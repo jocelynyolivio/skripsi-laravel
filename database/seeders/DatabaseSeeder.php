@@ -1,0 +1,138 @@
+<?php
+
+namespace Database\Seeders;
+
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Carbon\Carbon;
+use App\Models\Post;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\Category;
+use App\Models\Reservation;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // \App\Models\User::factory(10)->create();
+
+        // \App\Models\User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
+
+        User::create([
+            'name' => 'Jocelyn',
+            'username' => 'yoli',
+            'email' => 'yoli1@gmail.com',
+            'password' => bcrypt('12345'),
+            'role_id' => 1
+        ]);
+
+        User::create([
+            'name' => 'admin1',
+            'username' => 'admin1',
+            'email' => 'admin1@gmail.com',
+            'password' => bcrypt('admin'),
+            'role_id' => 1
+        ]);
+
+        User::create([
+            'name' => 'dokter1',
+            'username' => 'dokter1',
+            'email' => 'dokter1@gmail.com',
+            'password' => bcrypt('dokter'),
+            'role_id' => 2
+        ]);
+        User::create([
+            'name' => 'manager1',
+            'username' => 'manager1',
+            'email' => 'manager1@gmail.com',
+            'password' => bcrypt('manager'),
+            'role_id' => 3
+        ]);
+
+        Role::create([
+            'role_name' => 'admin'
+        ]);
+
+        Role::create([
+            'role_name' => 'dokter'
+        ]);
+        
+        Role::create([
+            'role_name' => 'manager'
+        ]);
+
+        Role::create([
+            'role_name' => 'pasien'
+        ]);
+
+        // User::create([
+        //     'name' => 'Yolivio',
+        //     'email' => 'yoli2@gmail.com',
+        //     'password' => bcrypt('12345')
+        // ]);
+
+        Category::create([
+            'name' => 'Programming',
+            'slug' => 'programming'
+        ]);
+
+        Category::create([
+            'name' => 'Personal',
+            'slug' => 'personal'
+        ]);
+
+        Reservation::create([
+            'nama' => 'Jane Smith',
+                'nomor_telepon' => '082345678901',
+                'tanggal_reservasi' => Carbon::now()->addDays(2)->format('Y-m-d'),
+                'jam_reservasi' => '14:00:00',
+                'created_at' => now(),
+                'updated_at' => now(),
+        ]);
+
+        Reservation::create([
+            'nama' => 'John Doe',
+                'nomor_telepon' => '081234567890',
+                'tanggal_reservasi' => Carbon::now()->addDays(1)->format('Y-m-d'),
+                'jam_reservasi' => '10:00:00',
+                'created_at' => now(),
+                'updated_at' => now(),
+        ]);
+
+        // Post::create([
+        //     'title' => 'Judul Pertama',
+        //     'slug' => 'judul-pertama',
+        //     'category_id' => 1,
+        //     'user_id' => 1,
+        //     'excerpt' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum et iusto blanditiis eligendi.',
+        //     'body' => '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis quaerat tempore, assumenda labore commodi consequatur officia quibusdam asperiores tenetur, repudiandae nam repellat veniam hic iste error? Voluptatibus cumque sed sit cupiditate rerum, saepe perferendis sint. Nulla sunt facere quaerat tempore nesciunt quis explicabo nemo assumenda quae harum. Labore iste aut reiciendis a! Commodi, cum!</p><p> Laudantium accusantium saepe accusamus nihil consequuntur, neque aliquid, veritatis tempore reiciendis aspernatur alias fugit dolore placeat! Accusantium, sequi? Ex, voluptate quos, in enim totam soluta sed quas ullam nihil necessitatibus ipsa earum rem nulla perferendis amet possimus expedita officiis, vel libero odit dolorem. Ad aliquid nobis vel aspernatur voluptatem nam nesciunt minima sunt enim consequatur expedita, ipsa fugit tempora dolore voluptas quis explicabo quo eius.</p><p> Quos, amet, reiciendis corrupti quia qui harum rem quibusdam rerum consectetur, natus voluptatum unde labore doloremque accusamus ullam iure repellat? Unde placeat ipsam harum fugiat! Delectus minima sed velit dolore rem illum voluptate quasi facilis tenetur, rerum sequi voluptatibus similique dolorem adipisci nobis possimus accusamus beatae eos nam ipsum doloribus deserunt alias mollitia? Dignissimos, numquam atque! Laboriosam voluptates esse sapiente vel?</p>'
+        // ]);
+
+        // Post::create([
+        //     'title' => 'Judul Kedua',
+        //     'slug' => 'judul-kedua',
+        //     'category_id' => 2,
+        //     'user_id' => 1,
+        //     'excerpt' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum et iusto blanditiis eligendi.',
+        //     'body' => '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis quaerat tempore, assumenda labore commodi consequatur officia quibusdam asperiores tenetur, repudiandae nam repellat veniam hic iste error? Voluptatibus cumque sed sit cupiditate rerum, saepe perferendis sint. Nulla sunt facere quaerat tempore nesciunt quis explicabo nemo assumenda quae harum. Labore iste aut reiciendis a! Commodi, cum!</p><p> Laudantium accusantium saepe accusamus nihil consequuntur, neque aliquid, veritatis tempore reiciendis aspernatur alias fugit dolore placeat! Accusantium, sequi? Ex, voluptate quos, in enim totam soluta sed quas ullam nihil necessitatibus ipsa earum rem nulla perferendis amet possimus expedita officiis, vel libero odit dolorem. Ad aliquid nobis vel aspernatur voluptatem nam nesciunt minima sunt enim consequatur expedita, ipsa fugit tempora dolore voluptas quis explicabo quo eius.</p><p> Quos, amet, reiciendis corrupti quia qui harum rem quibusdam rerum consectetur, natus voluptatum unde labore doloremque accusamus ullam iure repellat? Unde placeat ipsam harum fugiat! Delectus minima sed velit dolore rem illum voluptate quasi facilis tenetur, rerum sequi voluptatibus similique dolorem adipisci nobis possimus accusamus beatae eos nam ipsum doloribus deserunt alias mollitia? Dignissimos, numquam atque! Laboriosam voluptates esse sapiente vel?</p>'
+        // ]);
+
+        // Post::create([
+        //     'title' => 'Judul Ketiga',
+        //     'slug' => 'judul-ketiga',
+        //     'category_id' => 1,
+        //     'user_id' => 2,
+        //     'excerpt' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum et iusto blanditiis eligendi.',
+        //     'body' => '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis quaerat tempore, assumenda labore commodi consequatur officia quibusdam asperiores tenetur, repudiandae nam repellat veniam hic iste error? Voluptatibus cumque sed sit cupiditate rerum, saepe perferendis sint. Nulla sunt facere quaerat tempore nesciunt quis explicabo nemo assumenda quae harum. Labore iste aut reiciendis a! Commodi, cum!</p><p> Laudantium accusantium saepe accusamus nihil consequuntur, neque aliquid, veritatis tempore reiciendis aspernatur alias fugit dolore placeat! Accusantium, sequi? Ex, voluptate quos, in enim totam soluta sed quas ullam nihil necessitatibus ipsa earum rem nulla perferendis amet possimus expedita officiis, vel libero odit dolorem. Ad aliquid nobis vel aspernatur voluptatem nam nesciunt minima sunt enim consequatur expedita, ipsa fugit tempora dolore voluptas quis explicabo quo eius.</p><p> Quos, amet, reiciendis corrupti quia qui harum rem quibusdam rerum consectetur, natus voluptatum unde labore doloremque accusamus ullam iure repellat? Unde placeat ipsam harum fugiat! Delectus minima sed velit dolore rem illum voluptate quasi facilis tenetur, rerum sequi voluptatibus similique dolorem adipisci nobis possimus accusamus beatae eos nam ipsum doloribus deserunt alias mollitia? Dignissimos, numquam atque! Laboriosam voluptates esse sapiente vel?</p>'
+        // ]);
+        User::factory(5)->create(); 
+        Post::factory(20)->create(); 
+    }
+}
