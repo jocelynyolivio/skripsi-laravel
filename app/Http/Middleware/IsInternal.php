@@ -3,8 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class IsInternal
 {
@@ -13,19 +12,17 @@ class IsInternal
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+
+    public function handle($request, Closure $next)
     {
-        if (auth()->guest()) {
-            // abort(403);
-            return redirect('/');
+        $user = Auth::user();
+
+        // Periksa apakah pengguna internal memiliki role
+        if (!$user || !$user->role) {
+            return redirect('/login')->with('error', 'Access Denied.');
         }
 
-        $allowedRoles = [1, 2, 3];
-        if (!in_array(auth()->user()->role_id, $allowedRoles)) {
-            // abort(403);
-            return redirect('/');
-        }
-
+        // Lanjutkan jika role valid
         return $next($request);
     }
 }

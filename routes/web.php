@@ -12,7 +12,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\DashboardPostController;
 
@@ -100,7 +102,7 @@ Route::get('/categories', function(){
 Route::get('/login', [LoginController::class, 'index'] )->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'authenticate'] );
 
-Route::post('/logout', [LoginController::class, 'logout'] );
+Route::post('/logout', [LoginController::class, 'logout'] )->name('logout')->middleware('auth');
 
 Route::get('/register', [RegisterController::class, 'index'] )->middleware('guest');
 // kalo ada req ke halaman register tapi method post maka nanti akan panggil yg store
@@ -112,20 +114,22 @@ Route::resource('/dashboard/posts', DashboardPostController::class)->middleware(
 
 // Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show')->middleware('admin');
 
-Route::get('/dashboard', function () {
-    $user = Auth::user(); // Mendapatkan pengguna yang sedang login
-    // $user->load('role'); // Memuat relasi role
-    return view('dashboard.index', [
-        'user' => $user,
-        'role' => $user->role ? $user->role->role_name : 'No Role',
-    ]);
-})->middleware('internal');
+// Route::get('/dashboard', function () {
+//     $user = Auth::user(); // Mendapatkan pengguna yang sedang login
+//     return view('dashboard.index', [
+//         'user' => $user,
+//         'role' => $user->role ? $user->role->role_name : 'No Role',
+//     ]);
+// })->middleware('internal');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware('internal')
+    ->name('dashboard');
 
 Route::get('/reservation', [ReservationController::class, 'index'])
     ->name('reservation.index')
     ->middleware('patient');
 
-    Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store');
+    Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
     // Route::get('/dashboard/masters', [UserController::class, 'index'])->name('dashboard.masters.index');
 
@@ -158,3 +162,9 @@ Route::get('/reservation', [ReservationController::class, 'index'])
                 "title" => "odontogram"
             ]);
         });
+
+
+        Route::get('/patient/login', [PatientLoginController::class, 'showLoginForm'])->name('patient.login');
+        Route::post('/patient/login', [PatientLoginController::class, 'login']);
+        Route::post('/patient/logout', [PatientLoginController::class, 'logout'])->name('patient.logout');
+        

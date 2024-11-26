@@ -5,33 +5,26 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
+class PatientLoginController extends Controller
 {
-    public function index()
+    public function showLoginForm()
     {
-        return view('login.index', [
-            'title' => 'login',
+        return view('auth.patient-login', [
+            'title' => 'Patient Login',
             'active' => 'login'
         ]);
     }
 
-    public function authenticate(Request $request)
+    public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::guard('patient')->attempt($credentials)) {
             $request->session()->regenerate();
-
-            // Arahkan ke dashboard jika login berhasil
-            $user = Auth::user();
-            if ($user->role) {
-                return redirect('/dashboard');
-            }
-
-            return back()->with('loginError', 'Access Denied.');
+            return redirect()->intended('/');
         }
 
         return back()->with('loginError', 'Login Failed');
@@ -39,12 +32,8 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-
-        // supaya gabisa dipake
+        Auth::guard('patient')->logout();
         $request->session()->invalidate();
-
-        // bikin token baru supaya gak di bajak
         $request->session()->regenerateToken();
 
         return redirect('/');

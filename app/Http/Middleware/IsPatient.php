@@ -3,22 +3,22 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class IsPatient
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle($request, Closure $next)
     {
-        if (auth()->guest()) {
-            return redirect('/login'); // Arahkan ke login jika belum login
+        $patient = Auth::guard('patient')->user();
+
+        if (!$patient) {
+            // Redirect jika tidak memiliki akses pasien
+            return redirect()->route('patient.login')->with('error', 'Unauthorized access.');
         }
 
-        // Pastikan hanya role_id 4 (Patient) yang bisa lanjut ke reservasi
-        if (auth()->user()->role_id !== 4) {
-            return redirect('/'); // Arahkan ke home jika bukan Patient
-        }
-
-        return $next($request); // Lanjutkan jika role_id adalah 4
+        // Jika memiliki akses, lanjutkan request
+        return $next($request);
     }
 }
