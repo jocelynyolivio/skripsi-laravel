@@ -5,28 +5,23 @@
     <h1 class="mb-4">Data Reservasi</h1>
 
     <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama</th>
-                <th>Nomor Telepon</th>
-                <th>Tanggal Reservasi</th>
-                <th>Jam Reservasi</th>
-                <th>Dokter</th>
-                <th>Keluhan</th>
-                <th>Aksi</th> <!-- Kolom baru untuk tombol Edit dan Delete -->
-            </tr>
-        </thead>
+    <thead>
+        <tr>
+            <th>Nama</th>
+            <th>Nomor Telepon</th>
+            <th>Tanggal</th>
+            <th>Jam</th>
+            <th>Dokter</th>
+        </tr>
+    </thead>
         <tbody>
             @foreach ($reservations as $index => $reservation)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $reservation->nama }}</td>
-                    <td>{{ $reservation->nomor_telepon }}</td>
-                    <td>{{ $reservation->tanggal_reservasi }}</td>
-                    <td>{{ $reservation->jam_reservasi }}</td>
-                    <td>{{ $reservation->nama }}</td>
-                    <td>{{ $reservation->nama }}{{$reservation->tanggal_reservasi}}</td>
+                <td>{{ $reservation->nama }}</td>
+                <td>{{ $reservation->nomor_telepon }}</td>
+                <td>{{ $reservation->tanggal_reservasi }}</td>
+                <td>{{ $reservation->jam_reservasi }}</td>
+                <td>{{ $reservation->doctor->name }}</td>
                     <td>
                         <!-- Tombol Edit -->
                         <a href="" class="btn btn-sm btn-warning">Edit</a>

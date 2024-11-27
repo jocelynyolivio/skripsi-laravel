@@ -18,6 +18,8 @@ return new class extends Migration
         $table->date('tanggal_reservasi');
         $table->time('jam_reservasi');
         $table->timestamps();
+        $table->unsignedBigInteger('doctor_id');
+        $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade'); // Relasi ke tabel users
     });
 }
 

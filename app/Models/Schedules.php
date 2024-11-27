@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Reservation extends Model
+class Schedules extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nama',
-        'nomor_telepon',
-        'tanggal_reservasi',
-        'jam_reservasi',
-        'doctor_id', // Tambahkan ini
+        'doctor_id', 'date', 'time_start', 'time_end', 'is_available',
     ];
 
     public function doctor()
@@ -22,4 +18,3 @@ class Reservation extends Model
         return $this->belongsTo(User::class, 'doctor_id');
     }
 }
-

@@ -2,15 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
     public function index()
     {
-        return view('reservation.index',[
-            'title'=>'reservation'
+        $doctors = User::where('role_id', 2)->get(); // Ambil data dokter dengan role_id = 2
+
+        $schedules = Schedules::where('is_available', true)->get();
+        $user = Auth::user();
+
+        return view('reservation.index', [
+            'title' => 'reservation',
+            'doctors' => $doctors,
+            'schedules' => $schedules,
+            'user' => $user,
         ]);
     }
 
@@ -19,18 +30,21 @@ class ReservationController extends Controller
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'reservation_date' => 'required|date',
-            'reservation_time' => 'required',
+        'phone' => 'required|string|max:20',
+        'schedule_id' => 'required|exists:schedules,id',
         ]);
+        $schedule = Schedules::findOrFail($request->schedule_id);
 
         // Simpan data ke tabel reservations
         Reservation::create([
             'nama' => $request->input('name'),
             'nomor_telepon' => $request->input('phone'),
-            'tanggal_reservasi' => $request->input('reservation_date'),
-            'jam_reservasi' => $request->input('reservation_time'),
+            'tanggal_reservasi' => $schedule->date,
+            'jam_reservasi' => $schedule->time_start, // Bisa gunakan waktu mulai atau waktu lainnya
+            'doctor_id' => $schedule->doctor_id,
         ]);
+        $schedule->update(['is_available' => false]);
+
 
         // Redirect dengan pesan sukses
         return redirect()->route('reservation.index')->with('success', 'Reservasi berhasil ditambahkan');

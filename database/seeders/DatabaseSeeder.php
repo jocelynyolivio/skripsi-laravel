@@ -8,6 +8,8 @@ use App\Models\Post;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Patient;
+use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Database\Seeder;
 
@@ -27,7 +29,6 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Jocelyn',
-            'username' => 'yoli',
             'email' => 'yoli1@gmail.com',
             'password' => bcrypt('12345'),
             'role_id' => 1
@@ -35,7 +36,6 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'admin1',
-            'username' => 'admin1',
             'email' => 'admin1@gmail.com',
             'password' => bcrypt('admin'),
             'role_id' => 1
@@ -43,14 +43,12 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'dokter1',
-            'username' => 'dokter1',
             'email' => 'dokter1@gmail.com',
             'password' => bcrypt('dokter'),
             'role_id' => 2
         ]);
         User::create([
             'name' => 'manager1',
-            'username' => 'manager1',
             'email' => 'manager1@gmail.com',
             'password' => bcrypt('manager'),
             'role_id' => 3
@@ -68,9 +66,16 @@ class DatabaseSeeder extends Seeder
             'role_name' => 'manager'
         ]);
 
-        Role::create([
-            'role_name' => 'pasien'
+        Patient::create([
+            'name' => 'yoli',
+            'email' => 'emailnyayoli@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
         ]);
+
+        // Role::create([
+        //     'role_name' => 'pasien'
+        // ]);
 
         // User::create([
         //     'name' => 'Yolivio',
@@ -88,6 +93,30 @@ class DatabaseSeeder extends Seeder
             'slug' => 'personal'
         ]);
 
+        Schedules::create([
+            'doctor_id' => 3, // Sesuaikan ID dokter
+            'date' => '2023-12-01',
+            'time_start' => '09:00:00',
+            'time_end' => '10:00:00',
+            'is_available' => true,
+        ]);
+
+        Schedules::create([
+            'doctor_id' => 3, // Sesuaikan ID dokter
+            'date' => '2023-12-01',
+            'time_start' => '09:00:00',
+            'time_end' => '10:00:00',
+            'is_available' => true,
+        ]);
+
+        Schedules::create([
+            'doctor_id' => 3, // Sesuaikan ID dokter
+            'date' => '2023-12-01',
+            'time_start' => '09:00:00',
+            'time_end' => '10:00:00',
+            'is_available' => true,
+        ]);
+
         Reservation::create([
             'nama' => 'Jane Smith',
                 'nomor_telepon' => '082345678901',
@@ -95,6 +124,7 @@ class DatabaseSeeder extends Seeder
                 'jam_reservasi' => '14:00:00',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'doctor_id' => 1,
         ]);
 
         Reservation::create([
@@ -104,6 +134,7 @@ class DatabaseSeeder extends Seeder
                 'jam_reservasi' => '10:00:00',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'doctor_id' => 1,
         ]);
 
         // Post::create([
