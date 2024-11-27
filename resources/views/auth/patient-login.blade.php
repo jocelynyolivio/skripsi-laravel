@@ -20,5 +20,10 @@
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
     </form>
+    <small class="d-block mt-3">
+                Don't have an account? <a href="/patient/register">Register here.</a>
+            </small>
+
+
 </div>
 @endsection

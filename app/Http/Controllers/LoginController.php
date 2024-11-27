@@ -22,20 +22,29 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            // Arahkan ke dashboard jika login berhasil
-            $user = Auth::user();
-            if ($user->role) {
-                return redirect('/dashboard');
+        if (Auth::guard('patient')->attempt($credentials)) {
+            $patient = Auth::guard('patient')->user();
+        
+            if (is_null($patient->email_verified_at)) {
+                Auth::guard('patient')->logout();
+                return back()->with('loginError', 'Please verify your email before logging in.');
             }
-
-            return back()->with('loginError', 'Access Denied.');
+        
+            $request->session()->regenerate();
+            return redirect()->intended('/');
         }
-
-        return back()->with('loginError', 'Login Failed');
-    }
+        if (Auth::guard('patient')->attempt($credentials)) {
+            $patient = Auth::guard('patient')->user();
+        
+            if (is_null($patient->email_verified_at)) {
+                Auth::guard('patient')->logout();
+                return back()->with('loginError', 'Please verify your email before logging in.');
+            }
+        
+            $request->session()->regenerate();
+            return redirect()->intended('/');
+        }
+        }        
 
     public function logout(Request $request)
     {

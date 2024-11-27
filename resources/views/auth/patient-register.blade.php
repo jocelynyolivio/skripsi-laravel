@@ -1,12 +1,17 @@
 @extends('layouts.main')
 
 @section('container')
-
 <div class="row justify-content-center text-center">
     <div class="col-md-6">
+    @if(session('success'))
+<div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+    {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
         <main class="form-registration w-100 m-auto">
             <h1 class="h3 mb-3 fw-normal">Registration Form</h1>
-            <form action="/register" method="post">
+            <form action="/patient/register" method="post">
                 @csrf
                 <div class="form-floating">
                     <input type="text" class="form-control rounded-top @error('name') is-invalid @enderror" id="name" name="name" placeholder="name" required value="{{old('nama')}}">

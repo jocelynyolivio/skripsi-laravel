@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
     public function index(){
-        return view('register.index',[
+        return view('auth.patient-register',[
             'title' => 'register',
             'active' => 'register'
         ]);
@@ -17,19 +19,17 @@ class RegisterController extends Controller
     public function store(Request $request){
         $validatedData = $request->validate([
             'name' => 'required|max:255',
-            'username' => ['required','min:3','max:255', 'unique:users'],
-            'email' => 'required|email:dns|unique:users',
-            'password' => 'required|min:5|max:255'
+            'email' => 'required|email:dns|unique:patients',
+            'password' => 'required|min:5|max:255',
         ]);
-
-        $validatedData['role_id'] = 4;
 
         $validatedData['password'] = bcrypt($validatedData['password']);
 
-        User::create($validatedData);
-        
-        // $request->session()->flash('success', 'Registration Successfull. Please login');
-        return redirect('/login')->with('success', 'Registration Successfull. Please login');
+        $patient = Patient::create($validatedData);
 
+        // Kirim email verifikasi
+        $patient->sendEmailVerificationNotification();
+
+        return redirect('/patient/register')->with('success', 'Registration successful. Please check your email to verify your account.');
     }
 }

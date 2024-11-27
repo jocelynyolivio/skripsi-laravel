@@ -4,6 +4,7 @@
 // use App\Models\User;
 
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\DashboardPostController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,9 +106,9 @@ Route::post('/login', [LoginController::class, 'authenticate'] );
 
 Route::post('/logout', [LoginController::class, 'logout'] )->name('logout')->middleware('auth');
 
-Route::get('/register', [RegisterController::class, 'index'] )->middleware('guest');
+Route::get('/patient/register', [RegisterController::class, 'index'] )->name('register')->middleware('guest');
 // kalo ada req ke halaman register tapi method post maka nanti akan panggil yg store
-Route::post('/register', [RegisterController::class, 'store'] );
+Route::post('/patient/register', [RegisterController::class, 'store'] );
 
 Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');
 
@@ -127,7 +129,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 Route::get('/reservation', [ReservationController::class, 'index'])
     ->name('reservation.index')
-    ->middleware('patient');
+    ->middleware(['auth:patient', 'verified']);
 
     Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
@@ -167,4 +169,20 @@ Route::get('/reservation', [ReservationController::class, 'index'])
         Route::get('/patient/login', [PatientLoginController::class, 'showLoginForm'])->name('patient.login');
         Route::post('/patient/login', [PatientLoginController::class, 'login']);
         Route::post('/patient/logout', [PatientLoginController::class, 'logout'])->name('patient.logout');
+        
+        Route::get('/email/verify', function () {
+            return view('auth.verify-email', [
+                'title' => 'Email Verification'
+            ]);
+        })->middleware('auth:patient')->name('verification.notice');
+        
+        Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+            $request->fulfill();
+            return redirect('/'); // Redirect ke halaman setelah verifikasi
+        })->middleware(['auth:patient', 'signed'])->name('verification.verify');
+        
+        Route::post('/email/resend', function (Request $request) {
+            $request->user('patient')->sendEmailVerificationNotification();
+            return back()->with('message', 'Verification email sent!');
+        })->middleware(['auth:patient', 'throttle:6,1'])->name('verification.resend');
         
