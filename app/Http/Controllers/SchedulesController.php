@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Schedules;
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchedulesRequest;
-use App\Http\Requests\UpdateSchedulesRequest;
 
 class SchedulesController extends Controller
 {
@@ -14,7 +15,12 @@ class SchedulesController extends Controller
      */
     public function index()
     {
-        //
+        $schedules = Schedules::with('doctor')->get();
+
+        return view('dashboard.schedules.index', [
+            'title' => 'Schedule List',
+            'schedules' => $schedules,
+        ]);
     }
 
     /**
@@ -22,7 +28,16 @@ class SchedulesController extends Controller
      */
     public function create()
     {
-        //
+        if (!auth()->check()) {
+            abort(403, 'Unauthorized');
+        }
+    
+        $doctors = User::where('role_id', 2)->get();
+    
+        return view('dashboard.schedules.create', [
+            'title' => 'Add Schedule',
+            'doctors' => $doctors,
+        ]);
     }
 
     /**
@@ -37,7 +52,7 @@ class SchedulesController extends Controller
             'time_end' => 'required|date_format:H:i|after:time_start',
         ]);
     
-        Schedule::create([
+        Schedules::create([
             'doctor_id' => $request->doctor_id,
             'date' => $request->date,
             'time_start' => $request->time_start,
@@ -45,7 +60,7 @@ class SchedulesController extends Controller
             'is_available' => true,
         ]);
     
-        return redirect()->route('schedule.index')->with('success', 'Jadwal berhasil ditambahkan!');
+        return redirect()->route('dashboard.schedule.index')->with('success', 'Jadwal berhasil ditambahkan!');
     }
 
     /**
@@ -59,24 +74,52 @@ class SchedulesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Schedules $schedules)
+    public function edit($id)
     {
-        //
+        // Ambil jadwal berdasarkan ID
+        $schedule = Schedules::findOrFail($id);
+        // Ambil daftar dokter
+        $doctors = User::where('role_id', 2)->get();
+
+        return view('dashboard.schedules.edit', [
+            'title' => 'Edit Schedule',
+            'schedule' => $schedule,
+            'doctors' => $doctors,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSchedulesRequest $request, Schedules $schedules)
+    public function update(Request $request, $id)
     {
-        //
+        $schedule = Schedules::findOrFail($id);
+    
+        // if (auth()->user()->id !== $schedule->doctor_id) {
+        //    abort(403, 'Unauthorized action.');
+        //}
+    
+        // Lanjutkan dengan logika update jika semua sudah benar
+        $schedule->update([
+            'doctor_id' => $request->doctor_id,
+            'date' => $request->date,
+            'time_start' => $request->time_start,
+            'time_end' => $request->time_end,
+        ]);
+    
+        return redirect()->route('dashboard.schedules.index')->with('success', 'Schedule updated successfully!');
     }
+    
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Schedules $schedules)
+    public function destroy($id)
     {
-        //
+        // Hapus jadwal
+        $schedule = Schedules::findOrFail($id);
+        $schedule->delete();
+
+        return redirect()->route('dashboard.schedules.index')->with('success', 'Schedule deleted successfully!');
     }
 }

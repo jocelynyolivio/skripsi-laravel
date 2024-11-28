@@ -24,7 +24,7 @@
                     <a class="nav-link text-white {{Request::is('dashboard/salaries*') ? 'active' : ''}}" href="/dashboard/salaries">
                         <i class="bi bi-file-earmark"></i>
                         Attendances and Slips
-</a>
+                    </a>
 
                 </li>
             </ul>
@@ -64,6 +64,11 @@
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/reservations') ? 'active' : '' }}" href="{{ route('dashboard.reservations.index') }}">
                         <i class="bi bi-calendar-check"></i> Data Reservasi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/schedules') ? 'active' : '' }}" href="{{ route('dashboard.schedules.create') }}">
+                        <i class="bi bi-calendar-plus"></i> Add Schedule
                     </a>
                 </li>
             </ul>
