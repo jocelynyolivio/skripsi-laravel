@@ -71,6 +71,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'emailnyayoli@gmail.com',
             'email_verified_at' => now(),
             'password' => bcrypt('12345678'),
+            'nomor_telepon' => '081230333587'
         ]);
 
         // Role::create([

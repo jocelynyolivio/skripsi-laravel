@@ -85,10 +85,6 @@ Route::get('/reservation', [ReservationController::class, 'index'])
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
-Route::get('/dashboard/masters/{role_id}', [UserController::class, 'showByRole'])->name('dashboard.masters.role')->middleware('internal');
-
-// Route::get('/dashboard/masters/patients', [PatientController::class, 'index'])->name('dashboard.masters.patients')->middleware('internal');
-
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     // Route untuk profil pengguna
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -105,12 +101,21 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     // Route::delete('/schedules/{schedule}', [SchedulesController::class, 'destroy'])->name('schedules.destroy');
 
     // Route untuk reservasi
-
-    // Route untuk reservasi
     Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
     Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
     Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
     Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+
+    Route::get('/masters/patients/{id}/edit', [PatientController::class, 'edit'])->name('masters.patients.edit');
+    Route::put('/masters/patients/{id}', [PatientController::class, 'update'])->name('masters.patients.update');
+    Route::delete('/masters/patients/{id}', [PatientController::class, 'destroy'])->name('masters.patients.destroy');
+    Route::get('/masters/patients', [PatientController::class, 'index'])->name('masters.patients');
+    Route::get('/masters/patients/create', [PatientController::class, 'create'])->name('masters.patients.create');
+    Route::post('/masters/patients', [PatientController::class, 'store'])->name('masters.patients.store');
+
+Route::get('/masters/{role_id}/role', [UserController::class, 'showByRole'])->name('masters.role');
+
+
 });
 
 Route::get('/dashboard/salaries/', function () {
