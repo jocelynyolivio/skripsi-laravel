@@ -50,7 +50,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/4') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 4]) }}">
+                    <a class="nav-link text-white {{ Request::is('dashboard/master/patients') ? 'active' : '' }}" href="{{ route('dashboard.masters.patients') }}">
                         <i class="bi bi-person-badge"></i> Master Pasien
                     </a>
                 </li>

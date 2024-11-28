@@ -1,128 +1,37 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Edit Post</h1>
-</div>
-
-<div class="col-lg-8">
-    <form method="post" action="/dashboard/posts/{{$post->slug}}" enctype="multipart/form-data">
-        @method('put')
+<div class="container mt-5">
+    <h3 class="text-center">Edit Reservation</h3>
+    <form action="{{ route('dashboard.reservations.update', $reservation->id) }}" method="POST">
         @csrf
+        @method('PUT')
+
+        <!-- Field Nama -->
         <div class="mb-3">
-            <label for="title" class="form-label">Title</label>
-            <input type="title" class="form-control @error('title') is-invalid @enderror" id="title" name="title" required autofocus value="{{old('title', $post->title)}}">
-            @error('title')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-            @enderror
-        </div>
-        <div class="mb-3">
-            <label for="slug" class="form-label @error('slug') is-invalid @enderror">Slug</label>
-            <input type="slug" class="form-control" id="slug" name="slug" required value="{{old('slug', $post->slug)}}">
-            @error('slug')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-            @enderror
-        </div>
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-select" name="category_id">
-                @foreach ($categories as $category)
-                @if (old('category_id', $post->category_id) == $category->id)
-                <option value="{{$category->id}}" selected>{{$category->name}}</option>
-                @else
-                <option value="{{$category->id}}" selected>{{$category->name}}</option>
-                @endif
-                @endforeach
-            </select>
+            <label for="name" class="form-label">Name</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ $reservation->nama }}" required>
         </div>
 
+        <!-- Field Phone -->
         <div class="mb-3">
-            <label for="image" class="form-label">Post Image</label>
-
-            <input type="hidden" name="oldImage" value="{{$post->image}}">
-
-            @if($post->image)
-            <img src="{{asset('storage/'.$post->image)}}" class="img-preview img-fluid mb-3 col-sm-5 d-block">
-            @else
-            <img class="img-preview img-fluid mb-3 col-sm-5 d-block">
-            @endif
-            
-            <input class="form-control  @error('image') is-invalid @enderror" type="file" id="image" name="image" onchange="previewImage()">
-            @error('image')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-            @enderror
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" name="phone" id="phone" class="form-control" value="{{ $reservation->nomor_telepon }}" required>
         </div>
 
-
+        <!-- Field Reservation Date -->
         <div class="mb-3">
-            <label for="body" class="form-label">Body</label>
-            <!-- @error('body')
-            <p class="text-danger">{{$message}}</p>
-            @enderror -->
-            <!-- <input id="x" type="hidden" name="content" value="{{old('body')}}">
-            <trix-editor input="x"></trix-editor> -->
-            <input type="body" class="form-control" id="body" name="body" required value="{{old('body', $post->body)}}">
-            @error('body')
-            <div class="invalid-feedback">
-                {{ $message }}
-            </div>
-            @enderror
+            <label for="reservation_date" class="form-label">Reservation Date</label>
+            <input type="date" name="reservation_date" id="reservation_date" class="form-control" value="{{ $reservation->tanggal_reservasi }}" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">Update Post</button>
+        <!-- Field Reservation Time -->
+        <div class="mb-3">
+            <label for="reservation_time" class="form-label">Reservation Time</label>
+            <input type="time" name="reservation_time" id="reservation_time" class="form-control" value="{{ $reservation->jam_reservasi }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Update Reservation</button>
     </form>
 </div>
-
-<script>
-    const title = document.querySelector('#title');
-    const slug = document.querySelector('#slug');
-
-    // title.addEventListener('change', function() {
-    //     fetch('/dashboard/posts/checkSlug?title=' + title.value)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             console.log(data); // Debugging response
-    //             slug.value = data.slug;
-    //         })
-    // });
-
-    title.addEventListener('change', function() {
-        fetch(`/dashboard/posts/checkSlug?title=${title.value}`)
-            .then(response => {
-                console.log(response); // Tambahkan log ini
-                return response.json();
-            })
-            .then(data => {
-                console.log(data); // Tambahkan log ini
-                slug.value = data.slug;
-            })
-            .catch(error => console.error('Error:', error));
-    });
-
-    document.addEventListener('trix-file-accept', function(e){
-        e.preventDefault();
-    })
-
-
-    function previewImage(){
-        const image = document.querySelector('#image');
-        const imgPreview = document.querySelector('.img-preview');
-        imgPreview.style.display = 'block';
-
-        const oFReader = new FileReader();
-        oFReader.readAsDataURL(image.files[0]);
-
-        oFReader.onload = function(oFREvent){
-            imgPreview.src = oFREvent.target.result;
-        }
-    }
-</script>
-
 @endsection

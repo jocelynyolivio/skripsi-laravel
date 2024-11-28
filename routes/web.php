@@ -14,6 +14,7 @@ use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\DashboardPostController;
+use App\Http\Controllers\PatientController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
@@ -84,14 +85,10 @@ Route::get('/reservation', [ReservationController::class, 'index'])
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
-// Route::get('/dashboard/masters', [UserController::class, 'index'])->name('dashboard.masters.index');
-
 Route::get('/dashboard/masters/{role_id}', [UserController::class, 'showByRole'])->name('dashboard.masters.role')->middleware('internal');
 
-Route::get('/dashboard/reservations', [ReservationController::class, 'list'])
-    ->name('dashboard.reservations.index')
-    ->middleware('auth');
-    
+// Route::get('/dashboard/masters/patients', [PatientController::class, 'index'])->name('dashboard.masters.patients')->middleware('internal');
+
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     // Route untuk profil pengguna
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -99,12 +96,21 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
 
     // Route untuk jadwal (Schedules)
-    Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
-    Route::get('/schedules/create', [SchedulesController::class, 'create'])->name('schedules.create');
-    Route::post('/schedules', [SchedulesController::class, 'store'])->name('schedules.store');
-    Route::get('/schedules/{schedule}/edit', [SchedulesController::class, 'edit'])->name('schedules.edit');
-    Route::put('/schedules/{schedule}', [SchedulesController::class, 'update'])->name('schedules.update');
-    Route::delete('/schedules/{schedule}', [SchedulesController::class, 'destroy'])->name('schedules.destroy');
+    Route::resource('schedules', SchedulesController::class);
+    // Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
+    // Route::get('/schedules/create', [SchedulesController::class, 'create'])->name('schedules.create');
+    // Route::post('/schedules', [SchedulesController::class, 'store'])->name('schedules.store');
+    // Route::get('/schedules/{schedule}/edit', [SchedulesController::class, 'edit'])->name('schedules.edit');
+    // Route::put('/schedules/{schedule}', [SchedulesController::class, 'update'])->name('schedules.update');
+    // Route::delete('/schedules/{schedule}', [SchedulesController::class, 'destroy'])->name('schedules.destroy');
+
+    // Route untuk reservasi
+
+    // Route untuk reservasi
+    Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
+    Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
+    Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
+    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 });
 
 Route::get('/dashboard/salaries/', function () {

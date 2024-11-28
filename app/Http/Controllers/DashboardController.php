@@ -16,5 +16,7 @@ class DashboardController extends Controller
             'role' => $user->role->role_name
         ]);
     }
+
+    
 }
 

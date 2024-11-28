@@ -25,6 +25,42 @@ class ReservationController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        // Ambil data reservasi berdasarkan ID
+        $reservation = Reservation::findOrFail($id);
+    
+        // Kirim data ke view
+        return view('dashboard.reservations.edit', [
+            'title' => 'Edit Reservation',
+            'reservation' => $reservation, // Data yang akan digunakan di form
+        ]);
+    }
+
+public function update(Request $request, $id)
+{
+    // Validasi input
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'phone' => 'required|string|max:20',
+        'reservation_date' => 'required|date',
+        'reservation_time' => 'required|date_format:H:i',
+    ]);
+
+    // Update data reservasi
+    $reservation = Reservation::findOrFail($id);
+    $reservation->update([
+        'name' => $request->name,
+        'phone' => $request->phone,
+        'reservation_date' => $request->reservation_date,
+        'reservation_time' => $request->reservation_time,
+    ]);
+
+    // Redirect dengan pesan sukses
+    return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation updated successfully!');
+}
+
+
     public function store(Request $request)
     {
         // Validasi input
@@ -47,8 +83,19 @@ class ReservationController extends Controller
 
 
         // Redirect dengan pesan sukses
-        return redirect()->route('reservation.index')->with('success', 'Reservasi berhasil ditambahkan');
+        return redirect()->route('dashboard.reservation.index')->with('success', 'Reservasi berhasil ditambahkan');
     }
+
+    public function destroy($id)
+{
+    // Hapus data reservasi
+    $reservation = Reservation::findOrFail($id);
+    $reservation->delete();
+
+    // Redirect dengan pesan sukses
+    return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation deleted successfully!');
+}
+
 
     public function list()
     {

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Patient;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
@@ -13,7 +12,16 @@ class PatientController extends Controller
      */
     public function index()
     {
-        //
+        
+        // Ambil semua data pasien dari tabel patients
+        $patients = Patient::all();
+        dd($patients);
+
+        // Kirim data ke view
+        return view('dashboard.masters.patients', [
+            'title' => 'Master Patients',
+            'patients' => $patients,
+        ]);
     }
 
     /**

@@ -10,8 +10,6 @@
             Doctor
         @elseif ($role_id == 3)
             Manager
-        @elseif ($role_id == 4)
-            Pasien
         @endif
     </h1>
 
