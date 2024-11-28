@@ -35,17 +35,17 @@
             <h6 class="text-uppercase px-3 text-light mt-3">Master Data</h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/1') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 1]) }}">
+                    <a class="nav-link text-white {{ Request::is('dashboard/masters/1/role') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 1]) }}">
                         <i class="bi bi-person-badge"></i> Master Admin
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/2') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 2]) }}">
+                    <a class="nav-link text-white {{ Request::is('dashboard/masters/2/role') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 2]) }}">
                         <i class="bi bi-person-badge"></i> Master Dokter
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/3') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 3]) }}">
+                    <a class="nav-link text-white {{ Request::is('dashboard/masters/3/role') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 3]) }}">
                         <i class="bi bi-person-badge"></i> Master Manager
                     </a>
                 </li>

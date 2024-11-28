@@ -85,9 +85,9 @@ Route::get('/reservation', [ReservationController::class, 'index'])
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
-Route::get('/dashboard/masters/{role_id}', [UserController::class, 'showByRole'])->name('dashboard.masters.role')->middleware('internal');
+Route::get('/dashboard/masters/{role_id}/role', [UserController::class, 'showByRole'])->name('dashboard.masters.role')->middleware('internal');
 
-// Route::get('/dashboard/masters/patients', [PatientController::class, 'index'])->name('dashboard.masters.patients')->middleware('internal');
+Route::get('/dashboard/masters/patients', [PatientController::class, 'index'])->name('dashboard.masters.patients')->middleware('internal');
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     // Route untuk profil pengguna
