@@ -2,7 +2,10 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Schedule List</h3>
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Schedule List</h3>
+        <a href="{{ route('dashboard.schedules.create') }}" class="btn btn-primary">Add Schedule</a>
+    </div>
 
     @if(session('success'))
         <div class="alert alert-success">

@@ -67,8 +67,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/schedules') ? 'active' : '' }}" href="{{ route('dashboard.schedules.create') }}">
-                        <i class="bi bi-calendar-plus"></i> Add Schedule
+                    <a class="nav-link text-white {{ Request::is('dashboard/schedules') ? 'active' : '' }}" href="{{ route('dashboard.schedules.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Data Schedules
                     </a>
                 </li>
             </ul>

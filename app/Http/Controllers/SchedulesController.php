@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\Schedules;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreSchedulesRequest;
 
 class SchedulesController extends Controller
 {
@@ -43,7 +42,7 @@ class SchedulesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSchedulesRequest $request)
+    public function store(Request $request)
     {
         $request->validate([
             'doctor_id' => 'required|exists:users,id',
@@ -60,7 +59,7 @@ class SchedulesController extends Controller
             'is_available' => true,
         ]);
     
-        return redirect()->route('dashboard.schedule.index')->with('success', 'Jadwal berhasil ditambahkan!');
+        return redirect()->route('dashboard.schedules.index')->with('success', 'Jadwal berhasil ditambahkan!');
     }
 
     /**
