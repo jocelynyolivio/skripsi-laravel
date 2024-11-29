@@ -119,23 +119,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Reservation::create([
-            'nama' => 'Jane Smith',
-                'nomor_telepon' => '082345678901',
-                'tanggal_reservasi' => Carbon::now()->addDays(2)->format('Y-m-d'),
-                'jam_reservasi' => '14:00:00',
-                'created_at' => now(),
-                'updated_at' => now(),
-                'doctor_id' => 1,
-        ]);
-
-        Reservation::create([
-            'nama' => 'John Doe',
-                'nomor_telepon' => '081234567890',
-                'tanggal_reservasi' => Carbon::now()->addDays(1)->format('Y-m-d'),
-                'jam_reservasi' => '10:00:00',
-                'created_at' => now(),
-                'updated_at' => now(),
-                'doctor_id' => 1,
+            'schedule_id' => 1,
+            'patient_id' => 1,
+            'doctor_id' => 1,
+            'tanggal_reservasi' => '2024-01-01',
+            'jam_reservasi' => '10:00:00',
         ]);
 
         // Post::create([

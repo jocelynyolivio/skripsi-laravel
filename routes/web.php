@@ -105,6 +105,13 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
     Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
     Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    // Admin: Menampilkan form tambah reservasi
+    Route::get('/reservations/create', [ReservationController::class, 'createForAdmin'])
+    ->name('reservations.create');
+
+    // Admin: Menyimpan data reservasi
+    Route::post('/reservations', [ReservationController::class, 'storeForAdmin'])
+    ->name('reservations.store');
 
     Route::get('/masters/patients/{id}/edit', [PatientController::class, 'edit'])->name('masters.patients.edit');
     Route::put('/masters/patients/{id}', [PatientController::class, 'update'])->name('masters.patients.update');
@@ -114,7 +121,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/masters/patients', [PatientController::class, 'store'])->name('masters.patients.store');
 
 Route::get('/masters/{role_id}/role', [UserController::class, 'showByRole'])->name('masters.role');
-
+Route::get('/masters/{role_id}/role/{id}/edit', [UserController::class, 'edit'])->name('masters.users.edit');
+Route::put('/masters/{role_id}/role/{id}', [UserController::class, 'update'])->name('masters.users.update');
+Route::delete('/masters/{role_id}/role/{id}', [UserController::class, 'destroy'])->name('masters.users.destroy');
 
 });
 

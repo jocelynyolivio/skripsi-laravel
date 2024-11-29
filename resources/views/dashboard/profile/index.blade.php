@@ -23,6 +23,6 @@
     </div>
 
     <!-- Tombol Edit Profil -->
-    <a href="{{ route('profile.edit') }}" class="btn btn-warning">Edit Profil</a>
+    <a href="{{ route('dashboard.profile.edit') }}" class="btn btn-warning">Edit Profil</a>
 </div>
 @endsection

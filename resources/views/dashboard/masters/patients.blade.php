@@ -3,7 +3,7 @@
 @section('container')
 <div class="container mt-5">
         <div class="d-flex justify-content-between mb-3">
-        <h1 class="text-center">Master Patients</h1>
+        <h3 class="text-center">Master Patients</h3>
         <a href="{{ route('dashboard.masters.patients.create') }}" class="btn btn-primary mb-3">Add New Patient</a>
     </div>
 

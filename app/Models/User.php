@@ -32,4 +32,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'role_id'); // Relasi ke model Role
     }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'doctor_id');
+    }
+
+    // Relasi ke tabel schedules (dokter memiliki jadwal)
+    public function schedules()
+    {
+        return $this->hasMany(Schedules::class, 'doctor_id');
+    }
 }

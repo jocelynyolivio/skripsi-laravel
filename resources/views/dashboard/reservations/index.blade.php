@@ -2,7 +2,10 @@
 
 @section('container')
 <div class="container mt-5">
-    <h1 class="mb-4">Data Reservasi</h1>
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Reservations List</h3>
+        <a href="{{ route('dashboard.reservations.create') }}" class="btn btn-primary mb-3">Add Reservation</a>
+    </div>
 
     <table class="table table-striped">
         <thead>
@@ -17,8 +20,8 @@
         <tbody>
             @foreach ($reservations as $index => $reservation)
             <tr>
-                <td>{{ $reservation->nama }}</td>
-                <td>{{ $reservation->nomor_telepon }}</td>
+                <td>{{ $reservation->patient->name }}</td>
+                <td>{{ $reservation->patient->nomor_telepon }}</td>
                 <td>{{ $reservation->tanggal_reservasi }}</td>
                 <td>{{ $reservation->jam_reservasi }}</td>
                 <td>{{ $reservation->doctor->name }}</td>

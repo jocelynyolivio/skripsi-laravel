@@ -21,5 +21,10 @@ class Patient extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'patient_id');
+    }
 }
 

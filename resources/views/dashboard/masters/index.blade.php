@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container">
-    <h1 class="my-4">
+    <h3 class="my-4">
         Master 
         @if ($role_id == 1)
             Admin
@@ -11,7 +11,7 @@
         @elseif ($role_id == 3)
             Manager
         @endif
-    </h1>
+    </h3>
 
     <table class="table table-striped">
         <thead>
@@ -31,15 +31,16 @@
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->role_id }}</td>
                 <td>
-                        <!-- Tombol Edit -->
-                        <a href="" class="btn btn-sm btn-warning">Edit</a>
-                        <!-- Tombol Delete -->
-                        <form action="" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Delete</button>
-                        </form>
-                    </td>
+                    <!-- Tombol Edit -->
+                    <a href="{{ route('dashboard.masters.users.edit', ['role_id' => $role_id, 'id' => $user->id]) }}" class="btn btn-sm btn-warning">Edit</a>
+                    
+                    <!-- Tombol Delete -->
+                    <form action="{{ route('dashboard.masters.users.destroy', ['role_id' => $role_id, 'id' => $user->id]) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Delete</button>
+                    </form>
+                </td>
             </tr>
             @endforeach
         </tbody>

@@ -9,10 +9,16 @@ class Schedules extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+        protected $fillable = [
         'doctor_id', 'date', 'time_start', 'time_end', 'is_available',
     ];
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'schedule_id');
+    }
+
+    // Relasi ke tabel users (dokter)
     public function doctor()
     {
         return $this->belongsTo(User::class, 'doctor_id');
