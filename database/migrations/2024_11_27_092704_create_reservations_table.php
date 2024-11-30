@@ -17,7 +17,8 @@ return new class extends Migration
         $table->unsignedBigInteger('patient_id'); // Foreign key ke tabel patients
         $table->unsignedBigInteger('doctor_id'); // Foreign key ke tabel users
         $table->date('tanggal_reservasi'); // Tanggal reservasi
-        $table->time('jam_reservasi'); // Jam reservasi
+        $table->time('jam_mulai'); // Jam reservasi
+        $table->time('jam_selesai'); // Jam reservasi
         $table->timestamps();
     
         // Foreign key constraints

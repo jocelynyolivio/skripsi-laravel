@@ -11,55 +11,60 @@ use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
-    // public function index()
-    // {
-    //     $doctors = User::where('role_id', 2)->get(); // Ambil data dokter dengan role_id = 2
-
-    //     $schedules = Schedules::where('is_available', true)->get();
-    //     $user = Auth::user();
-
-    //     return view('reservation.index', [
-    //         'title' => 'reservation',
-    //         'doctors' => $doctors,
-    //         'schedules' => $schedules,
-    //         'user' => $user,
-    //     ]);
-    // }
 
     public function edit($id)
-    {
-        // Ambil data reservasi berdasarkan ID
-        $reservation = Reservation::findOrFail($id);
-    
-        // Kirim data ke view
-        return view('dashboard.reservations.edit', [
-            'title' => 'Edit Reservation',
-            'reservation' => $reservation, // Data yang akan digunakan di form
-        ]);
-    }
+{
+    // Ambil data reservasi berdasarkan ID
+    $reservation = Reservation::findOrFail($id);
+
+    // Ambil jadwal yang masih tersedia
+    $schedules = Schedules::where('is_available', true)->get();
+
+    // Kirim data ke view
+    return view('dashboard.reservations.edit', [
+        'title' => 'Edit Reservation',
+        'reservation' => $reservation, // Data reservasi yang akan diedit
+        'schedules' => $schedules, // Jadwal yang masih available
+    ]);
+}
 
 public function update(Request $request, $id)
 {
     // Validasi input
     $request->validate([
-        'name' => 'required|string|max:255',
-        'phone' => 'required|string|max:20',
-        'reservation_date' => 'required|date',
-        'reservation_time' => 'required|date_format:H:i',
+        'schedule_id' => 'required|exists:schedules,id',
     ]);
 
-    // Update data reservasi
+    // Cari reservasi berdasarkan ID
     $reservation = Reservation::findOrFail($id);
+
+    // Ambil schedule lama (yang sebelumnya digunakan di reservasi)
+    $oldSchedule = $reservation->schedule;
+
+    // Ubah status jadwal lama menjadi 'available'
+    $oldSchedule->update(['is_available' => true]);
+
+    // Cari jadwal baru yang dipilih
+    $newSchedule = Schedules::findOrFail($request->schedule_id);
+
+    // Update status jadwal baru menjadi 'reserved'
+    $newSchedule->update(['is_available' => false]);
+
+    // Update data reservasi dengan schedule baru
     $reservation->update([
-        'name' => $request->name,
-        'phone' => $request->phone,
-        'reservation_date' => $request->reservation_date,
-        'reservation_time' => $request->reservation_time,
+        'schedule_id' => $newSchedule->id,
+        'doctor_id' => $newSchedule->doctor_id,
+        'tanggal_reservasi' => $newSchedule->date,
+        'jam_mulai' => $newSchedule->time_start,
+        'jam_selesai' => $newSchedule->time_end,
     ]);
 
     // Redirect dengan pesan sukses
     return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation updated successfully!');
 }
+
+    
+    
 
 
 public function index()
@@ -102,11 +107,14 @@ public function store(Request $request)
         'patient_id' => $patient->id,
         'doctor_id' => $schedule->doctor_id,
         'tanggal_reservasi' => $schedule->date,
-        'jam_reservasi' => $schedule->time_start,
+        'jam_mulai' => $schedule->time_start,
+        'jam_selesai' => $schedule->time_end,
     ]);
 
     // Tandai jadwal sebagai tidak tersedia
     $schedule->update(['is_available' => false]);
+
+    // $schedule->delete();
 
     return redirect()->route('reservation.index')->with('success', 'Reservation created successfully!');
 }
@@ -120,6 +128,8 @@ public function store(Request $request)
 
     // Cari jadwal terkait dari reservasi
     $schedule = $reservation->schedule;
+
+    $schedule->update(['is_available' => false]);
 
     // Hapus data reservasi
     $reservation->delete();
@@ -173,11 +183,13 @@ public function storeForAdmin(Request $request)
         'patient_id' => $request->patient_id,
         'doctor_id' => $schedule->doctor_id,
         'tanggal_reservasi' => $schedule->date,
-        'jam_reservasi' => $schedule->time_start,
+        'jam_mulai' => $schedule->time_start,
+        'jam_selesai' => $schedule->time_end,
     ]);
 
     // Tandai jadwal sebagai tidak tersedia
     $schedule->update(['is_available' => false]);
+    // $schedule->delete();
 
     return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation added successfully!');
 }

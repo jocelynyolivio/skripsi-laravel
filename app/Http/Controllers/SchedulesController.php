@@ -74,18 +74,25 @@ class SchedulesController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit($id)
-    {
-        // Ambil jadwal berdasarkan ID
-        $schedule = Schedules::findOrFail($id);
-        // Ambil daftar dokter
-        $doctors = User::where('role_id', 2)->get();
+{
+    // Ambil jadwal berdasarkan ID
+    $schedule = Schedules::findOrFail($id);
 
-        return view('dashboard.schedules.edit', [
-            'title' => 'Edit Schedule',
-            'schedule' => $schedule,
-            'doctors' => $doctors,
-        ]);
+    // Cek apakah jadwal sudah terreservasi
+    if (!$schedule->is_available) {
+        return redirect()->route('dashboard.schedules.index')->with('error', 'This schedule is already reserved and cannot be edited.');
     }
+
+    // Ambil daftar dokter
+    $doctors = User::where('role_id', 2)->get();
+
+    return view('dashboard.schedules.edit', [
+        'title' => 'Edit Schedule',
+        'schedule' => $schedule,
+        'doctors' => $doctors,
+    ]);
+}
+
 
     /**
      * Update the specified resource in storage.
@@ -114,11 +121,26 @@ class SchedulesController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy($id)
-    {
-        // Hapus jadwal
-        $schedule = Schedules::findOrFail($id);
-        $schedule->delete();
+{
+    // Ambil jadwal berdasarkan ID
+    $schedule = Schedules::findOrFail($id);
 
-        return redirect()->route('dashboard.schedules.index')->with('success', 'Schedule deleted successfully!');
+    // Cek apakah jadwal sudah terreservasi
+    if (!$schedule->is_available) {
+        return redirect()->route('dashboard.schedules.index')->with('error', 'This schedule is already reserved and cannot be deleted.');
     }
+
+    // Cek apakah jadwal sudah memiliki reservasi
+    if ($schedule->reservations()->count() > 0) {
+        // Jika ada reservasi, ubah status jadwal menjadi tidak tersedia
+        $schedule->update(['is_available' => false]);
+    } else {
+        // Jika tidak ada reservasi, hapus jadwal
+        $schedule->delete();
+    }
+
+    return redirect()->route('dashboard.schedules.index')->with('success', 'Schedule deleted or disabled successfully!');
+}
+
+
 }

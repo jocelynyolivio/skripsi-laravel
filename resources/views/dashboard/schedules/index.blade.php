@@ -13,7 +13,7 @@
     </div>
     @endif
 
-    <table class="table table-bordered table-striped">
+    <table id="scheduleTable" class="display">
         <thead class="thead-dark">
             <tr>
                 <th>#</th>
@@ -21,7 +21,7 @@
                 <th>Date</th>
                 <th>Start Time</th>
                 <th>End Time</th>
-                <th>Status</th>
+                <!-- <th>Status</th> -->
                 <th>Actions</th>
             </tr>
         </thead>
@@ -33,18 +33,36 @@
                 <td>{{ $schedule->date }}</td>
                 <td>{{ $schedule->time_start }}</td>
                 <td>{{ $schedule->time_end }}</td>
-                <td>{{ $schedule->is_available ? 'Available' : 'Reserved' }}</td>
+                <!-- <td>{{ $schedule->is_available ? 'Available' : 'Reserved' }}</td> -->
                 <td>
+                    @if($schedule->is_available)
                     <a href="{{ route('dashboard.schedules.edit', $schedule->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.schedules.destroy', $schedule->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                     </form>
+                    @else
+                    <span class="badge bg-danger">Reserved</span>
+                    @endif
                 </td>
             </tr>
             @endforeach
         </tbody>
     </table>
 </div>
+<script>
+    $(document).ready(function() {
+        $('#scheduleTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+            "columnDefs": [
+                { "orderable": false, "targets": 6 } // Kolom ke-5 adalah kolom Actions
+            ]
+        });
+    });
+</script>
 @endsection

@@ -119,7 +119,7 @@ class DatabaseSeeder extends Seeder
             'date' => '2024-01-01',
             'time_start' => '09:00:00',
             'time_end' => '10:00:00',
-            'is_available' => true,
+            'is_available' => false,
         ]);
         Schedules::create([
             'doctor_id' => 3, // Sesuaikan ID dokter
@@ -150,7 +150,8 @@ class DatabaseSeeder extends Seeder
             'patient_id' => 1,
             'doctor_id' => 3,
             'tanggal_reservasi' => '2024-01-01',
-            'jam_reservasi' => '09:00:00',
+            'jam_mulai' => '09:00:00',
+            'jam_selesai' => '10:00:00',
         ]);
 
         // Post::create([

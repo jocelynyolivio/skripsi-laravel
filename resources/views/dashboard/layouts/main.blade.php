@@ -12,6 +12,14 @@
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
     <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
 
+    <!-- Tambahkan di <head> untuk CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+
+
+
     <!-- ini kalau gamau ada attachment filesss -->
     <style>
         trix-toolbar [data-trix-button-group="file-tools"]{
@@ -21,6 +29,10 @@
 </head>
 
 <body>
+    <!-- Tambahkan di <body> untuk JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
     @include('dashboard.layouts.header')
     <div class="container-fluid">
         <div class="row" style="position: sticky;">

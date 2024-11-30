@@ -7,24 +7,26 @@
         <a href="{{ route('dashboard.reservations.create') }}" class="btn btn-primary mb-3">Add Reservation</a>
     </div>
 
-    <table class="table table-striped">
-        <thead>
+    <table id="reservationTable" class="display">
+    <thead>
             <tr>
-                <th>Nama</th>
-                <th>Nomor Telepon</th>
-                <th>Tanggal</th>
-                <th>Jam</th>
-                <th>Dokter</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Reservation Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($reservations as $index => $reservation)
             <tr>
                 <td>{{ $reservation->patient->name }}</td>
-                <td>{{ $reservation->patient->nomor_telepon }}</td>
-                <td>{{ $reservation->tanggal_reservasi }}</td>
-                <td>{{ $reservation->jam_reservasi }}</td>
                 <td>{{ $reservation->doctor->name }}</td>
+                <!-- <td>{{ $reservation->patient->nomor_telepon }}</td> -->
+                <td>{{ $reservation->tanggal_reservasi }}</td>
+                <td>{{ $reservation->jam_mulai }}</td>
+                <td>{{ $reservation->jam_selesai }}</td>
                 <td>
                     <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;">
@@ -38,4 +40,16 @@
         </tbody>
     </table>
 </div>
+<script>
+    $(document).ready(function() {
+        $('#reservationTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+        });
+    });
+</script>
+
 @endsection

@@ -7,7 +7,7 @@
         <a href="{{ route('dashboard.masters.patients.create') }}" class="btn btn-primary mb-3">Add New Patient</a>
     </div>
 
-    <table class="table table-striped">
+    <table id="patientTable" class="display">
         <thead>
             <tr>
                 <th>ID</th>
@@ -39,4 +39,22 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('#patientTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
+                ]
+            });
+        }, 100);
+    });
+</script>
+
 @endsection

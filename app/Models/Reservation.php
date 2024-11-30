@@ -13,7 +13,8 @@ class Reservation extends Model
         'nama',
         'nomor_telepon',
         'tanggal_reservasi',
-        'jam_reservasi',
+        'jam_mulai',
+        'jam_selesai',
         'doctor_id', // Tambahkan ini
         'schedule_id',
         'patient_id',
