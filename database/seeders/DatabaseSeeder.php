@@ -7,9 +7,10 @@ use Carbon\Carbon;
 use App\Models\Post;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Category;
 use App\Models\Patient;
+use App\Models\Category;
 use App\Models\Schedules;
+use App\Models\Odontogram;
 use App\Models\Reservation;
 use Illuminate\Database\Seeder;
 
@@ -129,13 +130,13 @@ class DatabaseSeeder extends Seeder
             'is_available' => true,
         ]);
 
-        Schedules::create([
-            'doctor_id' => 4, // Sesuaikan ID dokter
-            'date' => '2025-08-04',
-            'time_start' => '11:00:00',
-            'time_end' => '14:00:00',
-            'is_available' => true,
-        ]);
+            Schedules::create([
+                'doctor_id' => 4, // Sesuaikan ID dokter
+                'date' => '2025-08-04',
+                'time_start' => '11:00:00',
+                'time_end' => '14:00:00',
+                'is_available' => true,
+            ]);
 
         Schedules::create([
             'doctor_id' => 5, // Sesuaikan ID dokter
@@ -153,6 +154,35 @@ class DatabaseSeeder extends Seeder
             'jam_mulai' => '09:00:00',
             'jam_selesai' => '10:00:00',
         ]);
+
+        // Odontogram::create([
+        //     'medical_record_id' => 1, // Sesuaikan ID rekam medis yang sudah ada
+        //     'tooth_number' => '11', // Gigi 11 (Insisivus kanan atas)
+        //     'status' => 'sehat', // Status gigi sehat
+        //     'notes' => 'Tidak ada keluhan', // Catatan
+        // ]);
+
+        // Odontogram::create([
+        //     'medical_record_id' => 1,
+        //     'tooth_number' => '12', // Gigi 12
+        //     'status' => 'berlubang', // Status gigi berlubang
+        //     'notes' => 'Karies kecil pada email, butuh observasi',
+        // ]);
+
+        // Odontogram::create([
+        //     'medical_record_id' => 2, // Sesuaikan ID rekam medis
+        //     'tooth_number' => '21', // Gigi 21 (Insisivus kiri atas)
+        //     'status' => 'tambalan', // Status gigi tambalan
+        //     'notes' => 'Tambalan komposit resin', // Catatan
+        // ]);
+
+        // Odontogram::create([
+        //     'medical_record_id' => 3, // Sesuaikan ID rekam medis
+        //     'tooth_number' => '36', // Gigi 36 (Molari kiri bawah)
+        //     'status' => 'berlubang', // Status gigi berlubang
+        //     'notes' => 'Karies parah, perlu tindakan endodonti',
+        // ]);
+
 
         // Post::create([
         //     'title' => 'Judul Pertama',

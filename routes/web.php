@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SchedulesController;
+use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\DashboardPostController;
@@ -131,6 +132,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         Route::get('/medical_records/create', [MedicalRecordController::class, 'create'])->name('medical_records.create');
         Route::post('/medical_records', [MedicalRecordController::class, 'store'])->name('medical_records.store');
     });
+
+    Route::get('/reservations/whatsapp/{id}', [ReservationController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
+
 });
 
 Route::get('/dashboard/salaries/', function () {
@@ -140,12 +144,14 @@ Route::get('/dashboard/salaries/', function () {
 })->middleware('internal');
 
 
-Route::get('/odontogram', function () {
-    return view('odontogram', [
-        "title" => "odontogram"
-    ]);
-});
+// Route::get('/odontogram', function () {
+//     return view('dashboard.odontogram.show', [
+//         "title" => "odontogram"
+//     ]);
+// });
 
+Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'show'])->name('dashboard.odontogram.show');
+Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'store'])->name('dashboard.odontogram.store');
 
 Route::get('/patient/login', [PatientLoginController::class, 'showLoginForm'])->name('patient.login');
 Route::post('/patient/login', [PatientLoginController::class, 'login']);

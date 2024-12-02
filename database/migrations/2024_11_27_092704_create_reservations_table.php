@@ -19,6 +19,7 @@ return new class extends Migration
         $table->date('tanggal_reservasi'); // Tanggal reservasi
         $table->time('jam_mulai'); // Jam reservasi
         $table->time('jam_selesai'); // Jam reservasi
+        $table->string('status_konfirmasi')->nullable();
         $table->timestamps();
     
         // Foreign key constraints

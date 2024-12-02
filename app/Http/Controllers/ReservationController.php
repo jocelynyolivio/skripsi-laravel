@@ -194,4 +194,23 @@ public function storeForAdmin(Request $request)
     return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation added successfully!');
 }
 
+public function sendWhatsApp($id)
+{
+    // Ambil data reservasi berdasarkan ID
+    $reservation = Reservation::with('patient')->findOrFail($id);
+
+    // Nomor telepon pasien
+    $phoneNumber = $reservation->patient->nomor_telepon;
+
+    // Pesan template
+    $message = "Halo {$reservation->patient->name}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
+
+     // Update status konfirmasi
+     $reservation->status_konfirmasi = 'Sudah Dikonfirmasi';
+     $reservation->save();
+
+    // Redirect ke wa.me dengan pesan template
+    return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
+}
+
 }

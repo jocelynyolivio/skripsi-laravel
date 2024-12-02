@@ -15,6 +15,7 @@ class Reservation extends Model
         'tanggal_reservasi',
         'jam_mulai',
         'jam_selesai',
+        'status_konfirmasi',
         'doctor_id', // Tambahkan ini
         'schedule_id',
         'patient_id',
