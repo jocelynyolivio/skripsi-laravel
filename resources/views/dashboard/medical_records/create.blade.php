@@ -19,6 +19,37 @@
             </select>
         </div>
 
+         <!-- Prosedur (Checkbox) -->
+        <div class="mb-3">
+            <label class="form-label">Select Procedures</label>
+            <div>
+                @foreach($procedures as $procedure)
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="procedure_id[]" value="{{ $procedure->id }}" id="procedure_{{ $procedure->id }}">
+                        <label class="form-check-label" for="procedure_{{ $procedure->id }}">
+                            {{ $procedure->name }}
+                        </label>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+         <!-- Menampilkan bahan dental (tidak dapat diedit) -->
+<div class="mb-3">
+    <label class="form-label">Required Dental Materials</label>
+    <div id="material-list">
+        @if (isset($selectedMaterials) && count($selectedMaterials) > 0)
+            @foreach ($selectedMaterials as $materialId => $materialData)
+                <div class="mb-2">
+                    <span>{{ $materialData['name'] }} (Quantity: {{ $materialData['quantity'] }})</span>
+                </div>
+            @endforeach
+        @else
+            <p>No dental materials required for the selected procedures.</p>
+        @endif
+    </div>
+</div>
+
         <div class="mb-3">
             <label for="teeth_condition" class="form-label">Teeth Condition</label>
             <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" required>

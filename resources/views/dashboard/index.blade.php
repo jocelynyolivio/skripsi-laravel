@@ -11,7 +11,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title">Pasien Hari Ini</h5>
-                <p class="card-text display-5 fw-bold">15</p> <!-- Ganti dengan data dari database -->
+                <p class="card-text display-5 fw-bold">{{ $jumlahPasienHariIni }}</p>
                 <p class="text-muted">Jumlah pasien yang datang hari ini</p>
             </div>
         </div>
@@ -22,8 +22,8 @@
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title">Reservasi Belum Diproses</h5>
-                <p class="card-text display-5 fw-bold">8</p> <!-- Ganti dengan data dari database -->
-                <p class="text-muted">Jumlah reservasi yang menunggu konfirmasi</p>
+                <p class="card-text display-5 fw-bold">{{ $reservasiBelumDiproses }}</p>
+                <p class="text-muted">Juml ah reservasi yang menunggu konfirmasi</p>
             </div>
         </div>
     </div>

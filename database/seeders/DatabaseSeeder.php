@@ -9,10 +9,13 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Category;
+use App\Models\Procedure;
 use App\Models\Schedules;
 use App\Models\Odontogram;
 use App\Models\Reservation;
+use App\Models\DentalMaterial;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -154,6 +157,112 @@ class DatabaseSeeder extends Seeder
             'jam_mulai' => '09:00:00',
             'jam_selesai' => '10:00:00',
         ]);
+        DentalMaterial::create([
+            'name' => 'Resin Komposit',
+            'description' => 'Bahan untuk penambalan gigi berlubang',
+            'stock_quantity' => 50,
+            'unit_price' => 150.00,
+        ]);
+
+        DentalMaterial::create([
+            'name' => 'Anestesi',
+            'description' => 'Cairan anestesi lokal untuk prosedur dental',
+            'stock_quantity' => 30,
+            'unit_price' => 25.00,
+        ]);
+
+        DentalMaterial::create([
+            'name' => 'Cavity Liner',
+            'description' => 'Bahan pelapis untuk restorasi tambalan',
+            'stock_quantity' => 20,
+            'unit_price' => 45.00,
+        ]);
+
+        DentalMaterial::create([
+            'name' => 'Amalgam',
+            'description' => 'Bahan tambalan yang mengandung logam',
+            'stock_quantity' => 10,
+            'unit_price' => 100.00,
+        ]);
+
+        Procedure::create([
+            'name' => 'Tambal Gigi',
+            'description' => 'Prosedur untuk menambal gigi yang berlubang menggunakan bahan tambalan seperti resin komposit.',
+        ]);
+
+        Procedure::create([
+            'name' => 'Pembersihan Karang Gigi',
+            'description' => 'Prosedur untuk membersihkan karang gigi dan plak dengan scaler.',
+        ]);
+
+        Procedure::create([
+            'name' => 'Pencabutan Gigi',
+            'description' => 'Prosedur untuk mencabut gigi yang tidak bisa diselamatkan.',
+        ]);
+
+                // Menghubungkan Tambal Gigi dengan beberapa bahan dental
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 1, // ID untuk Tambal Gigi
+                    'dental_material_id' => 1, // Resin Komposit
+                    'quantity' => 2, // Butuh 2 unit Resin Komposit
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 1, // ID untuk Tambal Gigi
+                    'dental_material_id' => 2, // Anestesi
+                    'quantity' => 1, // Butuh 1 unit Anestesi
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 1, // ID untuk Tambal Gigi
+                    'dental_material_id' => 3, // Cavity Liner
+                    'quantity' => 1, // Butuh 1 unit Cavity Liner
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 1, // ID untuk Tambal Gigi
+                    'dental_material_id' => 4, // Amalgam
+                    'quantity' => 1, // Butuh 1 unit Amalgam (optional untuk kombinasi bahan)
+                ]);
+        
+                // Menghubungkan Pencabutan Gigi dengan beberapa bahan dental
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 3, // ID untuk Pencabutan Gigi
+                    'dental_material_id' => 2, // Anestesi
+                    'quantity' => 1, // Butuh 1 unit Anestesi
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 3, // ID untuk Pencabutan Gigi
+                    'dental_material_id' => 3, // Cavity Liner
+                    'quantity' => 1, // Butuh 1 unit Cavity Liner untuk perlindungan
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 3, // ID untuk Pencabutan Gigi
+                    'dental_material_id' => 1, // Resin Komposit (untuk pelindung gigi pasca pencabutan)
+                    'quantity' => 1, // Butuh 1 unit Resin Komposit
+                ]);
+        
+                // Menghubungkan Pembersihan Karang Gigi dengan beberapa bahan dental
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 2, // ID untuk Pembersihan Karang Gigi
+                    'dental_material_id' => 3, // Cavity Liner
+                    'quantity' => 1, // Butuh 1 unit Cavity Liner
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 2, // ID untuk Pembersihan Karang Gigi
+                    'dental_material_id' => 2, // Anestesi (opsional jika pasien mengalami ketidaknyamanan)
+                    'quantity' => 1, // Butuh 1 unit Anestesi
+                ]);
+        
+                DB::table('procedure_materials')->insert([
+                    'procedure_id' => 2, // ID untuk Pembersihan Karang Gigi
+                    'dental_material_id' => 4, // Amalgam (untuk kasus tertentu dengan tambalan kecil)
+                    'quantity' => 1, // Butuh 1 unit Amalgam
+                ]);
+
 
         // Odontogram::create([
         //     'medical_record_id' => 1, // Sesuaikan ID rekam medis yang sudah ada

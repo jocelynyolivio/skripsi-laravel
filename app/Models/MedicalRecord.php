@@ -30,4 +30,20 @@ class MedicalRecord extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
+
+    // Relasi many-to-many ke procedures melalui medical_record_procedure
+    public function procedures()
+    {
+        return $this->belongsToMany(Procedure::class, 'medical_record_procedure')
+                    ->withPivot('created_at', 'updated_at'); // Jika ingin memanfaatkan data tambahan dari pivot
+    }
+
+   // Relasi many-to-many dengan DentalMaterial melalui medical_record_dental_material
+public function dentalMaterials()
+{
+    return $this->belongsToMany(DentalMaterial::class, 'medical_record_dental_material')
+                ->withPivot('quantity') // Mengambil informasi kuantitas dari pivot
+                ->withTimestamps(); // Menambahkan timestamp pada data pivot
+}
+    
 }

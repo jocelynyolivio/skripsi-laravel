@@ -150,8 +150,12 @@ Route::get('/dashboard/salaries/', function () {
 //     ]);
 // });
 
-Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'show'])->name('dashboard.odontogram.show');
-Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'store'])->name('dashboard.odontogram.store');
+// Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'show'])->name('dashboard.odontogram.show');
+// Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'store'])->name('dashboard.odontogram.store');
+Route::get('/dashboard/odontogram', function () {
+    return view('dashboard.odontogram.index');
+})->name('dashboard.odontogram.index');
+
 
 Route::get('/patient/login', [PatientLoginController::class, 'showLoginForm'])->name('patient.login');
 Route::post('/patient/login', [PatientLoginController::class, 'login']);
