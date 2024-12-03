@@ -71,6 +71,12 @@
                         <i class="bi bi-calendar-plus"></i> Data Schedules
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/dental-materials*') ? 'active' : '' }}" href="{{ route('dashboard.dental-materials.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Dental Materials
+                    </a>
+                </li>
+            </ul>
             </ul>
         </div>
     </div>

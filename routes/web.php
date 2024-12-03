@@ -17,6 +17,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\DentalMaterialController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
@@ -134,6 +135,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     });
 
     Route::get('/reservations/whatsapp/{id}', [ReservationController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
+
+    Route::resource('/dental-materials', DentalMaterialController::class);
 
 });
 
