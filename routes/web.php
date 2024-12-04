@@ -137,6 +137,15 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/reservations/whatsapp/{id}', [ReservationController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
 
     Route::resource('/dental-materials', DentalMaterialController::class);
+    Route::get('/medical_records/{medicalRecordId}/selectMaterials', [MedicalRecordController::class, 'selectMaterials'])
+    ->name('medical_records.selectMaterials');
+
+    Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])
+    ->name('medical_records.saveMaterials');
+
+    Route::post('/medical_records/{medicalRecordId}/removeMaterial/{materialId}', [MedicalRecordController::class, 'removeMaterial'])
+    ->name('medical_records.removeMaterial');
+
 
 });
 
