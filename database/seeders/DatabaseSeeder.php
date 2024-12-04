@@ -93,7 +93,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'yoli',
             'email' => 'emailnyayoli@gmail.com',
             'email_verified_at' => now(),
-            'password' => bcrypt('12345678'),
+            'password' => bcrypt('12345'),
             'nomor_telepon' => '081230333587'
         ]);
         Patient::create([

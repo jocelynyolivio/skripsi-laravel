@@ -21,6 +21,7 @@ class RegisterController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|email:dns|unique:patients',
             'password' => 'required|min:5|max:255',
+            'nomor_telepon' => 'required|max:255'
         ]);
 
         $validatedData['password'] = bcrypt($validatedData['password']);

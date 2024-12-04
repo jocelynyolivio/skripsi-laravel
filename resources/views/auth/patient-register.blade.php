@@ -23,6 +23,15 @@
                     @enderror
                 </div>
                 <div class="form-floating">
+                    <input type="text" class="form-control rounded-top @error('nomor_telepon') is-invalid @enderror" id="nomor_telepon" name="nomor_telepon" placeholder="nomor_telepon" required value="{{old('nomor_telepon')}}">
+                    <label for="nomor_telepon">Nomor Telepon</label>
+                    @error('nomor_telepon')
+                    <div class="invalid-feedback">
+                        Please input nomor telepon.
+                    </div>
+                    @enderror
+                </div>
+                <div class="form-floating">
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="name@example.com" required value="{{old('email')}}">
                     <label for="email">Email address</label>
                     @error('email')
