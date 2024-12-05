@@ -19,7 +19,7 @@ use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\DentalMaterialController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-
+use App\Http\Controllers\ProcedureMaterialController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -143,8 +143,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])
     ->name('medical_records.saveMaterials');
 
-    Route::post('/medical_records/{medicalRecordId}/removeMaterial/{materialId}', [MedicalRecordController::class, 'removeMaterial'])
-    ->name('medical_records.removeMaterial');
+    // Route::post('/medical_records/{medicalRecordId}/removeMaterial/{materialId}', [MedicalRecordController::class, 'removeMaterial'])
+    // ->name('medical_records.removeMaterial');
+
+    Route::resource('procedure_materials', ProcedureMaterialController::class);
 
 
 });

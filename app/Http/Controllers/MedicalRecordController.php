@@ -185,4 +185,13 @@ public function removeMaterial($medicalRecordId, $materialId)
                      ->with('success', 'Dental material removed successfully.');
 }
 
+public function procedureMaterialsPage()
+{
+    // Ambil semua prosedur beserta bahan materialnya
+    $procedures = Procedure::with('dentalMaterials')->get();
+
+    // Kirim data ke view
+    return view('dashboard.procedure_materials', compact('procedures'));
+}
+
 }
