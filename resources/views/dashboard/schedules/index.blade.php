@@ -59,9 +59,6 @@
             "ordering": true,
             "info": true,
             "responsive": true,
-            "columnDefs": [
-                { "orderable": false, "targets": 6 } // Kolom ke-5 adalah kolom Actions
-            ]
         });
     });
 </script>

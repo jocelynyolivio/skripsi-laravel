@@ -15,26 +15,43 @@
                 </h2>
                 <div id="collapse-{{ $procedureGroup->first()->procedure->id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $procedureGroup->first()->procedure->id }}" data-bs-parent="#procedureAccordion">
                     <div class="accordion-body">
-                        <ul class="list-group">
-                            @foreach ($procedureGroup as $material)
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <div>
-                                        <strong>{{ $material->dentalMaterial->name }}</strong> - Quantity: {{ $material->quantity }}
-                                    </div>
-                                    <div>
-                                        <a href="{{ route('dashboard.procedure_materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('dashboard.procedure_materials.destroy', $material->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
+                        <table class="table table-striped" id="datatable-{{ $procedureGroup->first()->procedure->id }}">
+                            <thead>
+                                <tr>
+                                    <th>Material Name</th>
+                                    <th>Quantity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($procedureGroup as $material)
+                                    <tr>
+                                        <td>{{ $material->dentalMaterial->name }}</td>
+                                        <td>{{ $material->quantity }}</td>
+                                        <td>
+                                            <a href="{{ route('dashboard.procedure_materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                            <form action="{{ route('dashboard.procedure_materials.destroy', $material->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         @endforeach
     </div>
+
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi DataTables untuk setiap tabel di dalam accordion
+            $('table[id^="datatable-"]').each(function() {
+                $(this).DataTable();
+            });
+        });
+    </script>
 @endsection

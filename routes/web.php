@@ -148,7 +148,11 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('procedure_materials', ProcedureMaterialController::class);
 
-
+    // Route::prefix('odontogram')->group(function () {
+    //     Route::get('/patient/{patientId}', [OdontogramController::class, 'show']);  // Menampilkan odontogram pasien
+    //     Route::post('/update', [OdontogramController::class, 'store']);  // Menyimpan atau memperbarui status gigi
+    //     Route::delete('/delete/{patientId}/{toothId}', [OdontogramController::class, 'destroy']);  // Menghapus status gigi
+    // });
 });
 
 Route::get('/dashboard/salaries/', function () {
@@ -166,9 +170,9 @@ Route::get('/dashboard/salaries/', function () {
 
 // Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'show'])->name('dashboard.odontogram.show');
 // Route::get('/dashboard/odontogram/{medicalRecordId}', [OdontogramController::class, 'store'])->name('dashboard.odontogram.store');
-Route::get('/dashboard/odontogram', function () {
-    return view('dashboard.odontogram.index');
-})->name('dashboard.odontogram.index');
+// Route::get('/dashboard/odontogram', function () {
+//     return view('dashboard.odontogram.index');
+// })->name('dashboard.odontogram.index');
 
 
 Route::get('/patient/login', [PatientLoginController::class, 'showLoginForm'])->name('patient.login');
