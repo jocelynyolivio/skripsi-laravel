@@ -196,4 +196,43 @@ public function procedureMaterialsPage()
     return view('dashboard.procedure_materials', compact('procedures'));
 }
 
+public function edit($patientId, $recordId)
+{
+    // Retrieve the medical record using the provided recordId
+    $medicalRecord = MedicalRecord::findOrFail($recordId);
+
+    // Pass the record to the view, along with the patientId
+    return view('dashboard.medical_records.edit', [
+        'medicalRecord' => $medicalRecord,
+        'patientId' => $patientId
+    ]);
+}
+
+
+public function update(Request $request, $patientId, $recordId)
+{
+    $validatedData = $request->validate([
+        'teeth_condition' => 'required|string',
+        'treatment' => 'required|string',
+        'notes' => 'nullable|string',
+    ]);
+
+    $medicalRecord = MedicalRecord::findOrFail($recordId);
+    $medicalRecord->update($validatedData);
+
+    return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
+                     ->with('success', 'Medical record updated successfully.');
+}
+
+public function destroy($patientId, $recordId)
+{
+    $medicalRecord = MedicalRecord::findOrFail($recordId);
+    $medicalRecord->delete();
+
+    return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
+                     ->with('success', 'Medical record deleted successfully.');
+}
+
+
+
 }

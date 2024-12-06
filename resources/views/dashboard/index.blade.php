@@ -23,7 +23,7 @@
             <div class="card-body">
                 <h5 class="card-title">Reservasi Belum Diproses</h5>
                 <p class="card-text display-5 fw-bold">{{ $reservasiBelumDiproses }}</p>
-                <p class="text-muted">Juml ah reservasi yang menunggu konfirmasi</p>
+                <p class="text-muted">Jumlah reservasi yang menunggu konfirmasi</p>
             </div>
         </div>
     </div>

@@ -11,7 +11,7 @@
         </div>
     @endif
 
-    <table class="table table-striped mt-4">
+    <table id="medicalRecordsTable" class="table table-striped mt-4">
         <thead>
             <tr>
                 <th>Date</th>
@@ -19,6 +19,7 @@
                 <th>Treatment</th>
                 <th>Notes</th>
                 <th>Doctor</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -37,10 +38,28 @@
                     @else
                         <span class="badge bg-secondary">Transaction Created</span>
                     @endif
+
+                    <td>
+                    <!-- Edit Button -->
+                    <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning">Edit</a>
+
+                    <!-- Delete Button -->
+                    <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                    </td>
                 </td>
             </tr>
             @endforeach
         </tbody>
     </table>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('#medicalRecordsTable').DataTable();
+    });
+</script>
 @endsection

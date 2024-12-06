@@ -130,9 +130,23 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::delete('/masters/{role_id}/role/{id}', [UserController::class, 'destroy'])->name('masters.users.destroy');
 
     Route::prefix('patients/{patientId}')->group(function () {
+        // Route to list all medical records for a patient
         Route::get('/medical_records', [MedicalRecordController::class, 'index'])->name('medical_records.index');
+        
+        // Route to display the form for creating a new medical record
         Route::get('/medical_records/create', [MedicalRecordController::class, 'create'])->name('medical_records.create');
+        
+        // Route to store a new medical record
         Route::post('/medical_records', [MedicalRecordController::class, 'store'])->name('medical_records.store');
+        
+        // Route to show the edit form for an existing medical record
+        Route::get('/medical_records/{recordId}/edit', [MedicalRecordController::class, 'edit'])->name('medical_records.edit');
+        
+        // Route to update an existing medical record
+        Route::put('/medical_records/{recordId}', [MedicalRecordController::class, 'update'])->name('medical_records.update');
+        
+        // Route to delete a medical record
+        Route::delete('/medical_records/{recordId}', [MedicalRecordController::class, 'destroy'])->name('medical_records.destroy');
     });
 
     Route::get('/reservations/whatsapp/{id}', [ReservationController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
