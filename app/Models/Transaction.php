@@ -9,16 +9,20 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['patient_id', 'procedure_id', 'doctor_id', 'date'];
+    protected $fillable = [
+        'medical_record_id',
+        'reservation_id',
+        'patient_id',
+        'doctor_id',
+        'admin_id',
+        'amount', // Pastikan 'amount' ada di sini
+        'payment_type',
+        'payment_status',
+    ];
 
     public function patient()
     {
         return $this->belongsTo(Patient::class);
-    }
-
-    public function procedure()
-    {
-        return $this->belongsTo(Procedure::class);
     }
 
     public function doctor()
@@ -26,8 +30,18 @@ class Transaction extends Model
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
-    public function dentalMaterials()
+    public function admin()
     {
-        return $this->belongsToMany(DentalMaterial::class, 'transaction_materials')->withPivot('quantity');
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function reservation()
+    {
+        return $this->belongsTo(Reservation::class, 'reservation_id');
+    }
+
+    public function medicalRecord()
+    {
+        return $this->belongsTo(MedicalRecord::class, 'medical_record_id');
     }
 }

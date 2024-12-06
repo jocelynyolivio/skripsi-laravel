@@ -24,8 +24,21 @@ class Procedure extends Model
          return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure');
      }
 
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
-    }
+     public function priceLists()
+{
+    return $this->hasMany(Pricelist::class);
+}
+
+// Mengambil harga dasar (non-promosi)
+public function basePrice()
+{
+    return $this->hasOne(Pricelist::class)->where('is_promo', false)->latestOfMany('effective_date');
+}
+
+// Mengambil harga promosi terbaru jika ada
+public function promoPrice()
+{
+    return $this->hasOne(Pricelist::class)->where('is_promo', true)->latestOfMany('effective_date');
+}
+
 }

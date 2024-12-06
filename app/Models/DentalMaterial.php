@@ -16,8 +16,5 @@ class DentalMaterial extends Model
         return $this->belongsToMany(Procedure::class, 'procedure_materials', 'dental_material_id', 'procedure_id')
                     ->withPivot('quantity');
     }
-    public function transactions()
-    {
-        return $this->belongsToMany(Transaction::class, 'transaction_materials')->withPivot('quantity');
-    }
+
 }

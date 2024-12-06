@@ -14,12 +14,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\DentalMaterialController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\ProcedureMaterialController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -153,6 +154,17 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     //     Route::post('/update', [OdontogramController::class, 'store']);  // Menyimpan atau memperbarui status gigi
     //     Route::delete('/delete/{patientId}/{toothId}', [OdontogramController::class, 'destroy']);  // Menghapus status gigi
     // });
+
+    // Halaman index transaksi (daftar semua transaksi)
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+
+    // Membuat transaksi baru dari rekam medis
+    Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])->name('transactions.create');
+
+    // Menyimpan transaksi baru
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+
+    
 });
 
 Route::get('/dashboard/salaries/', function () {

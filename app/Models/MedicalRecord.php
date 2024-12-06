@@ -46,5 +46,11 @@ public function dentalMaterials()
                 ->withTimestamps(); // Menambahkan timestamp pada data pivot
 }
 
+public function transaction()
+{
+    return $this->hasOne(Transaction::class);
+}
+
+
 
 }

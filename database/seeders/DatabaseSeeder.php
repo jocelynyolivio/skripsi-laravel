@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Category;
+use App\Models\Pricelist;
 use App\Models\Procedure;
 use App\Models\Schedules;
 use App\Models\Odontogram;
@@ -262,6 +263,54 @@ class DatabaseSeeder extends Seeder
                     'dental_material_id' => 4, // Amalgam (untuk kasus tertentu dengan tambalan kecil)
                     'quantity' => 1, // Butuh 1 unit Amalgam
                 ]);
+
+                // Tambal Gigi - Base Price
+        Pricelist::create([
+            'procedure_id' => 1,
+            'price' => 300000, // Harga dasar: 300.000
+            'is_promo' => false,
+            'effective_date' => Carbon::now()->subDays(5),
+        ]);
+
+        // Tambal Gigi - Promo Price
+        Pricelist::create([
+            'procedure_id' => 1,
+            'price' => 200000, // Harga promosi: 200.000
+            'is_promo' => true,
+            'effective_date' => Carbon::now()->subDays(2),
+        ]);
+
+        // Pembersihan Karang Gigi - Base Price
+        Pricelist::create([
+            'procedure_id' => 2,
+            'price' => 400000, // Harga dasar: 400.000
+            'is_promo' => false,
+            'effective_date' => Carbon::now()->subDays(10),
+        ]);
+
+        // Pembersihan Karang Gigi - Promo Price
+        Pricelist::create([
+            'procedure_id' => 2,
+            'price' => 300000, // Harga promosi: 300.000
+            'is_promo' => true,
+            'effective_date' => Carbon::now()->subDays(3),
+        ]);
+
+        // Pencabutan Gigi - Base Price
+        Pricelist::create([
+            'procedure_id' => 3,
+            'price' => 500000, // Harga dasar: 500.000
+            'is_promo' => false,
+            'effective_date' => Carbon::now()->subDays(7),
+        ]);
+
+        // Pencabutan Gigi - Promo Price
+        Pricelist::create([
+            'procedure_id' => 3,
+            'price' => 350000, // Harga promosi: 350.000
+            'is_promo' => true,
+            'effective_date' => Carbon::now()->subDays(1),
+        ]);
 
 
         // Odontogram::create([

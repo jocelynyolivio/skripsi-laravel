@@ -81,6 +81,11 @@
                         <i class="bi bi-calendar-plus"></i> Procedure Materials
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.transactions.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Transaction
+                    </a>
+                </li>
             </ul>
             </ul>
             </ul>
