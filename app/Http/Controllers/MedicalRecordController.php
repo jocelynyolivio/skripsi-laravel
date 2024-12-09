@@ -233,6 +233,18 @@ public function destroy($patientId, $recordId)
                      ->with('success', 'Medical record deleted successfully.');
 }
 
+public function selectForTransaction()
+{
+    // Ambil semua rekam medis yang belum memiliki transaksi
+    $medicalRecords = MedicalRecord::doesntHave('transaction')
+        ->with(['patient', 'doctor', 'reservation'])
+        ->get();
+
+    return view('dashboard.medical_records.selectForTransaction', [
+        'title' => 'Select Medical Record',
+        'medicalRecords' => $medicalRecords,
+    ]);
+}
 
 
 }

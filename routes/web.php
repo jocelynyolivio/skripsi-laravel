@@ -158,6 +158,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])
     ->name('medical_records.saveMaterials');
 
+    Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
+    ->name('transactions.selectMedicalRecord');
+
+
     // Route::post('/medical_records/{medicalRecordId}/removeMaterial/{materialId}', [MedicalRecordController::class, 'removeMaterial'])
     // ->name('medical_records.removeMaterial');
 

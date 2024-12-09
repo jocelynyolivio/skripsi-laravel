@@ -3,11 +3,16 @@
 @section('container')
 <div class="container mt-5">
     <h3 class="text-center">Transaction List</h3>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ route('dashboard.transactions.selectMedicalRecord') }}" class="btn btn-primary">Add Transaction</a>
+    </div>
+
+
 
     @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
     @endif
 
     <table class="table table-striped mt-4" id="transactionTable">

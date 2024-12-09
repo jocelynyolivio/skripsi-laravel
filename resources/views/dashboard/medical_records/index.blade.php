@@ -59,7 +59,13 @@
 
 <script>
     $(document).ready(function() {
-        $('#medicalRecordsTable').DataTable();
+        $('#medicalRecordsTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+        });
     });
 </script>
 @endsection
