@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    use HasFactory; 
+    use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['name'];
 
-    public function posts(){
-        return $this->hasMany(Post::class);
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
     }
 }

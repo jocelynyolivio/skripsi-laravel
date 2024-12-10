@@ -86,6 +86,11 @@
                         <i class="bi bi-calendar-plus"></i> Transaction
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/expenses*') ? 'active' : '' }}" href="{{ route('dashboard.expenses.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Expenses
+                    </a>
+                </li>
             </ul>
             </ul>
             </ul>

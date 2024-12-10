@@ -312,6 +312,31 @@ class DatabaseSeeder extends Seeder
             'effective_date' => Carbon::now()->subDays(1),
         ]);
 
+        // Bahan Baku
+        Category::create([
+            'name' => 'Bahan Baku',
+        ]);
+
+        // Operasional
+        Category::create([
+            'name' => 'Operasional',
+        ]);
+
+        // Gaji Karyawan
+        Category::create([
+            'name' => 'Gaji Karyawan',
+        ]);
+
+        // Peralatan
+        Category::create([
+            'name' => 'Peralatan',
+        ]);
+
+        // Rumah Tangga
+        Category::create([
+            'name' => 'Rumah Tangga',
+        ]);
+
 
         // Odontogram::create([
         //     'medical_record_id' => 1, // Sesuaikan ID rekam medis yang sudah ada

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
@@ -181,6 +182,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     // Menyimpan transaksi baru
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+
+    Route::resource('expenses', ExpenseController::class);
 
     
 });
