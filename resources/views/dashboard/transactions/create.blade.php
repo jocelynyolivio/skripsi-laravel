@@ -28,6 +28,11 @@
             </ul>
         </div>
     </div>
+    <div class="mb-3">
+    <label for="total_amount" class="form-label">Total Amount</label>
+    <input type="text" class="form-control" id="total_amount" name="total_amount" value="{{ number_format($totalAmount, 2) }}" readonly>
+</div>
+
 
     <form action="{{ route('dashboard.transactions.store') }}" method="POST">
         @csrf
@@ -85,4 +90,31 @@
 
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const amountInputs = document.querySelectorAll('input[name^="amount"]');
+        const totalAmountField = document.getElementById('total_amount');
+
+        // Fungsi untuk menghitung total amount
+        function calculateTotal() {
+            let total = 0;
+            amountInputs.forEach(input => {
+                if (input.checked) {
+                    total += parseFloat(input.value || 0);
+                }
+            });
+            totalAmountField.value = total.toFixed(2); // Format menjadi 2 desimal
+        }
+
+        // Event listener untuk setiap input amount
+        amountInputs.forEach(input => {
+            input.addEventListener('change', calculateTotal);
+        });
+
+        // Hitung total saat halaman dimuat
+        calculateTotal();
+    });
+</script>
+
 @endsection

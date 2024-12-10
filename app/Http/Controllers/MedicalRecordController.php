@@ -30,8 +30,11 @@ class MedicalRecordController extends Controller
         // Mengambil data pasien berdasarkan patientId
         $patient = Patient::findOrFail($patientId);
 
-        // Mengambil semua reservasi yang dimiliki oleh pasien tertentu
-        $reservations = Reservation::where('patient_id', $patientId)->get();
+        // Mengambil semua reservasi yang dimiliki oleh pasien tertentu. 
+        $reservations = Reservation::where('patient_id', $patientId)
+    ->whereDoesntHave('medicalRecord') // Tambahkan filter ini
+    ->get();
+
 
         // Mengambil semua prosedur yang tersedia
         $procedures = Procedure::all();
@@ -84,6 +87,11 @@ class MedicalRecordController extends Controller
         ]);
 
         $reservation = Reservation::findOrFail($validatedData['reservation_id']);
+        $existingRecord = MedicalRecord::where('reservation_id', $reservation->id)->first();
+
+        if ($existingRecord) {
+            return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
+        }
 
         $medicalRecord = new MedicalRecord();
         $medicalRecord->patient_id = $patientId;
@@ -101,7 +109,6 @@ class MedicalRecordController extends Controller
         return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
                          ->with('success', 'Medical Record has been added successfully. Now select dental materials.');
     }
-
     public function selectMaterials($medicalRecordId)
 {
     // Ambil rekam medis berdasarkan ID

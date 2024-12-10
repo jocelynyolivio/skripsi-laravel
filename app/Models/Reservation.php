@@ -35,5 +35,11 @@ class Reservation extends Model
     {
         return $this->belongsTo(Patient::class, 'patient_id');
     }
+
+    public function medicalRecord()
+{
+    return $this->hasOne(MedicalRecord::class);
+}
+
 }
 

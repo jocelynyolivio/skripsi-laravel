@@ -7,6 +7,7 @@
     <form action="{{ route('dashboard.medical_records.store', ['patientId' => $patientId]) }}" method="POST">
         @csrf
 
+        <!-- Pilih Reservasi -->
         <div class="mb-3">
             <label for="reservation_id" class="form-label">Select Reservation</label>
             <select name="reservation_id" id="reservation_id" class="form-select" required>
@@ -19,24 +20,13 @@
             </select>
         </div>
 
-        <!-- Prosedur (Checkbox) -->
+        <!-- Prosedur Dinamis -->
         <div class="mb-3">
-            <label class="form-label">Select Procedures</label>
-            <div>
-                @foreach($procedures as $procedure)
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="procedure_id[]" value="{{ $procedure->id }}" id="procedure_{{ $procedure->id }}">
-                    <label class="form-check-label" for="procedure_{{ $procedure->id }}">
-                        {{ $procedure->name }}
-                    </label>
-                </div>
-                @endforeach
+            <label class="form-label">Procedures</label>
+            <div id="procedures-container">
+                <!-- Prosedur Dinamis Akan Ditambahkan Di Sini -->
             </div>
-        </div>
-
-        <div class="mb-3">
-            <label for="teeth_condition" class="form-label">Teeth Condition</label>
-            <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" required>
+            <button type="button" class="btn btn-secondary mt-2" id="add-procedure-btn">Add Procedure</button>
         </div>
 
         <div class="mb-3">
@@ -44,6 +34,13 @@
             <input type="text" class="form-control" id="treatment" name="treatment" required>
         </div>
 
+        <!-- Kondisi Gigi -->
+        <div class="mb-3">
+            <label for="teeth_condition" class="form-label">Teeth Condition</label>
+            <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" required>
+        </div>
+
+        <!-- Catatan -->
         <div class="mb-3">
             <label for="notes" class="form-label">Notes</label>
             <textarea class="form-control" id="notes" name="notes"></textarea>
@@ -53,4 +50,34 @@
     </form>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addProcedureBtn = document.getElementById('add-procedure-btn');
+        const proceduresContainer = document.getElementById('procedures-container');
+        
+        // Menambahkan prosedur baru
+        addProcedureBtn.addEventListener('click', function () {
+            const procedureCount = proceduresContainer.children.length + 1;
+            const procedureElement = `
+                <div class="mb-3 border p-3">
+                    <label for="procedure_${procedureCount}" class="form-label">Procedure ${procedureCount}</label>
+                    <select name="procedure_id[]" id="procedure_${procedureCount}" class="form-select" required>
+                        <option value="">Select Procedure</option>
+                        @foreach($procedures as $procedure)
+                        <option value="{{ $procedure->id }}">{{ $procedure->name }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="btn btn-danger mt-2 remove-procedure-btn">Remove</button>
+                </div>`;
+            proceduresContainer.insertAdjacentHTML('beforeend', procedureElement);
+        });
+
+        // Menghapus prosedur
+        proceduresContainer.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-procedure-btn')) {
+                e.target.closest('.mb-3').remove();
+            }
+        });
+    });
+</script>
 @endsection
