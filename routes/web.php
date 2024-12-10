@@ -185,6 +185,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('expenses', ExpenseController::class);
 
+    Route::get('dental-materials/report', [DentalMaterialController::class, 'report'])->name('dental-materials.report');
+
+
     
 });
 

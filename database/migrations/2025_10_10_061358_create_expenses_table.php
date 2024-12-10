@@ -19,6 +19,11 @@ return new class extends Migration
             $table->text('description')->nullable(); // Deskripsi pengeluaran
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); // Admin yang mencatat pengeluaran
             $table->timestamps();
+
+            $table->unsignedBigInteger('dental_material_id')->nullable(); // Relasi ke bahan dental
+            $table->integer('quantity')->nullable(); // Jumlah bahan dental yang dibeli
+            
+            $table->foreign('dental_material_id')->references('id')->on('dental_materials')->onDelete('cascade');
         });
     }
 

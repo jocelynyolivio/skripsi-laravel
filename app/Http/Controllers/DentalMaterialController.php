@@ -58,4 +58,12 @@ class DentalMaterialController extends Controller
         $dentalMaterial->delete();
         return redirect()->route('dashboard.dental-materials.index')->with('success', 'Dental material deleted successfully.');
     }
+
+    public function report()
+{
+    $materials = DentalMaterial::with(['procedures'])->get();
+
+    return view('dashboard.dental-materials.report', compact('materials'));
+}
+
 }

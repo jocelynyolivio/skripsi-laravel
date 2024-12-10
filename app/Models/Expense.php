@@ -9,15 +9,18 @@ class Expense extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['date', 'amount', 'category_id', 'description', 'created_by'];
+    protected $fillable = [
+        'date', 'amount', 'category_id', 'description', 
+        'created_by', 'dental_material_id', 'quantity'
+    ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function admin()
+    public function dentalMaterial()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(DentalMaterial::class, 'dental_material_id');
     }
 }
