@@ -20,6 +20,7 @@ use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\DentalMaterialController;
+use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\ProcedureMaterialController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 /*
@@ -188,6 +189,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('dental-materials/report', [DentalMaterialController::class, 'report'])->name('dental-materials.report');
 
 
+    Route::resource('expense_requests', ExpenseRequestController::class);
+    Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
+    Route::patch('expense_requests/{id}/reject', [ExpenseRequestController::class, 'reject'])->name('expense_requests.reject');
+    Route::patch('expense_requests/{id}/done', [ExpenseRequestController::class, 'markDone'])->name('expense_requests.done');
     
 });
 

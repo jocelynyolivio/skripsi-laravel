@@ -91,6 +91,11 @@
                         <i class="bi bi-calendar-plus"></i> Expenses
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/expense_requests*') ? 'active' : '' }}" href="{{ route('dashboard.expense_requests.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Expenses Request
+                    </a>
+                </li>
             </ul>
             </ul>
             </ul>
