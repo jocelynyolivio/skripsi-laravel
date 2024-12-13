@@ -184,6 +184,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     // Menyimpan transaksi baru
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
 
+    Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
+
+
     Route::resource('expenses', ExpenseController::class);
 
     Route::get('dental-materials/report', [DentalMaterialController::class, 'report'])->name('dental-materials.report');

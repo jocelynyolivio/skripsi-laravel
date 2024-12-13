@@ -94,5 +94,19 @@ public function store(Request $request)
             'transactions' => $transactions,
         ]);
     }
+
+    public function showStruk($id)
+{
+    $transaction = Transaction::with([
+        'medicalRecord.procedures.basePrice',
+        'medicalRecord.patient',
+        'medicalRecord.doctor'
+    ])->findOrFail($id);    
+    
+    return view('dashboard.transactions.struk', compact('transaction')); // Tampilkan view struk
+}
+
+
+
 }
 

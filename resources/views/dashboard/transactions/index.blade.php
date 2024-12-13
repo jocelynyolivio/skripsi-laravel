@@ -7,8 +7,6 @@
         <a href="{{ route('dashboard.transactions.selectMedicalRecord') }}" class="btn btn-primary">Add Transaction</a>
     </div>
 
-
-
     @if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
@@ -26,6 +24,7 @@
                 <th>Payment Type</th>
                 <th>Payment Status</th>
                 <th>Created At</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -39,6 +38,12 @@
                 <td>{{ ucfirst($transaction->payment_type) }}</td>
                 <td>{{ ucfirst($transaction->payment_status) }}</td>
                 <td>{{ $transaction->created_at->format('d M Y H:i') }}</td>
+                <td>
+                    <!-- Button untuk Show Struk -->
+                    <a href="{{ route('dashboard.transactions.showStruk', $transaction->id) }}" class="btn btn-info btn-sm">
+                        Show Struk
+                    </a>
+                </td>
             </tr>
             @endforeach
         </tbody>
