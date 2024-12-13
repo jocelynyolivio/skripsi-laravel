@@ -125,28 +125,37 @@
             </tr>
         </thead>
         <tbody>
-            @php $total = 0; @endphp
-            @foreach($transaction->medicalRecord->procedures as $index => $procedure)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $procedure->id }}</td>
-                <td>{{ $procedure->name }}</td>
-                <td>1</td>
-                <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-                <td>0</td>
-                <td>0</td>
-                <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-            </tr>
-            @endforeach
-        </tbody>
+    @php $total = 0; @endphp
+    @foreach($transaction->medicalRecord->procedures as $index => $procedure)
+        @php
+            $unitPrice = $procedure->pivot->price; // Ambil harga dari pivot table
+            $subtotal = $unitPrice; // Karena quantity = 1
+            $total += $subtotal;
+        @endphp
+        <tr>
+            <td>{{ $index + 1 }}</td>
+            <td>{{ $procedure->id }}</td>
+            <td>{{ $procedure->name }}</td>
+            <td>1</td>
+            <td>Rp {{ number_format($unitPrice, 0, ',', '.') }}</td>
+            <td>0</td> <!-- Diskon % -->
+            <td>0</td> <!-- Diskon Rp -->
+            <td>Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+        </tr>
+    @endforeach
+</tbody>
+
+
     </table>
 
     <!-- Footer -->
     <div class="footer">
-        <p class="total">Total: Rp {{ number_format($transaction->amount, 0, ',', '.') }}</p>
-        <p>1. Jenis Pembayaran: {{ ucfirst($transaction->payment_type) }}</p>
-        <p>2. Media Transaksi: {{ $transaction->payment_media ?? 'Tidak diketahui' }}</p>
-    </div>
+    <p class="total">Total: Rp {{ number_format($total, 0, ',', '.') }}</p>
+    <p>1. Jenis Pembayaran: {{ ucfirst($transaction->payment_type) }}</p>
+    <p>2. Media Transaksi: {{ $transaction->payment_media ?? 'Tidak diketahui' }}</p>
+</div>
+
+
 
     <button class="no-print" onclick="window.print()">Cetak Struk</button>
 </body>

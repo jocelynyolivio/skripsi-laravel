@@ -80,6 +80,12 @@ public function store(Request $request)
         'payment_status' => $request->payment_status,
     ]);
 
+    $medicalRecord = MedicalRecord::findOrFail($request->medical_record_id);
+    foreach ($medicalRecord->procedures as $index => $procedure) {
+        $procedure->pivot->price = $request->amount[$index]; // Simpan harga pilihan
+        $procedure->pivot->save();
+    }
+
     return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
 }
 
@@ -98,13 +104,17 @@ public function store(Request $request)
     public function showStruk($id)
 {
     $transaction = Transaction::with([
-        'medicalRecord.procedures.basePrice',
+        'medicalRecord.procedures' => function ($query) {
+            $query->withPivot('price'); // Muat harga dari pivot table
+        },
         'medicalRecord.patient',
         'medicalRecord.doctor'
-    ])->findOrFail($id);    
-    
-    return view('dashboard.transactions.struk', compact('transaction')); // Tampilkan view struk
+    ])->findOrFail($id);
+
+    return view('dashboard.transactions.struk', compact('transaction'));
 }
+
+    
 
 
 

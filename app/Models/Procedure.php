@@ -21,7 +21,7 @@ class Procedure extends Model
      // Relasi ke Medical Records (Many to Many)
      public function medicalRecords()
      {
-         return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure');
+         return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure')->withPivot('price')->withTimestamps();
      }
 
      public function priceLists()

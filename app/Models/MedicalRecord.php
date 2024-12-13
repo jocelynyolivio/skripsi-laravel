@@ -35,7 +35,7 @@ class MedicalRecord extends Model
 public function procedures()
 {
     return $this->belongsToMany(Procedure::class, 'medical_record_procedure')
-                ->withPivot('created_at', 'updated_at'); // Jika ingin memanfaatkan data tambahan dari pivot
+                ->withPivot('created_at', 'updated_at','price'); // Jika ingin memanfaatkan data tambahan dari pivot
 }
 
 // Relasi many-to-many dengan DentalMaterial melalui medical_record_dental_material

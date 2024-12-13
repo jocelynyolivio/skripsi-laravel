@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('medical_record_procedure', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('medical_record_id'); // Foreign key ke medical_records
+            $table->decimal('price', 10, 2)->nullable(); // Tambahkan kolom price
 
             $table->timestamps();
 

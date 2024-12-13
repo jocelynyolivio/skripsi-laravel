@@ -33,7 +33,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title">Pendapatan Hari Ini</h5>
-                <p class="card-text display-5 fw-bold">Rp2.500.000</p> <!-- Ganti dengan data dari database -->
+                <p class="card-text display-5 fw-bold">Rp{{ number_format($pendapatanHariIni, 0, ',', '.') }}</p> <!-- Ganti dengan data dari database -->
                 <p class="text-muted">Total pendapatan dari pasien hari ini</p>
             </div>
         </div>
