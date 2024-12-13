@@ -1,66 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Transaksi</title>
     <style>
-            @media print {
-        .no-print {
-            display: none;
+        @media print {
+            .no-print {
+                display: none;
+            }
         }
-    }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         .kop {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .kop h1 {
             margin: 0;
             font-size: 18px;
             font-weight: bold;
         }
+
         .kop p {
             margin: 2px 0;
             font-size: 14px;
         }
+
         .detail {
             margin-top: 20px;
         }
+
         .detail td {
             padding: 5px;
             vertical-align: top;
         }
+
         .table-items {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             font-size: 12px;
         }
-        .table-items th, .table-items td {
+
+        .table-items th,
+        .table-items td {
             border: 1px solid #000;
             padding: 8px;
             text-align: left;
         }
+
         .table-items th {
             background-color: #f0f0f0;
         }
+
         .footer {
             margin-top: 20px;
         }
+
         .footer p {
             margin: 5px 0;
             font-size: 12px;
         }
+
         .footer .total {
             font-weight: bold;
             font-size: 14px;
         }
     </style>
 </head>
+
 <body>
     <!-- Kop Klinik -->
     <div class="kop">
@@ -112,16 +127,16 @@
         <tbody>
             @php $total = 0; @endphp
             @foreach($transaction->medicalRecord->procedures as $index => $procedure)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $procedure->id }}</td>
-                    <td>{{ $procedure->name }}</td>
-                    <td>1</td>
-                    <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
-                </tr>
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $procedure->id }}</td>
+                <td>{{ $procedure->name }}</td>
+                <td>1</td>
+                <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
+                <td>0</td>
+                <td>0</td>
+                <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
+            </tr>
             @endforeach
         </tbody>
     </table>
@@ -134,5 +149,6 @@
     </div>
 
     <button class="no-print" onclick="window.print()">Cetak Struk</button>
-    </body>
+</body>
+
 </html>
