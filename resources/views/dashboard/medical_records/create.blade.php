@@ -46,6 +46,41 @@
             <textarea class="form-control" id="notes" name="notes"></textarea>
         </div>
 
+        <!-- Odontogram -->
+        <div class="odontogram mt-4">
+            <h4>Odontogram</h4>
+            <div class="odontogram-diagram mb-4">
+                @for ($i = 1; $i <= 32; $i++)
+                    <button 
+                        type="button"
+                        class="tooth btn btn-outline-primary mb-2"
+                        data-tooth="{{ $i }}"
+                        onclick="selectTooth({{ $i }})">
+                        {{ $i }}
+                    </button>
+                @endfor
+            </div>
+
+            <!-- Form Update Odontogram -->
+            <div class="mb-3">
+                <label for="tooth_number" class="form-label">Selected Tooth</label>
+                <input type="text" class="form-control" id="tooth_number" name="tooth_number" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="condition" class="form-label">Condition</label>
+                <select name="condition" id="condition" class="form-select">
+                    <option value="Healthy">Healthy</option>
+                    <option value="Cavity">Cavity</option>
+                    <option value="Filled">Filled</option>
+                    <option value="Extracted">Extracted</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="odontogram_notes" class="form-label">Notes</label>
+                <textarea name="odontogram_notes" id="odontogram_notes" class="form-control"></textarea>
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary">Save Medical Record</button>
     </form>
 </div>
@@ -78,6 +113,12 @@
                 e.target.closest('.mb-3').remove();
             }
         });
+
+        // Menangani odontogram
+        window.selectTooth = function(toothNumber) {
+            document.getElementById('tooth_number').value = toothNumber;
+            alert('Tooth ' + toothNumber + ' selected');
+        };
     });
 </script>
 @endsection
