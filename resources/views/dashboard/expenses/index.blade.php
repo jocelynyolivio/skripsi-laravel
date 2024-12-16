@@ -1,12 +1,12 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container">
-    <div class="mt-3">
-        <h1>{{ $title }}</h1> <!-- Menampilkan judul -->
+<div class="container mt-5">
+
+<div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Expenses List</h3>
         <a href="{{ route('dashboard.expenses.create') }}" class="btn btn-primary">Add Expense</a>
     </div>
-
     <table id="expensesTable" class="table mt-3">
         <thead>
             <tr>
@@ -25,7 +25,7 @@
                 <td>{{ $expense->amount }}</td>
                 <td>{{ $expense->category->name }}</td>
                 <td>{{ $expense->description }}</td>
-                <td>{{ $expense->admin->name ?? 'N/A' }}</td>
+                <td>{{ $expense->admin?->name ?? 'N/A' }}</td>
                 <td>
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">

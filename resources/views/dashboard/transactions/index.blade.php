@@ -2,8 +2,8 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Transaction List</h3>
-    <div class="d-flex justify-content-end mb-3">
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Transaction List</h3>
         <a href="{{ route('dashboard.transactions.selectMedicalRecord') }}" class="btn btn-primary">Add Transaction</a>
     </div>
 

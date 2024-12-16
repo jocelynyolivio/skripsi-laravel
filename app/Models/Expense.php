@@ -23,4 +23,11 @@ class Expense extends Model
     {
         return $this->belongsTo(DentalMaterial::class, 'dental_material_id');
     }
+
+    // App\Models\Expense.php
+public function admin()
+{
+    return $this->belongsTo(User::class, 'created_by');
+}
+
 }

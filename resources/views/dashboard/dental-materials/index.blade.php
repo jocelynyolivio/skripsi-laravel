@@ -3,15 +3,16 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Dental Materials</h3>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    <a href="{{ route('dashboard.dental-materials.create') }}" class="btn btn-primary mb-3">
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Dental Materials</h3>
+        <a href="{{ route('dashboard.dental-materials.create') }}" class="btn btn-primary mb-3">
         Add New Material
     </a>
+    </div>
+
+    @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
     <table id="dentalMaterialTable" class="display">
         <thead>
@@ -25,20 +26,20 @@
         </thead>
         <tbody>
             @foreach ($dentalMaterials as $material)
-                <tr>
-                    <td>{{ $material->name }}</td>
-                    <td>{{ $material->description }}</td>
-                    <td>{{ $material->stock_quantity }}</td>
-                    <td>{{ $material->unit_price }}</td>
-                    <td>
-                        <a href="{{ route('dashboard.dental-materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                        <form action="{{ route('dashboard.dental-materials.destroy', $material->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ $material->name }}</td>
+                <td>{{ $material->description }}</td>
+                <td>{{ $material->stock_quantity }}</td>
+                <td>{{ $material->unit_price }}</td>
+                <td>
+                    <a href="{{ route('dashboard.dental-materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form action="{{ route('dashboard.dental-materials.destroy', $material->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
             @endforeach
         </tbody>
     </table>
