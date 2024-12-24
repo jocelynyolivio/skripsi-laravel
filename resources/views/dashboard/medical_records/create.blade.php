@@ -61,24 +61,8 @@
                 @endfor
             </div>
 
-            <!-- Form Update Odontogram -->
-            <div class="mb-3">
-                <label for="tooth_number" class="form-label">Selected Tooth</label>
-                <input type="text" class="form-control" id="tooth_number" name="tooth_number" readonly>
-            </div>
-            <div class="mb-3">
-                <label for="condition" class="form-label">Condition</label>
-                <select name="condition" id="condition" class="form-select">
-                    <option value="Healthy">Healthy</option>
-                    <option value="Cavity">Cavity</option>
-                    <option value="Filled">Filled</option>
-                    <option value="Extracted">Extracted</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="odontogram_notes" class="form-label">Notes</label>
-                <textarea name="odontogram_notes" id="odontogram_notes" class="form-control"></textarea>
-            </div>
+            <!-- Hidden Fields for Odontogram -->
+            <div id="odontogram-fields"></div>
         </div>
 
         <button type="submit" class="btn btn-primary">Save Medical Record</button>
@@ -87,10 +71,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Prosedur Dinamis
         const addProcedureBtn = document.getElementById('add-procedure-btn');
         const proceduresContainer = document.getElementById('procedures-container');
-        
-        // Menambahkan prosedur baru
+
         addProcedureBtn.addEventListener('click', function () {
             const procedureCount = proceduresContainer.children.length + 1;
             const procedureElement = `
@@ -107,18 +91,47 @@
             proceduresContainer.insertAdjacentHTML('beforeend', procedureElement);
         });
 
-        // Menghapus prosedur
         proceduresContainer.addEventListener('click', function (e) {
             if (e.target.classList.contains('remove-procedure-btn')) {
                 e.target.closest('.mb-3').remove();
             }
         });
 
-        // Menangani odontogram
+        // Odontogram Dinamis
+        const odontogramFields = document.getElementById('odontogram-fields');
+
         window.selectTooth = function(toothNumber) {
-            document.getElementById('tooth_number').value = toothNumber;
-            alert('Tooth ' + toothNumber + ' selected');
+            const existingField = document.querySelector(`[data-tooth-number="${toothNumber}"]`);
+
+            if (!existingField) {
+                odontogramFields.insertAdjacentHTML('beforeend', `
+                    <div data-tooth-number="${toothNumber}" class="mb-3 border p-3">
+                        <h5>Tooth ${toothNumber}</h5>
+                        <input type="hidden" name="tooth_number[]" value="${toothNumber}">
+                        <label for="odontogram_condition_${toothNumber}" class="form-label">Condition</label>
+                        <select name="odontogram_condition[]" id="odontogram_condition_${toothNumber}" class="form-select">
+                            <option value="Healthy">Healthy</option>
+                            <option value="Cavity">Cavity</option>
+                            <option value="Filled">Filled</option>
+                            <option value="Extracted">Extracted</option>
+                        </select>
+                        <label for="odontogram_notes_${toothNumber}" class="form-label">Notes</label>
+                        <textarea name="odontogram_notes[]" id="odontogram_notes_${toothNumber}" class="form-control"></textarea>
+                        <button type="button" class="btn btn-danger mt-2" onclick="removeTooth(${toothNumber})">Remove</button>
+                    </div>
+                `);
+            } else {
+                alert(`Tooth ${toothNumber} is already selected.`);
+            }
+        };
+
+        window.removeTooth = function(toothNumber) {
+            const field = document.querySelector(`[data-tooth-number="${toothNumber}"]`);
+            if (field) {
+                field.remove();
+            }
         };
     });
 </script>
 @endsection
+

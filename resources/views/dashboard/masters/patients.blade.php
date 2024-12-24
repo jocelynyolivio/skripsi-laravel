@@ -33,6 +33,7 @@
                     </form>
                     <!-- Tombol baru untuk melihat rekam medis pasien -->
                     <a href="{{ route('dashboard.medical_records.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-info">View Medical Records</a>
+                    <a href="{{ route('dashboard.odontograms.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-primary">View Odontogram</a>
                 </td>
             </tr>
             @endforeach

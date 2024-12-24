@@ -51,6 +51,10 @@ public function transaction()
     return $this->hasOne(Transaction::class);
 }
 
+public function odontograms()
+{
+    return $this->hasMany(Odontogram::class, 'medical_record_id');
+}
 
 
 }

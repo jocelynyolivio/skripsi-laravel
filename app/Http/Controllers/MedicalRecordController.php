@@ -109,6 +109,7 @@ class MedicalRecordController extends Controller
         return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
                          ->with('success', 'Medical Record has been added successfully. Now select dental materials.');
     }
+    
     public function selectMaterials($medicalRecordId)
 {
     // Ambil rekam medis berdasarkan ID

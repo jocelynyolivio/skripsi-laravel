@@ -26,5 +26,11 @@ class Patient extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Reservation::class, 'patient_id');
     }
+
+    public function odontograms()
+{
+    return $this->hasMany(Odontogram::class);
+}
+
 }
 

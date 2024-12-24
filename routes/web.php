@@ -91,6 +91,7 @@ Route::get('/reservation', [ReservationController::class, 'index'])
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
+// isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     // Route untuk profil pengguna
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -163,17 +164,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
     ->name('transactions.selectMedicalRecord');
 
-
-    // Route::post('/medical_records/{medicalRecordId}/removeMaterial/{materialId}', [MedicalRecordController::class, 'removeMaterial'])
-    // ->name('medical_records.removeMaterial');
-
     Route::resource('procedure_materials', ProcedureMaterialController::class);
-
-    // Route::prefix('odontogram')->group(function () {
-    //     Route::get('/patient/{patientId}', [OdontogramController::class, 'show']);  // Menampilkan odontogram pasien
-    //     Route::post('/update', [OdontogramController::class, 'store']);  // Menyimpan atau memperbarui status gigi
-    //     Route::delete('/delete/{patientId}/{toothId}', [OdontogramController::class, 'destroy']);  // Menghapus status gigi
-    // });
 
     // Halaman index transaksi (daftar semua transaksi)
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
@@ -186,16 +177,24 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
 
-
     Route::resource('expenses', ExpenseController::class);
 
     Route::get('dental-materials/report', [DentalMaterialController::class, 'report'])->name('dental-materials.report');
-
 
     Route::resource('expense_requests', ExpenseRequestController::class);
     Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
     Route::patch('expense_requests/{id}/reject', [ExpenseRequestController::class, 'reject'])->name('expense_requests.reject');
     Route::patch('expense_requests/{id}/done', [ExpenseRequestController::class, 'markDone'])->name('expense_requests.done');
+
+// Rute untuk odontogram
+Route::prefix('odontograms')->name('odontograms.')->group(function () {
+    // Menampilkan halaman odontogram pasien
+    Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index');
+    
+    // Menyimpan atau memperbarui data odontogram
+    Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store');
+});
+
     
 });
 
