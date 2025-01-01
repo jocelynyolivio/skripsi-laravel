@@ -13,7 +13,7 @@
     </div>
     @endif
 
-    <table class="table table-striped mt-4" id="transactionTable">
+    <table id="transactionTable" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Transaction ID</th>

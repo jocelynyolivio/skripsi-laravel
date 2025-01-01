@@ -51,14 +51,14 @@
             <h4>Odontogram</h4>
             <div class="odontogram-diagram mb-4">
                 @for ($i = 1; $i <= 32; $i++)
-                    <button 
-                        type="button"
-                        class="tooth btn btn-outline-primary mb-2"
-                        data-tooth="{{ $i }}"
-                        onclick="selectTooth({{ $i }})">
-                        {{ $i }}
+                    <button
+                    type="button"
+                    class="tooth btn btn-outline-primary mb-2"
+                    data-tooth="{{ $i }}"
+                    onclick="selectTooth({{ $i }})">
+                    {{ $i }}
                     </button>
-                @endfor
+                    @endfor
             </div>
 
             <!-- Hidden Fields for Odontogram -->
@@ -70,12 +70,12 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         // Prosedur Dinamis
         const addProcedureBtn = document.getElementById('add-procedure-btn');
         const proceduresContainer = document.getElementById('procedures-container');
 
-        addProcedureBtn.addEventListener('click', function () {
+        addProcedureBtn.addEventListener('click', function() {
             const procedureCount = proceduresContainer.children.length + 1;
             const procedureElement = `
                 <div class="mb-3 border p-3">
@@ -91,7 +91,7 @@
             proceduresContainer.insertAdjacentHTML('beforeend', procedureElement);
         });
 
-        proceduresContainer.addEventListener('click', function (e) {
+        proceduresContainer.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-procedure-btn')) {
                 e.target.closest('.mb-3').remove();
             }
@@ -105,21 +105,21 @@
 
             if (!existingField) {
                 odontogramFields.insertAdjacentHTML('beforeend', `
-                    <div data-tooth-number="${toothNumber}" class="mb-3 border p-3">
-                        <h5>Tooth ${toothNumber}</h5>
-                        <input type="hidden" name="tooth_number[]" value="${toothNumber}">
-                        <label for="odontogram_condition_${toothNumber}" class="form-label">Condition</label>
-                        <select name="odontogram_condition[]" id="odontogram_condition_${toothNumber}" class="form-select">
-                            <option value="Healthy">Healthy</option>
-                            <option value="Cavity">Cavity</option>
-                            <option value="Filled">Filled</option>
-                            <option value="Extracted">Extracted</option>
-                        </select>
-                        <label for="odontogram_notes_${toothNumber}" class="form-label">Notes</label>
-                        <textarea name="odontogram_notes[]" id="odontogram_notes_${toothNumber}" class="form-control"></textarea>
-                        <button type="button" class="btn btn-danger mt-2" onclick="removeTooth(${toothNumber})">Remove</button>
-                    </div>
-                `);
+            <div data-tooth-number="${toothNumber}" class="mb-3 border p-3">
+                <h5>Tooth ${toothNumber}</h5>
+                <input type="hidden" name="tooth_number[]" value="${toothNumber}">
+                <label for="odontogram_condition_${toothNumber}" class="form-label">Condition</label>
+                <select name="odontogram_condition[]" id="odontogram_condition_${toothNumber}" class="form-select">
+                    <option value="Healthy">Healthy</option>
+                    <option value="Cavity">Cavity</option>
+                    <option value="Filled">Filled</option>
+                    <option value="Extracted">Extracted</option>
+                </select>
+                <label for="odontogram_notes_${toothNumber}" class="form-label">Notes</label>
+                <textarea name="odontogram_notes[]" id="odontogram_notes_${toothNumber}" class="form-control"></textarea>
+                <button type="button" class="btn btn-danger mt-2" onclick="removeTooth(${toothNumber})">Remove</button>
+            </div>
+        `);
             } else {
                 alert(`Tooth ${toothNumber} is already selected.`);
             }
@@ -131,7 +131,7 @@
                 field.remove();
             }
         };
+
     });
 </script>
 @endsection
-

@@ -7,7 +7,7 @@
         <a href="{{ route('dashboard.reservations.create') }}" class="btn btn-primary mb-3">Add Reservation</a>
     </div>
 
-    <table id="reservationTable" class="display">
+    <table id="reservationTable" class="table table-striped table-bordered">
     <thead>
         <tr>
             <th>Patient</th>

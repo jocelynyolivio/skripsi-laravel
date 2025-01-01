@@ -7,7 +7,7 @@
         <h3 class="text-center">Expenses List</h3>
         <a href="{{ route('dashboard.expenses.create') }}" class="btn btn-primary">Add Expense</a>
     </div>
-    <table id="expensesTable" class="table mt-3">
+    <table id="expensesTable" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Date</th>

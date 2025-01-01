@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Procedure;
+use App\Models\Odontogram;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
@@ -84,15 +85,21 @@ class MedicalRecordController extends Controller
             'teeth_condition' => 'required|string',
             'treatment' => 'required|string',
             'notes' => 'nullable|string',
+    
+            // Validasi odontogram
+            'tooth_number' => 'nullable|array',
+            'tooth_number.*' => 'integer|min:1|max:32',
+            'odontogram_condition.*' => 'nullable|string',
+            'odontogram_notes.*' => 'nullable|string',
         ]);
-
+    
         $reservation = Reservation::findOrFail($validatedData['reservation_id']);
         $existingRecord = MedicalRecord::where('reservation_id', $reservation->id)->first();
-
+    
         if ($existingRecord) {
             return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
         }
-
+    
         $medicalRecord = new MedicalRecord();
         $medicalRecord->patient_id = $patientId;
         $medicalRecord->reservation_id = $reservation->id;
@@ -102,13 +109,27 @@ class MedicalRecordController extends Controller
         $medicalRecord->treatment = $validatedData['treatment'];
         $medicalRecord->notes = $validatedData['notes'];
         $medicalRecord->save();
-
+    
+        // Prosedur
         $medicalRecord->procedures()->attach($validatedData['procedure_id']);
-
-        // Redirect to select materials page to choose materials
+    
+        // Simpan odontogram jika ada
+        if (!empty($validatedData['tooth_number'])) {
+            foreach ($validatedData['tooth_number'] as $index => $toothNumber) {
+                Odontogram::create([
+                    'patient_id' => $patientId,
+                    'medical_record_id' => $medicalRecord->id,
+                    'tooth_number' => $toothNumber,
+                    'condition' => $validatedData['odontogram_condition'][$index] ?? null,
+                    'notes' => $validatedData['odontogram_notes'][$index] ?? null,
+                ]);
+            }
+        }
+    
         return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
-                         ->with('success', 'Medical Record has been added successfully. Now select dental materials.');
+                         ->with('success', 'Medical Record and Odontogram have been saved successfully.');
     }
+    
     
     public function selectMaterials($medicalRecordId)
 {

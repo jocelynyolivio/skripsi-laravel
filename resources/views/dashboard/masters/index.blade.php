@@ -13,7 +13,7 @@
         @endif
     </h3>
 
-    <table class="table table-striped">
+    <table id="masterTable" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>ID</th>
@@ -46,4 +46,21 @@
         </tbody>
     </table>
 </div>
+
+<script>
+        $(document).ready(function() {
+        setTimeout(function() {
+            $('#masterTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
+                ]
+            });
+        }, 100);
+    });
+</script>
 @endsection

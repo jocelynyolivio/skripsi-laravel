@@ -13,7 +13,7 @@
     </div>
     @endif
 
-    <table id="scheduleTable" class="display">
+    <table id="scheduleTable" class="table table-striped table-bordered">
         <thead class="thead-dark">
             <tr>
                 <th>#</th>
