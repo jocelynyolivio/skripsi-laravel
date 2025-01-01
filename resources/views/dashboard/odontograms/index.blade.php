@@ -5,28 +5,34 @@
     <h3 class="text-center">Odontogram for {{ $patient->name }}</h3>
 
     <div class="odontogram-diagram mb-4">
-    @foreach(range(1, 32) as $toothNumber)
-@php
-    $tooth = $odontograms->where('tooth_number', $toothNumber)->first();
-@endphp
-<button
-    type="button"
-    class="tooth btn btn-outline-primary mb-2"
-    data-bs-toggle="modal"
-    data-bs-target="#editToothModal"
-    data-tooth-number="{{ $toothNumber }}"
-    data-condition="{{ $tooth->condition ?? 'Healthy' }}"
-    data-notes="{{ $tooth->notes ?? '' }}"
-    data-procedures="{{ $tooth && $tooth->procedures ? json_encode($tooth->procedures->pluck('id')) : '[]' }}">
-    {{ $toothNumber }}
-</button>
-@endforeach
-
+        @foreach(range(1, 32) as $toothNumber)
+            @php
+                $tooth = $odontograms->where('tooth_number', $toothNumber)->first();
+                $buttonClass = match($tooth->condition ?? 'Healthy') {
+                    'Healthy' => 'btn-outline-primary',
+                    'Cavity' => 'btn-outline-warning',
+                    'Filled' => 'btn-outline-danger', // Warna merah
+                    'Extracted' => 'btn-outline-secondary',
+                    default => 'btn-outline-primary',
+                };
+            @endphp
+            <button
+                type="button"
+                class="tooth btn {{ $buttonClass }} mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#editToothModal"
+                data-tooth-number="{{ $toothNumber }}"
+                data-condition="{{ $tooth->condition ?? 'Healthy' }}"
+                data-notes="{{ $tooth->notes ?? '' }}"
+                data-procedures="{{ $tooth && $tooth->procedures ? json_encode($tooth->procedures->pluck('id')) : '[]' }}">
+                {{ $toothNumber }}
+            </button>
+        @endforeach
     </div>
 </div>
 
 <div class="modal fade" id="editToothModal" tabindex="-1" aria-labelledby="editToothModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg"> <!-- Modal ukuran besar -->
+    <div class="modal-dialog modal-lg">
         <form action="{{ route('dashboard.odontograms.store', ['patientId' => $patient->id]) }}" method="POST">
             @csrf
             <input type="hidden" name="tooth_number" id="tooth_number">
@@ -36,7 +42,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Input for Condition -->
                     <div class="mb-3">
                         <label for="condition" class="form-label">Condition</label>
                         <select name="condition" id="condition" class="form-select">
@@ -47,7 +52,6 @@
                         </select>
                     </div>
 
-                    <!-- Input for Procedures -->
                     <div class="mb-3">
                         <label class="form-label">Procedures</label>
                         <select name="procedure_id[]" id="procedures" class="form-select" multiple>
@@ -57,7 +61,6 @@
                         </select>
                     </div>
 
-                    <!-- Input for Notes -->
                     <div class="mb-3">
                         <label for="notes" class="form-label">Notes</label>
                         <textarea name="notes" id="notes" class="form-control"></textarea>
@@ -72,7 +75,6 @@
     </div>
 </div>
 
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const toothButtons = document.querySelectorAll('.tooth');
@@ -84,12 +86,10 @@
                 const notes = this.getAttribute('data-notes');
                 const procedures = JSON.parse(this.getAttribute('data-procedures') || '[]');
 
-                // Isi data ke dalam modal
                 document.getElementById('tooth_number').value = toothNumber;
                 document.getElementById('condition').value = condition;
                 document.getElementById('notes').value = notes;
 
-                // Reset pilihan prosedur
                 const procedureSelect = document.getElementById('procedures');
                 [...procedureSelect.options].forEach(option => option.selected = false);
                 procedures.forEach(procedureId => {
@@ -98,11 +98,6 @@
                 });
             });
         });
-        document.getElementById('editToothModal').addEventListener('hidden.bs.modal', function () {
-    // Hapus elemen backdrop jika ada
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-});
-
     });
 </script>
 @endsection

@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-
         Schema::create('odontograms', function (Blueprint $table) {
             $table->bigIncrements('id'); // ID Primary Key
             $table->unsignedBigInteger('patient_id'); // Foreign Key ke tabel pasien
             $table->unsignedBigInteger('medical_record_id')->nullable(); // Foreign Key ke tabel rekam medis (opsional)
-            $table->string('tooth_number', 255); // Nomor gigi (11, 12, dst.)
+            $table->integer('tooth_number'); // Nomor gigi (1-32)
             $table->string('condition', 255)->default('Healthy'); // Kondisi gigi (default: Healthy)
             $table->text('notes')->nullable(); // Catatan tambahan (opsional)
             $table->timestamps(); // Timestamps untuk created_at dan updated_at
@@ -25,7 +24,6 @@ return new class extends Migration
             $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade'); // Cascade jika pasien dihapus
             $table->foreign('medical_record_id')->references('id')->on('medical_records')->onDelete('cascade'); // Cascade jika rekam medis dihapus
         });
-        
     }
 
     /**
@@ -36,3 +34,4 @@ return new class extends Migration
         Schema::dropIfExists('odontograms');
     }
 };
+

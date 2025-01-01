@@ -100,6 +100,7 @@ class MedicalRecordController extends Controller
             return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
         }
     
+        // Simpan Medical Record
         $medicalRecord = new MedicalRecord();
         $medicalRecord->patient_id = $patientId;
         $medicalRecord->reservation_id = $reservation->id;
@@ -113,22 +114,35 @@ class MedicalRecordController extends Controller
         // Prosedur
         $medicalRecord->procedures()->attach($validatedData['procedure_id']);
     
-        // Simpan odontogram jika ada
-        if (!empty($validatedData['tooth_number'])) {
-            foreach ($validatedData['tooth_number'] as $index => $toothNumber) {
-                Odontogram::create([
+        // Simpan atau Perbarui Odontogram
+        foreach (range(1, 32) as $toothNumber) {
+            // Cari data dari input user atau gunakan default
+            $index = !empty($validatedData['tooth_number']) ? array_search($toothNumber, $validatedData['tooth_number']) : null;
+            $condition = $index !== false && isset($validatedData['odontogram_condition'][$index])
+                ? $validatedData['odontogram_condition'][$index]
+                : 'Healthy';
+            $notes = $index !== false && isset($validatedData['odontogram_notes'][$index])
+                ? $validatedData['odontogram_notes'][$index]
+                : null;
+    
+            // Update atau buat odontogram baru
+            Odontogram::updateOrCreate(
+                [
                     'patient_id' => $patientId,
-                    'medical_record_id' => $medicalRecord->id,
                     'tooth_number' => $toothNumber,
-                    'condition' => $validatedData['odontogram_condition'][$index] ?? null,
-                    'notes' => $validatedData['odontogram_notes'][$index] ?? null,
-                ]);
-            }
+                ],
+                [
+                    'medical_record_id' => $medicalRecord->id,
+                    'condition' => $condition,
+                    'notes' => $notes,
+                ]
+            );
         }
     
         return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
                          ->with('success', 'Medical Record and Odontogram have been saved successfully.');
     }
+    
     
     
     public function selectMaterials($medicalRecordId)

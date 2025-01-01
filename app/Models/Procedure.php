@@ -41,4 +41,9 @@ public function promoPrice()
     return $this->hasOne(Pricelist::class)->where('is_promo', true)->latestOfMany('effective_date');
 }
 
+public function odontograms()
+{
+    return $this->belongsToMany(Odontogram::class, 'odontogram_procedures');
+}
+
 }

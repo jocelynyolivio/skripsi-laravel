@@ -26,7 +26,12 @@ class OdontogramController extends Controller
             'notes' => 'nullable|string',
             'procedure_id' => 'nullable|array',
             'procedure_id.*' => 'exists:procedures,id',
+        ], [
+            'tooth_number.required' => 'Nomor gigi harus diisi.',
+            'condition.required' => 'Kondisi gigi harus diisi.',
+            'procedure_id.*.exists' => 'Prosedur yang dipilih tidak valid.',
         ]);
+        
     
         $odontogram = Odontogram::updateOrCreate(
             ['patient_id' => $patientId, 'tooth_number' => $validated['tooth_number']],
