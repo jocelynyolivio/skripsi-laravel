@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
@@ -185,6 +186,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
     Route::patch('expense_requests/{id}/reject', [ExpenseRequestController::class, 'reject'])->name('expense_requests.reject');
     Route::patch('expense_requests/{id}/done', [ExpenseRequestController::class, 'markDone'])->name('expense_requests.done');
+
+    Route::get('/salaries/upload-salary', [SalaryController::class, 'uploadForm']);
+Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel']);
+
 
 // Rute untuk odontogram
 Route::prefix('odontograms')->name('odontograms.')->group(function () {
