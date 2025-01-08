@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\HomeContent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\OdontogramController;
+use App\Http\Controllers\HomeContentController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PatientLoginController;
@@ -35,17 +37,30 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |
 */
 
+// Route::get('/', function () {
+//     // Route::get('/about', function () {
+//     // ini artinya nde url nti hrus ada about e
+//     $contents = HomeContent::all();
+//     return view('home', [
+//         "title" => "homeee",
+//         "active" => 'home',
+//         'contents' => $contents,
+//     ]);
+//     // ini nanti brti folder view, file welcome.blade.php
+//     // return 'Hello World';
+// });
 Route::get('/', function () {
-    // Route::get('/about', function () {
-    // ini artinya nde url nti hrus ada about e
-
+    $contents = HomeContent::all();
     return view('home', [
-        "title" => "homeee",
-        "active" => 'home'
+        "title" => "SenyumQu",
+        "active" => "home",
+        "contents" => $contents,
     ]);
-    // ini nanti brti folder view, file welcome.blade.php
-    // return 'Hello World';
 });
+Route::get('/dashboard/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('dashboard.home_content.edit');
+
+
+// Route::get('/', [HomeContentController::class, 'index'])->name('home');
 
 Route::get('/about', function () {
     // return 'Halaman About';
@@ -94,6 +109,8 @@ Route::post('/reservation', [ReservationController::class, 'store'])->name('rese
 
 // isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::resource('/home_content', HomeContentController::class);
+
     // Route untuk profil pengguna
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');

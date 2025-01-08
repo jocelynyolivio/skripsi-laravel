@@ -1,20 +1,24 @@
-<!-- resources/views/home.blade.php -->
-
 @extends('layouts.main')
+
 @section('container')
 <div class="container mt-5">
     <!-- Carousel -->
     <div id="clinicCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
         <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="https://via.placeholder.com/800x400?text=Welcome+to+Our+Dental+Clinic" class="d-block w-100" alt="Welcome">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/800x400?text=Professional+Dental+Care" class="d-block w-100" alt="Professional Dental Care">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/800x400?text=Your+Smile+Matters+to+Us" class="d-block w-100" alt="Your Smile Matters">
-            </div>
+            @if($contents->isEmpty())
+                <div class="carousel-item active">
+                    <img src="https://via.placeholder.com/800x400?text=No+Content+Available" class="d-block w-100" alt="No Content">
+                </div>
+            @else
+                @foreach($contents as $content)
+                    <div class="carousel-item @if ($loop->first) active @endif">
+                        <img src="{{ asset('storage/' . $content->carousel_image) }}" class="d-block w-100" alt="{{ $content->carousel_text }}">
+                        <div class="carousel-caption">
+                            <h5>{{ $content->carousel_text }}</h5>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#clinicCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -27,27 +31,28 @@
     </div>
 
     <!-- Welcome Section -->
-    <h3>Welcome to {{ $title }}</h3>
-    <p class="lead">Your trusted clinic for quality dental care and personalized service.</p>
+    @if($contents->isNotEmpty())
+        <h3>{{ $contents->first()->welcome_title ?? 'Welcome to Our Dental Clinic' }}</h3>
+        <p class="lead">{{ $contents->first()->welcome_message ?? 'Your trusted clinic for quality dental care.' }}</p>
+    @endif
 
     <!-- About Section -->
+    @if($contents->isNotEmpty())
     <div class="row mt-5">
         <div class="col-md-6">
             <h4>About Our Clinic</h4>
-            <p>Our clinic is dedicated to providing top-notch dental care with the latest technology and a compassionate approach. Our team of experienced professionals is here to ensure your comfort and satisfaction.</p>
+            <p>{{ $contents->first()->about_text }}</p>
         </div>
         <div class="col-md-6">
-            <img src="https://via.placeholder.com/500x300?text=Clinic+Image" class="img-fluid rounded" alt="Clinic Image">
+            <img src="{{ asset('storage/' . $contents->first()->about_image) }}" class="img-fluid rounded" alt="Clinic Image">
         </div>
     </div>
+    @endif
 
     <!-- Services Section -->
     <div class="mt-5">
         <h4>Our Services</h4>
-        <p>We offer a range of dental services, including preventive care, cosmetic dentistry, and emergency treatments. Our goal is to help you maintain a healthy and beautiful smile.</p>
+        <p>{{ $contents->first()->services_text ?? 'We offer a range of dental services to help you maintain a healthy and beautiful smile.' }}</p>
     </div>
 </div>
-@include('partial.footer')
 @endsection
-
-

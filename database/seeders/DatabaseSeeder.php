@@ -15,6 +15,7 @@ use App\Models\Schedules;
 use App\Models\Odontogram;
 use App\Models\Reservation;
 use App\Models\DentalMaterial;
+use App\Models\HomeContent;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
