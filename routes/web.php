@@ -26,6 +26,7 @@ use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\ProcedureMaterialController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\UserProfileController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -259,3 +260,9 @@ Route::post('/email/resend', function (Request $request) {
     $request->user('patient')->sendEmailVerificationNotification();
     return back()->with('message', 'Verification email sent!');
 })->middleware(['auth:patient', 'throttle:6,1'])->name('verification.resend');
+
+// Routes untuk user profile (non-dashboard)
+Route::middleware(['auth:patient'])->group(function () {
+    Route::get('/profile/edit', [UserProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [UserProfileController::class, 'update'])->name('profile.update');
+});
