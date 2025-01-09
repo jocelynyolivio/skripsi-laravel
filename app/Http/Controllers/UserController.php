@@ -7,11 +7,21 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        $users = User::all(); // Mengambil semua data pengguna
-        return view('dashboard.masters.index', compact('users'));
-    }    
+    public function index(Request $request)
+{
+    $role = $request->input('role'); // Ambil parameter 'role' dari request
+
+    // Query untuk mengambil data sesuai filter
+    $query = User::query();
+    if ($role) {
+        $query->where('role_id', $role);
+    }
+
+    $users = $query->get();
+
+    return view('dashboard.masters.index', compact('users', 'role'));
+}
+
 
     // Menampilkan user berdasarkan role
     // public function showByRole($role_id)

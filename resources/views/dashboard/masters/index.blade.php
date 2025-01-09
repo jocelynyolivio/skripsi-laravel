@@ -4,6 +4,19 @@
 <div class="container">
     <h3 class="my-4">All Users</h3>
 
+    <!-- Dropdown Filter -->
+    <div class="mb-3">
+        <form action="{{ route('dashboard.masters.index') }}" method="GET">
+            <label for="roleFilter" class="form-label">Filter by Role</label>
+            <select id="roleFilter" name="role" class="form-select" onchange="this.form.submit()">
+                <option value="">All Roles</option>
+                <option value="1" {{ request('role') == '1' ? 'selected' : '' }}>Admin</option>
+                <option value="2" {{ request('role') == '2' ? 'selected' : '' }}>Doctor</option>
+                <option value="3" {{ request('role') == '3' ? 'selected' : '' }}>Manager</option>
+            </select>
+        </form>
+    </div>
+
     <table id="usersTable" class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -48,18 +61,16 @@
 
 <script>
     $(document).ready(function() {
-        setTimeout(function() {
-            $('#usersTable').DataTable({
-                "paging": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "responsive": true,
-                "columnDefs": [
-                    { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
-                ]
-            });
-        }, 100);
+        $('#usersTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+            "columnDefs": [
+                { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
+            ]
+        });
     });
 </script>
 @endsection
