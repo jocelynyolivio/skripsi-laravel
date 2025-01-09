@@ -4,7 +4,7 @@
 <div class="container">
     <h3 class="my-4">Edit User</h3>
 
-    <form action="{{ route('dashboard.masters.users.update', ['role_id' => $role_id, 'id' => $user->id]) }}" method="POST">
+    <form action="{{ route('dashboard.masters.update', $user->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -19,7 +19,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="role_id" class="form-label">Role ID</label>
+            <label for="role_id" class="form-label">Role</label>
             <select class="form-select" id="role_id" name="role_id" required>
                 <option value="1" {{ $user->role_id == 1 ? 'selected' : '' }}>Admin</option>
                 <option value="2" {{ $user->role_id == 2 ? 'selected' : '' }}>Doctor</option>

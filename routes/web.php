@@ -146,10 +146,15 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/masters/patients/create', [PatientController::class, 'create'])->name('masters.patients.create');
     Route::post('/masters/patients', [PatientController::class, 'store'])->name('masters.patients.store');
 
-    Route::get('/masters/{role_id}/role', [UserController::class, 'showByRole'])->name('masters.role');
-    Route::get('/masters/{role_id}/role/{id}/edit', [UserController::class, 'edit'])->name('masters.users.edit');
-    Route::put('/masters/{role_id}/role/{id}', [UserController::class, 'update'])->name('masters.users.update');
-    Route::delete('/masters/{role_id}/role/{id}', [UserController::class, 'destroy'])->name('masters.users.destroy');
+    // Route::get('/masters/{role_id}/role', [UserController::class, 'showByRole'])->name('masters.role');
+    // Route::get('/masters/{role_id}/role/{id}/edit', [UserController::class, 'edit'])->name('masters.users.edit');
+    // Route::put('/masters/{role_id}/role/{id}', [UserController::class, 'update'])->name('masters.users.update');
+    // Route::delete('/masters/{role_id}/role/{id}', [UserController::class, 'destroy'])->name('masters.users.destroy');
+    Route::get('/masters', [UserController::class, 'index'])->name('masters.index');
+Route::get('/masters/{id}/edit', [UserController::class, 'edit'])->name('masters.edit');
+Route::put('/masters/{id}', [UserController::class, 'update'])->name('masters.update');
+Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('masters.destroy');
+
 
     Route::prefix('patients/{patientId}')->group(function () {
         // Route to list all medical records for a patient

@@ -2,24 +2,15 @@
 
 @section('container')
 <div class="container">
-    <h3 class="my-4">
-        Master 
-        @if ($role_id == 1)
-            Admin
-        @elseif ($role_id == 2)
-            Doctor
-        @elseif ($role_id == 3)
-            Manager
-        @endif
-    </h3>
+    <h3 class="my-4">All Users</h3>
 
-    <table id="masterTable" class="table table-striped table-bordered">
+    <table id="usersTable" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Role ID</th>
+                <th>Role</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -29,16 +20,24 @@
                 <td>{{ $user->id }}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->email }}</td>
-                <td>{{ $user->role_id }}</td>
+                <td>
+                    @if ($user->role_id == 1)
+                        Admin
+                    @elseif ($user->role_id == 2)
+                        Doctor
+                    @elseif ($user->role_id == 3)
+                        Manager
+                    @endif
+                </td>
                 <td>
                     <!-- Tombol Edit -->
-                    <a href="{{ route('dashboard.masters.users.edit', ['role_id' => $role_id, 'id' => $user->id]) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ route('dashboard.masters.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     
                     <!-- Tombol Delete -->
-                    <form action="{{ route('dashboard.masters.users.destroy', ['role_id' => $role_id, 'id' => $user->id]) }}" method="POST" class="d-inline">
+                    <form action="{{ route('dashboard.masters.destroy', $user->id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus?')">Delete</button>
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -48,9 +47,9 @@
 </div>
 
 <script>
-        $(document).ready(function() {
+    $(document).ready(function() {
         setTimeout(function() {
-            $('#masterTable').DataTable({
+            $('#usersTable').DataTable({
                 "paging": true,
                 "searching": true,
                 "ordering": true,

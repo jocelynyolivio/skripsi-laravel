@@ -7,25 +7,22 @@
         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-white {{Request::is('dashboard') ? 'active' : ''}}" aria-current="page" href="/dashboard">
+                    <a class="nav-link text-white {{ Request::is('dashboard') ? 'active' : '' }}" aria-current="page" href="/dashboard">
                         <i class="bi bi-house-fill"></i>
                         Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <!-- <a class="nav-link text-white {{Request::is('dashboard/posts*') ? 'active' : ''}}" href="/dashboard/posts">
-                        <i class="bi bi-file-earmark"></i>
-                        My Profile
-                    </a> -->
-                    <a class="nav-link text-white {{Request::is('dashboard/profile*') ? 'active' : ''}}" href="/dashboard/profile">
+                    <a class="nav-link text-white {{ Request::is('dashboard/profile*') ? 'active' : '' }}" href="/dashboard/profile">
                         <i class="bi bi-file-earmark"></i>
                         My Profile
                     </a>
-                    <a class="nav-link text-white {{Request::is('dashboard/salaries*') ? 'active' : ''}}" href="/dashboard/salaries">
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/salaries*') ? 'active' : '' }}" href="/dashboard/salaries">
                         <i class="bi bi-file-earmark"></i>
                         Attendances and Slips
                     </a>
-
                 </li>
             </ul>
 
@@ -35,18 +32,8 @@
             <h6 class="text-uppercase px-3 text-light mt-3">Master Data</h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/1/role') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 1]) }}">
-                        <i class="bi bi-person-badge"></i> Master Admin
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/2/role') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 2]) }}">
-                        <i class="bi bi-person-badge"></i> Master Dokter
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/masters/3/role') ? 'active' : '' }}" href="{{ route('dashboard.masters.role', ['role_id' => 3]) }}">
-                        <i class="bi bi-person-badge"></i> Master Manager
+                    <a class="nav-link text-white {{ Request::is('users*') ? 'active' : '' }}" href="{{ route('dashboard.masters.index') }}">
+                        <i class="bi bi-people-fill"></i> Master Users
                     </a>
                 </li>
                 <li class="nav-item">
@@ -96,8 +83,6 @@
                         <i class="bi bi-calendar-plus"></i> Expenses Request
                     </a>
                 </li>
-            </ul>
-            </ul>
             </ul>
         </div>
     </div>
