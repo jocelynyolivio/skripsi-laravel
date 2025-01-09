@@ -32,10 +32,26 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
     <style>
-        .dataTables_wrapper .dataTables_paginate {
-    margin-top: 1rem;
-}
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 250px; /* Adjust width as needed */
+        }
 
+        main {
+            margin-left: 250px; /* Match sidebar width */
+            padding: 20px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 1rem;
+        }
     </style>
 </head>
 
