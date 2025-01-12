@@ -24,6 +24,12 @@
                         Attendances and Slips
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/home_content/') ? 'active' : '' }}" href="/dashboard/home_content/">
+                        <i class="bi bi-house-door"></i>
+                        Home Content
+                    </a>
+                </li>
             </ul>
 
             <!-- Divider -->
@@ -58,6 +64,12 @@
                         <i class="bi bi-calendar-plus"></i> Data Schedules
                     </a>
                 </li>
+            </ul>
+
+                <!-- Divider -->
+            <hr class="border-light">
+            <h6 class="text-uppercase px-3 text-light mt-3">MATERIALS</h6>
+            <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/dental-materials*') ? 'active' : '' }}" href="{{ route('dashboard.dental-materials.index') }}">
                         <i class="bi bi-calendar-plus"></i> Dental Materials
@@ -65,9 +77,14 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/procedure_materials*') ? 'active' : '' }}" href="{{ route('dashboard.procedure_materials.index') }}">
-                        <i class="bi bi-calendar-plus"></i> Procedure Materials
+                        <i class="bi bi-calendar-plus"></i> Procedure
                     </a>
                 </li>
+            </ul>
+            <!-- Divider -->
+            <hr class="border-light">
+            <h6 class="text-uppercase px-3 text-light mt-3">TRANSACTIONS</h6>
+            <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.transactions.index') }}">
                         <i class="bi bi-calendar-plus"></i> Transaction
