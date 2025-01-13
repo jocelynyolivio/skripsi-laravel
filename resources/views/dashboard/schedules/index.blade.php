@@ -2,64 +2,44 @@
 
 @section('container')
 <div class="container mt-5">
-    <div class="d-flex justify-content-between mb-3">
-        <h3 class="text-center">Schedule List</h3>
-        <a href="{{ route('dashboard.schedules.create') }}" class="btn btn-primary">Add Schedule</a>
-    </div>
+    <h3 class="mb-4">Schedules</h3>
 
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-    @endif
+    <form id="filterForm" action="{{ route('dashboard.schedules.get-doctors-by-date') }}" method="GET">
+        <div class="form-group">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Filter</button>
+    </form>
 
-    <table id="scheduleTable" class="table table-striped table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th>#</th>
-                <th>Doctor</th>
-                <th>Date</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <!-- <th>Status</th> -->
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($schedules as $schedule)
-            <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $schedule->doctor->name }}</td>
-                <td>{{ $schedule->date }}</td>
-                <td>{{ $schedule->time_start }}</td>
-                <td>{{ $schedule->time_end }}</td>
-                <!-- <td>{{ $schedule->is_available ? 'Available' : 'Reserved' }}</td> -->
-                <td>
-                    @if($schedule->is_available)
-                    <a href="{{ route('dashboard.schedules.edit', $schedule->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('dashboard.schedules.destroy', $schedule->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                    </form>
-                    @else
-                    <span class="badge bg-danger">Reserved</span>
-                    @endif
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div id="results" class="mt-4">
+        <!-- Hasil dokter yang tersedia akan muncul di sini -->
+    </div>
 </div>
+
 <script>
-    $(document).ready(function() {
-        $('#scheduleTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "responsive": true,
-        });
+    document.getElementById('filterForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const date = document.getElementById('date').value;
+        const response = await fetch(`{{ route('dashboard.schedules.get-doctors-by-date') }}?date=${date}`);
+        const data = await response.json();
+
+        let resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = `
+            <h5>Available Doctors for ${data.date} (${data.day_of_week}):</h5>
+        `;
+
+        if (data.doctors.length > 0) {
+            let list = '<ul>';
+            data.doctors.forEach(doctor => {
+                list += `<li>${doctor.name}</li>`;
+            });
+            list += '</ul>';
+            resultsDiv.innerHTML += list;
+        } else {
+            resultsDiv.innerHTML += `<p>No doctors available on this date.</p>`;
+        }
     });
 </script>
 @endsection

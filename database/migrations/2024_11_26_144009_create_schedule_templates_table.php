@@ -6,29 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('schedules', function (Blueprint $table) {
+        Schema::create('schedule_templates', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('doctor_id');
-            $table->date('date');
-            $table->time('time_start');
-            $table->time('time_end');
-            $table->boolean('is_available')->default(true);
+            $table->enum('day_of_week', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('schedules');
+        Schema::dropIfExists('schedule_templates');
     }
-};
+}; 

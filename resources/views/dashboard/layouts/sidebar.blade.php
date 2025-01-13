@@ -61,12 +61,12 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/schedules') ? 'active' : '' }}" href="{{ route('dashboard.schedules.index') }}">
-                        <i class="bi bi-calendar-plus"></i> Data Schedules
+                        <i class="bi bi-calendar"></i> Schedules
                     </a>
                 </li>
             </ul>
 
-                <!-- Divider -->
+            <!-- Divider -->
             <hr class="border-light">
             <h6 class="text-uppercase px-3 text-light mt-3">MATERIALS</h6>
             <ul class="nav flex-column">
@@ -98,6 +98,23 @@
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/expense_requests*') ? 'active' : '' }}" href="{{ route('dashboard.expense_requests.index') }}">
                         <i class="bi bi-calendar-plus"></i> Expenses Request
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Divider -->
+            <hr class="border-light">
+
+            <h6 class="text-uppercase px-3 text-light mt-3">Schedules Management</h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/schedules/templates*') ? 'active' : '' }}" href="{{ route('dashboard.schedules.templates.index') }}">
+                        <i class="bi bi-calendar"></i> Schedule Templates
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/schedules/overrides*') ? 'active' : '' }}" href="{{ route('dashboard.schedules.overrides.index') }}">
+                        <i class="bi bi-calendar-event"></i> Schedule Overrides
                     </a>
                 </li>
             </ul>

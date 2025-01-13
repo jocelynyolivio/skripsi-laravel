@@ -13,20 +13,23 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\HomeContentController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
+use App\Http\Controllers\ScheduleOverrideController;
+use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\UserProfileController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -118,7 +121,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
 
     // Route untuk jadwal (Schedules)
-    Route::resource('schedules', SchedulesController::class);
+    // Route::resource('schedules', SchedulesController::class);
     // Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
     // Route::get('/schedules/create', [SchedulesController::class, 'create'])->name('schedules.create');
     // Route::post('/schedules', [SchedulesController::class, 'store'])->name('schedules.store');
@@ -222,8 +225,6 @@ Route::prefix('odontograms')->name('odontograms.')->group(function () {
     // Menyimpan atau memperbarui data odontogram
     Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store');
 });
-
-    
 });
 
 Route::get('/dashboard/salaries/', function () {
@@ -270,4 +271,16 @@ Route::post('/email/resend', function (Request $request) {
 Route::middleware(['auth:patient'])->group(function () {
     Route::get('/profile/edit', [UserProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [UserProfileController::class, 'update'])->name('profile.update');
+});
+
+Route::get('/dashboard/schedules', [ScheduleController::class, 'index'])->name('dashboard.schedules.index');
+
+// Rute untuk mendapatkan dokter berdasarkan tanggal
+Route::get('/dashboard/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
+    ->name('dashboard.schedules.get-doctors-by-date');
+
+// Rute untuk template dan override jadwal
+Route::prefix('dashboard/schedules')->name('dashboard.schedules.')->group(function () {
+    Route::resource('templates', ScheduleTemplateController::class);
+    Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
 });
