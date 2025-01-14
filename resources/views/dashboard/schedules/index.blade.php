@@ -3,6 +3,11 @@
 @section('container')
 <div class="container mt-5">
     <h3 class="mb-4">Schedules</h3>
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 
     <!-- Dropdown Pasien -->
     <form id="filterForm" action="{{ route('dashboard.schedules.get-doctors-by-date') }}" method="GET">
@@ -61,53 +66,54 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Handle form submission
     document.getElementById('filterForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        const date = document.getElementById('date').value;
-        const patientId = document.getElementById('patient').value;
+    const date = document.getElementById('date').value;
+    const patientId = document.getElementById('patient').value;
 
-        if (!patientId) {
-            alert('Please select a patient first.');
-            return;
-        }
+    if (!patientId) {
+        alert('Please select a patient first.');
+        return;
+    }
 
-        try {
-            const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
-            const data = await response.json();
+    try {
+        const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
+        const data = await response.json();
 
-            let resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `
-                <h5>Schedules for ${data.date} (${data.day_of_week}):</h5>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Doctor Name</th>
-                                <th>Available Times</th>
+        let resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = ` 
+            <h5>Schedules for ${data.date} (${data.day_of_week}):</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Doctor Name</th>
+                            <th>Available Times</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.doctors.map(doctor => `
+                            <tr data-doctor-id="${doctor.doctor.id}">
+                                <td>${doctor.doctor.name}</td>
+                                <td>
+                                    ${doctor.schedules.filter(schedule => schedule.is_available).map(schedule => 
+                                        `<span class="badge bg-success">
+                                            ${schedule.time_start} - ${schedule.time_end}
+                                        </span>`
+                                    ).join(' ')}
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${data.doctors.map(doctor => `
-                                <tr data-doctor-id="${doctor.doctor.id}">
-                                    <td>${doctor.doctor.name}</td>
-                                    <td>
-                                        ${doctor.schedules.map(schedule => 
-                                            `<span class="badge ${schedule.is_available ? 'bg-success' : 'bg-warning'}">
-                                                ${schedule.time_start} - ${schedule.time_end}
-                                            </span>`
-                                        ).join(' ')}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('results').innerHTML = '<p class="text-danger">Error loading schedules</p>';
-        }
-    });
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('results').innerHTML = '<p class="text-danger">Error loading schedules</p>';
+    }
+});
+
 
     document.getElementById('results').addEventListener('click', function (event) {
         if (event.target.tagName === 'SPAN' && event.target.classList.contains('badge')) {
