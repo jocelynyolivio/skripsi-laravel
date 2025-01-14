@@ -110,6 +110,11 @@ Route::get('/reservation', [ReservationController::class, 'index'])
 
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
+
+// Route::middleware(['auth:patient', 'verified'])->group(function () {
+//     Route::get('/reservation', [ReservationController::class, 'index'])->name('reservation.index');
+//     Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store');
+// });
 // isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/schedules/get-patients', [ScheduleController::class, 'getPatients'])->name('schedules.get-patients');
