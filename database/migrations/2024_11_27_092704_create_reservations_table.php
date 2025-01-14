@@ -10,24 +10,22 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('reservations', function (Blueprint $table) {
-        $table->id(); // Primary key
-        $table->unsignedBigInteger('schedule_id'); // Foreign key ke tabel schedules
-        $table->unsignedBigInteger('patient_id'); // Foreign key ke tabel patients
-        $table->unsignedBigInteger('doctor_id'); // Foreign key ke tabel users
-        $table->date('tanggal_reservasi'); // Tanggal reservasi
-        $table->time('jam_mulai'); // Jam reservasi
-        $table->time('jam_selesai'); // Jam reservasi
-        $table->string('status_konfirmasi')->nullable();
-        $table->timestamps();
-    
-        // Foreign key constraints
-        $table->foreign('schedule_id')->references('id')->on('schedules')->onDelete('cascade');
-        $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
-        $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
-    });
-}
+    {
+        Schema::create('reservations', function (Blueprint $table) {
+            $table->id(); // Primary key
+            $table->unsignedBigInteger('patient_id'); // Foreign key ke tabel patients
+            $table->unsignedBigInteger('doctor_id'); // Foreign key ke tabel users
+            $table->date('tanggal_reservasi'); // Tanggal reservasi
+            $table->time('jam_mulai'); // Jam reservasi
+            $table->time('jam_selesai'); // Jam reservasi
+            $table->string('status_konfirmasi')->nullable();
+            $table->timestamps();
+        
+            // Foreign key constraints
+            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
+            $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
+        });
+    }
 
     /**
      * Reverse the migrations.
@@ -37,3 +35,4 @@ return new class extends Migration
         Schema::dropIfExists('reservations');
     }
 };
+

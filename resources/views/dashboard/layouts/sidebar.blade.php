@@ -54,11 +54,7 @@
 
             <h6 class="text-uppercase px-3 text-light mt-3">Reservations</h6>
             <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link text-white {{ Request::is('dashboard/reservations') ? 'active' : '' }}" href="{{ route('dashboard.reservations.index') }}">
-                        <i class="bi bi-calendar-check"></i> Data Reservasi
-                    </a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link text-white {{ Request::is('dashboard/schedules') ? 'active' : '' }}" href="{{ route('dashboard.schedules.index') }}">
                         <i class="bi bi-calendar"></i> Schedules

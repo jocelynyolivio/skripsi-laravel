@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Patient;
 use App\Models\Schedules;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\ScheduleOverride;
 use App\Models\ScheduleTemplate;
@@ -33,7 +35,7 @@ class ScheduleController extends Controller
 
         // Ambil template berdasarkan hari
         $templates = ScheduleTemplate::where('day_of_week', $dayOfWeek)->get();
-        
+
         // Ambil override pada tanggal tersebut
         $overrides = ScheduleOverride::where('override_date', $selectedDate)->get();
 
@@ -49,10 +51,10 @@ class ScheduleController extends Controller
                 $nextStartTime = $currentStartTime + 3600; // 1 jam
 
                 // Cek apakah ada override
-                $override = $overrides->first(function($override) use ($template, $currentStartTime, $nextStartTime) {
+                $override = $overrides->first(function ($override) use ($template, $currentStartTime, $nextStartTime) {
                     return $override->doctor_id == $template->doctor_id &&
-                           (!$override->start_time || strtotime($override->start_time) <= $currentStartTime) &&
-                           (!$override->end_time || strtotime($override->end_time) >= $nextStartTime);
+                        (!$override->start_time || strtotime($override->start_time) <= $currentStartTime) &&
+                        (!$override->end_time || strtotime($override->end_time) >= $nextStartTime);
                 });
 
                 // Jika ada override dan tidak available, skip jadwal ini
@@ -69,9 +71,13 @@ class ScheduleController extends Controller
 
             if (!empty($sessions)) {
                 $doctorsSchedules[] = [
-                    'doctor' => $template->doctor,
+                    'doctor' => [
+                        'id' => $template->doctor->id, // Pastikan id dokter dikirim
+                        'name' => $template->doctor->name // Nama dokter
+                    ],
                     'schedules' => $sessions
                 ];
+                
             }
         }
 
@@ -150,6 +156,36 @@ class ScheduleController extends Controller
 
         return true;
     }
+
+    public function getPatients()
+    {
+        $patients = Patient::all(); // Pastikan model Patient sudah ada
+        return response()->json($patients);
+    }
+
+    public function storeReservation(Request $request)
+    {
+        $request->validate([
+            'patient_id' => 'required|integer',
+            'doctor_id' => 'required|integer',
+            'tanggal_reservasi' => 'required|date',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+        ]);
+
+        $reservation = Reservation::create([
+            'patient_id' => $request->patient_id,
+            'doctor_id' => $request->doctor_id,
+            'tanggal_reservasi' => $request->tanggal_reservasi,
+            'jam_mulai' => $request->jam_mulai,
+            'jam_selesai' => $request->jam_selesai,
+        ]);
+
+        return response()->json([
+            'message' => 'Reservation created successfully',
+            'reservation' => $reservation,
+        ]);
+    }
+    
+
 }
-
-

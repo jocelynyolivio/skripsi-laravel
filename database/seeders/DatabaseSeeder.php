@@ -151,14 +151,7 @@ class DatabaseSeeder extends Seeder
             'is_available' => true,
         ]);
 
-        Reservation::create([
-            'schedule_id' => 1,
-            'patient_id' => 1,
-            'doctor_id' => 3,
-            'tanggal_reservasi' => '2024-01-01',
-            'jam_mulai' => '09:00:00',
-            'jam_selesai' => '10:00:00',
-        ]);
+        
         DentalMaterial::create([
             'name' => 'Resin Komposit',
             'description' => 'Bahan untuk penambalan gigi berlubang',

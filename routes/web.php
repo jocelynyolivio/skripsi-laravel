@@ -15,7 +15,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\HomeContentController;
 use App\Http\Controllers\ReservationController;
@@ -113,6 +112,14 @@ Route::post('/reservation', [ReservationController::class, 'store'])->name('rese
 
 // isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::get('/schedules/get-patients', [ScheduleController::class, 'getPatients'])->name('schedules.get-patients');
+    Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
+
+    Route::post('/reservations', [ScheduleController::class, 'storeReservation'])->name('reservations.store');
+
+    Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.list');
+
+
     Route::resource('/home_content', HomeContentController::class);
 
     // Route untuk profil pengguna
@@ -130,17 +137,17 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     // Route::delete('/schedules/{schedule}', [SchedulesController::class, 'destroy'])->name('schedules.destroy');
 
     // Route untuk reservasi
-    Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
-    Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
-    Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
-    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
-    // Admin: Menampilkan form tambah reservasi
-    Route::get('/reservations/create', [ReservationController::class, 'createForAdmin'])
-        ->name('reservations.create');
+    // Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
+    // Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
+    // Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
+    // Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    // // Admin: Menampilkan form tambah reservasi
+    // Route::get('/reservations/create', [ReservationController::class, 'createForAdmin'])
+    //     ->name('reservations.create');
 
-    // Admin: Menyimpan data reservasi
-    Route::post('/reservations', [ReservationController::class, 'storeForAdmin'])
-        ->name('reservations.store');
+    // // Admin: Menyimpan data reservasi
+    // Route::post('/reservations', [ReservationController::class, 'storeForAdmin'])
+    //     ->name('reservations.store');
 
     Route::get('/masters/patients/{id}/edit', [PatientController::class, 'edit'])->name('masters.patients.edit');
     Route::put('/masters/patients/{id}', [PatientController::class, 'update'])->name('masters.patients.update');

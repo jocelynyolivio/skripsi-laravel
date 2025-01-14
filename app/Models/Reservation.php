@@ -9,17 +9,8 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'nama',
-        'nomor_telepon',
-        'tanggal_reservasi',
-        'jam_mulai',
-        'jam_selesai',
-        'status_konfirmasi',
-        'doctor_id', // Tambahkan ini
-        'schedule_id',
-        'patient_id',
-    ];
+    // Perbaiki properti fillable agar sesuai dengan nama kolom di migrasi
+    protected $fillable = ['patient_id', 'doctor_id', 'tanggal_reservasi', 'jam_mulai', 'jam_selesai', 'status_konfirmasi'];
 
     public function doctor()
     {
@@ -37,9 +28,7 @@ class Reservation extends Model
     }
 
     public function medicalRecord()
-{
-    return $this->hasOne(MedicalRecord::class);
+    {
+        return $this->hasOne(MedicalRecord::class);
+    }
 }
-
-}
-

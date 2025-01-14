@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Reservations List</h3>
-        <a href="{{ route('dashboard.reservations.create') }}" class="btn btn-primary mb-3">Add Reservation</a>
+
     </div>
 
     <table id="reservationTable" class="table table-striped table-bordered">
@@ -38,14 +38,7 @@
             <td>
                 {{ $reservation->status_konfirmasi ?? 'Belum Dikonfirmasi' }}
             </td>
-            <td>
-                <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                </form>
-            </td>
+
         </tr>
         @endforeach
     </tbody>
