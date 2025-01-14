@@ -117,7 +117,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::post('/reservations', [ScheduleController::class, 'storeReservation'])->name('reservations.store');
 
-    Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.list');
+    Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
 
 
     Route::resource('/home_content', HomeContentController::class);
@@ -138,9 +138,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     // Route untuk reservasi
     // Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
-    // Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
-    // Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
-    // Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
+    Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
+    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
     // // Admin: Menampilkan form tambah reservasi
     // Route::get('/reservations/create', [ReservationController::class, 'createForAdmin'])
     //     ->name('reservations.create');
