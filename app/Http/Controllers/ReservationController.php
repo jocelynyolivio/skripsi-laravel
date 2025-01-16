@@ -8,6 +8,7 @@ use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
@@ -94,10 +95,35 @@ public function update(Request $request, $id)
     
 
 
-public function index()
+public function index(Request $request)
 {
+    if ($request->has('date')) {
+        $date = $request->date;
+        $dayOfWeek = Carbon::parse($date)->format('l');
+        
+        // Mengambil jadwal dokter yang tersedia untuk tanggal yang dipilih
+        $schedules = Schedules::where('date', $date)
+            ->where('is_available', true)
+            ->with('doctor') // Eager loading relasi doctor
+            ->get()
+            ->groupBy('doctor_id')
+            ->map(function ($schedules) {
+                return [
+                    'doctor' => $schedules->first()->doctor,
+                    'schedules' => $schedules
+                ];
+            });
+        
+        return view('reservation.index', [
+            'title' => 'Reservation',
+            'schedules' => $schedules,
+            'date' => $date,
+            'day_of_week' => $dayOfWeek
+        ]);
+    }
+    
     return view('reservation.index', [
-        'title' => 'Reservation',
+        'title' => 'Reservation'
     ]);
 }
 
