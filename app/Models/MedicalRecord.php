@@ -31,12 +31,16 @@ class MedicalRecord extends Model
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
-// Relasi many-to-many ke procedures melalui medical_record_procedure
-public function procedures()
-{
-    return $this->belongsToMany(Procedure::class, 'medical_record_procedure')
-                ->withPivot('created_at', 'updated_at','price'); // Jika ingin memanfaatkan data tambahan dari pivot
-}
+    public function procedures()
+    {
+        return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id');
+    }
+    
+    public function odontograms()
+    {
+        return $this->hasMany(Odontogram::class, 'medical_record_id');
+    }
+    
 
 // Relasi many-to-many dengan DentalMaterial melalui medical_record_dental_material
 public function dentalMaterials()
@@ -51,10 +55,10 @@ public function transaction()
     return $this->hasOne(Transaction::class);
 }
 
-public function odontograms()
-{
-    return $this->hasMany(Odontogram::class, 'medical_record_id');
-}
 
+public function procedureOdontograms()
+{
+    return $this->hasMany(ProcedureOdontogram::class);
+}
 
 }

@@ -20,24 +20,15 @@
             </select>
         </div>
 
-        <!-- Prosedur Dinamis -->
+        <!-- Kondisi Gigi -->
         <div class="mb-3">
-            <label class="form-label">Procedures</label>
-            <div id="procedures-container">
-                <!-- Prosedur Dinamis Akan Ditambahkan Di Sini -->
-            </div>
-            <button type="button" class="btn btn-secondary mt-2" id="add-procedure-btn">Add Procedure</button>
+            <label for="teeth_condition" class="form-label">Teeth Condition</label>
+            <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" required>
         </div>
 
         <div class="mb-3">
             <label for="treatment" class="form-label">Treatment</label>
             <input type="text" class="form-control" id="treatment" name="treatment" required>
-        </div>
-
-        <!-- Kondisi Gigi -->
-        <div class="mb-3">
-            <label for="teeth_condition" class="form-label">Teeth Condition</label>
-            <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" required>
         </div>
 
         <!-- Catatan -->
@@ -46,23 +37,44 @@
             <textarea class="form-control" id="notes" name="notes"></textarea>
         </div>
 
-        <!-- Odontogram -->
-        <div class="odontogram mt-4">
-            <h4>Odontogram</h4>
-            <div class="odontogram-diagram mb-4">
-                @for ($i = 1; $i <= 32; $i++)
-                    <button
-                    type="button"
-                    class="tooth btn btn-outline-primary mb-2"
-                    data-tooth="{{ $i }}"
-                    onclick="selectTooth({{ $i }})">
-                    {{ $i }}
-                    </button>
-                    @endfor
+        <!-- Prosedur dan Odontogram Integration -->
+        <div class="mb-4">
+            <h4>Select Procedure and Teeth</h4>
+            
+            <!-- Procedure Selection -->
+            <div class="mb-3">
+                <label class="form-label">Select Procedure</label>
+                <select id="currentProcedure" class="form-select">
+                    <option value="">Select Procedure</option>
+                    @foreach($procedures as $procedure)
+                    <option value="{{ $procedure->id }}" 
+                            data-default-condition="{{ $procedure->default_condition }}">
+                        {{ $procedure->name }}
+                    </option>
+                    @endforeach
+                </select>
             </div>
 
-            <!-- Hidden Fields for Odontogram -->
-            <div id="odontogram-fields"></div>
+            <!-- Odontogram Diagram -->
+            <div class="odontogram-diagram mb-3">
+                <div class="row">
+                    @for ($i = 1; $i <= 32; $i++)
+                        <div class="col-md-1 mb-2">
+                            <button type="button"
+                                    class="tooth btn btn-outline-primary w-100"
+                                    data-tooth="{{ $i }}"
+                                    onclick="selectToothForProcedure({{ $i }})">
+                                {{ $i }}
+                            </button>
+                        </div>
+                    @endfor
+                </div>
+            </div>
+
+            <!-- Selected Procedures and Teeth -->
+            <div id="selectedProceduresContainer">
+                <!-- Selected procedures will be added here dynamically -->
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary">Save Medical Record</button>
@@ -70,68 +82,110 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Prosedur Dinamis
-        const addProcedureBtn = document.getElementById('add-procedure-btn');
-        const proceduresContainer = document.getElementById('procedures-container');
+document.addEventListener('DOMContentLoaded', function() {
+    const selectedProcedures = new Map(); // To track selected procedures and teeth
 
-        addProcedureBtn.addEventListener('click', function() {
-            const procedureCount = proceduresContainer.children.length + 1;
-            const procedureElement = `
-                <div class="mb-3 border p-3">
-                    <label for="procedure_${procedureCount}" class="form-label">Procedure ${procedureCount}</label>
-                    <select name="procedure_id[]" id="procedure_${procedureCount}" class="form-select" required>
-                        <option value="">Select Procedure</option>
-                        @foreach($procedures as $procedure)
-                        <option value="{{ $procedure->id }}">{{ $procedure->name }}</option>
-                        @endforeach
-                    </select>
-                    <button type="button" class="btn btn-danger mt-2 remove-procedure-btn">Remove</button>
-                </div>`;
-            proceduresContainer.insertAdjacentHTML('beforeend', procedureElement);
+    window.selectToothForProcedure = function(toothNumber) {
+        const procedureSelect = document.getElementById('currentProcedure');
+        const procedureId = procedureSelect.value;
+        
+        if (!procedureId) {
+            alert('Please select a procedure first');
+            return;
+        }
+
+        const procedureName = procedureSelect.options[procedureSelect.selectedIndex].text;
+        const defaultCondition = procedureSelect.options[procedureSelect.selectedIndex].dataset.defaultCondition;
+
+        // Check if tooth is already used
+        const isToothUsed = Array.from(selectedProcedures.values()).some(proc => 
+            proc.teeth.includes(toothNumber)
+        );
+
+        if (isToothUsed) {
+            alert(`Tooth ${toothNumber} is already assigned to a procedure`);
+            return;
+        }
+
+        // Add or update procedure-tooth mapping
+        if (!selectedProcedures.has(procedureId)) {
+            selectedProcedures.set(procedureId, {
+                name: procedureName,
+                teeth: [toothNumber],
+                defaultCondition: defaultCondition
+            });
+        } else {
+            selectedProcedures.get(procedureId).teeth.push(toothNumber);
+        }
+
+        updateSelectedProceduresDisplay();
+        highlightSelectedTooth(toothNumber);
+    };
+
+    function updateSelectedProceduresDisplay() {
+        const container = document.getElementById('selectedProceduresContainer');
+        container.innerHTML = '';
+
+        selectedProcedures.forEach((data, procedureId) => {
+            const div = document.createElement('div');
+            div.className = 'mb-3 border p-3';
+            div.innerHTML = `
+                <h5>${data.name}</h5>
+                <input type="hidden" name="procedure_id[]" value="${procedureId}">
+                ${data.teeth.map(tooth => `
+                    <div class="mb-2">
+                        <p>Tooth ${tooth}</p>
+                        <input type="hidden" name="tooth_numbers[]" value="${tooth}">
+                        <textarea name="procedure_notes[]" class="form-control" 
+                                placeholder="Notes for tooth ${tooth}"></textarea>
+                    </div>
+                `).join('')}
+                <button type="button" class="btn btn-danger btn-sm mt-2" 
+                        onclick="removeProcedure('${procedureId}')">
+                    Remove Procedure
+                </button>
+            `;
+            container.appendChild(div);
         });
+    }
 
-        proceduresContainer.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-procedure-btn')) {
-                e.target.closest('.mb-3').remove();
-            }
-        });
+    window.removeProcedure = function(procedureId) {
+        const teeth = selectedProcedures.get(procedureId).teeth;
+        teeth.forEach(tooth => unhighlightTooth(tooth));
+        selectedProcedures.delete(procedureId);
+        updateSelectedProceduresDisplay();
+    };
 
-        // Odontogram Dinamis
-        const odontogramFields = document.getElementById('odontogram-fields');
+    function highlightSelectedTooth(toothNumber) {
+        const toothButton = document.querySelector(`button[data-tooth="${toothNumber}"]`);
+        if (toothButton) {
+            toothButton.classList.remove('btn-outline-primary');
+            toothButton.classList.add('btn-primary');
+        }
+    }
 
-        window.selectTooth = function(toothNumber) {
-            const existingField = document.querySelector(`[data-tooth-number="${toothNumber}"]`);
-
-            if (!existingField) {
-                odontogramFields.insertAdjacentHTML('beforeend', `
-            <div data-tooth-number="${toothNumber}" class="mb-3 border p-3">
-                <h5>Tooth ${toothNumber}</h5>
-                <input type="hidden" name="tooth_number[]" value="${toothNumber}">
-                <label for="odontogram_condition_${toothNumber}" class="form-label">Condition</label>
-                <select name="odontogram_condition[]" id="odontogram_condition_${toothNumber}" class="form-select">
-                    <option value="Healthy">Healthy</option>
-                    <option value="Cavity">Cavity</option>
-                    <option value="Filled">Filled</option>
-                    <option value="Extracted">Extracted</option>
-                </select>
-                <label for="odontogram_notes_${toothNumber}" class="form-label">Notes</label>
-                <textarea name="odontogram_notes[]" id="odontogram_notes_${toothNumber}" class="form-control"></textarea>
-                <button type="button" class="btn btn-danger mt-2" onclick="removeTooth(${toothNumber})">Remove</button>
-            </div>
-        `);
-            } else {
-                alert(`Tooth ${toothNumber} is already selected.`);
-            }
-        };
-
-        window.removeTooth = function(toothNumber) {
-            const field = document.querySelector(`[data-tooth-number="${toothNumber}"]`);
-            if (field) {
-                field.remove();
-            }
-        };
-
-    });
+    function unhighlightTooth(toothNumber) {
+        const toothButton = document.querySelector(`button[data-tooth="${toothNumber}"]`);
+        if (toothButton) {
+            toothButton.classList.remove('btn-primary');
+            toothButton.classList.add('btn-outline-primary');
+        }
+    }
+});
 </script>
+
+<style>
+.tooth {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 2px;
+    font-size: 12px;
+}
+
+.odontogram-diagram {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+</style>
 @endsection

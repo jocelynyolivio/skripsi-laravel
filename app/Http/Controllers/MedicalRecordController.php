@@ -15,14 +15,14 @@ class MedicalRecordController extends Controller
 {
     public function index($patientId)
     {
-        $medicalRecords = MedicalRecord::with('transaction')->where('patient_id', $patientId)->get();
-        $patient = Patient::findOrFail($patientId);
-    
-        return view('dashboard.medical_records.index', [
-            'medicalRecords' => $medicalRecords,
-            'patientName' => $patient->name,
-            'patientId' => $patientId
-        ]);
+        $medicalRecords = MedicalRecord::with(['doctor', 'procedureOdontograms.procedure'])
+            ->where('patient_id', $patientId)
+            ->latest()
+            ->get();
+        
+        $patientName = Patient::findOrFail($patientId)->name;
+
+        return view('dashboard.medical_records.index', compact('medicalRecords', 'patientId', 'patientName'));
     }
     
 

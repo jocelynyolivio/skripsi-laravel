@@ -1,5 +1,3 @@
-<!-- hapus komen kalo eerorrrr -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,39 +19,46 @@
         th {
             background-color: #f2f2f2;
         }
+        .no-data {
+            text-align: center;
+            color: red;
+        }
     </style>
 </head>
 <body>
     <h1>Summary Presensi</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Sheet</th>
-                <th>Departemen</th>
-                <th>Nama</th>
-                <th>No. ID</th>
-                <th>Tanggal</th>
-                <th>Jam Masuk</th>
-                <th>Jam Pulang</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($dataSummary as $data)
-                @foreach ($data['kehadiran'] as $kehadiran)
-                    <tr>
-                        <td>{{ $data['sheet'] }}</td>
-                        <td>{{ $data['departemen'] }}</td>
-                        <td>{{ $data['nama'] }}</td>
-                        <td>{{ $data['no_id'] }}</td>
-                        <td>{{ $kehadiran['tanggal'] }}</td>
-                        <td>{{ $kehadiran['jam_masuk'] ?? 'N/A' }}</td>
-                        <td>{{ $kehadiran['jam_pulang'] ?? 'N/A' }}</td>
-                    </tr>
+    @if (isset($dataSummary) && count($dataSummary) > 0)
+        <table>
+            <thead>
+                <tr>
+                    <th>Sheet</th>
+                    <th>Departemen</th>
+                    <th>Nama</th>
+                    <th>No. ID</th>
+                    <th>Tanggal</th>
+                    <th>Jam Masuk</th>
+                    <th>Jam Pulang</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($dataSummary as $data)
+                    @foreach ($data['kehadiran'] as $kehadiran)
+                        <tr>
+                            <td>{{ $data['sheet'] }}</td>
+                            <td>{{ $data['departemen'] }}</td>
+                            <td>{{ $data['nama'] }}</td>
+                            <td>{{ $data['no_id'] }}</td>
+                            <td>{{ $kehadiran['tanggal'] }}</td>
+                            <td>{{ $kehadiran['jam_masuk'] ?? '-' }}</td>
+                            <td>{{ $kehadiran['jam_pulang'] ?? '-' }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
-            @endforeach
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    @else
+        <p class="no-data">Data presensi tidak tersedia.</p>
+    @endif
 </body>
 </html>
-

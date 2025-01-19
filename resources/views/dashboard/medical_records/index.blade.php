@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Medical Records for Patient ID: {{ $patientName }}</h3>
+    <h3 class="text-center">Medical Records for Patient: {{ $patientName }}</h3>
     <a href="{{ route('dashboard.medical_records.create', ['patientId' => $patientId]) }}" class="btn btn-primary mb-3">Add Medical Record</a>
 
     @if(session('success'))
@@ -17,6 +17,7 @@
                 <th>Date</th>
                 <th>Teeth Condition</th>
                 <th>Treatment</th>
+                <th>Procedures & Teeth</th>
                 <th>Notes</th>
                 <th>Doctor</th>
                 <th>Status</th>
@@ -29,27 +30,50 @@
                 <td>{{ $record->date }}</td>
                 <td>{{ $record->teeth_condition }}</td>
                 <td>{{ $record->treatment }}</td>
+                <td>
+                    @if($record->procedures->count() > 0)
+                        @foreach($record->procedures as $procedure)
+                            <div class="mb-2">
+                                <strong>{{ $procedure->name }}:</strong>
+                                <br>
+                                Teeth: 
+                                {{ $record->odontograms->where('procedure_id', $procedure->id)->pluck('tooth_number')->implode(', ') }}
+                                @php
+                                    $notes = $record->odontograms->where('procedure_id', $procedure->id)->pluck('notes')->filter()->implode(', ');
+                                @endphp
+                                @if($notes)
+                                    <br>
+                                    <small class="text-muted">
+                                        Notes: {{ $notes }}
+                                    </small>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        <span class="text-muted">No procedures</span>
+                    @endif
+                </td>
                 <td>{{ $record->notes }}</td>
                 <td>{{ $record->doctor->name }}</td>
                 <td>
-                    <!-- Tampilkan tombol Create Transaction hanya jika belum ada transaksi -->
                     @if(!$record->transaction)
-                        <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-success">Create Transaction</a>
+                        <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}" 
+                           class="btn btn-sm btn-success">Create Transaction</a>
                     @else
                         <span class="badge bg-secondary">Transaction Created</span>
                     @endif
+                </td>
+                <td>
+                    <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" 
+                       class="btn btn-sm btn-warning">Edit</a>
 
-                    <td>
-                    <!-- Edit Button -->
-                    <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning">Edit</a>
-
-                    <!-- Delete Button -->
-                    <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                    <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}" 
+                          method="POST" style="display:inline;" 
+                          onsubmit="return confirm('Are you sure you want to delete this record?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                     </form>
-                    </td>
                 </td>
             </tr>
             @endforeach
