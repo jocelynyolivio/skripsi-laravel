@@ -31,28 +31,39 @@
                 <td>{{ $record->teeth_condition }}</td>
                 <td>{{ $record->treatment }}</td>
                 <td>
-                    @if($record->procedures->count() > 0)
-                        @foreach($record->procedures as $procedure)
-                            <div class="mb-2">
-                                <strong>{{ $procedure->name }}:</strong>
-                                <br>
-                                Teeth: 
-                                {{ $record->odontograms->where('procedure_id', $procedure->id)->pluck('tooth_number')->implode(', ') }}
-                                @php
-                                    $notes = $record->odontograms->where('procedure_id', $procedure->id)->pluck('notes')->filter()->implode(', ');
-                                @endphp
-                                @if($notes)
-                                    <br>
-                                    <small class="text-muted">
-                                        Notes: {{ $notes }}
-                                    </small>
-                                @endif
-                            </div>
+    @if($record->procedures->count() > 0)
+        @foreach($record->procedures as $procedure)
+            <div class="mb-2">
+                <strong>{{ $procedure->name }}:</strong>
+                <br>
+                Teeth: 
+                {{ $record->odontograms->where('procedure_id', $procedure->id)->pluck('tooth_number')->implode(', ') }}
+                @php
+                    $notes = $record->odontograms->where('procedure_id', $procedure->id)->pluck('notes')->filter()->implode(', ');
+                @endphp
+                @if($notes)
+                    <br>
+                    <small class="text-muted">
+                        Notes: {{ $notes }}
+                    </small>
+                @endif
+                @if($record->procedureOdontograms->count() > 0)
+                    <ul>
+                        @foreach($record->procedureOdontograms->where('procedure_id', $procedure->id) as $procedureOdontogram)
+                            <li>
+                                Tooth: {{ $procedureOdontogram->tooth_number }} - 
+                                <small class="text-muted">{{ $procedureOdontogram->notes }}</small>
+                            </li>
                         @endforeach
-                    @else
-                        <span class="text-muted">No procedures</span>
-                    @endif
-                </td>
+                    </ul>
+                @endif
+            </div>
+        @endforeach
+    @else
+        <span class="text-muted">No procedures</span>
+    @endif
+</td>
+
                 <td>{{ $record->notes }}</td>
                 <td>{{ $record->doctor->name }}</td>
                 <td>

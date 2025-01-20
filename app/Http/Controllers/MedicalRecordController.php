@@ -10,20 +10,23 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
 use App\Models\DentalMaterial;
+use App\Models\ProcedureOdontogram;
 
 class MedicalRecordController extends Controller
 {
     public function index($patientId)
-    {
-        $medicalRecords = MedicalRecord::with(['doctor', 'procedureOdontograms.procedure'])
-            ->where('patient_id', $patientId)
-            ->latest()
-            ->get();
-        
-        $patientName = Patient::findOrFail($patientId)->name;
+{
+    // Menambahkan relasi 'procedures' untuk mengambil prosedur yang terhubung dengan odontogram
+    $medicalRecords = MedicalRecord::with(['doctor', 'procedures', 'odontograms', 'procedureOdontograms.procedure'])
+        ->where('patient_id', $patientId)
+        ->latest()
+        ->get();
+    
+    $patientName = Patient::findOrFail($patientId)->name;
 
-        return view('dashboard.medical_records.index', compact('medicalRecords', 'patientId', 'patientName'));
-    }
+    return view('dashboard.medical_records.index', compact('medicalRecords', 'patientId', 'patientName'));
+}
+
     
 
     public function create(Request $request, $patientId)
@@ -77,71 +80,94 @@ class MedicalRecordController extends Controller
     }
 
     public function store(Request $request, $patientId)
-    {
-        $validatedData = $request->validate([
-            'reservation_id' => 'required|exists:reservations,id',
-            'procedure_id' => 'required|array',
-            'procedure_id.*' => 'exists:procedures,id',
-            'teeth_condition' => 'required|string',
-            'treatment' => 'required|string',
-            'notes' => 'nullable|string',
-    
-            // Validasi odontogram
-            'tooth_number' => 'nullable|array',
-            'tooth_number.*' => 'integer|min:1|max:32',
-            'odontogram_condition.*' => 'nullable|string',
-            'odontogram_notes.*' => 'nullable|string',
-        ]);
-    
-        $reservation = Reservation::findOrFail($validatedData['reservation_id']);
-        $existingRecord = MedicalRecord::where('reservation_id', $reservation->id)->first();
-    
-        if ($existingRecord) {
-            return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
-        }
-    
-        // Simpan Medical Record
-        $medicalRecord = new MedicalRecord();
-        $medicalRecord->patient_id = $patientId;
-        $medicalRecord->reservation_id = $reservation->id;
-        $medicalRecord->doctor_id = $reservation->doctor_id;
-        $medicalRecord->date = $reservation->tanggal_reservasi;
-        $medicalRecord->teeth_condition = $validatedData['teeth_condition'];
-        $medicalRecord->treatment = $validatedData['treatment'];
-        $medicalRecord->notes = $validatedData['notes'];
-        $medicalRecord->save();
-    
-        // Prosedur
-        $medicalRecord->procedures()->attach($validatedData['procedure_id']);
-    
-        // Simpan atau Perbarui Odontogram
-        foreach (range(1, 32) as $toothNumber) {
-            // Cari data dari input user atau gunakan default
-            $index = !empty($validatedData['tooth_number']) ? array_search($toothNumber, $validatedData['tooth_number']) : null;
-            $condition = $index !== false && isset($validatedData['odontogram_condition'][$index])
-                ? $validatedData['odontogram_condition'][$index]
-                : 'Healthy';
-            $notes = $index !== false && isset($validatedData['odontogram_notes'][$index])
-                ? $validatedData['odontogram_notes'][$index]
-                : null;
-    
-            // Update atau buat odontogram baru
-            Odontogram::updateOrCreate(
-                [
-                    'patient_id' => $patientId,
-                    'tooth_number' => $toothNumber,
-                ],
-                [
-                    'medical_record_id' => $medicalRecord->id,
-                    'condition' => $condition,
-                    'notes' => $notes,
-                ]
-            );
-        }
-    
-        return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
-                         ->with('success', 'Medical Record and Odontogram have been saved successfully.');
+{
+    $validatedData = $request->validate([
+        'reservation_id' => 'required|exists:reservations,id',
+        'procedure_id' => 'required|array',
+        'procedure_id.*' => 'exists:procedures,id',
+        'teeth_condition' => 'required|string',
+        'treatment' => 'required|string',
+        'notes' => 'nullable|string',
+        'tooth_numbers' => 'required|array', // Pastikan array
+        'tooth_numbers.*' => 'integer|min:1|max:32',
+        'procedure_notes' => 'nullable|array',
+        'procedure_notes.*' => 'nullable|string',
+    ]);
+
+    $reservation = Reservation::findOrFail($validatedData['reservation_id']);
+    $existingRecord = MedicalRecord::where('reservation_id', $reservation->id)->first();
+
+    if ($existingRecord) {
+        return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
     }
+
+    // Simpan Medical Record
+    $medicalRecord = new MedicalRecord();
+    $medicalRecord->patient_id = $patientId;
+    $medicalRecord->reservation_id = $reservation->id;
+    $medicalRecord->doctor_id = $reservation->doctor_id;
+    $medicalRecord->date = $reservation->tanggal_reservasi;
+    $medicalRecord->teeth_condition = $validatedData['teeth_condition'];
+    $medicalRecord->treatment = $validatedData['treatment'];
+    $medicalRecord->notes = $validatedData['notes'];
+    $medicalRecord->save();
+
+    // Prosedur
+    $medicalRecord->procedures()->attach($validatedData['procedure_id']);
+
+    // Simpan atau Perbarui Odontogram dan ProcedureOdontogram
+    $uniqueCombinations = [];
+    foreach (range(1, 32) as $toothNumber) {
+        $index = !empty($validatedData['tooth_numbers']) ? array_search($toothNumber, $validatedData['tooth_numbers']) : null;
+        $condition = $index !== false && isset($validatedData['odontogram_condition'][$index])
+            ? $validatedData['odontogram_condition'][$index]
+            : 'Healthy';
+        $notes = $index !== false && isset($validatedData['odontogram_notes'][$index])
+            ? $validatedData['odontogram_notes'][$index]
+            : null;
+
+        // Simpan ke ProcedureOdontogram
+        if (!empty($validatedData['procedure_id']) && !empty($validatedData['tooth_numbers'])) {
+            foreach ($validatedData['procedure_id'] as $procedureIndex => $procedureId) {
+                $currentToothNumber = $validatedData['tooth_numbers'][$procedureIndex] ?? null;
+                $procedureNotes = $validatedData['procedure_notes'][$procedureIndex] ?? null;
+
+                // Buat kombinasi unik berdasarkan procedure_id dan tooth_number
+                $combinationKey = $procedureId . '-' . $currentToothNumber;
+
+                if (!in_array($combinationKey, $uniqueCombinations) && $currentToothNumber == $toothNumber) {
+                    // Simpan kombinasi ke dalam array unik
+                    $uniqueCombinations[] = $combinationKey;
+
+                    // Simpan ke database
+                    ProcedureOdontogram::create([
+                        'medical_record_id' => $medicalRecord->id,
+                        'procedure_id' => $procedureId,
+                        'tooth_number' => $currentToothNumber,
+                        'notes' => $procedureNotes,
+                    ]);
+                }
+            }
+        }
+
+        // Update atau buat odontogram baru
+        Odontogram::updateOrCreate(
+            [
+                'patient_id' => $patientId,
+                'tooth_number' => $toothNumber,
+            ],
+            [
+                'medical_record_id' => $medicalRecord->id,
+                'condition' => $condition,
+                'notes' => $notes,
+            ]
+        );
+    }
+
+    return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
+                     ->with('success', 'Medical Record and Odontogram have been saved successfully.');
+}
+
     
     
     
