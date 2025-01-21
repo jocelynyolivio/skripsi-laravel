@@ -100,6 +100,10 @@ class MedicalRecordController extends Controller
     if ($existingRecord) {
         return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
     }
+    if (count($validatedData['tooth_numbers']) !== count($validatedData['procedure_id'])) {
+        return redirect()->back()->with('error', 'Mismatch between teeth and procedures.');
+    }
+    
 
     // Simpan Medical Record
     $medicalRecord = new MedicalRecord();
@@ -116,53 +120,30 @@ class MedicalRecordController extends Controller
     $medicalRecord->procedures()->attach($validatedData['procedure_id']);
 
     // Simpan atau Perbarui Odontogram dan ProcedureOdontogram
-    $uniqueCombinations = [];
-    foreach (range(1, 32) as $toothNumber) {
-        $index = !empty($validatedData['tooth_numbers']) ? array_search($toothNumber, $validatedData['tooth_numbers']) : null;
-        $condition = $index !== false && isset($validatedData['odontogram_condition'][$index])
-            ? $validatedData['odontogram_condition'][$index]
-            : 'Healthy';
-        $notes = $index !== false && isset($validatedData['odontogram_notes'][$index])
-            ? $validatedData['odontogram_notes'][$index]
-            : null;
+    // Simpan ke ProcedureOdontogram untuk setiap pasangan tooth_number dan procedure_id
+$uniqueCombinations = []; // Untuk mencegah duplikasi
+foreach ($validatedData['tooth_numbers'] as $index => $toothNumber) {
+    $procedureId = $validatedData['procedure_id'][$index] ?? null;
+    $procedureNotes = $validatedData['procedure_notes'][$index] ?? null;
 
-        // Simpan ke ProcedureOdontogram
-        if (!empty($validatedData['procedure_id']) && !empty($validatedData['tooth_numbers'])) {
-            foreach ($validatedData['procedure_id'] as $procedureIndex => $procedureId) {
-                $currentToothNumber = $validatedData['tooth_numbers'][$procedureIndex] ?? null;
-                $procedureNotes = $validatedData['procedure_notes'][$procedureIndex] ?? null;
+    if ($procedureId) {
+        // Buat kombinasi unik berdasarkan procedure_id dan tooth_number
+        $combinationKey = $procedureId . '-' . $toothNumber;
 
-                // Buat kombinasi unik berdasarkan procedure_id dan tooth_number
-                $combinationKey = $procedureId . '-' . $currentToothNumber;
+        if (!in_array($combinationKey, $uniqueCombinations)) {
+            // Simpan kombinasi ke dalam array unik
+            $uniqueCombinations[] = $combinationKey;
 
-                if (!in_array($combinationKey, $uniqueCombinations) && $currentToothNumber == $toothNumber) {
-                    // Simpan kombinasi ke dalam array unik
-                    $uniqueCombinations[] = $combinationKey;
-
-                    // Simpan ke database
-                    ProcedureOdontogram::create([
-                        'medical_record_id' => $medicalRecord->id,
-                        'procedure_id' => $procedureId,
-                        'tooth_number' => $currentToothNumber,
-                        'notes' => $procedureNotes,
-                    ]);
-                }
-            }
-        }
-
-        // Update atau buat odontogram baru
-        Odontogram::updateOrCreate(
-            [
-                'patient_id' => $patientId,
-                'tooth_number' => $toothNumber,
-            ],
-            [
+            // Simpan ke database
+            ProcedureOdontogram::create([
                 'medical_record_id' => $medicalRecord->id,
-                'condition' => $condition,
-                'notes' => $notes,
-            ]
-        );
+                'procedure_id' => $procedureId,
+                'tooth_number' => $toothNumber,
+                'notes' => $procedureNotes,
+            ]);
+        }
     }
+}
 
     return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecord->id])
                      ->with('success', 'Medical Record and Odontogram have been saved successfully.');

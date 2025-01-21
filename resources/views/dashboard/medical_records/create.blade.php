@@ -123,31 +123,31 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     function updateSelectedProceduresDisplay() {
-        const container = document.getElementById('selectedProceduresContainer');
-        container.innerHTML = '';
+    const container = document.getElementById('selectedProceduresContainer');
+    container.innerHTML = '';
 
-        selectedProcedures.forEach((data, procedureId) => {
-            const div = document.createElement('div');
-            div.className = 'mb-3 border p-3';
-            div.innerHTML = `
-                <h5>${data.name}</h5>
-                <input type="hidden" name="procedure_id[]" value="${procedureId}">
-                ${data.teeth.map(tooth => `
-                    <div class="mb-2">
-                        <p>Tooth ${tooth}</p>
-                        <input type="hidden" name="tooth_numbers[]" value="${tooth}">
-                        <textarea name="procedure_notes[]" class="form-control" 
-                                placeholder="Notes for tooth ${tooth}"></textarea>
-                    </div>
-                `).join('')}
-                <button type="button" class="btn btn-danger btn-sm mt-2" 
-                        onclick="removeProcedure('${procedureId}')">
-                    Remove Procedure
-                </button>
-            `;
-            container.appendChild(div);
-        });
-    }
+    selectedProcedures.forEach((data, procedureId) => {
+        const div = document.createElement('div');
+        div.className = 'mb-3 border p-3';
+        div.innerHTML = `
+            <h5>${data.name}</h5>
+            ${data.teeth.map(tooth => `
+                <div class="mb-2">
+                    <p>Tooth ${tooth}</p>
+                    <input type="hidden" name="procedure_id[]" value="${procedureId}">
+                    <input type="hidden" name="tooth_numbers[]" value="${tooth}">
+                    <textarea name="procedure_notes[]" class="form-control" 
+                            placeholder="Notes for tooth ${tooth}"></textarea>
+                </div>
+            `).join('')}
+            <button type="button" class="btn btn-danger btn-sm mt-2" 
+                    onclick="removeProcedure('${procedureId}')">
+                Remove Procedure
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
 
     window.removeProcedure = function(procedureId) {
         const teeth = selectedProcedures.get(procedureId).teeth;
