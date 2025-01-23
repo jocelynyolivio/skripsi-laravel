@@ -168,13 +168,13 @@ public function store(Request $request)
     // Cari jadwal terkait dari reservasi
     $schedule = $reservation->schedule;
 
-    $schedule->update(['is_available' => false]);
+    // $schedule->update(['is_available' => false]);
 
     // Hapus data reservasi
     $reservation->delete();
 
     // Update status is_available pada jadwal menjadi true
-    $schedule->update(['is_available' => true]);
+    // $schedule->update(['is_available' => true]);
     return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation deleted successfully!');
 }
 

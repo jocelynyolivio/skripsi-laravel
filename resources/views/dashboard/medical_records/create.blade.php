@@ -63,7 +63,7 @@
                             <button type="button"
                                     class="tooth btn btn-outline-primary w-100"
                                     data-tooth="{{ $i }}"
-                                    onclick="selectToothForProcedure({{ $i }})">
+                                    onclick="selectToothForProcedure('{{ $i }}')">
                                 {{ $i }}
                             </button>
                         </div>
