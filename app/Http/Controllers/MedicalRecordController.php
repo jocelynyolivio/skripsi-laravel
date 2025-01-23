@@ -24,7 +24,9 @@ class MedicalRecordController extends Controller
     
     $patientName = Patient::findOrFail($patientId)->name;
 
-    return view('dashboard.medical_records.index', compact('medicalRecords', 'patientId', 'patientName'));
+    $proceduress = Procedure::all();
+
+return view('dashboard.medical_records.index', compact('medicalRecords', 'patientId', 'patientName', 'proceduress'));
 }
 
     
@@ -122,6 +124,7 @@ class MedicalRecordController extends Controller
     // Simpan atau Perbarui Odontogram dan ProcedureOdontogram
     // Simpan ke ProcedureOdontogram untuk setiap pasangan tooth_number dan procedure_id
 $uniqueCombinations = []; // Untuk mencegah duplikasi
+// dd($validatedData['tooth_numbers']);
 foreach ($validatedData['tooth_numbers'] as $index => $toothNumber) {
     $procedureId = $validatedData['procedure_id'][$index] ?? null;
     $procedureNotes = $validatedData['procedure_notes'][$index] ?? null;

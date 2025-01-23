@@ -32,7 +32,8 @@
                 <td>{{ $record->treatment }}</td>
                 <td>
                     @if($record->procedures->count() > 0)
-                    @foreach($record->procedures as $procedure)
+                    @foreach($proceduress as $procedure)
+                    @if($record->procedureOdontograms->where('procedure_id', $procedure->id)->count() > 0)
                     <div class="mb-2">
                         <strong>{{ $procedure->name }}:</strong>
                         <br>
@@ -58,6 +59,7 @@
                         </ul>
                         @endif
                     </div>
+                    @endif
                     @endforeach
                     @else
                     <span class="text-muted">No procedures</span>
