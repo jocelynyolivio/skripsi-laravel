@@ -251,31 +251,67 @@ public function procedureMaterialsPage()
 
 public function edit($patientId, $recordId)
 {
-    // Retrieve the medical record using the provided recordId
-    $medicalRecord = MedicalRecord::findOrFail($recordId);
+    $medicalRecord = MedicalRecord::with(['procedures', 'procedureOdontograms'])->findOrFail($recordId);
+    
+    // Ambil semua prosedur yang tersedia
+    $procedures = Procedure::all();
+    
+    // Ambil semua prosedur yang telah dipilih
+    $selectedProcedures = $medicalRecord->procedures->pluck('id')->toArray();
 
-    // Pass the record to the view, along with the patientId
+    // Ambil semua nomor gigi yang terkait dengan rekam medis ini
+    $procedureOdontograms = $medicalRecord->procedureOdontograms->map(function ($po) {
+        return [
+            'procedure_id' => $po->procedure_id,
+            'tooth_number' => $po->tooth_number,
+            'notes' => $po->notes,
+        ];
+    });
+
     return view('dashboard.medical_records.edit', [
         'medicalRecord' => $medicalRecord,
-        'patientId' => $patientId
+        'patientId' => $patientId,
+        'procedures' => $procedures,
+        'selectedProcedures' => $selectedProcedures,
+        'procedureOdontograms' => $procedureOdontograms,
     ]);
 }
-
 
 public function update(Request $request, $patientId, $recordId)
 {
     $validatedData = $request->validate([
-        'teeth_condition' => 'required|string',
-        'treatment' => 'required|string',
-        'notes' => 'nullable|string',
+        'tooth_numbers' => 'required|array',
+        'tooth_numbers.*' => 'integer|min:1|max:32',
+        'procedure_notes' => 'nullable|array',
+        'procedure_notes.*' => 'nullable|string',
     ]);
 
-    $medicalRecord = MedicalRecord::findOrFail($recordId);
-    $medicalRecord->update($validatedData);
+    $medicalRecord = MedicalRecord::with('procedureOdontograms')->findOrFail($recordId);
 
-    return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
-                     ->with('success', 'Medical record updated successfully.');
+    // **Update odontogram (nomor gigi dan notes)**
+    $existingOdontograms = $medicalRecord->procedureOdontograms->keyBy('id');
+
+    foreach ($validatedData['tooth_numbers'] as $index => $toothNumber) {
+        $odontogram = $existingOdontograms->skip($index)->first();
+
+        if ($odontogram) {
+            $odontogram->update([
+                'tooth_number' => $toothNumber,
+                'notes' => $validatedData['procedure_notes'][$index] ?? null,
+            ]);
+        }
+    }
+
+    // Redirect setelah update
+    return redirect()
+        ->route('dashboard.medical_records.index', ['patientId' => $patientId])
+        ->with('success', 'Medical record updated successfully.');
 }
+
+
+
+
+
 
 public function destroy($patientId, $recordId)
 {
