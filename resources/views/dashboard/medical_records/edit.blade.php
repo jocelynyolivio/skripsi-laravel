@@ -24,31 +24,29 @@
         </div>
 
         <div class="mb-3">
-            <label for="procedures" class="form-label">Procedures</label>
-            <select class="form-select" name="procedure_id[]" id="procedures" multiple required>
-                @foreach($procedures as $procedure)
-                    <option value="{{ $procedure->id }}" 
-                        {{ in_array($procedure->id, $selectedProcedures) ? 'selected' : '' }}>
-                        {{ $procedure->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="tooth_numbers" class="form-label">Tooth Numbers</label>
-            <div id="tooth-container">
-                @foreach($procedureOdontograms as $odontogram)
-                    <div class="tooth-entry d-flex mb-2">
-                        <input type="text" class="form-control me-2" name="tooth_numbers[]" value="{{ $odontogram['tooth_number'] }}" placeholder="Tooth Number" required>
-                        <input type="hidden" name="procedure_id[]" value="{{ $odontogram['procedure_id'] }}">
-                        <input type="text" class="form-control" name="procedure_notes[]" value="{{ $odontogram['notes'] }}" placeholder="Notes">
-                        <!-- Remove button to delete the existing entry -->
-                        <button type="button" class="btn btn-danger ms-2 remove-tooth">X</button>
-                    </div>
-                @endforeach
+    <label for="tooth_numbers" class="form-label">Tooth Numbers and Procedures</label>
+    <div id="tooth-container">
+        @foreach($procedureOdontograms as $odontogram)
+            <div class="tooth-entry d-flex mb-2 align-items-center">
+                <!-- Menampilkan nama prosedur (read-only) -->
+                <span class="form-control me-2 bg-light">{{ $procedures->firstWhere('id', $odontogram['procedure_id'])->name }}</span>
+                
+                <!-- Menampilkan nomor gigi (editable) -->
+                <input type="text" class="form-control me-2" name="tooth_numbers[]" value="{{ $odontogram['tooth_number'] }}" placeholder="Tooth Number" required>
+                
+                <!-- Hidden input untuk procedure_id -->
+                <input type="hidden" name="procedure_id[]" value="{{ $odontogram['procedure_id'] }}">
+                
+                <!-- Menampilkan notes (editable) -->
+                <input type="text" class="form-control me-2" name="procedure_notes[]" value="{{ $odontogram['notes'] }}" placeholder="Notes">
+                
+                <!-- Remove button -->
+                <button type="button" class="btn btn-danger ms-2 remove-tooth">X</button>
             </div>
-        </div>
+        @endforeach
+    </div>
+</div>
+
 
         <div class="mb-3">
             <button type="submit" class="btn btn-primary">Save Changes</button>

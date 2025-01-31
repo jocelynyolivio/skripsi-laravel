@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
-use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\ScheduleOverride;
@@ -29,46 +28,47 @@ class ScheduleController extends Controller
         $request->validate([
             'date' => 'required|date',
         ]);
-    
+
         $selectedDate = $request->date;
         $dayOfWeek = date('l', strtotime($selectedDate));
-    
+
         // Ambil template berdasarkan hari
         $templates = ScheduleTemplate::where('day_of_week', $dayOfWeek)->get();
-    
+
         // Ambil override pada tanggal tersebut
         $overrides = ScheduleOverride::where('override_date', $selectedDate)->get();
-    
+
         $doctorsSchedules = [];
-    
+
         foreach ($templates as $template) {
             // Generate sessions untuk setiap template
             $sessions = [];
             $currentStartTime = strtotime($template->start_time);
             $endTime = strtotime($template->end_time);
-    
+
             while ($currentStartTime < $endTime) {
                 $nextStartTime = $currentStartTime + 3600; // 1 jam
-    
+
+
                 // Cek apakah ada override
                 $override = $overrides->first(function ($override) use ($template, $currentStartTime, $nextStartTime) {
                     return $override->doctor_id == $template->doctor_id &&
                         (!$override->start_time || strtotime($override->start_time) <= $currentStartTime) &&
                         (!$override->end_time || strtotime($override->end_time) >= $nextStartTime);
                 });
-    
+
                 // Cek apakah sesi sudah terreservasi
                 $isReserved = Reservation::where('doctor_id', $template->doctor_id)
                     ->where('tanggal_reservasi', $selectedDate)
                     ->where('jam_mulai', date('H:i', $currentStartTime))
                     ->exists();
-    
+
                 // Jika sudah terreservasi, skip jadwal ini
                 if ($isReserved) {
                     $currentStartTime = $nextStartTime;
                     continue;
                 }
-    
+
                 // Jika ada override dan tidak available, skip jadwal ini
                 if (!($override && !$override->is_available)) {
                     $sessions[] = [
@@ -77,10 +77,10 @@ class ScheduleController extends Controller
                         'is_available' => $override ? $override->is_available : true
                     ];
                 }
-    
+
                 $currentStartTime = $nextStartTime;
             }
-    
+
             if (!empty($sessions)) {
                 $doctorsSchedules[] = [
                     'doctor' => [
@@ -91,14 +91,14 @@ class ScheduleController extends Controller
                 ];
             }
         }
-    
+
         return response()->json([
             'date' => $selectedDate,
             'day_of_week' => $dayOfWeek,
             'doctors' => $doctorsSchedules
         ]);
     }
-    
+
 
     private function generateSchedules($templates, $overrides)
     {
@@ -176,31 +176,28 @@ class ScheduleController extends Controller
     }
 
     public function storeReservation(Request $request)
-{
-    // Validasi form input
-    $request->validate([
-        'patient_id' => 'required|integer',
-        'doctor_id' => 'required|integer',
-        'tanggal_reservasi' => 'required|date',
-        'jam_mulai' => 'required|date_format:H:i',
-        'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
-    ]);
-    
-    // Proses penyimpanan reservasi
-    $reservation = Reservation::create([
-        'patient_id' => $request->patient_id,
-        'doctor_id' => $request->doctor_id,
-        'tanggal_reservasi' => $request->tanggal_reservasi,
-        'jam_mulai' => $request->jam_mulai,
-        'jam_selesai' => $request->jam_selesai,
-    ]);
-    
-    // Menyimpan flash message ke session
-    session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
-    
-    return redirect()->route('dashboard.schedules.index'); // Redirect kembali ke halaman jadwal
-}
+    {
+        // Validasi form input
+        $request->validate([
+            'patient_id' => 'required|integer',
+            'doctor_id' => 'required|integer',
+            'tanggal_reservasi' => 'required|date',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+        ]);
 
-    
+        // Proses penyimpanan reservasi
+        $reservation = Reservation::create([
+            'patient_id' => $request->patient_id,
+            'doctor_id' => $request->doctor_id,
+            'tanggal_reservasi' => $request->tanggal_reservasi,
+            'jam_mulai' => $request->jam_mulai,
+            'jam_selesai' => $request->jam_selesai,
+        ]);
 
+        // Menyimpan flash message ke session
+        session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
+
+        return redirect()->route('dashboard.schedules.index'); // Redirect kembali ke halaman jadwal
+    }
 }
