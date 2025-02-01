@@ -120,6 +120,11 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/schedules/get-patients', [ScheduleController::class, 'getPatients'])->name('schedules.get-patients');
     Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
 
+//     Route::get('/reservation/edit-reservation/{id}', [ScheduleController::class, 'editReservation'])->name('schedules.edit-reservation');
+// Route::post('/schedules/update-reservation/{id}', [ScheduleController::class, 'updateReservation'])->name('schedules.update-reservation');
+// Route::get('/schedules/get-available-times', [ScheduleController::class, 'getAvailableTimes']);
+
+
     Route::post('/reservations', [ScheduleController::class, 'storeReservation'])->name('reservations.store');
 
     Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
@@ -143,9 +148,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     // Route untuk reservasi
     // Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
-    Route::get('/reservations/{reservation}/edit', [ReservationController::class, 'edit'])->name('reservations.edit');
-    Route::put('/reservations/{reservation}', [ReservationController::class, 'update'])->name('reservations.update');
+    Route::get('/reservations/{reservation}/edit', [ScheduleController::class, 'editReservation'])->name('reservations.edit');
+    Route::put('/reservations/{reservation}', [ScheduleController::class, 'updateReservation'])->name('reservations.update');
     Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::get('/reservations/get-available-times', [ScheduleController::class, 'getAvailableTimes'])->name('reservations.getAvailableTimes');
     // // Admin: Menampilkan form tambah reservasi
     // Route::get('/reservations/create', [ReservationController::class, 'createForAdmin'])
     //     ->name('reservations.create');

@@ -175,29 +175,160 @@ class ScheduleController extends Controller
         return response()->json($patients);
     }
 
-    public function storeReservation(Request $request)
+    // public function storeReservation(Request $request)
+    // {
+    //     // Validasi form input
+    //     $request->validate([
+    //         'patient_id' => 'required|integer',
+    //         'doctor_id' => 'required|integer',
+    //         'tanggal_reservasi' => 'required|date',
+    //         'jam_mulai' => 'required|date_format:H:i',
+    //         'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+    //     ]);
+
+    //     // Proses penyimpanan reservasi
+    //     $reservation = Reservation::create([
+    //         'patient_id' => $request->patient_id,
+    //         'doctor_id' => $request->doctor_id,
+    //         'tanggal_reservasi' => $request->tanggal_reservasi,
+    //         'jam_mulai' => $request->jam_mulai,
+    //         'jam_selesai' => $request->jam_selesai,
+    //     ]);
+
+    //     // Menyimpan flash message ke session
+    //     session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
+
+    //     return redirect()->route('dashboard.schedules.index'); // Redirect kembali ke halaman jadwal
+    // }
+
+    public function getAvailableTimes(Request $request)
     {
-        // Validasi form input
-        $request->validate([
-            'patient_id' => 'required|integer',
-            'doctor_id' => 'required|integer',
-            'tanggal_reservasi' => 'required|date',
-            'jam_mulai' => 'required|date_format:H:i',
-            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
-        ]);
+        $request->validate(['date' => 'required|date']);
+        $selectedDate = $request->date;
+        $dayOfWeek = date('l', strtotime($selectedDate));
 
-        // Proses penyimpanan reservasi
-        $reservation = Reservation::create([
-            'patient_id' => $request->patient_id,
-            'doctor_id' => $request->doctor_id,
-            'tanggal_reservasi' => $request->tanggal_reservasi,
-            'jam_mulai' => $request->jam_mulai,
-            'jam_selesai' => $request->jam_selesai,
-        ]);
+        $templates = ScheduleTemplate::where('day_of_week', $dayOfWeek)->get();
+        $overrides = ScheduleOverride::where('override_date', $selectedDate)->get();
+        $schedules = $this->generateSchedules($templates, $overrides);
 
-        // Menyimpan flash message ke session
-        session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
-
-        return redirect()->route('dashboard.schedules.index'); // Redirect kembali ke halaman jadwal
+        return response()->json(['date' => $selectedDate, 'schedules' => $schedules]);
     }
+
+    public function editReservation($id)
+    {
+        $reservation = Reservation::with(['patient', 'doctor'])->findOrFail($id);
+        $patients = Patient::all();
+        $doctors = ScheduleTemplate::with('doctor')->get()->pluck('doctor')->unique();
+
+        return view('dashboard.reservations.edit', compact('reservation', 'patients', 'doctors'));
+    }
+
+    // public function updateReservation(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'patient_id' => 'required|integer',
+    //         'doctor_id' => 'required|integer',
+    //         'tanggal_reservasi' => 'required|date',
+    //         'jam_mulai' => 'required|date_format:H:i',
+    //         'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+    //     ]);
+
+    //     dd($request);
+    //     $isReserved = Reservation::where('doctor_id', $request->doctor_id)
+    //         ->where('tanggal_reservasi', $request->tanggal_reservasi)
+    //         ->where('jam_mulai', $request->jam_mulai)
+    //         ->where('id', '!=', $id)
+    //         ->exists();
+
+    //     if ($isReserved) {
+    //         return redirect()->back()->withErrors(['error' => 'Jadwal sudah direservasi. Pilih jadwal lain.']);
+    //     }
+
+    //     $reservation = Reservation::findOrFail($id);
+    //     $reservation->update($request->all());
+
+    //     return redirect()->route('dashboard.reservations.index')->with('success', 'Reservasi berhasil diperbarui.');
+    // }
+
+
+//     public function editReservation($id)
+// {
+//     $reservation = Reservation::findOrFail($id);
+//     $patients = Patient::all(); // Ambil daftar pasien
+//     $doctors = ScheduleTemplate::distinct()->pluck('doctor_id'); // Ambil daftar dokter
+//     return view('dashboard.schedules.edit', compact('reservation', 'patients', 'doctors'));
+// }
+
+
+// public function updateReservation(Request $request, $id)
+// {
+//     // Validasi input
+//     $request->validate([
+//         'patient_id' => 'required|integer',
+//         'doctor_id' => 'required|integer',
+//         'tanggal_reservasi' => 'required|date',
+//         'jam_mulai' => 'required|date_format:H:i',
+//         'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+//     ]);
+
+//     // Ambil data reservasi berdasarkan ID
+//     $reservation = Reservation::findOrFail($id);
+
+//     // Update data reservasi
+//     $reservation->update([
+//         'patient_id' => $request->patient_id,
+//         'doctor_id' => $request->doctor_id,
+//         'tanggal_reservasi' => $request->tanggal_reservasi,
+//         'jam_mulai' => $request->jam_mulai,
+//         'jam_selesai' => $request->jam_selesai,
+//     ]);
+
+//     // Set flash message dan redirect
+//     return redirect()->route('dashboard.schedules.index')->with('success', 'Reservation updated successfully!');
+// }
+
+public function saveReservation(Request $request, $id = null)
+{
+    // Validasi input
+    $request->validate([
+        'patient_id' => 'required|integer',
+        'doctor_id' => 'required|integer',
+        'tanggal_reservasi' => 'required|date',
+        'jam_mulai' => 'required|date_format:H:i',
+        'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+    ]);
+
+    // Jika ID diberikan, update reservasi yang ada, jika tidak buat baru
+    $reservation = $id ? Reservation::findOrFail($id) : new Reservation();
+
+    $reservation->fill([
+        'patient_id' => $request->patient_id,
+        'doctor_id' => $request->doctor_id,
+        'tanggal_reservasi' => $request->tanggal_reservasi,
+        'jam_mulai' => $request->jam_mulai,
+        'jam_selesai' => $request->jam_selesai,
+    ]);
+
+    $reservation->save();
+
+    // Menyimpan flash message ke session
+    $message = $id ? 'Reservasi berhasil diperbarui.' : 'Reservasi berhasil dibuat.';
+    session()->flash('success', $message);
+ 
+    return redirect()->route('dashboard.schedules.index');
+}
+
+// Store Reservation memanggil saveReservation
+public function storeReservation(Request $request)
+{
+    return $this->saveReservation($request);
+}
+
+// Update Reservation memanggil saveReservation dengan ID reservasi
+public function updateReservation(Request $request, $id)
+{
+    return $this->saveReservation($request, $id);
+}
+
+
 }

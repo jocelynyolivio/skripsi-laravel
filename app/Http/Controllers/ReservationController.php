@@ -1,65 +1,53 @@
 <?php
 
 namespace App\Http\Controllers;
+use Carbon\Carbon;
 use App\Models\Patient;
 use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use App\Models\ScheduleTemplate;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
 
-    public function edit($id)
+public function edit($id)
 {
-    // Ambil data reservasi berdasarkan ID
     $reservation = Reservation::findOrFail($id);
+    $patients = Patient::all(); // Ambil daftar pasien
+    $doctors = ScheduleTemplate::distinct()->pluck('doctor_id'); // Ambil daftar dokter
 
-    // Ambil jadwal yang masih tersedia
-    $schedules = Schedules::where('is_available', true)->get();
 
-    // Kirim data ke view
-    return view('dashboard.reservations.edit', [
-        'title' => 'Edit Reservation',
-        'reservation' => $reservation, // Data reservasi yang akan diedit
-        'schedules' => $schedules, // Jadwal yang masih available
-    ]);
+    return view('dashboard.reservations.edit', compact('reservation', 'patients', 'doctors'));
 }
+
 
 public function update(Request $request, $id)
 {
     // Validasi input
     $request->validate([
-        'schedule_id' => 'required|exists:schedules,id',
+        'patient_id' => 'required|integer',
+        'doctor_id' => 'required|integer',
+        'tanggal_reservasi' => 'required|date',
+        'jam_mulai' => 'required|date_format:H:i',
+        'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
     ]);
 
-    // Cari reservasi berdasarkan ID
+    // Ambil data reservasi berdasarkan ID
     $reservation = Reservation::findOrFail($id);
 
-    // Ambil schedule lama (yang sebelumnya digunakan di reservasi)
-    $oldSchedule = $reservation->schedule;
-
-    // Ubah status jadwal lama menjadi 'available'
-    $oldSchedule->update(['is_available' => true]);
-
-    // Cari jadwal baru yang dipilih
-    $newSchedule = Schedules::findOrFail($request->schedule_id);
-
-    // Update status jadwal baru menjadi 'reserved'
-    $newSchedule->update(['is_available' => false]);
-
-    // Update data reservasi dengan schedule baru
+    // Update data reservasi
     $reservation->update([
-        'schedule_id' => $newSchedule->id,
-        'doctor_id' => $newSchedule->doctor_id,
-        'tanggal_reservasi' => $newSchedule->date,
-        'jam_mulai' => $newSchedule->time_start,
-        'jam_selesai' => $newSchedule->time_end,
+        'patient_id' => $request->patient_id,
+        'doctor_id' => $request->doctor_id,
+        'tanggal_reservasi' => $request->tanggal_reservasi,
+        'jam_mulai' => $request->jam_mulai,
+        'jam_selesai' => $request->jam_selesai,
     ]);
 
-    // Redirect dengan pesan sukses
-    return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation updated successfully!');
+    // Set flash message dan redirect
+    return redirect()->route('dashboard.schedules.index')->with('success', 'Reservation updated successfully!');
 }
 
     public function storeReservation(Request $request)
@@ -87,7 +75,7 @@ public function update(Request $request, $id)
     // Menyimpan flash message ke session
     session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
 
-    return redirect()->route('dashboard.schedules.index'); // Redirect ke halaman dashboard setelah sukses
+    return redirect()->route('dashboard.reservations.index'); // Redirect ke halaman dashboard setelah sukses
 }
 
     
