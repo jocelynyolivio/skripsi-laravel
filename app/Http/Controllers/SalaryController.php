@@ -5,68 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-// class SalaryController extends Controller
-// {
-//     public function uploadForm()
-//     {
-//         return view('dashboard.salaries.upload-salary');
-//     }
-
-//     public function processExcel(Request $request)
-//     {
-//         // Validasi file upload
-//         $request->validate([
-//             'file' => 'required|mimes:xls,xlsx',
-//         ]);
-
-//         // Ambil path file yang diunggah
-//         $filePath = $request->file('file')->getPathName();
-
-//         // Load file XLS/XLSX menggunakan PhpSpreadsheet
-//         $spreadsheet = IOFactory::load($filePath);
-
-//         // Daftar nama sheet yang ingin dibaca
-//         $sheetNames = ['1.2.3', '4.5.6', '7.8.9', '10.11.12', '13.14.15', '16.17'];
-//         $dataSummary = [];
-
-//         // Iterasi untuk membaca setiap sheet yang diinginkan
-//         foreach ($sheetNames as $sheetName) {
-//             $sheet = $spreadsheet->getSheetByName($sheetName);
-
-//             if ($sheet) {
-//                 // Baca tanggal (sama untuk semua orang dalam sheet)
-//                 $tanggal = $sheet->getCell('D2')->getValue();
-
-//                 // Kolom awal data untuk setiap orang
-//                 $startingColumns = [
-//                     ['departemen' => 'B', 'nama' => 'J'], // Orang pertama
-//                     ['departemen' => 'Q', 'nama' => 'Y'], // Orang kedua
-//                     ['departemen' => 'AF', 'nama' => 'AN'], // Orang ketiga
-//                 ];
-
-//                 foreach ($startingColumns as $columns) {
-//                     // Ambil data berdasarkan lokasi kolom
-//                     $departemen = $sheet->getCell($columns['departemen'] . "3")->getValue(); // Departemen
-//                     $nama = $sheet->getCell($columns['nama'] . "3")->getValue(); // Nama
-//                     $noId = $sheet->getCell($columns['nama'] . "4")->getValue(); // No. ID
-
-//                     // Simpan ke dalam array
-//                     $dataSummary[] = [
-//                         'sheet' => $sheetName,
-//                         'tanggal' => $tanggal,
-//                         'departemen' => $departemen,
-//                         'nama' => $nama,
-//                         'no_id' => $noId,
-//                     ];
-//                 }
-//             }
-//         }
-
-//         // Kirim data ke view untuk ditampilkan
-//         return view('dashboard.salaries.salary-result', compact('dataSummary'));
-//     }
-// }
-
 class SalaryController extends Controller
 {
     public function uploadForm()
@@ -74,6 +12,93 @@ class SalaryController extends Controller
         return view('dashboard.salaries.upload-salary');
     }
 
+    // public function processExcel(Request $request)
+    // {
+    //     // Validasi file upload
+    //     $request->validate([
+    //         'file' => 'required|mimes:xls,xlsx',
+    //     ]);
+
+    //     // Ambil path file yang diunggah
+    //     $filePath = $request->file('file')->getPathName();
+
+    //     // Load file XLS/XLSX menggunakan PhpSpreadsheet
+    //     $spreadsheet = IOFactory::load($filePath);
+
+    //     // Daftar nama sheet yang ingin dibaca
+    //     $sheetNames = ['1.2.3', '4.5.6', '7.8.9', '10.11.12', '13.14.15', '16.17'];
+    //     $dataSummary = [];
+
+    //     // Kolom awal data untuk setiap dokter
+    //     $startingColumns = [
+    //         ['departemen' => 'B', 'nama' => 'J', 'data_awal' => 'B'], // Dokter 1
+    //         ['departemen' => 'Q', 'nama' => 'Y', 'data_awal' => 'Q'], // Dokter 2
+    //         ['departemen' => 'AF', 'nama' => 'AN', 'data_awal' => 'AF'], // Dokter 3
+    //     ];
+
+    //     foreach ($sheetNames as $sheetName) {
+    //         // Ambil sheet berdasarkan nama
+    //         $sheet = $spreadsheet->getSheetByName($sheetName);
+    //         if (!$sheet) continue; // Lewati jika sheet tidak ditemukan
+
+    //         foreach ($startingColumns as $columns) {
+    //             // Ambil informasi statis dokter dari sheet
+    //             $departemen = $sheet->getCell($columns['departemen'] . "3")->getValue(); // Departemen dokter
+    //             $nama = $sheet->getCell($columns['nama'] . "3")->getValue(); // Nama dokter
+    //             $noId = $sheet->getCell($columns['nama'] . "4")->getValue(); // ID dokter
+
+    //             $kehadiran = []; // Array untuk menyimpan data kehadiran
+
+    //             for ($row = 12; $row <= 42; $row++) { // Iterasi baris untuk membaca tanggal dan jam kerja
+    //                 $tanggal = $sheet->getCell("A{$row}")->getValue(); // Ambil tanggal
+                    
+    //                 if ($tanggal) {
+    //                     $col = $columns['data_awal']; // Kolom awal berdasarkan dokter
+    //                     $jamMasuk = $this->convertTime($sheet->getCell($col . $row)->getValue()); // Ambil jam masuk
+    //                     $jamPulang = null; // Default null jika tidak ditemukan
+
+    //                     // Loop untuk mencari jam pulang dengan memeriksa beberapa kolom setelah jam masuk
+    //                     for ($offset = 1; $offset <= 3; $offset++) {
+    //                         $colCheck = $this->getNextExcelColumn($col, $offset);
+    //                         $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+    //                         if ($jamCek && !$jamPulang) {
+    //                             $jamPulang = $jamCek; // Simpan jam pulang pertama yang ditemukan
+    //                         }
+    //                     }
+
+    //                     // Ambil data lembur berdasarkan kolom yang sesuai
+    //                     $lemburMasuk = $this->convertTime($sheet->getCell($this->getNextExcelColumn($col, 4) . $row)->getValue());
+    //                     $lemburPulang = $this->convertTime($sheet->getCell($this->getNextExcelColumn($col, 5) . $row)->getValue());
+
+    //                     // Jika ada teks "Bolos", tandai sebagai tidak hadir
+    //                     $status = (strtolower(trim($jamMasuk)) == 'bolos' || strtolower(trim($jamPulang)) == 'bolos') ? 'Bolos' : 'Hadir';
+
+    //                     // Simpan data kehadiran dalam array
+    //                     $kehadiran[] = [
+    //                         'tanggal' => $tanggal,
+    //                         'jam_masuk' => $jamMasuk,
+    //                         'jam_pulang' => $jamPulang,
+    //                         'lembur_masuk' => $lemburMasuk,
+    //                         'lembur_pulang' => $lemburPulang,
+    //                         'status' => $status,
+    //                     ];
+    //                 }
+    //             }
+
+    //             // Simpan semua data dokter ke dalam array
+    //             $dataSummary[] = [
+    //                 'sheet' => $sheetName,
+    //                 'departemen' => $departemen,
+    //                 'nama' => $nama,
+    //                 'no_id' => $noId,
+    //                 'kehadiran' => $kehadiran,
+    //             ];
+    //         }
+    //     }
+
+    //     // Kirim data ke view untuk ditampilkan
+    //     return view('dashboard.salaries.salary-result', compact('dataSummary'));
+    // }
     public function processExcel(Request $request)
     {
         // Validasi file upload
@@ -91,60 +116,124 @@ class SalaryController extends Controller
         $sheetNames = ['1.2.3', '4.5.6', '7.8.9', '10.11.12', '13.14.15', '16.17'];
         $dataSummary = [];
 
-        // Iterasi untuk membaca setiap sheet yang diinginkan
+        // Kolom awal data untuk setiap dokter
+        $startingColumns = [
+            ['departemen' => 'B', 'nama' => 'J', 'jam_kerja_1' => 'B', 'jam_kerja_2' => 'G', 'lembur' => 'K'], // Dokter 1
+            ['departemen' => 'Q', 'nama' => 'Y', 'jam_kerja_1' => 'Q', 'jam_kerja_2' => 'V', 'lembur' => 'Z'], // Dokter 2
+            ['departemen' => 'AF', 'nama' => 'AN', 'jam_kerja_1' => 'AF', 'jam_kerja_2' => 'AK', 'lembur' => 'AO'], // Dokter 3
+        ];
+
         foreach ($sheetNames as $sheetName) {
+            // Ambil sheet berdasarkan nama
             $sheet = $spreadsheet->getSheetByName($sheetName);
+            if (!$sheet) continue; // Lewati jika sheet tidak ditemukan
 
-            if ($sheet) {
-                // Kolom awal data untuk setiap orang
-                $startingColumns = [
-                    ['departemen' => 'B', 'nama' => 'J', 'data_awal' => 'B'], // Orang pertama
-                    ['departemen' => 'Q', 'nama' => 'Y', 'data_awal' => 'Q'], // Orang kedua
-                    ['departemen' => 'AF', 'nama' => 'AN', 'data_awal' => 'AF'], // Orang ketiga
-                ];
+            foreach ($startingColumns as $columns) {
+                // Ambil informasi statis dokter dari sheet
+                $departemen = $sheet->getCell($columns['departemen'] . "3")->getValue(); // Departemen dokter
+                $nama = $sheet->getCell($columns['nama'] . "3")->getValue(); // Nama dokter
+                $noId = $sheet->getCell($columns['nama'] . "4")->getValue(); // ID dokter
 
-                foreach ($startingColumns as $columns) {
-                    // Ambil data statis berdasarkan lokasi kolom
-                    $departemen = $sheet->getCell($columns['departemen'] . "3")->getValue(); // Departemen
-                    $nama = $sheet->getCell($columns['nama'] . "3")->getValue(); // Nama
-                    $noId = $sheet->getCell($columns['nama'] . "4")->getValue(); // No. ID
+                $kehadiran = []; // Array untuk menyimpan data kehadiran
 
-                    // Iterasi melalui tanggal (baris 12 ke bawah)
-                    $kehadiran = [];
-                    for ($row = 12; $row <= 35; $row++) {
-                        $tanggal = $sheet->getCell("A{$row}")->getValue(); // Tanggal
-                        if ($tanggal) {
-                            $col = $columns['data_awal']; // Kolom awal
-                            $jamMasuk = $sheet->getCell($col . $row)->getValue(); // Cek jam masuk
-                            $jamPulang = null;
+                for ($row = 12; $row <= 42; $row++) { // Iterasi baris untuk membaca tanggal dan jam kerja
+                    $tanggal = $sheet->getCell("A{$row}")->getValue(); // Ambil tanggal
+                    
+                    if ($tanggal) {
+                        $jamMasuk = null;
+                        $jamPulang = null;
+                        $lemburMasuk = null;
+                        $lemburPulang = null;
 
-                            // Jika ada jam masuk, cek apakah ada jam pulang di kolom sebelah
-                            if ($jamMasuk) {
-                                $nextCol = chr(ord($col) + 1); // Kolom sebelahnya
-                                $jamPulang = $sheet->getCell($nextCol . $row)->getValue();
+                        // **1. Cek Jam Kerja 1**
+                        $jamMasuk = $this->convertTime($sheet->getCell($columns['jam_kerja_1'] . $row)->getValue());
+                        for ($offset = 1; $offset <= 3; $offset++) {
+                            $colCheck = $this->getNextExcelColumn($columns['jam_kerja_1'], $offset);
+                            $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+                            if ($jamCek && !$jamPulang) {
+                                $jamPulang = $jamCek;
                             }
-
-                            $kehadiran[] = [
-                                'tanggal' => $tanggal,
-                                'jam_masuk' => $jamMasuk,
-                                'jam_pulang' => $jamPulang,
-                            ];
                         }
-                    }
 
-                    // Simpan semua data ke dalam array
-                    $dataSummary[] = [
-                        'sheet' => $sheetName,
-                        'departemen' => $departemen,
-                        'nama' => $nama,
-                        'no_id' => $noId,
-                        'kehadiran' => $kehadiran,
-                    ];
+                        // **2. Jika Jam Kerja 1 kosong, cek Jam Kerja 2**
+                        if (!$jamMasuk) {
+                            $jamMasuk = $this->convertTime($sheet->getCell($columns['jam_kerja_2'] . $row)->getValue());
+                            for ($offset = 1; $offset <= 3; $offset++) {
+                                $colCheck = $this->getNextExcelColumn($columns['jam_kerja_2'], $offset);
+                                $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+                                if ($jamCek && !$jamPulang) {
+                                    $jamPulang = $jamCek;
+                                }
+                            }
+                        }
+
+                        // **3. Jika masih kosong, cek Lembur**
+                        if (!$jamMasuk) {
+                            $jamMasuk = $this->convertTime($sheet->getCell($columns['lembur'] . $row)->getValue());
+                            for ($offset = 1; $offset <= 3; $offset++) {
+                                $colCheck = $this->getNextExcelColumn($columns['lembur'], $offset);
+                                $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+                                if ($jamCek && !$jamPulang) {
+                                    $jamPulang = $jamCek;
+                                }
+                            }
+                        }
+
+                        // Jika ada teks "Bolos", tandai sebagai tidak hadir
+                        $status = (strtolower(trim($jamMasuk)) == 'bolos' || strtolower(trim($jamPulang)) == 'bolos') ? 'Bolos' : 'Hadir';
+
+                        // Simpan data kehadiran dalam array
+                        $kehadiran[] = [
+                            'tanggal' => $tanggal,
+                            'jam_masuk' => $jamMasuk,
+                            'jam_pulang' => $jamPulang,
+                            'lembur_masuk' => $lemburMasuk,
+                            'lembur_pulang' => $lemburPulang,
+                            'status' => $status,
+                        ];
+                    }
                 }
+
+                // Simpan semua data dokter ke dalam array
+                $dataSummary[] = [
+                    'sheet' => $sheetName,
+                    'departemen' => $departemen,
+                    'nama' => $nama,
+                    'no_id' => $noId,
+                    'kehadiran' => $kehadiran,
+                ];
             }
         }
 
         // Kirim data ke view untuk ditampilkan
         return view('dashboard.salaries.salary-result', compact('dataSummary'));
+    }
+
+
+    // Fungsi untuk mengonversi format waktu dari angka Excel ke format jam
+    private function convertTime($value)
+    {
+        if (is_numeric($value)) {
+            $hours = floor($value * 24);
+            $minutes = round(($value * 1440) % 60);
+            return sprintf('%02d:%02d', $hours, $minutes);
+        }
+        return $value ? trim($value) : null; // Jika bukan angka, kembalikan nilai asli
+    }
+
+    // Fungsi untuk mendapatkan kolom Excel berikutnya dengan mendukung format lebih dari satu huruf
+    private function getNextExcelColumn($col, $offset = 1)
+    {
+        $letters = str_split($col);
+        $length = count($letters);
+
+        for ($i = $length - 1; $i >= 0; $i--) {
+            if ($letters[$i] !== 'Z') {
+                $letters[$i] = chr(ord($letters[$i]) + $offset);
+                return implode('', $letters);
+            }
+            $letters[$i] = 'A';
+        }
+        return 'A' . implode('', $letters);
     }
 }
