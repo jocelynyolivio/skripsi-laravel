@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -51,7 +52,7 @@ class SalaryController extends Controller
 
     //             for ($row = 12; $row <= 42; $row++) { // Iterasi baris untuk membaca tanggal dan jam kerja
     //                 $tanggal = $sheet->getCell("A{$row}")->getValue(); // Ambil tanggal
-                    
+
     //                 if ($tanggal) {
     //                     $col = $columns['data_awal']; // Kolom awal berdasarkan dokter
     //                     $jamMasuk = $this->convertTime($sheet->getCell($col . $row)->getValue()); // Ambil jam masuk
@@ -138,18 +139,16 @@ class SalaryController extends Controller
 
                 for ($row = 12; $row <= 42; $row++) { // Iterasi baris untuk membaca tanggal dan jam kerja
                     $tanggal = $sheet->getCell("A{$row}")->getValue(); // Ambil tanggal
-                    
+
                     if ($tanggal) {
                         $jamMasuk = null;
                         $jamPulang = null;
-                        $lemburMasuk = null;
-                        $lemburPulang = null;
 
                         // **1. Cek Jam Kerja 1**
-                        $jamMasuk = $this->convertTime($sheet->getCell($columns['jam_kerja_1'] . $row)->getValue());
+                        $jamMasuk = trim($this->convertTime($sheet->getCell($columns['jam_kerja_1'] . $row)->getValue()));
                         for ($offset = 1; $offset <= 3; $offset++) {
                             $colCheck = $this->getNextExcelColumn($columns['jam_kerja_1'], $offset);
-                            $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+                            $jamCek = trim($this->convertTime($sheet->getCell($colCheck . $row)->getValue()));
                             if ($jamCek && !$jamPulang) {
                                 $jamPulang = $jamCek;
                             }
@@ -157,10 +156,10 @@ class SalaryController extends Controller
 
                         // **2. Jika Jam Kerja 1 kosong, cek Jam Kerja 2**
                         if (!$jamMasuk) {
-                            $jamMasuk = $this->convertTime($sheet->getCell($columns['jam_kerja_2'] . $row)->getValue());
+                            $jamMasuk = trim($this->convertTime($sheet->getCell($columns['jam_kerja_2'] . $row)->getValue()));
                             for ($offset = 1; $offset <= 3; $offset++) {
                                 $colCheck = $this->getNextExcelColumn($columns['jam_kerja_2'], $offset);
-                                $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+                                $jamCek = trim($this->convertTime($sheet->getCell($colCheck . $row)->getValue()));
                                 if ($jamCek && !$jamPulang) {
                                     $jamPulang = $jamCek;
                                 }
@@ -169,29 +168,70 @@ class SalaryController extends Controller
 
                         // **3. Jika masih kosong, cek Lembur**
                         if (!$jamMasuk) {
-                            $jamMasuk = $this->convertTime($sheet->getCell($columns['lembur'] . $row)->getValue());
+                            $jamMasuk = trim($this->convertTime($sheet->getCell($columns['lembur'] . $row)->getValue()));
                             for ($offset = 1; $offset <= 3; $offset++) {
                                 $colCheck = $this->getNextExcelColumn($columns['lembur'], $offset);
-                                $jamCek = $this->convertTime($sheet->getCell($colCheck . $row)->getValue());
+                                $jamCek = trim($this->convertTime($sheet->getCell($colCheck . $row)->getValue()));
                                 if ($jamCek && !$jamPulang) {
                                     $jamPulang = $jamCek;
                                 }
                             }
                         }
 
-                        // Jika ada teks "Bolos", tandai sebagai tidak hadir
-                        $status = (strtolower(trim($jamMasuk)) == 'bolos' || strtolower(trim($jamPulang)) == 'bolos') ? 'Bolos' : 'Hadir';
+                        // **Cek apakah jam masuk atau jam pulang berisi "Bolos"**
+                        if (
+                            strtolower($jamMasuk) == 'bolos' || strtolower($jamPulang) == 'bolos' ||
+                            empty($jamMasuk) && empty($jamPulang) // Jika keduanya kosong, skip
+                        ) {
+                            continue; // Lewati data ini
+                        }
 
                         // Simpan data kehadiran dalam array
                         $kehadiran[] = [
                             'tanggal' => $tanggal,
                             'jam_masuk' => $jamMasuk,
                             'jam_pulang' => $jamPulang,
-                            'lembur_masuk' => $lemburMasuk,
-                            'lembur_pulang' => $lemburPulang,
-                            'status' => $status,
                         ];
                     }
+                }
+
+                // Ambil periode dari cell D2
+                $periode = $sheet->getCell("D2")->getValue();
+                $periodeParts = explode(' ', trim($periode));
+                $tanggalRange = explode('-', $periodeParts[0] ?? ''); // Ambil bagian sebelum "~"
+
+                // Ambil Tahun dan Bulan dari periode
+                $tahun = $tanggalRange[0] ?? null;
+                $bulan = $tanggalRange[1] ?? null;
+
+                foreach ($kehadiran as $record) {
+                    // **Hanya simpan jika ada jam masuk atau jam pulang**
+                    if (empty($record['jam_masuk']) && empty($record['jam_pulang'])) {
+                        continue;
+                    }
+
+                    // Ambil hanya angka dari tanggal (misalnya '02' dari '02 SEN')
+                    $tanggalParts = explode(' ', trim($record['tanggal']));
+                    $tanggalOnly = $tanggalParts[0] ?? null;
+
+                    // Format tanggal ke YYYY-MM-DD
+                    $tanggalFinal = ($tanggalOnly && $tahun && $bulan)
+                        ? "{$tahun}-{$bulan}-" . str_pad($tanggalOnly, 2, '0', STR_PAD_LEFT)
+                        : null;
+
+                    // Cek apakah tanggal valid
+                    if (!$tanggalFinal) {
+                        continue;
+                    }
+
+                    // Simpan ke database
+                    Attendance::create([
+                        'no_id' => $noId,
+                        'nama' => $nama,
+                        'tanggal' => $tanggalFinal,
+                        'jam_masuk' => $record['jam_masuk'] ? \Carbon\Carbon::parse($record['jam_masuk'])->format('H:i:s') : null,
+                        'jam_pulang' => $record['jam_pulang'] ? \Carbon\Carbon::parse($record['jam_pulang'])->format('H:i:s') : null,
+                    ]);
                 }
 
                 // Simpan semua data dokter ke dalam array
@@ -208,6 +248,8 @@ class SalaryController extends Controller
         // Kirim data ke view untuk ditampilkan
         return view('dashboard.salaries.salary-result', compact('dataSummary'));
     }
+
+
 
 
     // Fungsi untuk mengonversi format waktu dari angka Excel ke format jam
