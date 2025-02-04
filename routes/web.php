@@ -235,6 +235,15 @@ Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('master
 Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel']);
 
 
+Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
+
+
+
+Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
+Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data');
+
+
+
 // Rute untuk odontogram
 Route::prefix('odontograms')->name('odontograms.')->group(function () {
     // Menampilkan halaman odontogram pasien
@@ -245,11 +254,11 @@ Route::prefix('odontograms')->name('odontograms.')->group(function () {
 });
 });
 
-Route::get('/dashboard/salaries/', function () {
-    $user = Auth::user(); // Mendapatkan pengguna yang sedang login
-    // $user->load('role'); // Memuat relasi role
-    return view('dashboard.salaries.index');
-})->middleware('internal');
+    // Route::get('/dashboard/salaries/', function () {
+    //     $user = Auth::user(); // Mendapatkan pengguna yang sedang login
+    //     // $user->load('role'); // Memuat relasi role
+    //     return view('dashboard.salaries.index');
+    // })->middleware('internal');
 
 
 // Route::get('/odontogram', function () {

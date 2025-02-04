@@ -331,6 +331,15 @@ class DatabaseSeeder extends Seeder
             'name' => 'Rumah Tangga',
         ]);
 
+        DB::table('holidays')->insert([
+            ['tanggal' => '2024-01-01', 'keterangan' => 'Tahun Baru'],
+            ['tanggal' => '2024-02-10', 'keterangan' => 'Tahun Baru Imlek'],
+            ['tanggal' => '2024-03-11', 'keterangan' => 'Nyepi'],
+            ['tanggal' => '2024-04-10', 'keterangan' => 'Idul Fitri'],
+            ['tanggal' => '2024-12-25', 'keterangan' => 'Natal'],
+        ]);
+        
+
 
         // Odontogram::create([
         //     'medical_record_id' => 1, // Sesuaikan ID rekam medis yang sudah ada

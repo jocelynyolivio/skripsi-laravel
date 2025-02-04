@@ -4,10 +4,85 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class SalaryController extends Controller
 {
+
+    // public function index(Request $request)
+    // {
+    //     // Ambil parameter bulan & tahun dari request (default ke bulan ini)
+    //     $month = $request->input('month', now()->format('m'));
+    //     $year = $request->input('year', now()->format('Y'));
+
+    //     // Ambil daftar hari libur nasional dari database tanpa model
+    //     $holidays = DB::table('holidays')->pluck('tanggal')->toArray();
+
+    //     // Hitung jumlah shift normal dan holiday shift per no_id dengan filter bulan & tahun
+    //     $data = DB::table('attendances')->join('users', 'attendances.no_id', '=', 'users.id') // Join users untuk mendapatkan nama
+
+    //         ->select(
+    //             'attendances.no_id',
+    //             'users.name as nama', // Ambil nama dari users
+    //             DB::raw("COUNT(CASE WHEN tanggal NOT IN ('" . implode("','", $holidays) . "') THEN 1 END) AS normal_shift"),
+    //             DB::raw("COUNT(CASE WHEN tanggal IN ('" . implode("','", $holidays) . "') THEN 1 END) AS holiday_shift")
+    //         )
+    //         ->whereMonth('tanggal', $month) // Filter bulan
+    //         ->whereYear('tanggal', $year)   // Filter tahun
+    //         ->groupBy('attendances.no_id', 'users.name')
+    //         ->get();
+
+    //     return view('dashboard.salaries.index', compact('data', 'month', 'year'));
+    // }
+
+    public function index(Request $request)
+{
+    // Ambil parameter bulan & tahun dari request (default ke bulan ini)
+    $month = $request->input('month', now()->format('m'));
+    $year = $request->input('year', now()->format('Y'));
+
+    // Ambil daftar hari libur dari database
+    $holidays = DB::table('holidays')->pluck('tanggal')->toArray();
+
+    // Query untuk mengambil semua users + LEFT JOIN ke attendances
+    $data = DB::table('users')
+        ->leftJoin('attendances', function ($join) use ($month, $year) {
+            $join->on('users.id', '=', 'attendances.no_id')
+                 ->whereMonth('attendances.tanggal', $month)
+                 ->whereYear('attendances.tanggal', $year);
+        })
+        ->select(
+            'users.id as no_id',
+            'users.name as nama', // Ambil nama dari users
+            DB::raw("COALESCE(COUNT(CASE WHEN attendances.tanggal NOT IN ('" . implode("','", $holidays) . "') THEN 1 END), 0) AS normal_shift"),
+            DB::raw("COALESCE(COUNT(CASE WHEN attendances.tanggal IN ('" . implode("','", $holidays) . "') THEN 1 END), 0) AS holiday_shift")
+        )
+        ->groupBy('users.id', 'users.name') // Kelompokkan berdasarkan ID dan Nama
+        ->get();
+
+    return view('dashboard.salaries.index', compact('data', 'month', 'year'));
+}
+
+
+
+    //     public function getSalaryData()
+    //     {
+    //         $holidays = DB::table('holidays')->pluck('tanggal')->toArray();
+
+    // $data = DB::table('attendances')
+    //     ->select('no_id', DB::raw("
+    //         COUNT(CASE WHEN DATE(tanggal) NOT IN ('" . implode("','", $holidays) . "') THEN 1 END) AS normal_shift,
+    //         COUNT(CASE WHEN DATE(tanggal) IN ('" . implode("','", $holidays) . "') THEN 1 END) AS holiday_shift
+    //     "))
+    //     ->groupBy('no_id')
+    //     ->get();
+
+
+    //         return response()->json(['data' => $data]);
+
+    //     }
+
     public function uploadForm()
     {
         return view('dashboard.salaries.upload-salary');
