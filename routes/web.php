@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
@@ -243,6 +244,8 @@ Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->
 
 Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');
 Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store');
+
+Route::resource('holidays', HolidayController::class);
 
 
 

@@ -333,6 +333,26 @@ class DatabaseSeeder extends Seeder
             ['tanggal' => '2024-04-10', 'keterangan' => 'Idul Fitri'],
             ['tanggal' => '2024-12-25', 'keterangan' => 'Natal'],
         ]);
+
+        DB::table('holidays')->insert([
+            ['tanggal' => '2025-01-01', 'keterangan' => 'Tahun Baru 2025 Masehi'],
+            ['tanggal' => '2025-01-27', 'keterangan' => 'Isra Mikraj Nabi Muhammad SAW'],
+            ['tanggal' => '2025-01-29', 'keterangan' => 'Tahun Baru Imlek 2576 Kongzili'],
+            ['tanggal' => '2025-03-29', 'keterangan' => 'Hari Suci Nyepi (Tahun Baru Saka 1947)'],
+            ['tanggal' => '2025-03-31', 'keterangan' => 'Idulfitri 1446 Hijriah'],
+            ['tanggal' => '2025-04-01', 'keterangan' => 'Idulfitri 1446 Hijriah'],
+            ['tanggal' => '2025-04-18', 'keterangan' => 'Wafat Yesus Kristus'],
+            ['tanggal' => '2025-04-20', 'keterangan' => 'Kebangkitan Yesus Kristus (Paskah)'],
+            ['tanggal' => '2025-05-01', 'keterangan' => 'Hari Buruh Internasional'],
+            ['tanggal' => '2025-05-12', 'keterangan' => 'Hari Raya Waisak 2569 BE'],
+            ['tanggal' => '2025-05-29', 'keterangan' => 'Kenaikan Yesus Kristus'],
+            ['tanggal' => '2025-06-01', 'keterangan' => 'Hari Lahir Pancasila'],
+            ['tanggal' => '2025-06-06', 'keterangan' => 'Idul Adha 1446 Hijriah'],
+            ['tanggal' => '2025-06-27', 'keterangan' => 'Tahun Baru Islam 1447 Hijriah'],
+            ['tanggal' => '2025-08-17', 'keterangan' => 'Proklamasi Kemerdekaan RI'],
+            ['tanggal' => '2025-09-05', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
+            ['tanggal' => '2025-12-25', 'keterangan' => 'Hari Raya Natal'],
+        ]);
         
 
 
