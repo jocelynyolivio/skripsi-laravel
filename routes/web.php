@@ -237,6 +237,16 @@ Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel'
 
 Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
 
+Route::get('/salaries/slip', [SalaryController::class, 'userSalarySlip'])->name('salaries.slip');
+
+Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process');
+
+Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');
+Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store');
+
+
+
+
 
 
 Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
