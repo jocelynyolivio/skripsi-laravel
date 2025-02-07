@@ -13,11 +13,12 @@ use App\Models\Pricelist;
 use App\Models\Procedure;
 use App\Models\Schedules;
 use App\Models\Odontogram;
+use App\Models\HomeContent;
 use App\Models\Reservation;
 use App\Models\DentalMaterial;
-use App\Models\HomeContent;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -33,7 +34,31 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        $users = [
+            ['name' => 'Yohany', 'email' => 'yohany@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Astri', 'email' => 'astri@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Erika', 'email' => 'erika@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Siska', 'email' => 'siska@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Marsha', 'email' => 'marsha@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Shandra', 'email' => 'shandra@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Inneke', 'email' => 'inneke@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Felicia', 'email' => 'felicia@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Nico', 'email' => 'nico@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Stefanus', 'email' => 'stefanus@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Anin', 'email' => 'anin@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Winda', 'email' => 'winda@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Cinta', 'email' => 'cinta@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Yohana', 'email' => 'yohana@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Ajeng', 'email' => 'ajeng@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Debi', 'email' => 'debi@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
+            ['name' => 'Johana', 'email' => 'johana@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Naila', 'email' => 'naila@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Dina', 'email' => 'dina@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+        ];
 
+        foreach ($users as $user) {
+            User::create($user);
+        }
 
         User::create([
             'name' => 'admin1',

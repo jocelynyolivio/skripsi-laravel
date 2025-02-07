@@ -23,7 +23,7 @@ class SalaryController extends Controller
 
         // Ambil data absensi
         $data = DB::table('users')
-            ->leftJoin('attendances', function ($join) use ($month, $year) {
+            ->join('attendances', function ($join) use ($month, $year) {
                 $join->on('users.id', '=', 'attendances.no_id')
                     ->whereMonth('attendances.tanggal', $month)
                     ->whereYear('attendances.tanggal', $year);
@@ -31,8 +31,8 @@ class SalaryController extends Controller
             ->select(
                 'users.id as no_id',
                 'users.name as nama',
-                DB::raw("COALESCE(COUNT(CASE WHEN attendances.tanggal NOT IN ('" . implode("','", $holidays) . "') THEN 1 END), 0) AS normal_shift"),
-                DB::raw("COALESCE(COUNT(CASE WHEN attendances.tanggal IN ('" . implode("','", $holidays) . "') THEN 1 END), 0) AS holiday_shift")
+                DB::raw("COUNT(CASE WHEN attendances.tanggal NOT IN ('" . implode("','", $holidays) . "') THEN 1 END) AS normal_shift"),
+                DB::raw("COUNT(CASE WHEN attendances.tanggal IN ('" . implode("','", $holidays) . "') THEN 1 END) AS holiday_shift")
             )
             ->groupBy('users.id', 'users.name')
             ->get();
@@ -51,27 +51,30 @@ class SalaryController extends Controller
 
         // Ambil data absensi
         $data = DB::table('users')
-            ->leftJoin('attendances', function ($join) use ($month, $year) {
+            ->join('attendances', function ($join) use ($month, $year) {
                 $join->on('users.id', '=', 'attendances.no_id')
                     ->whereMonth('attendances.tanggal', $month)
                     ->whereYear('attendances.tanggal', $year);
             })
+            ->where('users.role_id', 1)
             ->select(
                 'users.id as no_id',
                 'users.name as nama',
-                DB::raw("COALESCE(COUNT(CASE WHEN attendances.tanggal NOT IN ('" . implode("','", $holidays) . "') THEN 1 END), 0) AS normal_shift"),
-                DB::raw("COALESCE(COUNT(CASE WHEN attendances.tanggal IN ('" . implode("','", $holidays) . "') THEN 1 END), 0) AS holiday_shift")
+                DB::raw("COUNT(CASE WHEN attendances.tanggal NOT IN ('" . implode("','", $holidays) . "') THEN 1 END) AS normal_shift"),
+                DB::raw("COUNT(CASE WHEN attendances.tanggal IN ('" . implode("','", $holidays) . "') THEN 1 END) AS holiday_shift")
             )
             ->groupBy('users.id', 'users.name')
             ->get();
+        
 
         // Ambil data absensi dan hitung gaji
         $salaries = DB::table('users')
-            ->leftJoin('attendances', function ($join) use ($month, $year) {
+            ->join('attendances', function ($join) use ($month, $year) {
                 $join->on('users.id', '=', 'attendances.no_id')
                     ->whereMonth('attendances.tanggal', $month)
                     ->whereYear('attendances.tanggal', $year);
             })
+            ->where('users.role_id', 1) // Hanya admin
             ->select(
                 'users.id as user_id',
                 'users.name as nama',
@@ -101,7 +104,7 @@ class SalaryController extends Controller
                 DB::raw("COUNT(CASE 
                         WHEN TIMESTAMPDIFF(MINUTE, attendances.jam_masuk, attendances.jam_pulang) <= 720 
                         AND attendances.tanggal NOT IN ('" . implode("','", $holidays) . "') 
-                        AND TIME(attendances.jam_masuk) BETWEEN '10:01:00' AND '18:00:00' 
+                        AND TIME(attendances.jam_masuk) BETWEEN '10:01:00' AND '14:00:00' 
                         THEN 1 
                     END) AS shift_siang")
             )

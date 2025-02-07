@@ -76,7 +76,7 @@
 
     @if(isset($calculatedSalaries))
     <!-- Tabel Hasil Perhitungan -->
-    <h3 class="mt-5">Hasil Perhitungan Gaji</h3>
+    <h3 class="mt-5">Hasil Perhitungan Gaji Admin</h3>
     <table id="calculatedSalariesTable" class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -84,6 +84,7 @@
                 <th>Nama</th>
                 <th>Shift Pagi</th>
                 <th>Shift Siang</th>
+                <th>Holiday</th>
                 <th>Lembur</th>
                 <th>Gaji Pokok</th>
                 <th>Tunjangan</th>
