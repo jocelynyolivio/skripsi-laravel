@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\HomeContent;
 use Illuminate\Http\Request;
+use App\Models\SalaryCalculation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\HomeContentController;
 use App\Http\Controllers\ReservationController;
@@ -243,9 +245,25 @@ Route::get('/salaries/slip', [SalaryController::class, 'userSalarySlip'])->name(
 Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process');
 
 Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');
+Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor');
+
+// Route::resource('attendances', AttendanceController::class);
+
+Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
+    Route::get('attendances/create', [AttendanceController::class, 'create'])->name('attendances.create');
+    Route::post('attendances/store', [AttendanceController::class, 'store'])->name('attendances.store');
+    Route::get('attendances/{attendance}', [AttendanceController::class, 'show'])->name('attendances.show');
+    Route::get('attendances/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit');
+    Route::put('attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
+    Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+
+
 Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store');
 
 Route::resource('holidays', HolidayController::class);
+
+
+
 
 
 

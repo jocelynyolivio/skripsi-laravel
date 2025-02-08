@@ -3,13 +3,13 @@
 @section('container')
 <div class="container mt-4">
     <h2>Data Gaji Berdasarkan Absensi</h2>
+
     @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-@endif
-
+    @endif
 
     <!-- Form Filter Bulan & Tahun -->
     <form method="GET" action="{{ route('dashboard.salaries.index') }}" class="mb-4">
@@ -66,16 +66,16 @@
         </tbody>
     </table>
 
-    Tombol Hitung Gaji
+    <!-- Tombol Hitung Gaji Admin -->
     <form method="POST" action="{{ route('dashboard.salaries.calculate') }}">
         @csrf
         <input type="hidden" name="month" value="{{ request('month', now()->format('m')) }}">
         <input type="hidden" name="year" value="{{ request('year', now()->format('Y')) }}">
-        <button type="submit" class="btn btn-primary mt-3">Hitung Gaji</button>
+        <button type="submit" class="btn btn-primary mt-3">Hitung Gaji Admin</button>
     </form>
 
     @if(isset($calculatedSalaries))
-    <!-- Tabel Hasil Perhitungan -->
+    <!-- Tabel Hasil Perhitungan Gaji Admin -->
     <h3 class="mt-5">Hasil Perhitungan Gaji Admin</h3>
     <table id="calculatedSalariesTable" class="table table-striped table-bordered">
         <thead>
@@ -107,23 +107,52 @@
             @endforeach
         </tbody>
     </table>
+    @endif
 
-    <!-- Tombol Simpan Gaji -->
-    <form method="POST" action="{{ route('dashboard.salaries.store') }}">
+    <!-- Tombol Hitung Gaji Dokter -->
+    <form method="POST" action="{{ route('dashboard.salaries.doctor') }}">
         @csrf
         <input type="hidden" name="month" value="{{ request('month', now()->format('m')) }}">
         <input type="hidden" name="year" value="{{ request('year', now()->format('Y')) }}">
-        <input type="hidden" name="salaries" value="{{ json_encode($calculatedSalaries) }}">
-        <button type="submit" class="btn btn-success mt-3">Simpan Gaji</button>
+        <button type="submit" class="btn btn-primary mt-3">Hitung Gaji Dokter</button>
     </form>
+
+    @if(isset($doctorSalaries))
+    <!-- Tabel Hasil Perhitungan Gaji Dokter -->
+    <h3 class="mt-5">Hasil Perhitungan Gaji Dokter</h3>
+    <table id="doctorSalariesTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>No ID</th>
+                <th>Nama</th>
+                <th>Shift</th>
+                <th>Total Transport</th>
+                <th>Bagi Hasil</th>
+                <th>Gaji Pokok</th>
+                <th>Grand Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($doctorSalaries as $salary)
+                <tr>
+                    <td>{{ $salary['user_id'] }}</td>
+                    <td>{{ $salary['nama'] }}</td>
+                    <td>{{ $salary['shift_count'] }}</td>
+                    <td>Rp. {{ number_format($salary['transport_total'], 2, ',', '.') }}</td>
+                    <td>Rp. {{ number_format($salary['bagi_hasil'], 2, ',', '.') }}</td>
+                    <td>Rp. {{ number_format($salary['base_salary'], 2, ',', '.') }}</td>
+                    <td><b>Rp. {{ number_format($salary['grand_total'], 2, ',', '.') }}</b></td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
     @endif
 </div>
 
-<!-- DataTables -->
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#salariesTable, #calculatedSalariesTable, #savedSalariesTable').DataTable({
+        $('#salariesTable, #calculatedSalariesTable, #doctorSalariesTable').DataTable({
             "paging": true,
             "searching": true,
             "ordering": true,

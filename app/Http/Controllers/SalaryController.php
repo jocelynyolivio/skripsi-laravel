@@ -5,14 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use App\Models\SalaryCalculation;
+use Dotenv\Util\Regex;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class SalaryController extends Controller
 {
-
-
-
     public function index(Request $request)
     {
         $month = $request->input('month', now()->format('m') - 1);
@@ -150,6 +148,78 @@ class SalaryController extends Controller
     }
 
 
+    public function calculateDoctorSalaries(Request $request)
+    {
+        $month = $request->input('month');
+        $year = $request->input('year');
+    
+        // Ambil data absensi dokter
+        $attendances = DB::table('users')
+            ->join('attendances', function ($join) use ($month, $year) {
+                $join->on('users.id', '=', 'attendances.no_id')
+                    ->whereMonth('attendances.tanggal', $month)
+                    ->whereYear('attendances.tanggal', $year);
+            })
+            ->where('users.role_id', 2) // Role ID 2 = Dokter
+            ->select(
+                'users.id as user_id',
+                'users.name as nama',
+                DB::raw('COUNT(attendances.tanggal) as jumlah_kehadiran'), // Jumlah hari hadir
+                DB::raw('SUM(TIMESTAMPDIFF(HOUR, attendances.jam_masuk, attendances.jam_pulang))/60 as total_jam_kerja') // Total jam kerja
+            )
+            ->groupBy('users.id', 'users.name')
+            ->get();
+    
+        $doctorSalaries = [];
+    
+        foreach ($attendances as $attendance) {
+            // Hitung jumlah shift (lebih dari 8 jam dihitung sebagai 2 shift)
+            $jumlah_shift = ($attendance->total_jam_kerja > 8) ? 2 * $attendance->jumlah_kehadiran : $attendance->jumlah_kehadiran;
+    
+            // Tarif transport per shift
+            $transport_per_shift = 65000;
+            $total_transport = $jumlah_shift * $transport_per_shift;
+    
+            // Ambil bagi hasil dari transaksi pasien
+            // $bagi_hasil = DB::table('transactions')
+            //     ->where('doctor_id', $attendance->user_id)
+            //     ->whereMonth('tanggal', $month)
+            //     ->whereYear('tanggal', $year)
+            //     ->sum('amount');
+            $bagi_hasil = 0;
+    
+            // Gaji pokok (hanya jika dokter pegawai tetap)
+            $base_salary = 1500000; // Contoh: Rp. 1.500.000
+    
+            // Grand total
+            $grand_total = $base_salary + $total_transport + $bagi_hasil;
+    
+            // Simpan hasil perhitungan dalam array
+            $doctorSalaries[] = [
+                'user_id' => $attendance->user_id,
+                'nama' => $attendance->nama,
+                'jumlah_kehadiran' => $attendance->jumlah_kehadiran,
+                'shift_count' => $jumlah_shift,
+                'transport_total' => $total_transport,
+                'bagi_hasil' => $bagi_hasil,
+                'base_salary' => $base_salary,
+                'grand_total' => $grand_total
+            ];
+        }
+    
+        // Simpan hasil ke database
+        foreach ($doctorSalaries as $salary) {
+            SalaryCalculation::updateOrCreate(
+                ['user_id' => $salary['user_id'], 'month' => "$year-$month"],
+                $salary
+            );
+        }
+    
+        return view('dashboard.salaries.index', compact('doctorSalaries', 'month', 'year'));
+    }
+    
+
+
     public function storeSalaries(Request $request)
     {
         // Ubah dari JSON ke array
@@ -199,7 +269,7 @@ class SalaryController extends Controller
         $spreadsheet = IOFactory::load($filePath);
 
         // Daftar nama sheet yang ingin dibaca
-        $sheetNames = ['1.2.3', '4.5.6', '7.8.9', '10.11.12', '13.14.15', '16.17'];
+        $sheetNames = ['1.2.3', '4.5.6', '7.8.9', '10.11.12', '13.14.15', '16.17.18',];
         $dataSummary = [];
 
         // Kolom awal data untuk setiap dokter
@@ -362,6 +432,80 @@ class SalaryController extends Controller
             $letters[$i] = 'A';
         }
         return 'A' . implode('', $letters);
+    }
+
+    public function create()
+    {
+        return view('dashboard.attendances.create');
+    }
+
+    /**
+     * Simpan data baru ke database.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'no_id' => 'required|integer',
+            'nama' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'jam_masuk' => 'nullable|date_format:H:i',
+            'jam_pulang' => 'nullable|date_format:H:i',
+        ]);
+
+        Attendance::create($request->all());
+
+        return redirect()->route('attendances.index')
+                         ->with('success', 'Data absensi berhasil ditambahkan.');
+    }
+
+    /**
+     * Tampilkan detail absensi.
+     */
+    public function show($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+        return view('dashboard.attendances.show', compact('attendance'));
+    }
+
+    /**
+     * Tampilkan form edit absensi.
+     */
+    public function edit($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+        return view('dashboard.attendances.edit', compact('attendance'));
+    }
+
+    /**
+     * Update data absensi di database.
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'no_id' => 'required|integer',
+            'nama' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'jam_masuk' => 'nullable|date_format:H:i',
+            'jam_pulang' => 'nullable|date_format:H:i',
+        ]);
+
+        $attendance = Attendance::findOrFail($id);
+        $attendance->update($request->all());
+
+        return redirect()->route('attendances.index')
+                         ->with('success', 'Data absensi berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus data absensi.
+     */
+    public function destroy($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+        $attendance->delete();
+
+        return redirect()->route('attendances.index')
+                         ->with('success', 'Data absensi berhasil dihapus.');
     }
 
     // public function processSalaries(Request $request)
