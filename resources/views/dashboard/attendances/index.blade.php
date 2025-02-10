@@ -3,8 +3,16 @@
 @section('container')
 <div class="container">
     <h2>Data Presensi</h2>
-    <a href="{{ route('dashboard.attendances.create') }}" class="btn btn-primary">Tambah Data</a>
-    
+
+    <!-- Filter Per Bulan -->
+    <form method="GET" action="{{ route('dashboard.attendances.index') }}" class="mb-3">
+        <label for="bulan">Filter Bulan:</label>
+        <input type="month" name="bulan" id="bulan" class="form-control d-inline-block w-auto"
+               value="{{ request('bulan') }}">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ route('dashboard.attendances.index') }}" class="btn btn-secondary">Reset</a>
+    </form>
+
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -12,7 +20,7 @@
     @if($attendances->isEmpty())
         <p class="text-center mt-3">Belum ada data presensi.</p>
     @else
-        <table class="table table-bordered mt-3">
+        <table class="table table-bordered mt-3" id="attendanceTable">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -48,4 +56,18 @@
         </table>
     @endif
 </div>
+<script>
+    $(document).ready(function() {
+        $('#attendanceTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+            "columnDefs": [
+                { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
+            ]
+        });
+    });
+</script>
 @endsection

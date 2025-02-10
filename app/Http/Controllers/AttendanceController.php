@@ -2,15 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $attendances = Attendance::all();
+        $query = Attendance::query();
+
+        // Filter berdasarkan bulan jika parameter bulan diberikan
+        if ($request->has('bulan')) {
+            $query->whereMonth('tanggal', Carbon::parse($request->bulan)->format('m'))
+                  ->whereYear('tanggal', Carbon::parse($request->bulan)->format('Y'));
+        }
+
+        $attendances = $query->get();
+
         return view('dashboard.attendances.index', compact('attendances'));
     }
 
