@@ -16,9 +16,7 @@
             <tr>
                 <th>Date</th>
                 <th>Teeth Condition</th>
-                <th>Treatment</th>
                 <th>Procedures & Teeth</th>
-                <th>Notes</th>
                 <th>Doctor</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -27,9 +25,9 @@
         <tbody>
             @foreach($medicalRecords as $record)
             <tr>
-                <td>{{ $record->date }}</td>
+                <td>{{ $record->reservation->tanggal_reservasi }}</td>
                 <td>{{ $record->teeth_condition }}</td>
-                <td>{{ $record->treatment }}</td>
+                <!-- <td>{{ $record->treatment }}</td> -->
                 <td>
                     @if($record->procedures->count() > 0)
                     @foreach($proceduress as $procedure)
@@ -66,8 +64,8 @@
                     @endif
                 </td>
 
-                <td>{{ $record->notes }}</td>
-                <td>{{ $record->doctor->name }}</td>
+                <!-- <td>{{ $record->notes }}</td> -->
+                <td>{{ $record->reservation->doctor->name }}</td>
                 <td>
                     @if(!$record->transaction)
                     <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}"

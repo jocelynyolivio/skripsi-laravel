@@ -3,13 +3,13 @@
 @section('container')
 <div class="container mt-5">
     <h3 class="mb-4">Edit Reservation</h3>
-    
+
     @if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
     @endif
-    
+
     <form id="editReservationForm" action="{{ route('dashboard.reservations.update', $reservation->id) }}" method="POST">
         @csrf
         @method('PUT') <!-- Laravel menangani PUT/PATCH menggunakan hidden input -->
@@ -44,24 +44,32 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const editForm = document.getElementById('editReservationForm');
-    const dateInput = document.getElementById('date');
-    const resultsDiv = document.getElementById('results');
-    const saveButton = document.getElementById('saveButton');
-    const doctorIdInput = document.getElementById('doctor_id');
-    const timeStartInput = document.getElementById('time_start');
-    const timeEndInput = document.getElementById('time_end');
+    document.addEventListener('DOMContentLoaded', function() {
 
-    dateInput.addEventListener('change', async function() {
-        const date = dateInput.value;
-        if (!date) return;
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Mencegah submit otomatis saat tekan Enter
+            }
+        });
 
-        try {
-            const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
-            const data = await response.json();
+        const editForm = document.getElementById('editReservationForm');
+        const dateInput = document.getElementById('date');
+        const resultsDiv = document.getElementById('results');
+        const saveButton = document.getElementById('saveButton');
+        const doctorIdInput = document.getElementById('doctor_id');
+        const timeStartInput = document.getElementById('time_start');
+        const timeEndInput = document.getElementById('time_end');
 
-            resultsDiv.innerHTML = ` 
+        dateInput.addEventListener('change', async function() {
+            event.preventDefault();
+            const date = dateInput.value;
+            if (!date) return;
+
+            try {
+                const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
+                const data = await response.json();
+
+                resultsDiv.innerHTML = ` 
                 <h5>Schedules for ${data.date} (${data.day_of_week}):</h5>
                 <div class="table-responsive">
                     <table class="table table-striped">
@@ -88,33 +96,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     </table>
                 </div>
             `;
-        } catch (error) {
-            console.error('Error:', error);
-            resultsDiv.innerHTML = '<p class="text-danger">Error loading schedules</p>';
-        }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = '<p class="text-danger">Error loading schedules</p>';
+            }
+        });
+
+        resultsDiv.addEventListener('click', function(event) {
+            if (event.target.classList.contains('time-slot')) {
+                const selectedSchedule = {
+                    time_start: event.target.dataset.timeStart,
+                    time_end: event.target.dataset.timeEnd,
+                    doctor_id: event.target.dataset.doctorId
+                };
+
+                doctorIdInput.value = selectedSchedule.doctor_id;
+                document.getElementById('reservation_date').value = dateInput.value;
+                timeStartInput.value = selectedSchedule.time_start;
+                timeEndInput.value = selectedSchedule.time_end;
+
+                saveButton.style.display = 'block';
+            }
+        });
+
+        editForm.addEventListener('submit', function() {
+            saveButton.disabled = true; // Hindari double submit
+        });
     });
-
-    resultsDiv.addEventListener('click', function(event) {
-        if (event.target.classList.contains('time-slot')) {
-            const selectedSchedule = {
-                time_start: event.target.dataset.timeStart,
-                time_end: event.target.dataset.timeEnd,
-                doctor_id: event.target.dataset.doctorId
-            };
-
-            doctorIdInput.value = selectedSchedule.doctor_id;
-            document.getElementById('reservation_date').value = dateInput.value;
-            timeStartInput.value = selectedSchedule.time_start;
-            timeEndInput.value = selectedSchedule.time_end;
-
-            saveButton.style.display = 'block';
-        }
-    });
-
-    editForm.addEventListener('submit', function() {
-        saveButton.disabled = true; // Hindari double submit
-    });
-});
 </script>
 
 @endsection

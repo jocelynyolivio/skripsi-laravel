@@ -9,8 +9,8 @@
             <strong>Medical Record Details</strong>
         </div>
         <div class="card-body">
-            <p><strong>Patient:</strong> {{ $medicalRecord->patient->name }}</p>
-            <p><strong>Doctor:</strong> {{ $medicalRecord->doctor->name }}</p>
+            <p><strong>Patient:</strong> {{ $medicalRecord->reservation->patient->name }}</p>
+            <p><strong>Doctor:</strong> {{ $medicalRecord->reservation->doctor->name }}</p>
             <p><strong>Reservation Date:</strong> {{ $medicalRecord->reservation->tanggal_reservasi }}</p>
             <p><strong>Procedures:</strong></p>
             <ul>
@@ -37,9 +37,6 @@
     <form action="{{ route('dashboard.transactions.store') }}" method="POST">
         @csrf
         <input type="hidden" name="medical_record_id" value="{{ $medicalRecord->id }}">
-        <input type="hidden" name="reservation_id" value="{{ $medicalRecord->reservation->id }}">
-        <input type="hidden" name="patient_id" value="{{ $medicalRecord->patient->id }}">
-        <input type="hidden" name="doctor_id" value="{{ $medicalRecord->doctor->id }}">
 
         <div class="mb-3">
     <label for="amount" class="form-label">Amount</label>

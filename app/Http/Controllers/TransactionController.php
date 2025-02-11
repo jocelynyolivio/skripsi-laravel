@@ -11,8 +11,13 @@ class TransactionController extends Controller
 {
     public function create($medicalRecordId)
 {
-    // Ambil data rekam medis beserta prosedurnya
-    $medicalRecord = MedicalRecord::with(['patient', 'doctor', 'reservation', 'procedures.priceLists'])->findOrFail($medicalRecordId);
+     // Ambil data rekam medis dengan reservasi, dokter, dan prosedur
+     $medicalRecord = MedicalRecord::with([
+        'reservation.patient', 
+        'reservation.doctor', 
+        'procedures.basePrice', 
+        'procedures.promoPrice'
+    ])->findOrFail($medicalRecordId);
 
     $proceduresWithPrices = [];
     $totalAmount = 0;
@@ -47,9 +52,6 @@ public function store(Request $request)
     // Validasi input
     $request->validate([
         'medical_record_id' => 'required|exists:medical_records,id',
-        'reservation_id' => 'required|exists:reservations,id',
-        'patient_id' => 'required|exists:patients,id',
-        'doctor_id' => 'required|exists:users,id',
         'amount' => 'required|array',
         'payment_type' => 'required|in:cash,credit,dp',
         'payment_status' => 'required|in:lunas,cicilan,dp',
@@ -62,6 +64,11 @@ public function store(Request $request)
         return redirect()->back()->with('error', 'Transaction for this medical record already exists.');
     }
 
+            // Ambil Medical Record untuk mendapatkan data reservasi, pasien, dan dokter
+
+    $medicalRecord = MedicalRecord::with('reservation')->findOrFail($request->medical_record_id);
+
+
     // Ambil data admin yang membuat transaksi
     $admin = Auth::user();
     
@@ -71,9 +78,6 @@ public function store(Request $request)
     // Buat transaksi baru
     Transaction::create([
         'medical_record_id' => $request->medical_record_id,
-        'reservation_id' => $request->reservation_id,
-        'patient_id' => $request->patient_id,
-        'doctor_id' => $request->doctor_id,
         'admin_id' => $admin->id,
         'amount' => $totalAmount,
         'payment_type' => $request->payment_type,
@@ -94,7 +98,13 @@ public function store(Request $request)
 
     public function index()
     {
-        $transactions = Transaction::with(['patient', 'doctor', 'admin', 'reservation'])->get();
+        // Ambil transaksi dengan relasi yang diperlukan
+        $transactions = Transaction::with([
+            'medicalRecord.reservation.patient', 
+            'medicalRecord.reservation.doctor', 
+            'admin'
+        ])->get();
+
         return view('dashboard.transactions.index', [
             'title' => 'Transactions',
             'transactions' => $transactions,
@@ -103,12 +113,13 @@ public function store(Request $request)
 
     public function showStruk($id)
 {
-    $transaction = Transaction::with([
+     // Ambil transaksi dengan medical record dan prosedur terkait
+     $transaction = Transaction::with([
         'medicalRecord.procedures' => function ($query) {
             $query->withPivot('price'); // Muat harga dari pivot table
         },
-        'medicalRecord.patient',
-        'medicalRecord.doctor'
+        'medicalRecord.reservation.patient',
+        'medicalRecord.reservation.doctor'
     ])->findOrFail($id);
 
     return view('dashboard.transactions.struk', compact('transaction'));

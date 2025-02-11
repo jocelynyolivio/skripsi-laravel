@@ -16,6 +16,7 @@ use App\Models\Odontogram;
 use App\Models\HomeContent;
 use App\Models\Reservation;
 use App\Models\DentalMaterial;
+use App\Models\ScheduleTemplate;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -354,6 +355,16 @@ class DatabaseSeeder extends Seeder
             'name' => 'Rumah Tangga',
         ]);
 
+        ScheduleTemplate::create([
+            'doctor_id' => 23,
+                'day_of_week' => 'Monday',
+                'start_time' => '10:00:00',
+                'end_time' => '17:00:00',
+                'is_active' => true,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+        ]);
+
         DB::table('holidays')->insert([
             ['tanggal' => '2024-01-01', 'keterangan' => 'Tahun Baru'],
             ['tanggal' => '2024-02-10', 'keterangan' => 'Tahun Baru Imlek'],
@@ -381,6 +392,8 @@ class DatabaseSeeder extends Seeder
             ['tanggal' => '2025-09-05', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
             ['tanggal' => '2025-12-25', 'keterangan' => 'Hari Raya Natal'],
         ]);
+
+        
         
 
 

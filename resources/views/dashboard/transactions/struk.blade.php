@@ -91,15 +91,15 @@
         <table>
             <tr>
                 <td><strong>ID Pasien:</strong></td>
-                <td>{{ $transaction->medicalRecord->patient->id }}</td>
+                <td>{{ $transaction->medicalRecord->reservation->patient->id }}</td>
                 <td><strong>Nama:</strong></td>
-                <td>{{ $transaction->medicalRecord->patient->name }}</td>
+                <td>{{ $transaction->medicalRecord->reservation->patient->name }}</td>
             </tr>
             <tr>
                 <td><strong>Drg:</strong></td>
-                <td>{{ $transaction->medicalRecord->doctor->name }}</td>
+                <td>{{ $transaction->medicalRecord->reservation->doctor->name }}</td>
                 <td><strong>SIP:</strong></td>
-                <td>{{ $transaction->medicalRecord->doctor->sip ?? '-' }}</td>
+                <td>{{ $transaction->medicalRecord->reservation->doctor->sip ?? '-' }}</td>
             </tr>
             <tr>
                 <td><strong>Tanggal:</strong></td>

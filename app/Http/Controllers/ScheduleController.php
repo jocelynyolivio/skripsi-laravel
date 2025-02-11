@@ -301,6 +301,8 @@ public function saveReservation(Request $request, $id = null)
     // Jika ID diberikan, update reservasi yang ada, jika tidak buat baru
     $reservation = $id ? Reservation::findOrFail($id) : new Reservation();
 
+    // dd('masuk save');
+
     $reservation->fill([
         'patient_id' => $request->patient_id,
         'doctor_id' => $request->doctor_id,
@@ -327,6 +329,7 @@ public function storeReservation(Request $request)
 // Update Reservation memanggil saveReservation dengan ID reservasi
 public function updateReservation(Request $request, $id)
 {
+    // dd($request->all());
     return $this->saveReservation($request, $id);
 }
 

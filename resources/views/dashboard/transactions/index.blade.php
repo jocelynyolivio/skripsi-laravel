@@ -31,8 +31,8 @@
             @foreach($transactions as $transaction)
             <tr>
                 <td>{{ $transaction->id }}</td>
-                <td>{{ $transaction->patient->name }}</td>
-                <td>{{ $transaction->doctor->name }}</td>
+                <td>{{ $transaction->medicalRecord->reservation->patient->name }}</td>
+                <td>{{ $transaction->medicalRecord->reservation->doctor->name }}</td>
                 <td>{{ $transaction->admin->name }}</td>
                 <td>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>
                 <td>{{ ucfirst($transaction->payment_type) }}</td>

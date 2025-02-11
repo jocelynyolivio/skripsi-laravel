@@ -26,17 +26,6 @@
             <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" required>
         </div>
 
-        <div class="mb-3">
-            <label for="treatment" class="form-label">Treatment</label>
-            <input type="text" class="form-control" id="treatment" name="treatment" required>
-        </div>
-
-        <!-- Catatan -->
-        <div class="mb-3">
-            <label for="notes" class="form-label">Notes</label>
-            <textarea class="form-control" id="notes" name="notes"></textarea>
-        </div>
-
         <!-- Prosedur dan Odontogram Integration -->
         <div class="mb-4">
             <h4>Select Procedure and Teeth</h4>
