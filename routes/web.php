@@ -111,6 +111,11 @@ Route::get('/reservation', [ReservationController::class, 'index'])
     ->name('reservation.index')
     ->middleware(['auth:patient', 'verified']);
 
+    Route::get('/reservation/upcoming', [ReservationController::class, 'upcomingReservations'])
+    ->name('reservations.upcoming')
+    ->middleware(['auth:patient', 'verified']); // Pastikan hanya pasien yang login yang bisa melihat
+
+
 Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware('patient');
 
 

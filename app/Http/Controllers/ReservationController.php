@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\Schedules;
 use App\Models\Reservation;
+use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
@@ -54,37 +57,37 @@ class ReservationController extends Controller
         return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
     }
 
-    // public function index(Request $request)
-    // {
-    //     if ($request->has('date')) {
-    //         $date = $request->date;
-    //         $dayOfWeek = Carbon::parse($date)->format('l');
+    public function index(Request $request)
+    {
+        if ($request->has('date')) {
+            $date = $request->date;
+            $dayOfWeek = Carbon::parse($date)->format('l');
 
-    //         // Mengambil jadwal dokter yang tersedia untuk tanggal yang dipilih
-    //         $schedules = Schedules::where('date', $date)
-    //             ->where('is_available', true)
-    //             ->with('doctor') // Eager loading relasi doctor
-    //             ->get()
-    //             ->groupBy('doctor_id')
-    //             ->map(function ($schedules) {
-    //                 return [
-    //                     'doctor' => $schedules->first()->doctor,
-    //                     'schedules' => $schedules
-    //                 ];
-    //             });
+            // Mengambil jadwal dokter yang tersedia untuk tanggal yang dipilih
+            $schedules = Schedules::where('date', $date)
+                ->where('is_available', true)
+                ->with('doctor') // Eager loading relasi doctor
+                ->get()
+                ->groupBy('doctor_id')
+                ->map(function ($schedules) {
+                    return [
+                        'doctor' => $schedules->first()->doctor,
+                        'schedules' => $schedules
+                    ];
+                });
 
-    //         return view('reservation.index', [
-    //             'title' => 'Reservation',
-    //             'schedules' => $schedules,
-    //             'date' => $date,
-    //             'day_of_week' => $dayOfWeek
-    //         ]);
-    //     }
+            return view('reservation.index', [
+                'title' => 'Reservation',
+                'schedules' => $schedules,
+                'date' => $date,
+                'day_of_week' => $dayOfWeek
+            ]);
+        }
 
-    //     return view('reservation.index', [
-    //         'title' => 'Reservation'
-    //     ]);
-    // }
+        return view('reservation.index', [
+            'title' => 'Reservation'
+        ]);
+    }
 
     // public function edit($id)
     // {
@@ -152,33 +155,49 @@ class ReservationController extends Controller
     // }
 
 
-    // public function store(Request $request)
-    // {
-    //     // Validasi input
-    //     $request->validate([
-    //         'doctor_id' => 'required|integer',
-    //         'tanggal_reservasi' => 'required|date',
-    //         'jam_mulai' => 'required|date_format:H:i',
-    //         'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
-    //     ]);
+    public function store(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'doctor_id' => 'required|integer',
+            'tanggal_reservasi' => 'required|date',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+        ]);
 
-    //     // Mengambil ID pasien yang sedang login
-    //     $patientId = auth()->guard('patient')->user()->id;
+        // Mengambil ID pasien yang sedang login
+        $patientId = auth()->guard('patient')->user()->id;
 
-    //     // Simpan data reservasi ke database
-    //     $reservation = Reservation::create([
-    //         'patient_id' => $patientId,
-    //         'doctor_id' => $request->doctor_id,
-    //         'tanggal_reservasi' => $request->tanggal_reservasi,
-    //         'jam_mulai' => $request->jam_mulai,
-    //         'jam_selesai' => $request->jam_selesai,
-    //     ]);
+        // Simpan data reservasi ke database
+        $reservation = Reservation::create([
+            'patient_id' => $patientId,
+            'doctor_id' => $request->doctor_id,
+            'tanggal_reservasi' => $request->tanggal_reservasi,
+            'jam_mulai' => $request->jam_mulai,
+            'jam_selesai' => $request->jam_selesai,
+        ]);
 
-    //     // Menyimpan flash message ke session
-    //     session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
+        // Menyimpan flash message ke session
+        session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
 
-    //     return redirect()->route('reservation.index'); // Redirect ke halaman reservasi setelah sukses
-    // }
+        return redirect()->route('reservation.index'); // Redirect ke halaman reservasi setelah sukses
+    }
+
+    public function upcomingReservations()
+{
+    // Ambil user yang sedang login
+    $patientId = auth()->id();
+
+    // Ambil daftar reservasi yang masih berlaku (tanggal >= hari ini)
+    $reservations = Reservation::where('patient_id', $patientId)
+        ->whereDate('tanggal_reservasi', '>=', now()->toDateString()) // Cek jika tanggal masih berlaku
+        ->with('doctor') // Ambil data dokter
+        ->orderBy('tanggal_reservasi', 'asc') // Urutkan berdasarkan tanggal
+        ->get();
+
+    return view('reservation.upcoming', compact('reservations'));
+}
+
 
     // public function createForAdmin()
     // {
