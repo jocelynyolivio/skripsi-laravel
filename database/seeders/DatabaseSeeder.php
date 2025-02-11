@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        // sesuai data absensi excel
         $users = [
             ['name' => 'Yohany', 'email' => 'yohany@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
             ['name' => 'Astri', 'email' => 'astri@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
@@ -53,9 +54,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Ajeng', 'email' => 'ajeng@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
             ['name' => 'Debi', 'email' => 'debi@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
             ['name' => 'Johana', 'email' => 'johana@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Naila', 'email' => 'naila@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Dina', 'email' => 'dina@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Radin', 'email' => 'radin@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Naila', 'email' => 'naila@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
+            ['name' => 'Dina', 'email' => 'dina@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
+            ['name' => 'Radin', 'email' => 'radin@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
             ['name' => 'Sergio', 'email' => 'sergio@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
 
         ];
@@ -64,6 +65,7 @@ class DatabaseSeeder extends Seeder
             User::create($user);
         }
 
+        // tambahan coba pribadi
         User::create([
             'name' => 'admin1',
             'email' => 'admin1@gmail.com',
@@ -108,7 +110,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Role::create([
-            'role_name' => 'dokter'
+            'role_name' => 'dokter tetap'
+        ]);
+        
+        Role::create([
+            'role_name' => 'dokter luar'
         ]);
         
         Role::create([

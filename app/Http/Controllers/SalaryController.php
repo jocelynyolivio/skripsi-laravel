@@ -146,43 +146,44 @@ class SalaryController extends Controller
 
         return view('dashboard.salaries.index', compact('calculatedSalaries', 'month', 'year', 'data'));
     }
-
     public function calculateDoctorSalaries(Request $request)
     {
         $month = $request->input('month');
         $year = $request->input('year');
     
-        // Ambil data absensi dokter
+        // Ambil data absensi dokter tetap (role_id = 2) dan tidak tetap (role_id = 3)
         $attendances = DB::table('users')
             ->join('attendances', function ($join) use ($month, $year) {
                 $join->on('users.id', '=', 'attendances.no_id')
                     ->whereMonth('attendances.tanggal', $month)
                     ->whereYear('attendances.tanggal', $year);
             })
-            ->where('users.role_id', 2) // Role ID 2 = Dokter
+            ->whereIn('users.role_id', [2, 3]) // Role ID 2 = Dokter Tetap, Role ID 3 = Dokter Tidak Tetap
             ->select(
                 'users.id as user_id',
                 'users.name as nama',
+                'users.role_id',
                 DB::raw('COUNT(attendances.tanggal) as jumlah_kehadiran'), // Jumlah hari hadir
-                DB::raw('SUM(TIMESTAMPDIFF(MINUTE, attendances.jam_masuk, attendances.jam_pulang))/60 as total_jam_kerja') // Total jam kerja (lebih akurat dengan menit)
+                DB::raw('SUM(TIMESTAMPDIFF(MINUTE, attendances.jam_masuk, attendances.jam_pulang))/60 as total_jam_kerja') // Total jam kerja dalam jam
             )
-            ->groupBy('users.id', 'users.name')
+            ->groupBy('users.id', 'users.name', 'users.role_id')
             ->get();
     
         $doctorSalaries = [];
     
         // Ambil total amount dari transactions berdasarkan dokter & bulan yang dipilih
         $bagi_hasil_data = DB::table('transactions')
-    ->join('reservations', 'transactions.reservation_id', '=', 'reservations.id') // Join untuk ambil tanggal_reservasi
-    ->whereMonth('reservations.tanggal_reservasi', $month) // Filter bulan berdasarkan tanggal reservasi
-    ->whereYear('reservations.tanggal_reservasi', $year) // Filter tahun berdasarkan tanggal reservasi
-    ->groupBy('transactions.doctor_id')
-    ->select('transactions.doctor_id', DB::raw('SUM(transactions.amount) as bagi_hasil'))
-    ->pluck('bagi_hasil', 'doctor_id'); // Ubah hasil menjadi array dengan doctor_id sebagai key
-
+        ->join('medical_records', 'transactions.medical_record_id', '=', 'medical_records.id') // Ambil reservation_id dari medical_records
+        ->join('reservations', 'medical_records.reservation_id', '=', 'reservations.id') // Ambil doctor_id dari reservations
+        ->whereMonth('reservations.tanggal_reservasi', $month) // Filter berdasarkan bulan
+        ->whereYear('reservations.tanggal_reservasi', $year) // Filter berdasarkan tahun
+        ->groupBy('reservations.doctor_id')
+        ->select('reservations.doctor_id', DB::raw('SUM(transactions.amount) as bagi_hasil'))
+        ->pluck('bagi_hasil', 'doctor_id'); // Ubah hasil menjadi array dengan doctor_id sebagai key
+    
     
         foreach ($attendances as $attendance) {
-            // Hitung jumlah shift berdasarkan total jam kerja dalam sehari (bukan sebulan)
+            // Hitung jumlah shift berdasarkan total jam kerja dalam sehari
             $jumlah_shift = round($attendance->total_jam_kerja / 8); // Misal kerja 16 jam = 2 shift
     
             // Tarif transport per shift
@@ -191,21 +192,24 @@ class SalaryController extends Controller
     
             // Ambil bagi hasil dokter dari transaksi
             $bagi_hasil = $bagi_hasil_data[$attendance->user_id] ?? 0;
-            $bagi_hasil = $bagi_hasil * 35 / 100;
     
-            // Gaji pokok (hanya jika dokter pegawai tetap)
-            $base_salary = 1500000;
+            // Tentukan persentase bagi hasil berdasarkan role_id
+            if ($attendance->role_id == 2) {
+                $bagi_hasil = $bagi_hasil * 35 / 100; // Dokter tetap: 35%
+                $base_salary = 1500000; // Dokter tetap dapat gaji pokok
+            } else {
+                $bagi_hasil = $bagi_hasil * 30 / 100; // Dokter tidak tetap: 30%
+                $base_salary = 0; // Dokter tidak tetap tidak dapat gaji pokok
+            }
     
             // Hitung total gaji
             $grand_total = $base_salary + $total_transport + $bagi_hasil;
-
-            // dd($bagi_hasil_data);
-
     
             // Simpan hasil perhitungan dalam array
             $doctorSalaries[] = [
                 'user_id' => $attendance->user_id,
                 'nama' => $attendance->nama,
+                'role_id' => $attendance->role_id,
                 'jumlah_kehadiran' => $attendance->jumlah_kehadiran,
                 'shift_count' => $jumlah_shift,
                 'transport_total' => $total_transport,
@@ -215,16 +219,9 @@ class SalaryController extends Controller
             ];
         }
     
-        // Simpan hasil ke database
-        // foreach ($doctorSalaries as $salary) {
-        //     SalaryCalculation::updateOrCreate(
-        //         ['user_id' => $salary['user_id'], 'month' => "$year-$month"],
-        //         $salary
-        //     );
-        // }
-    
         return view('dashboard.salaries.index', compact('doctorSalaries', 'month', 'year'));
     }
+    
     
     
 
