@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Edit Medical Record for Patient: {{ $medicalRecord->patient->name }}</h3>
+    <h3 class="text-center">Edit Medical Record for Patient: {{ $medicalRecord->reservation->patient->name }}</h3>
 
     <form action="{{ route('dashboard.medical_records.update', ['patientId' => $patientId, 'recordId' => $medicalRecord->id]) }}" method="POST">
         @csrf
@@ -11,16 +11,6 @@
         <div class="mb-3">
             <label for="teeth_condition" class="form-label">Teeth Condition</label>
             <input type="text" class="form-control" id="teeth_condition" name="teeth_condition" value="{{ old('teeth_condition', $medicalRecord->teeth_condition) }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="treatment" class="form-label">Treatment</label>
-            <input type="text" class="form-control" id="treatment" name="treatment" value="{{ old('treatment', $medicalRecord->treatment) }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="notes" class="form-label">Notes</label>
-            <textarea class="form-control" id="notes" name="notes">{{ old('notes', $medicalRecord->notes) }}</textarea>
         </div>
 
         <div class="mb-3">

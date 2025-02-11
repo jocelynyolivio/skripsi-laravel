@@ -13,7 +13,7 @@ class Odontogram extends Model
 
     public function procedures()
     {
-        return $this->belongsToMany(Procedure::class, 'odontogram_procedures')->withTimestamps();
+        return $this->belongsToMany(Procedure::class, 'procedure_odontogram')->withTimestamps();
     }
 
     public function patient()

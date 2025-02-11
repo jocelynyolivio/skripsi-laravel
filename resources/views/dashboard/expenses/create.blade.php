@@ -55,6 +55,12 @@
             <label for="quantity" class="form-label">Quantity</label>
             <input type="number" name="quantity" class="form-control" value="{{ old('quantity') }}" required>
         </div>
+
+        <!-- Input untuk Tanggal Kadaluarsa -->
+        <div class="mb-3">
+            <label for="expired_at" class="form-label">Expiration Date</label>
+            <input type="date" name="expired_at" class="form-control" value="{{ old('expired_at') }}">
+        </div>
         @endif
 
         <div class="mb-3">

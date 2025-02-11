@@ -2,10 +2,8 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Select Dental Materials for Medical Record</h3>
+    <h3 class="text-center">Dental Materials for Medical Record</h3>
 
-    <form method="POST" action="{{ route('dashboard.medical_records.saveMaterials', ['medicalRecordId' => $medicalRecordId]) }}">
-    @csrf
     <div class="form-group">
         <label for="procedures">Procedures:</label>
         <ul>
@@ -33,10 +31,15 @@
                         <td>{{ $material['quantity'] }} (Required)</td>
                         <td>{{ $material['stock_quantity'] }}</td>
                         <td>
-                            <!-- Menggunakan input dengan nilai default yang sudah diisi jumlah yang dibutuhkan -->
-                            <input type="number" name="quantities[{{ $materialId }}]" 
-                                   value="{{ $material['quantity'] }}" 
-                                   min="0" max="{{ $material['stock_quantity'] }}">
+                            @if(!$hasMaterials)
+                                <!-- Form Input Jika Belum Tersimpan -->
+                                <input type="number" name="quantities[{{ $materialId }}]" 
+                                       value="{{ $material['quantity'] }}" 
+                                       min="0" max="{{ $material['stock_quantity'] }}">
+                            @else
+                                <!-- Tampilkan angka saja jika sudah tersimpan -->
+                                {{ $material['quantity'] }}
+                            @endif
                         </td>
                     </tr>
                 @endforeach
@@ -44,9 +47,15 @@
         </table>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save Materials</button>
-</form>
-
-
+    @if(!$hasMaterials)
+        <form method="POST" action="{{ route('dashboard.medical_records.saveMaterials', ['medicalRecordId' => $medicalRecordId]) }}">
+            @csrf
+            <button type="submit" class="btn btn-primary">Save Materials</button>
+        </form>
+    @else
+        <div class="alert alert-success mt-3">
+            <strong>Note:</strong> Materials have already been saved for this medical record. You can only view them.
+        </div>
+    @endif
 </div>
 @endsection

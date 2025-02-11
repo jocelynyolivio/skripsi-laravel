@@ -14,6 +14,9 @@
                 <th>Amount</th>
                 <th>Category</th>
                 <th>Description</th>
+                <th>Material</th>
+<th>Quantity</th>
+<th>Expired at</th>
                 <th>Created By</th>
                 <th>Actions</th>
             </tr>
@@ -22,9 +25,13 @@
             @foreach ($expenses as $expense)
             <tr>
                 <td>{{ $expense->date }}</td>
-                <td>{{ $expense->amount }}</td>
+                <td>Rp. {{ number_format($expense->amount, 2, ',', '.') }}</td>
                 <td>{{ $expense->category->name }}</td>
                 <td>{{ $expense->description }}</td>
+                <td>{{ $expense->dentalMaterial?->name ?? '-' }}</td>
+<td>{{ $expense->quantity ?? '-' }}</td>
+<td>{{ $expense->expired_at ? date('d M Y', strtotime($expense->expired_at)) : '-' }}</td>
+
                 <td>{{ $expense->admin?->name ?? 'N/A' }}</td>
                 <td>
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>

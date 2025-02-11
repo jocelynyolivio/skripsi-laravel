@@ -43,7 +43,9 @@ public function promoPrice()
 
 public function odontograms()
 {
-    return $this->hasMany(ProcedureOdontogram::class);
+    return $this->belongsToMany(Odontogram::class, 'procedure_odontogram', 'procedure_id', 'odontogram_id')
+        ->withTimestamps();
 }
+
 
 }

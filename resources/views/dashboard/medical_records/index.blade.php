@@ -78,6 +78,10 @@
                     <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
                         class="btn btn-sm btn-warning">Edit</a>
 
+                        <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}"
+                        class="btn btn-sm btn-info">Select Materials</a>
+                        
+
                     <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
                         method="POST" style="display:inline;"
                         onsubmit="return confirm('Are you sure you want to delete this record?');">

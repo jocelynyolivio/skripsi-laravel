@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Relasi ke kategori
             $table->text('description')->nullable(); // Deskripsi pengeluaran
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); // Admin yang mencatat pengeluaran
+            $table->date('expired_at')->nullable();
             $table->timestamps();
 
             $table->unsignedBigInteger('dental_material_id')->nullable(); // Relasi ke bahan dental

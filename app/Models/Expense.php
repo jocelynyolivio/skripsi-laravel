@@ -10,8 +10,14 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
-        'date', 'amount', 'category_id', 'description', 
-        'created_by', 'dental_material_id', 'quantity'
+        'date',
+        'amount',
+        'category_id',
+        'description',
+        'expired_at',
+        'created_by',
+        'dental_material_id',
+        'quantity',
     ];
 
     public function category()

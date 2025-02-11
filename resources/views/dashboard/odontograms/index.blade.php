@@ -5,29 +5,44 @@
     <h3 class="text-center">Odontogram for {{ $patient->name }}</h3>
 
     <div class="odontogram-diagram mb-4">
-        @foreach(range(1, 32) as $toothNumber)
-            @php
-                $tooth = $odontograms->where('tooth_number', $toothNumber)->first();
-                $buttonClass = match($tooth->condition ?? 'Healthy') {
-                    'Healthy' => 'btn-outline-primary',
-                    'Cavity' => 'btn-outline-warning',
-                    'Filled' => 'btn-outline-danger', // Warna merah
-                    'Extracted' => 'btn-outline-secondary',
-                    default => 'btn-outline-primary',
-                };
-            @endphp
-            <button
-                type="button"
-                class="tooth btn {{ $buttonClass }} mb-2"
-                data-bs-toggle="modal"
-                data-bs-target="#editToothModal"
-                data-tooth-number="{{ $toothNumber }}"
-                data-condition="{{ $tooth->condition ?? 'Healthy' }}"
-                data-notes="{{ $tooth->notes ?? '' }}"
-                data-procedures="{{ $tooth && $tooth->procedures ? json_encode($tooth->procedures->pluck('id')) : '[]' }}">
-                {{ $toothNumber }}
-            </button>
-        @endforeach
+    @foreach(range(1, 32) as $toothNumber)
+    @php
+        // Cek apakah gigi ini ada di rekam medis (procedure_odontogram)
+        $toothProcedures = $procedureOdontograms->get($toothNumber, collect());
+        $hasMedicalRecord = $toothProcedures->isNotEmpty();
+
+        // Cek apakah gigi ini ada di odontogram manual
+        $toothManual = $odontograms->get($toothNumber);
+        $manualCondition = $toothManual->condition ?? null;
+
+        // Tentukan warna berdasarkan prioritas
+        if ($hasMedicalRecord) {
+            $buttonClass = 'btn-success'; // Gigi yang sudah ditangani di rekam medis
+        } elseif ($manualCondition) {
+            $buttonClass = match($manualCondition) {
+                'Cavity' => 'btn-warning',
+                'Filled' => 'btn-danger',
+                'Extracted' => 'btn-secondary',
+                default => 'btn-primary',
+            };
+        } else {
+            $buttonClass = 'btn-outline-primary'; // Default untuk gigi sehat
+        }
+    @endphp
+
+    <button
+        type="button"
+        class="tooth btn {{ $buttonClass }} mb-2"
+        data-bs-toggle="modal"
+        data-bs-target="#editToothModal"
+        data-tooth-number="{{ $toothNumber }}"
+        data-condition="{{ $manualCondition ?? 'Healthy' }}"
+        data-notes="{{ $toothManual->notes ?? '' }}"
+        data-procedures="{{ json_encode($toothProcedures->pluck('procedure_id')) }}">
+        {{ $toothNumber }}
+    </button>
+@endforeach
+
     </div>
 </div>
 
