@@ -17,12 +17,9 @@ class MedicalRecordController extends Controller
     public function index($patientId)
     {
         // Menambahkan relasi 'procedures' untuk mengambil prosedur yang terhubung dengan odontogram
-        $medicalRecords = MedicalRecord::with(['reservation.patient', 'reservation.doctor', 'procedures', 'odontograms', 'procedureOdontograms.procedure'])
-            ->whereHas('reservation', function ($query) use ($patientId) {
-                $query->where('patient_id', $patientId);
-            })
-            ->latest()
-            ->get();
+        $medicalRecords = MedicalRecord::with(['reservation.patient', 'reservation.doctor', 'procedureOdontograms.procedure'])->whereHas('reservation', function ($query) use ($patientId) {
+            $query->where('patient_id', $patientId);
+        })->latest()->get();
 
         $patientName = Patient::findOrFail($patientId)->name;
         $proceduress = Procedure::all();
@@ -38,9 +35,7 @@ class MedicalRecordController extends Controller
         $patient = Patient::findOrFail($patientId);
 
         // Mengambil semua reservasi yang dimiliki oleh pasien tertentu. 
-        $reservations = Reservation::where('patient_id', $patientId)
-            ->whereDoesntHave('medicalRecord') // Tambahkan filter ini
-            ->get();
+        $reservations = Reservation::where('patient_id', $patientId)->whereDoesntHave('medicalRecord')->get();
 
 
         // Mengambil semua prosedur yang tersedia
@@ -89,141 +84,112 @@ class MedicalRecordController extends Controller
             'procedure_id' => 'required|array',
             'procedure_id.*' => 'exists:procedures,id',
             'teeth_condition' => 'required|string',
-            'tooth_numbers' => 'required|array', // Pastikan array
-            'tooth_numbers.*' => 'integer|min:1|max:32',
+            'tooth_numbers' => 'nullable|array',
             'procedure_notes' => 'nullable|array',
-            'procedure_notes.*' => 'nullable|string',
         ]);
-
+    
+        // Temukan reservasi pasien
         $reservation = Reservation::findOrFail($validatedData['reservation_id']);
-        $existingRecord = MedicalRecord::where('reservation_id', $reservation->id)->first();
-
-        if ($existingRecord) {
-            return redirect()->back()->with('error', 'A medical record already exists for this reservation.');
-        }
-        if (count($validatedData['tooth_numbers']) !== count($validatedData['procedure_id'])) {
-            return redirect()->back()->with('error', 'Mismatch between teeth and procedures.');
-        }
-
-
-
-        // Simpan Medical Record
+    
+        // Simpan rekam medis
         $medicalRecord = new MedicalRecord();
         $medicalRecord->reservation_id = $reservation->id;
-        // dd( $medicalRecord->reservation_id);
         $medicalRecord->teeth_condition = $validatedData['teeth_condition'];
         $medicalRecord->save();
-
-        // Prosedur
-        $medicalRecord->procedures()->attach($validatedData['procedure_id']);
-
-        // Simpan atau Perbarui Odontogram dan ProcedureOdontogram
-        // Simpan ke ProcedureOdontogram untuk setiap pasangan tooth_number dan procedure_id
-        $uniqueCombinations = []; // Untuk mencegah duplikasi
-        // dd($validatedData['tooth_numbers']);
-        foreach ($validatedData['tooth_numbers'] as $index => $toothNumber) {
-            $procedureId = $validatedData['procedure_id'][$index] ?? null;
-            $procedureNotes = $validatedData['procedure_notes'][$index] ?? null;
-
-            if ($procedureId) {
-                // Buat kombinasi unik berdasarkan procedure_id dan tooth_number
-                $combinationKey = $procedureId . '-' . $toothNumber;
-
-                if (!in_array($combinationKey, $uniqueCombinations)) {
-                    // Simpan kombinasi ke dalam array unik
-                    $uniqueCombinations[] = $combinationKey;
-
-                    // Simpan ke database
+    
+        // Ambil daftar prosedur yang memerlukan nomor gigi
+        $proceduresRequiringTeeth = Procedure::where('requires_tooth', 1)->pluck('id')->toArray();
+        $uniqueCombinations = [];
+    
+        foreach ($validatedData['procedure_id'] as $procedureId) {
+            if (in_array($procedureId, $proceduresRequiringTeeth)) {
+                // Jika prosedur memerlukan nomor gigi, pastikan ada data
+                if (!isset($validatedData['tooth_numbers'][$procedureId]) || !is_array($validatedData['tooth_numbers'][$procedureId])) {
+                    return redirect()->back()->with('error', "Tooth number is required for procedure ID: $procedureId");
+                }
+    
+                foreach ($validatedData['tooth_numbers'][$procedureId] as $toothNumber) {
+                    $procedureNotes = $validatedData['procedure_notes'][$procedureId][$toothNumber] ?? null;
+    
+                    $combinationKey = $procedureId . '-' . $toothNumber;
+                    if (!in_array($combinationKey, $uniqueCombinations)) {
+                        $uniqueCombinations[] = $combinationKey;
+    
+                        ProcedureOdontogram::create([
+                            'medical_record_id' => $medicalRecord->id,
+                            'procedure_id' => $procedureId,
+                            'tooth_number' => $toothNumber,
+                            'notes' => $procedureNotes,
+                        ]);
+                    }
+                }
+            } else {
+                // Jika prosedur tidak membutuhkan gigi, cukup simpan prosedurnya dengan notes (jika ada)
+                $procedureNotes = $validatedData['procedure_notes'][$procedureId] ?? null;
+    
+                if (!in_array($procedureId, $uniqueCombinations)) {
+                    $uniqueCombinations[] = $procedureId;
+    
                     ProcedureOdontogram::create([
                         'medical_record_id' => $medicalRecord->id,
                         'procedure_id' => $procedureId,
-                        'tooth_number' => $toothNumber,
-                        'notes' => $procedureNotes,
+                        'tooth_number' => null, // Tidak perlu gigi
+                        'notes' => is_array($procedureNotes) ? implode(', ', $procedureNotes) : $procedureNotes,
                     ]);
                 }
             }
         }
-
+    
         return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
             ->with('success', 'Medical Record and Odontogram have been saved successfully.');
     }
-
-
-
+    
 
     public function selectMaterials($medicalRecordId)
-{
-    // Ambil rekam medis berdasarkan ID
-    $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
-
-    // Ambil semua prosedur yang terkait dengan rekam medis ini
-    $procedures = $medicalRecord->procedures;
-
-    // Cek apakah rekam medis ini sudah memiliki bahan tersimpan
-    $hasMaterials = $medicalRecord->dentalMaterials()->exists(); // True jika sudah ada bahan tersimpan
-
-    // Menyimpan bahan yang dibutuhkan untuk setiap prosedur
-    $materials = [];
-
-    foreach ($procedures as $procedure) {
-        foreach ($procedure->dentalMaterials as $material) {
-            if (!isset($materials[$material->id])) {
-                // Menambahkan bahan hanya sekali, jika belum ada dalam array $materials
-                $materials[$material->id] = [
-                    'name' => $material->name,
-                    'stock_quantity' => $material->stock_quantity,
-                    'quantity' => $material->pivot->quantity, // Menyimpan jumlah bahan yang diperlukan untuk prosedur
-                    'procedure_id' => $procedure->id // Menyimpan id prosedur untuk menghubungkan bahan ke prosedur
-                ];
-            } else {
-                // Jika bahan sudah ada, tambah jumlah kuantitas untuk prosedur yang sama
-                $materials[$material->id]['quantity'] += $material->pivot->quantity;
-            }
-        }
-    }
-
-    return view('dashboard.medical_records.selectMaterials', [
-        'medicalRecordId' => $medicalRecordId,
-        'procedures' => $procedures,
-        'materials' => $materials,
-        'hasMaterials' => $hasMaterials, // Kirim status apakah sudah tersimpan atau belum
-    ]);
-}
-
-
-
-    public function saveMaterials(Request $request, $medicalRecordId)
     {
+        // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
-
-        // Validasi input bahan dan kuantitas
-        $validatedData = $request->validate([
-            'quantities' => 'required|array',
-        ]);
-
-        // Loop melalui bahan-bahan yang dipilih
-        foreach ($validatedData['quantities'] as $materialId => $quantity) {
-            if ($quantity > 0) {
-                $material = DentalMaterial::findOrFail($materialId);
-
-                // Periksa apakah stok cukup
-                if ($material->stock_quantity < $quantity) {
-                    return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+    
+        // Ambil semua prosedur dari procedure_odontograms
+        $procedureIds = $medicalRecord->procedureOdontograms->pluck('procedure_id')->unique();
+        $procedures = Procedure::whereIn('id', $procedureIds)->get();
+    
+        // Cek apakah rekam medis ini sudah memiliki bahan tersimpan
+        $hasMaterials = $medicalRecord->dentalMaterials()->exists(); // True jika sudah ada bahan tersimpan
+    
+        // Menyimpan bahan yang dibutuhkan untuk setiap prosedur
+        $materials = [];
+    
+        foreach ($procedures as $procedure) {
+            // Hitung jumlah gigi yang terkait dengan prosedur ini
+            $toothCount = $medicalRecord->procedureOdontograms->where('procedure_id', $procedure->id)->count();
+    
+            foreach ($procedure->dentalMaterials as $material) {
+                $requiredQuantity = $material->pivot->quantity * max(1, $toothCount); // Kalikan dengan jumlah gigi jika diperlukan
+    
+                if (!isset($materials[$material->id])) {
+                    // Menambahkan bahan hanya sekali, jika belum ada dalam array $materials
+                    $materials[$material->id] = [
+                        'name' => $material->name,
+                        'stock_quantity' => $material->stock_quantity,
+                        'quantity' => $requiredQuantity, // Menyimpan jumlah bahan yang diperlukan untuk prosedur
+                        'procedure_id' => $procedure->id // Menyimpan id prosedur untuk menghubungkan bahan ke prosedur
+                    ];
+                } else {
+                    // Jika bahan sudah ada, tambah jumlah kuantitas untuk prosedur yang sama
+                    $materials[$material->id]['quantity'] += $requiredQuantity;
                 }
-
-                // Kurangi stok bahan
-                $material->stock_quantity -= $quantity;
-                $material->save();
-
-                // Simpan hubungan antara rekam medis dan bahan
-                $medicalRecord->dentalMaterials()->attach($materialId, ['quantity' => $quantity]);
             }
         }
-
-        // Redirect ke halaman rekam medis
-        return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->reservation->patient_id])
-            ->with('success', 'Dental materials have been successfully saved.');
+    
+        return view('dashboard.medical_records.selectMaterials', [
+            'medicalRecordId' => $medicalRecordId,
+            'procedures' => $procedures,
+            'materials' => $materials,
+            'hasMaterials' => $hasMaterials, // Kirim status apakah sudah tersimpan atau belum
+        ]);
     }
+    
     public function removeMaterial($medicalRecordId, $materialId)
     {
         // Temukan rekam medis berdasarkan ID
@@ -251,67 +217,74 @@ class MedicalRecordController extends Controller
 
     public function edit($patientId, $recordId)
     {
-        $medicalRecord = MedicalRecord::with(['procedures', 'procedureOdontograms'])->findOrFail($recordId);
+        // Ambil rekam medis beserta semua prosedur yang telah tercatat dalam procedure_odontogram
+        $medicalRecord = MedicalRecord::with(['procedureOdontograms.procedure'])->findOrFail($recordId);
 
         // Ambil semua prosedur yang tersedia
         $procedures = Procedure::all();
 
-        // Ambil semua prosedur yang telah dipilih
-        $selectedProcedures = $medicalRecord->procedures->pluck('id')->toArray();
+        // Ambil semua prosedur yang telah dipilih dalam rekam medis
+        $selectedProcedures = $medicalRecord->procedureOdontograms->pluck('procedure_id')->toArray();
 
         // Ambil semua nomor gigi yang terkait dengan rekam medis ini
         $procedureOdontograms = $medicalRecord->procedureOdontograms->map(function ($po) {
             return [
+                'id' => $po->id, // ID untuk update data yang sudah ada
                 'procedure_id' => $po->procedure_id,
                 'tooth_number' => $po->tooth_number,
                 'notes' => $po->notes,
             ];
         });
 
-        return view('dashboard.medical_records.edit', [
-            'medicalRecord' => $medicalRecord,
-            'patientId' => $patientId,
-            'procedures' => $procedures,
-            'selectedProcedures' => $selectedProcedures,
-            'procedureOdontograms' => $procedureOdontograms,
-        ]);
+        return view('dashboard.medical_records.edit', compact(
+            'medicalRecord', 'patientId', 'procedures', 'selectedProcedures', 'procedureOdontograms'
+        ));
     }
 
     public function update(Request $request, $patientId, $recordId)
     {
+        // Debugging: Cek apakah request masuk dengan benar
+        // dd($request->all());
+
         $validatedData = $request->validate([
-            'tooth_numbers' => 'required|array',
-            'tooth_numbers.*' => 'integer|min:1|max:32',
+            'teeth_condition' => 'required|string',
+            'id' => 'required|array', // ID dari ProcedureOdontogram yang diedit
+            'id.*' => 'exists:procedure_odontogram,id', // Sesuaikan dengan nama tabel
+            'tooth_numbers' => 'nullable|array',
+            'tooth_numbers.*' => 'nullable|string',
             'procedure_notes' => 'nullable|array',
             'procedure_notes.*' => 'nullable|string',
         ]);
 
-        $medicalRecord = MedicalRecord::with('procedureOdontograms')->findOrFail($recordId);
+        // Ambil rekam medis berdasarkan ID
+        $medicalRecord = MedicalRecord::findOrFail($recordId);
 
-        // **Update odontogram (nomor gigi dan notes)**
-        $existingOdontograms = $medicalRecord->procedureOdontograms->keyBy('id');
+        // Update kondisi gigi pada rekam medis
+        $medicalRecord->teeth_condition = $validatedData['teeth_condition'];
+        $medicalRecord->save();
 
-        foreach ($validatedData['tooth_numbers'] as $index => $toothNumber) {
-            $odontogram = $existingOdontograms->skip($index)->first();
+        // Loop berdasarkan `id[]` untuk update data yang sudah ada
+        foreach ($validatedData['id'] as $index => $odontogramId) {
+            $odontogram = ProcedureOdontogram::find($odontogramId);
 
             if ($odontogram) {
-                $odontogram->update([
-                    'tooth_number' => $toothNumber,
-                    'notes' => $validatedData['procedure_notes'][$index] ?? null,
-                ]);
+                // Periksa apakah nomor gigi ada dalam request atau gunakan nilai lama
+                $newToothNumber = $validatedData['tooth_numbers'][$index] ?? $odontogram->tooth_number;
+                $newNotes = $validatedData['procedure_notes'][$index] ?? $odontogram->notes;
+
+                // Update hanya jika ada perubahan data
+                if ($newToothNumber != $odontogram->tooth_number || $newNotes != $odontogram->notes) {
+                    $odontogram->update([
+                        'tooth_number' => $newToothNumber,
+                        'notes' => $newNotes,
+                    ]);
+                }
             }
         }
 
-        // Redirect setelah update
-        return redirect()
-            ->route('dashboard.medical_records.index', ['patientId' => $patientId])
+        return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
             ->with('success', 'Medical record updated successfully.');
     }
-
-
-
-
-
 
     public function destroy($patientId, $recordId)
     {

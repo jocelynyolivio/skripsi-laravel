@@ -29,19 +29,21 @@
         <!-- Prosedur dan Odontogram Integration -->
         <div class="mb-4">
             <h4>Select Procedure and Teeth</h4>
-            
+
             <!-- Procedure Selection -->
             <div class="mb-3">
                 <label class="form-label">Select Procedure</label>
                 <select id="currentProcedure" class="form-select">
                     <option value="">Select Procedure</option>
                     @foreach($procedures as $procedure)
-                    <option value="{{ $procedure->id }}" 
-                            data-default-condition="{{ $procedure->default_condition }}">
+                    <option value="{{ $procedure->id }}"
+                        data-requires-tooth="{{ $procedure->requires_tooth ? '1' : '0' }}"
+                        data-default-condition="{{ $procedure->default_condition }}">
                         {{ $procedure->name }}
                     </option>
                     @endforeach
                 </select>
+
             </div>
 
             <!-- Odontogram Diagram -->
@@ -49,132 +51,156 @@
                 <div class="row">
                     @for ($i = 1; $i <= 32; $i++)
                         <div class="col-md-1 mb-2">
-                            <button type="button"
-                                    class="tooth btn btn-outline-primary w-100"
-                                    data-tooth="{{ $i }}"
-                                    onclick="selectToothForProcedure('{{ $i }}')">
-                                {{ $i }}
-                            </button>
-                        </div>
-                    @endfor
+                        <button type="button"
+                            class="tooth btn btn-outline-primary w-100"
+                            data-tooth="{{ $i }}"
+                            onclick="selectToothForProcedure('{{ $i }}')">
+                            {{ $i }}
+                        </button>
                 </div>
-            </div>
-
-            <!-- Selected Procedures and Teeth -->
-            <div id="selectedProceduresContainer">
-                <!-- Selected procedures will be added here dynamically -->
+                @endfor
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Save Medical Record</button>
-    </form>
+        <!-- Selected Procedures and Teeth -->
+        <div id="selectedProceduresContainer">
+            <!-- Selected procedures will be added here dynamically -->
+        </div>
 </div>
 
+<button type="submit" class="btn btn-primary">Save Medical Record</button>
+</form>
+</div>
+
+<!-- Hidden input untuk menyimpan data -->
+<!-- Hidden input untuk menyimpan data -->
+<input type="hidden" id="procedureData" name="procedureData">
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectedProcedures = new Map(); // To track selected procedures and teeth
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedProcedures = new Map();
 
-    window.selectToothForProcedure = function(toothNumber) {
-        const procedureSelect = document.getElementById('currentProcedure');
-        const procedureId = procedureSelect.value;
-        
-        if (!procedureId) {
-            alert('Please select a procedure first');
-            return;
-        }
+        window.selectProcedure = function() {
+            // ambil dari select
+            const procedureSelect = document.getElementById('currentProcedure');
+            const procedureId = procedureSelect.value;
+            const requiresTooth = procedureSelect.options[procedureSelect.selectedIndex].dataset.requiresTooth === "1";
+            const procedureName = procedureSelect.options[procedureSelect.selectedIndex].text;
 
-        const procedureName = procedureSelect.options[procedureSelect.selectedIndex].text;
-        const defaultCondition = procedureSelect.options[procedureSelect.selectedIndex].dataset.defaultCondition;
+            if (!procedureId) {
+                alert('Please select a procedure first');
+                return;
+           l }
 
-        // Check if tooth is already used
-        const isToothUsed = Array.from(selectedProcedures.values()).some(proc => 
-            proc.teeth.includes(toothNumber)
-        );
+            if (!selectedProcedures.has(procedureId)) {
+                selectedProcedures.set(procedureId, {
+                    name: procedureName,
+                    requiresTooth: requiresTooth,
+                    teeth: [] // Hanya diisi jika requiresTooth = true
+                });
 
-        if (isToothUsed) {
-            alert(`Tooth ${toothNumber} is already assigned to a procedure`);
-            return;
-        }
+                updateSelectedProceduresDisplay();
+            }
+        };
 
-        // Add or update procedure-tooth mapping
-        if (!selectedProcedures.has(procedureId)) {
-            selectedProcedures.set(procedureId, {
-                name: procedureName,
-                teeth: [toothNumber],
-                defaultCondition: defaultCondition
+        window.selectToothForProcedure = function(toothNumber) {
+            const procedureSelect = document.getElementById('currentProcedure');
+            const procedureId = procedureSelect.value;
+
+            if (!procedureId || !selectedProcedures.has(procedureId)) {
+                alert('Please select a procedure first');
+                return;
+            }
+
+            const procedureData = selectedProcedures.get(procedureId);
+            if (!procedureData.requiresTooth) {
+                alert('This procedure does not require a specific tooth.');
+                return;
+            }
+
+            if (!procedureData.teeth.includes(toothNumber)) {
+                procedureData.teeth.push(toothNumber);
+            }
+
+            updateSelectedProceduresDisplay();
+            highlightSelectedTooth(toothNumber);
+        };
+
+        function updateSelectedProceduresDisplay() {
+            const container = document.getElementById('selectedProceduresContainer');
+            container.innerHTML = '';
+
+            let procedureDataObj = {}; // Data yang akan dikirim ke backend
+
+            selectedProcedures.forEach((data, procedureId) => {
+                procedureDataObj[procedureId] = data.teeth.length > 0 ? data.teeth : null; // Null jika tidak butuh gigi
+
+                const div = document.createElement('div');
+                div.className = 'mb-3 border p-3';
+                div.innerHTML = `
+                <h5>${data.name}</h5>
+                <input type="hidden" name="procedure_id[]" value="${procedureId}">
+                ${data.requiresTooth ? data.teeth.map(tooth => `
+                    <div class="mb-2">
+                        <p>Tooth ${tooth}</p>
+                        <input type="hidden" name="tooth_numbers[${procedureId}][]" value="${tooth}">
+                        <textarea name="procedure_notes[${procedureId}][${tooth}]" class="form-control" 
+                                placeholder="Notes for tooth ${tooth}"></textarea>
+                    </div>
+                `).join('') : `
+                    <p class="text-muted">This procedure does not require a specific tooth.</p>
+                    <input type="hidden" name="tooth_numbers[${procedureId}][]" value="">
+                `}
+                <button type="button" class="btn btn-danger btn-sm mt-2" 
+                        onclick="removeProcedure('${procedureId}')">
+                    Remove Procedure
+                </button>
+            `;
+                container.appendChild(div);
             });
-        } else {
-            selectedProcedures.get(procedureId).teeth.push(toothNumber);
+
+            // Simpan data JSON ke hidden input
+            document.getElementById('procedureData').value = JSON.stringify(procedureDataObj);
         }
 
-        updateSelectedProceduresDisplay();
-        highlightSelectedTooth(toothNumber);
-    };
+        window.removeProcedure = function(procedureId) {
+            selectedProcedures.delete(procedureId);
+            updateSelectedProceduresDisplay();
+        };
 
-    function updateSelectedProceduresDisplay() {
-    const container = document.getElementById('selectedProceduresContainer');
-    container.innerHTML = '';
+        function highlightSelectedTooth(toothNumber) {
+            const toothButton = document.querySelector(`button[data-tooth="${toothNumber}"]`);
+            if (toothButton) {
+                toothButton.classList.remove('btn-outline-primary');
+                toothButton.classList.add('btn-primary');
+            }
+        }
 
-    selectedProcedures.forEach((data, procedureId) => {
-        const div = document.createElement('div');
-        div.className = 'mb-3 border p-3';
-        div.innerHTML = `
-            <h5>${data.name}</h5>
-            ${data.teeth.map(tooth => `
-                <div class="mb-2">
-                    <p>Tooth ${tooth}</p>
-                    <input type="hidden" name="procedure_id[]" value="${procedureId}">
-                    <input type="hidden" name="tooth_numbers[]" value="${tooth}">
-                    <textarea name="procedure_notes[]" class="form-control" 
-                            placeholder="Notes for tooth ${tooth}"></textarea>
-                </div>
-            `).join('')}
-            <button type="button" class="btn btn-danger btn-sm mt-2" 
-                    onclick="removeProcedure('${procedureId}')">
-                Remove Procedure
-            </button>
-        `;
-        container.appendChild(div);
+        function unhighlightTooth(toothNumber) {
+            const toothButton = document.querySelector(`button[data-tooth="${toothNumber}"]`);
+            if (toothButton) {
+                toothButton.classList.remove('btn-primary');
+                toothButton.classList.add('btn-outline-primary');
+            }
+        }
+
+        document.getElementById('currentProcedure').addEventListener('change', selectProcedure);
     });
-}
-
-    window.removeProcedure = function(procedureId) {
-        const teeth = selectedProcedures.get(procedureId).teeth;
-        teeth.forEach(tooth => unhighlightTooth(tooth));
-        selectedProcedures.delete(procedureId);
-        updateSelectedProceduresDisplay();
-    };
-
-    function highlightSelectedTooth(toothNumber) {
-        const toothButton = document.querySelector(`button[data-tooth="${toothNumber}"]`);
-        if (toothButton) {
-            toothButton.classList.remove('btn-outline-primary');
-            toothButton.classList.add('btn-primary');
-        }
-    }
-
-    function unhighlightTooth(toothNumber) {
-        const toothButton = document.querySelector(`button[data-tooth="${toothNumber}"]`);
-        if (toothButton) {
-            toothButton.classList.remove('btn-primary');
-            toothButton.classList.add('btn-outline-primary');
-        }
-    }
-});
 </script>
 
-<style>
-.tooth {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    margin: 2px;
-    font-size: 12px;
-}
 
-.odontogram-diagram {
-    max-width: 1000px;
-    margin: 0 auto;
-}
+<style>
+    .tooth {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        margin: 2px;
+        font-size: 12px;
+    }
+
+    .odontogram-diagram {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
 </style>
 @endsection

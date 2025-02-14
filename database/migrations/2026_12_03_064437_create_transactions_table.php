@@ -13,13 +13,16 @@
         {
             Schema::create('transactions', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('medical_record_id')->constrained()->onDelete('cascade');
-                $table->foreignId('admin_id')->nullable()->constrained('users')->onDelete('set null');
                 $table->decimal('amount', 10, 2);
                 $table->enum('payment_type', ['cash', 'credit', 'dp']);
                 $table->enum('payment_status', ['lunas', 'cicilan', 'dp']);
                 $table->timestamps();
+            
+                // Foreign keys
+                $table->foreignId('medical_record_id')->constrained()->onDelete('cascade');
+                $table->foreignId('admin_id')->nullable()->constrained('users')->onDelete('set null');
             });
+            
         }
 
         /**

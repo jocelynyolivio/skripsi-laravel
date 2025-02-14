@@ -10,7 +10,8 @@ class MedicalRecord extends Model
     use HasFactory;
 
     protected $fillable = [
-        'reservation_id', 'teeth_condition'
+        'reservation_id',
+        'teeth_condition'
     ];
 
     // Relasi dengan reservasi
@@ -19,34 +20,31 @@ class MedicalRecord extends Model
         return $this->belongsTo(Reservation::class);
     }
 
-    public function procedures()
-    {
-        return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id');
-    }
-    
+    // public function procedures()
+    // {
+    //     return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id');
+    // }
+
     public function odontograms()
     {
         return $this->hasMany(Odontogram::class, 'medical_record_id');
     }
-    
 
-// Relasi many-to-many dengan DentalMaterial melalui medical_record_dental_material
-public function dentalMaterials()
-{
-    return $this->belongsToMany(DentalMaterial::class, 'medical_record_dental_material')
-                ->withPivot('quantity') // Mengambil informasi kuantitas dari pivot
-                ->withTimestamps(); // Menambahkan timestamp pada data pivot
-}
+    public function dentalMaterials()
+    {
+        return $this->belongsToMany(DentalMaterial::class, 'medical_record_dental_material')
+            ->withPivot('quantity') // Mengambil informasi kuantitas dari pivot
+            ->withTimestamps(); // Menambahkan timestamp pada data pivot
+    }
 
-public function transaction()
-{
-    return $this->hasOne(Transaction::class);
-}
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class);
+    }
 
 
-public function procedureOdontograms()
-{
-    return $this->hasMany(ProcedureOdontogram::class);
-}
-
+    public function procedureOdontograms()
+    {
+        return $this->hasMany(ProcedureOdontogram::class);
+    }
 }

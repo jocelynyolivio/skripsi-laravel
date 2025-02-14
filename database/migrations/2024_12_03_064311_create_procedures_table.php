@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // Nama prosedur, misalnya Tambal Gigi
             $table->text('description')->nullable(); // Deskripsi tentang prosedur
+            $table->boolean('requires_tooth')->default(true); // Default: prosedur butuh nomor gigi
             $table->timestamps();
         });
     }

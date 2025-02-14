@@ -10,11 +10,13 @@ return new class extends Migration
     {
         Schema::create('procedure_odontogram', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('medical_record_id')->constrained()->onDelete('cascade');
-            $table->foreignId('procedure_id')->constrained()->onDelete('cascade');
-            $table->integer('tooth_number');
+            $table->integer('tooth_number')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+        
+            // Foreign keys
+            $table->foreignId('medical_record_id')->constrained()->onDelete('cascade');
+            $table->foreignId('procedure_id')->constrained()->onDelete('cascade');
         });
     }
 

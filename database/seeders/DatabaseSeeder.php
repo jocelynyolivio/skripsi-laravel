@@ -1,21 +1,15 @@
 <?php
 
 namespace Database\Seeders;
-
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Carbon\Carbon;
-use App\Models\Post;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Category;
 use App\Models\Pricelist;
 use App\Models\Procedure;
-use App\Models\Schedules;
-use App\Models\Odontogram;
-use App\Models\HomeContent;
-use App\Models\Reservation;
 use App\Models\DentalMaterial;
+use App\Models\ProcedureMaterial;
 use App\Models\ScheduleTemplate;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -28,13 +22,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
         // sesuai data absensi excel
         $users = [
             ['name' => 'Yohany', 'email' => 'yohany@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
@@ -60,26 +47,23 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Sergio', 'email' => 'sergio@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
 
         ];
-
         foreach ($users as $user) {
             User::create($user);
         }
 
-        // tambahan coba pribadi
+        // tambahan
         User::create([
             'name' => 'admin1',
             'email' => 'admin1@gmail.com',
             'password' => bcrypt('admin'),
             'role_id' => 1
         ]);
-
         User::create([
             'name' => 'dokter1',
             'email' => 'dokter1@gmail.com',
             'password' => bcrypt('dokter'),
             'role_id' => 2
         ]);
-
         User::create([
             'name' => 'dokter2',
             'email' => 'dokter2@gmail.com',
@@ -108,15 +92,12 @@ class DatabaseSeeder extends Seeder
         Role::create([
             'role_name' => 'admin'
         ]);
-
         Role::create([
             'role_name' => 'dokter tetap'
         ]);
-        
         Role::create([
             'role_name' => 'dokter luar'
         ]);
-        
         Role::create([
             'role_name' => 'manager'
         ]);
@@ -150,38 +131,16 @@ class DatabaseSeeder extends Seeder
             'nomor_telepon' => '0000000'
         ]);
 
-        Schedules::create([
-            'doctor_id' => 3, // Sesuaikan ID dokter
-            'date' => '2024-01-01',
-            'time_start' => '09:00:00',
-            'time_end' => '10:00:00',
-            'is_available' => false,
-        ]);
-        Schedules::create([
-            'doctor_id' => 3, // Sesuaikan ID dokter
-            'date' => '2023-12-12',
-            'time_start' => '08:00:00',
-            'time_end' => '10:00:00',
-            'is_available' => true,
+        ScheduleTemplate::create([
+            'doctor_id' => 23,
+            'day_of_week' => 'Monday',
+            'start_time' => '10:00:00',
+            'end_time' => '17:00:00',
+            'is_active' => true,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ]);
 
-            Schedules::create([
-                'doctor_id' => 4, // Sesuaikan ID dokter
-                'date' => '2025-08-04',
-                'time_start' => '11:00:00',
-                'time_end' => '14:00:00',
-                'is_available' => true,
-            ]);
-
-        Schedules::create([
-            'doctor_id' => 5, // Sesuaikan ID dokter
-            'date' => '2024-12-01',
-            'time_start' => '19:00:00',
-            'time_end' => '20:00:00',
-            'is_available' => true,
-        ]);
-
-        
         DentalMaterial::create([
             'name' => 'Resin Komposit',
             'description' => 'Bahan untuk penambalan gigi berlubang',
@@ -225,70 +184,31 @@ class DatabaseSeeder extends Seeder
             'description' => 'Prosedur untuk mencabut gigi yang tidak bisa diselamatkan.',
         ]);
 
-                // Menghubungkan Tambal Gigi dengan beberapa bahan dental
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 1, // ID untuk Tambal Gigi
-                    'dental_material_id' => 1, // Resin Komposit
-                    'quantity' => 2, // Butuh 2 unit Resin Komposit
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 1, // ID untuk Tambal Gigi
-                    'dental_material_id' => 2, // Anestesi
-                    'quantity' => 1, // Butuh 1 unit Anestesi
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 1, // ID untuk Tambal Gigi
-                    'dental_material_id' => 3, // Cavity Liner
-                    'quantity' => 1, // Butuh 1 unit Cavity Liner
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 1, // ID untuk Tambal Gigi
-                    'dental_material_id' => 4, // Amalgam
-                    'quantity' => 1, // Butuh 1 unit Amalgam (optional untuk kombinasi bahan)
-                ]);
-        
-                // Menghubungkan Pencabutan Gigi dengan beberapa bahan dental
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 3, // ID untuk Pencabutan Gigi
-                    'dental_material_id' => 2, // Anestesi
-                    'quantity' => 1, // Butuh 1 unit Anestesi
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 3, // ID untuk Pencabutan Gigi
-                    'dental_material_id' => 3, // Cavity Liner
-                    'quantity' => 1, // Butuh 1 unit Cavity Liner untuk perlindungan
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 3, // ID untuk Pencabutan Gigi
-                    'dental_material_id' => 1, // Resin Komposit (untuk pelindung gigi pasca pencabutan)
-                    'quantity' => 1, // Butuh 1 unit Resin Komposit
-                ]);
-        
-                // Menghubungkan Pembersihan Karang Gigi dengan beberapa bahan dental
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 2, // ID untuk Pembersihan Karang Gigi
-                    'dental_material_id' => 3, // Cavity Liner
-                    'quantity' => 1, // Butuh 1 unit Cavity Liner
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 2, // ID untuk Pembersihan Karang Gigi
-                    'dental_material_id' => 2, // Anestesi (opsional jika pasien mengalami ketidaknyamanan)
-                    'quantity' => 1, // Butuh 1 unit Anestesi
-                ]);
-        
-                DB::table('procedure_materials')->insert([
-                    'procedure_id' => 2, // ID untuk Pembersihan Karang Gigi
-                    'dental_material_id' => 4, // Amalgam (untuk kasus tertentu dengan tambalan kecil)
-                    'quantity' => 1, // Butuh 1 unit Amalgam
-                ]);
+        $procedureMaterials = [
+            // Tambal Gigi
+            ['procedure_id' => 1, 'dental_material_id' => 1, 'quantity' => 2], // Resin Komposit
+            ['procedure_id' => 1, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
+            ['procedure_id' => 1, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
+            ['procedure_id' => 1, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (optional)
 
-                // Tambal Gigi - Base Price
+            // Pencabutan Gigi
+            ['procedure_id' => 3, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
+            ['procedure_id' => 3, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
+            ['procedure_id' => 3, 'dental_material_id' => 1, 'quantity' => 1], // Resin Komposit (pelindung pasca pencabutan)
+
+            // Pembersihan Karang Gigi
+            ['procedure_id' => 2, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
+            ['procedure_id' => 2, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi (opsional)
+            ['procedure_id' => 2, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (kasus tertentu)
+        ];
+
+        // Loop dan buat satu per satu dengan create()
+        foreach ($procedureMaterials as $data) {
+            ProcedureMaterial::create($data);
+        }
+
+
+        // Tambal Gigi - Base Price
         Pricelist::create([
             'procedure_id' => 1,
             'price' => 300000, // Harga dasar: 300.000
@@ -361,16 +281,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Rumah Tangga',
         ]);
 
-        ScheduleTemplate::create([
-            'doctor_id' => 23,
-                'day_of_week' => 'Monday',
-                'start_time' => '10:00:00',
-                'end_time' => '17:00:00',
-                'is_active' => true,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-        ]);
-
         DB::table('holidays')->insert([
             ['tanggal' => '2024-01-01', 'keterangan' => 'Tahun Baru'],
             ['tanggal' => '2024-02-10', 'keterangan' => 'Tahun Baru Imlek'],
@@ -398,68 +308,5 @@ class DatabaseSeeder extends Seeder
             ['tanggal' => '2025-09-05', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
             ['tanggal' => '2025-12-25', 'keterangan' => 'Hari Raya Natal'],
         ]);
-
-        
-        
-
-
-        // Odontogram::create([
-        //     'medical_record_id' => 1, // Sesuaikan ID rekam medis yang sudah ada
-        //     'tooth_number' => '11', // Gigi 11 (Insisivus kanan atas)
-        //     'status' => 'sehat', // Status gigi sehat
-        //     'notes' => 'Tidak ada keluhan', // Catatan
-        // ]);
-
-        // Odontogram::create([
-        //     'medical_record_id' => 1,
-        //     'tooth_number' => '12', // Gigi 12
-        //     'status' => 'berlubang', // Status gigi berlubang
-        //     'notes' => 'Karies kecil pada email, butuh observasi',
-        // ]);
-
-        // Odontogram::create([
-        //     'medical_record_id' => 2, // Sesuaikan ID rekam medis
-        //     'tooth_number' => '21', // Gigi 21 (Insisivus kiri atas)
-        //     'status' => 'tambalan', // Status gigi tambalan
-        //     'notes' => 'Tambalan komposit resin', // Catatan
-        // ]);
-
-        // Odontogram::create([
-        //     'medical_record_id' => 3, // Sesuaikan ID rekam medis
-        //     'tooth_number' => '36', // Gigi 36 (Molari kiri bawah)
-        //     'status' => 'berlubang', // Status gigi berlubang
-        //     'notes' => 'Karies parah, perlu tindakan endodonti',
-        // ]);
-
-
-        // Post::create([
-        //     'title' => 'Judul Pertama',
-        //     'slug' => 'judul-pertama',
-        //     'category_id' => 1,
-        //     'user_id' => 1,
-        //     'excerpt' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum et iusto blanditiis eligendi.',
-        //     'body' => '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis quaerat tempore, assumenda labore commodi consequatur officia quibusdam asperiores tenetur, repudiandae nam repellat veniam hic iste error? Voluptatibus cumque sed sit cupiditate rerum, saepe perferendis sint. Nulla sunt facere quaerat tempore nesciunt quis explicabo nemo assumenda quae harum. Labore iste aut reiciendis a! Commodi, cum!</p><p> Laudantium accusantium saepe accusamus nihil consequuntur, neque aliquid, veritatis tempore reiciendis aspernatur alias fugit dolore placeat! Accusantium, sequi? Ex, voluptate quos, in enim totam soluta sed quas ullam nihil necessitatibus ipsa earum rem nulla perferendis amet possimus expedita officiis, vel libero odit dolorem. Ad aliquid nobis vel aspernatur voluptatem nam nesciunt minima sunt enim consequatur expedita, ipsa fugit tempora dolore voluptas quis explicabo quo eius.</p><p> Quos, amet, reiciendis corrupti quia qui harum rem quibusdam rerum consectetur, natus voluptatum unde labore doloremque accusamus ullam iure repellat? Unde placeat ipsam harum fugiat! Delectus minima sed velit dolore rem illum voluptate quasi facilis tenetur, rerum sequi voluptatibus similique dolorem adipisci nobis possimus accusamus beatae eos nam ipsum doloribus deserunt alias mollitia? Dignissimos, numquam atque! Laboriosam voluptates esse sapiente vel?</p>'
-        // ]);
-
-        // Post::create([
-        //     'title' => 'Judul Kedua',
-        //     'slug' => 'judul-kedua',
-        //     'category_id' => 2,
-        //     'user_id' => 1,
-        //     'excerpt' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum et iusto blanditiis eligendi.',
-        //     'body' => '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis quaerat tempore, assumenda labore commodi consequatur officia quibusdam asperiores tenetur, repudiandae nam repellat veniam hic iste error? Voluptatibus cumque sed sit cupiditate rerum, saepe perferendis sint. Nulla sunt facere quaerat tempore nesciunt quis explicabo nemo assumenda quae harum. Labore iste aut reiciendis a! Commodi, cum!</p><p> Laudantium accusantium saepe accusamus nihil consequuntur, neque aliquid, veritatis tempore reiciendis aspernatur alias fugit dolore placeat! Accusantium, sequi? Ex, voluptate quos, in enim totam soluta sed quas ullam nihil necessitatibus ipsa earum rem nulla perferendis amet possimus expedita officiis, vel libero odit dolorem. Ad aliquid nobis vel aspernatur voluptatem nam nesciunt minima sunt enim consequatur expedita, ipsa fugit tempora dolore voluptas quis explicabo quo eius.</p><p> Quos, amet, reiciendis corrupti quia qui harum rem quibusdam rerum consectetur, natus voluptatum unde labore doloremque accusamus ullam iure repellat? Unde placeat ipsam harum fugiat! Delectus minima sed velit dolore rem illum voluptate quasi facilis tenetur, rerum sequi voluptatibus similique dolorem adipisci nobis possimus accusamus beatae eos nam ipsum doloribus deserunt alias mollitia? Dignissimos, numquam atque! Laboriosam voluptates esse sapiente vel?</p>'
-        // ]);
-
-        // Post::create([
-        //     'title' => 'Judul Ketiga',
-        //     'slug' => 'judul-ketiga',
-        //     'category_id' => 1,
-        //     'user_id' => 2,
-        //     'excerpt' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum et iusto blanditiis eligendi.',
-        //     'body' => '<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis quaerat tempore, assumenda labore commodi consequatur officia quibusdam asperiores tenetur, repudiandae nam repellat veniam hic iste error? Voluptatibus cumque sed sit cupiditate rerum, saepe perferendis sint. Nulla sunt facere quaerat tempore nesciunt quis explicabo nemo assumenda quae harum. Labore iste aut reiciendis a! Commodi, cum!</p><p> Laudantium accusantium saepe accusamus nihil consequuntur, neque aliquid, veritatis tempore reiciendis aspernatur alias fugit dolore placeat! Accusantium, sequi? Ex, voluptate quos, in enim totam soluta sed quas ullam nihil necessitatibus ipsa earum rem nulla perferendis amet possimus expedita officiis, vel libero odit dolorem. Ad aliquid nobis vel aspernatur voluptatem nam nesciunt minima sunt enim consequatur expedita, ipsa fugit tempora dolore voluptas quis explicabo quo eius.</p><p> Quos, amet, reiciendis corrupti quia qui harum rem quibusdam rerum consectetur, natus voluptatum unde labore doloremque accusamus ullam iure repellat? Unde placeat ipsam harum fugiat! Delectus minima sed velit dolore rem illum voluptate quasi facilis tenetur, rerum sequi voluptatibus similique dolorem adipisci nobis possimus accusamus beatae eos nam ipsum doloribus deserunt alias mollitia? Dignissimos, numquam atque! Laboriosam voluptates esse sapiente vel?</p>'
-        // ]);
-    //     User::factory(5)->create(); 
-    //     Post::factory(20)->create(); 
-    // }
-}
+    }
 }

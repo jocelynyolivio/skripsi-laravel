@@ -29,40 +29,53 @@
                 <td>{{ $record->teeth_condition }}</td>
                 <!-- <td>{{ $record->treatment }}</td> -->
                 <td>
-                    @if($record->procedures->count() > 0)
-                    @foreach($proceduress as $procedure)
-                    @if($record->procedureOdontograms->where('procedure_id', $procedure->id)->count() > 0)
-                    <div class="mb-2">
-                        <strong>{{ $procedure->name }}:</strong>
+    @if($record->procedureOdontograms->isNotEmpty())  
+        @foreach($proceduress as $procedure) 
+            @php
+                $procedureOdontograms = $record->procedureOdontograms->where('procedure_id', $procedure->id);
+            @endphp
+
+            @if($procedureOdontograms->isNotEmpty())
+                <div class="mb-2">
+                    <strong>{{ $procedure->name }}</strong>
+
+                    <!-- @if($procedure->requires_tooth === 1)
                         <br>
-                        Teeth:
-                        {{ $record->odontograms->where('procedure_id', $procedure->id)->pluck('tooth_number')->implode(', ') }}
-                        @php
-                        $notes = $record->odontograms->where('procedure_id', $procedure->id)->pluck('notes')->filter()->implode(', ');
-                        @endphp
-                        @if($notes)
+                        <strong>Teeth:</strong>
+                        {{ $procedureOdontograms->pluck('tooth_number')->implode(', ') }}
+                    @endif
+
+                    @php
+                        $notes = $procedureOdontograms->pluck('notes')->filter()->implode(', ');
+                    @endphp
+
+                    @if($notes)
                         <br>
-                        <small class="text-muted">
-                            Notes: {{ $notes }}
-                        </small>
-                        @endif
-                        @if($record->procedureOdontograms->count() > 0)
+                        <small class="text-muted">Notes: {{ $notes }}</small>
+                    @endif -->
+
+                    @if($procedure->requires_tooth === 1)
                         <ul>
-                            @foreach($record->procedureOdontograms->where('procedure_id', $procedure->id) as $procedureOdontogram)
-                            <li>
-                                Tooth: {{ $procedureOdontogram->tooth_number }} -
-                                <small class="text-muted">{{ $procedureOdontogram->notes }}</small>
-                            </li>
+                            @foreach($procedureOdontograms as $procedureOdontogram)
+                                <li>
+                                    Tooth: {{ $procedureOdontogram->tooth_number }}
+                                    @if($procedureOdontogram->notes)
+                                        - <small class="text-muted">{{ $procedureOdontogram->notes }}</small>
+                                    @endif
+                                </li>
                             @endforeach
                         </ul>
-                        @endif
-                    </div>
                     @endif
-                    @endforeach
-                    @else
-                    <span class="text-muted">No procedures</span>
-                    @endif
-                </td>
+                </div>
+            @endif
+        @endforeach
+    @else
+        <span class="text-muted">No procedures</span>
+    @endif
+</td>
+
+
+
 
                 <!-- <td>{{ $record->notes }}</td> -->
                 <td>{{ $record->reservation->doctor->name }}</td>
@@ -78,9 +91,9 @@
                     <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
                         class="btn btn-sm btn-warning">Edit</a>
 
-                        <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}"
+                    <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}"
                         class="btn btn-sm btn-info">Select Materials</a>
-                        
+
 
                     <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
                         method="POST" style="display:inline;"

@@ -18,14 +18,6 @@ return new class extends Migration
             $table->integer('stock_quantity'); // Jumlah stok yang tersedia
             $table->decimal('unit_price', 8, 2)->nullable(); // Harga satuan bahan
             $table->timestamps();
-
-            // $table->unsignedBigInteger('medical_record_id');
-            // $table->unsignedBigInteger('dental_material_id');
-
-                        // Foreign keys
-                        // $table->foreign('medical_record_id')->references('id')->on('medical_records')->onDelete('cascade');
-                        // $table->foreign('dental_material_id')->references('id')->on('dental_materials')->onDelete('cascade');
-
         });
     }
 

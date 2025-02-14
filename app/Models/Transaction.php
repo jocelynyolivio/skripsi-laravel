@@ -12,7 +12,7 @@ class Transaction extends Model
     protected $fillable = [
         'medical_record_id',
         'admin_id',
-        'amount', // Pastikan 'amount' ada di sini
+        'amount',
         'payment_type',
         'payment_status',
     ];

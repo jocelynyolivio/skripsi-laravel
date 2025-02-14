@@ -9,7 +9,7 @@ class Procedure extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'requires_tooth'];
 
      // Relasi ke Dental Materials (Many to Many)
      public function dentalMaterials()
@@ -18,11 +18,11 @@ class Procedure extends Model
                 ->withPivot('quantity');
 }
  
-     // Relasi ke Medical Records (Many to Many)
-     public function medicalRecords()
-     {
-         return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure');
-     }
+    //  // Relasi ke Medical Records (Many to Many)
+    //  public function medicalRecords()
+    //  {
+    //      return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure');
+    //  }
 
      public function priceLists()
 {
@@ -47,5 +47,7 @@ public function odontograms()
         ->withTimestamps();
 }
 
-
+public function procedureOdontograms() {
+    return $this->hasMany(ProcedureOdontogram::class, 'medical_record_id');
+}
 }

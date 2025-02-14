@@ -16,12 +16,7 @@ class Reservation extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
-
-    // public function schedule()
-    // {
-    //     return $this->belongsTo(Schedules::class, 'schedule_id');
-    // }
-
+    
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id');
