@@ -145,6 +145,7 @@ class MedicalRecordController extends Controller
     }
     
 
+
     public function selectMaterials($medicalRecordId)
     {
         // Ambil rekam medis berdasarkan ID
@@ -190,6 +191,51 @@ class MedicalRecordController extends Controller
         ]);
     }
     
+
+
+
+    public function saveMaterials(Request $request, $medicalRecordId)
+{
+    $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
+
+    // Validasi input bahan dan kuantitas
+    $validatedData = $request->validate([
+        'quantities' => 'required|array',
+    ]);
+
+    foreach ($validatedData['quantities'] as $materialId => $quantity) {
+        $quantity = (int) $quantity; // Konversi ke integer
+
+        if ($quantity > 0) {
+            $material = DentalMaterial::findOrFail($materialId);
+
+            // Debugging stok sebelum update
+            // dd('Sebelum Penyimpanan', $materialId, $quantity, $material->stock_quantity);
+
+            if ($material->stock_quantity < $quantity) {
+                return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+            }
+
+            // Kurangi stok bahan
+            $material->stock_quantity -= $quantity;
+            $material->save();
+
+            // Simpan hubungan antara rekam medis dan bahan dengan syncWithoutDetaching
+            $medicalRecord->dentalMaterials()->syncWithoutDetaching([
+                $materialId => ['quantity' => $quantity]
+            ]);
+
+            // Debugging setelah penyimpanan
+            // dd('Setelah Penyimpanan', $medicalRecord->dentalMaterials()->get());
+        }
+    }
+
+    return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->reservation->patient_id])
+        ->with('success', 'Dental materials have been successfully saved.');
+}
+
+
+
     public function removeMaterial($medicalRecordId, $materialId)
     {
         // Temukan rekam medis berdasarkan ID

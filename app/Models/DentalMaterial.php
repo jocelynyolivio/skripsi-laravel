@@ -17,4 +17,12 @@ class DentalMaterial extends Model
                     ->withPivot('quantity');
     }
 
+    public function medicalRecords()
+{
+    return $this->belongsToMany(MedicalRecord::class, 'medical_record_dental_material')
+        ->withPivot('quantity')
+        ->withTimestamps();
+}
+
+
 }
