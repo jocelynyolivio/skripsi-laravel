@@ -42,7 +42,6 @@
                     <td>{{ $attendance->jam_masuk }}</td>
                     <td>{{ $attendance->jam_pulang }}</td>
                     <td>
-                        <a href="{{ route('dashboard.attendances.show', $attendance->id) }}" class="btn btn-info btn-sm">Lihat</a>
                         <a href="{{ route('dashboard.attendances.edit', $attendance->id) }}" class="btn btn-warning btn-sm">Edit</a>
                         <form action="{{ route('dashboard.attendances.destroy', $attendance->id) }}" method="POST" class="d-inline">
                             @csrf

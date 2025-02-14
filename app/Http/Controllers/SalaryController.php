@@ -440,11 +440,6 @@ class SalaryController extends Controller
         return 'A' . implode('', $letters);
     }
 
-    public function create()
-    {
-        return view('dashboard.attendances.create');
-    }
-
     /**
      * Simpan data baru ke database.
      */
@@ -462,15 +457,6 @@ class SalaryController extends Controller
 
         return redirect()->route('attendances.index')
                          ->with('success', 'Data absensi berhasil ditambahkan.');
-    }
-
-    /**
-     * Tampilkan detail absensi.
-     */
-    public function show($id)
-    {
-        $attendance = Attendance::findOrFail($id);
-        return view('dashboard.attendances.show', compact('attendance'));
     }
 
     /**

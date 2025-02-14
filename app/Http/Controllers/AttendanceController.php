@@ -24,12 +24,6 @@ class AttendanceController extends Controller
         return view('dashboard.attendances.index', compact('attendances'));
     }
 
-    public function create()
-    {
-        $users = User::all();
-        return view('dashboard.attendances.create', compact('users'));
-    }
-
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -46,11 +40,6 @@ class AttendanceController extends Controller
         Attendance::create($validatedData);
 
         return redirect()->route('dashboard.attendances.index')->with('success', 'Data berhasil ditambahkan.');
-    }
-
-    public function show(Attendance $attendance)
-    {
-        return view('dashboard.attendances.show', compact('attendance'));
     }
 
     public function edit(Attendance $attendance)
