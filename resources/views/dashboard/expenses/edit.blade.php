@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container">
+<div class="container mt-5 col-md-6">
     <h1>Edit Expense</h1>
     <form action="{{ route('dashboard.expenses.update', $expense->id) }}" method="POST">
         @csrf

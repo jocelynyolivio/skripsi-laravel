@@ -32,10 +32,10 @@
                                         <td>{{ $material->quantity }}</td>
                                         <td>
                                             <a href="{{ route('dashboard.procedure_materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                            <form action="{{ route('dashboard.procedure_materials.destroy', $material->id) }}" method="POST" style="display:inline;">
+                                            <form action="{{ route('dashboard.procedure_materials.destroy', $material->id) }}" method="POST" style="display:inline;" class="delete-form">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                <button type="button" class="btn btn-danger btn-sm delete-button">Delete</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -56,5 +56,24 @@
                 $(this).DataTable();
             });
         });
+
+        // Event delegation for SweetAlert confirmation
+        $('table[id^="datatable-"]').on('click', '.delete-button', function(e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });                 
     </script>
 @endsection

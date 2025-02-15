@@ -2,7 +2,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5">
+<div class="container mt-5 col-md-6">
     <h3 class="text-center">Edit Dental Material</h3>
 
     @if(session('success'))

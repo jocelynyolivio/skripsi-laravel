@@ -43,10 +43,10 @@
                     <td>{{ $attendance->jam_pulang }}</td>
                     <td>
                         <a href="{{ route('dashboard.attendances.edit', $attendance->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                        <form action="{{ route('dashboard.attendances.destroy', $attendance->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('dashboard.attendances.destroy', $attendance->id) }}" method="POST" class="d-inline delete-form">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                            <button type="button" class="btn btn-danger btn-sm delete-button">Hapus</button>
                         </form>
                     </td>
                 </tr>
@@ -68,5 +68,24 @@
             ]
         });
     });
+
+    // Event delegation for SweetAlert confirmation
+    $('#attendanceTable').on('click', '.delete-button', function(e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
 </script>
 @endsection

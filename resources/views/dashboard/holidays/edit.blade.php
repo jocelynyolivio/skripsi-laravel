@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container">
+<div class="container mt-5 col-md-6">
     <h2>Edit Hari Libur</h2>
     <form action="{{ route('dashboard.holidays.update', $holiday->id) }}" method="POST">
         @csrf

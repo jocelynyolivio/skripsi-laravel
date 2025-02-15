@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container">
+<div class="container mt-5 col-md-6">
     <h3 class="my-4">Edit User</h3>
 
     <form action="{{ route('dashboard.masters.update', $user->id) }}" method="POST">

@@ -1,9 +1,10 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<h1>Edit Content</h1>
+<div class="container mt-5 col-md-6">
+    <h1>Edit Content</h1>
 
-<form action="{{ route('dashboard.home_content.update', $content->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('dashboard.home_content.update', $content->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
 
@@ -50,4 +51,5 @@
 
     <button type="submit" class="btn btn-primary">Update Content</button>
 </form>
+</div>
 @endsection

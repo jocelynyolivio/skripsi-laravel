@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5">
+<div class="container mt-5 col-md-6">
     <h3 class="text-center">Create Transaction for Medical Record ID: {{ $medicalRecord->id }}</h3>
 
     <div class="card mb-3">

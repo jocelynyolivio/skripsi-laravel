@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5">
+<div class="container mt-5 col-md-6">
     <h1 class="h2">Edit Profil Saya</h1>
     <hr>
 

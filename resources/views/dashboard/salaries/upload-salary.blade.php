@@ -1,16 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload File XLS</title>
-</head>
-<body>
-    <h1>Upload File Gaji</h1>
-    <form action="{{ url('dashboard/salaries/process-salary') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="file" required>
-        <button type="submit">Upload</button>
-    </form>
-</body>
-</html>
+@extends('dashboard.layouts.main')
+
+@section('container')
+<div class="container mt-5">
+    <h1 class="text-center">Upload File Gaji</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="{{ url('dashboard/salaries/process-salary') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-3">
+                    <input type="file" name="file" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection

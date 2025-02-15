@@ -140,6 +140,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
     Route::get('/reservations/get-available-times', [ScheduleController::class, 'getAvailableTimes'])->name('reservations.getAvailableTimes');
     Route::get('/reservations/whatsapp/{id}', [ReservationController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
+    Route::get('/reservations/whatsappConfirm/{id}', [ReservationController::class, 'waConfirmation'])->name('reservations.whatsappConfirm');
 
     Route::prefix('patients/{patientId}')->group(function () {
         // Route to list all medical records for a patient

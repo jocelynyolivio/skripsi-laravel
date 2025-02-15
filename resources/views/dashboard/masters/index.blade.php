@@ -47,10 +47,10 @@
                     <a href="{{ route('dashboard.masters.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     
                     <!-- Tombol Delete -->
-                    <form action="{{ route('dashboard.masters.destroy', $user->id) }}" method="POST" class="d-inline">
+                    <form action="{{ route('dashboard.masters.destroy', $user->id) }}" method="POST" class="d-inline delete-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -70,6 +70,25 @@
             "columnDefs": [
                 { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
             ]
+        });
+
+        // Event delegation for SweetAlert confirmation
+        $('#usersTable').on('click', '.delete-button', function(e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         });
     });
 </script>

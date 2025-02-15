@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5">
+<div class="container mt-5 col-md-6">
     <h3 class="text-center">Add New Patient</h3>
 
     <form action="{{ route('dashboard.masters.patients.store') }}" method="POST">

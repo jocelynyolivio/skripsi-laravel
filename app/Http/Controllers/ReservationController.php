@@ -49,12 +49,17 @@ class ReservationController extends Controller
         // Pesan template
         $message = "Halo {$reservation->patient->name}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
 
-        // Update status konfirmasi
-        $reservation->status_konfirmasi = 'Sudah Dikonfirmasi';
-        $reservation->save();
-
         // Redirect ke wa.me dengan pesan template
         return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
+    }
+
+    public function waConfirmation($id)
+    {
+        // dd('oi');
+        $reservation = Reservation::findOrFail($id);
+        $reservation->status_konfirmasi = 'Sudah Dikonfirmasi';
+        $reservation->save();
+        return redirect()->back()->with('success', 'Reservation confirmed successfully!');
     }
 
     public function index(Request $request)

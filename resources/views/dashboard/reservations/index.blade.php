@@ -31,18 +31,23 @@
                 <a href="{{ route('dashboard.reservations.whatsapp', $reservation->id) }}" 
                    class="btn btn-sm btn-success" 
                    target="_blank">
-                    Konfirmasi WA
+                    Chat Pasien
                 </a>
+                @if($reservation->status_konfirmasi !== 'Sudah Dikonfirmasi')
+                    <a href="{{ route('dashboard.reservations.whatsappConfirm', $reservation->id) }}" class="btn btn-sm btn-primary wa-confirmation">
+                        Konfirmasi WA
+                    </a>
+                @endif
             </td>
             <td>
                 {{ $reservation->status_konfirmasi ?? 'Belum Dikonfirmasi' }}
             </td>
             <td>
                 <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;">
+                <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;" class="delete-form">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                    <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                 </form>
             </td>
         </tr>
@@ -59,6 +64,44 @@
             "ordering": true,
             "info": true,
             "responsive": true,
+        });
+
+        // Event delegation for SweetAlert confirmation
+        $('#reservationTable').on('click', '.delete-button', function(e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            Swal.fire({
+                title: 'Are you sure?', 
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
+        // SweetAlert confirmation for WhatsApp
+        $('#reservationTable').on('click', '.wa-confirmation', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href'); // Get the URL from the href attribute
+            Swal.fire({
+                title: 'Yakin sudah melakukan konfirmasi WA?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, sudah konfirmasi!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to the confirmation URL
+                    window.location.href = url;
+                }
+            });
         });
     });
 </script>

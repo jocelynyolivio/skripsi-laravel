@@ -96,11 +96,10 @@
 
 
                     <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
-                        method="POST" style="display:inline;"
-                        onsubmit="return confirm('Are you sure you want to delete this record?');">
+                        method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -117,6 +116,25 @@
             "ordering": true,
             "info": true,
             "responsive": true,
+        });
+    });
+
+    // Event delegation for SweetAlert confirmation
+    $('#medicalRecordsTable').on('click', '.delete-button', function(e) {
+        e.preventDefault();
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
         });
     });
 </script>

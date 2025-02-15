@@ -1,6 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
+<div class="container mt-5 col-md-6">
     <h1>Create Procedure Material</h1>
 
     <form action="{{ route('dashboard.procedure_materials.store') }}" method="POST">
@@ -33,5 +34,6 @@
 
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
+</div>
 @endsection
 

@@ -31,6 +31,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
+
+    <!-- Include SweetAlert2 -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
+
     <style>
         .sidebar {
             position: fixed;
@@ -41,11 +45,13 @@
             padding: 0;
             overflow-x: hidden;
             overflow-y: auto;
-            width: 250px; /* Adjust width as needed */
+            width: 250px;
+            /* Adjust width as needed */
         }
 
         main {
-            margin-left: 250px; /* Match sidebar width */
+            margin-left: 250px;
+            /* Match sidebar width */
             padding: 20px;
         }
 
@@ -58,6 +64,7 @@
 </head>
 
 <body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Header -->
     @include('dashboard.layouts.header')
     <div class="container-fluid">
@@ -70,7 +77,6 @@
             </main>
         </div>
     </div>
-
 </body>
 
 </html>

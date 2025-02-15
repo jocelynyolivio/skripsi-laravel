@@ -35,10 +35,10 @@
                 <td>{{ $expense->admin?->name ?? 'N/A' }}</td>
                 <td>
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
+                    <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -54,6 +54,25 @@
             "ordering": true,
             "info": true,
             "responsive": true,
+        });
+    });
+
+    // Event delegation for SweetAlert confirmation
+    $('#expensesTable').on('click', '.delete-button', function(e) {
+        e.preventDefault();
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
         });
     });
 </script>

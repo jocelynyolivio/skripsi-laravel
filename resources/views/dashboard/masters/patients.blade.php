@@ -26,10 +26,10 @@
                 <td>{{ $patient->nomor_telepon }}</td>
                 <td>
                     <a href="{{ route('dashboard.masters.patients.edit', $patient->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('dashboard.masters.patients.destroy', $patient->id) }}" method="POST" style="display:inline;">
+                    <form action="{{ route('dashboard.masters.patients.destroy', $patient->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
                     <!-- Tombol baru untuk melihat rekam medis pasien -->
                     <a href="{{ route('dashboard.medical_records.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-info">View Medical Records</a>
@@ -57,23 +57,24 @@
         }, 100);
     });
 
-//     $(document).ready(function() {
-//     $('#patientTable').DataTable({
-//         "paging": true,
-//         "searching": true,
-//         "ordering": true,
-//         "info": true,
-//         "responsive": true,
-//         "columnDefs": [
-//             { "orderable": false, "targets": 4 }
-//         ],
-//         "language": {
-//             "search": "Search:", // Menyesuaikan teks pencarian
-//             "lengthMenu": "Show _MENU_ entries"
-//         }
-//     });
-// });
-
+    // Event delegation for SweetAlert confirmation
+    $('#patientTable').on('click', '.delete-button', function(e) {
+        e.preventDefault();
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
 </script>
 
 @endsection

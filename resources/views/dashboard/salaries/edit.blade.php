@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-4">
+<div class="container mt-4 col-md-6">
     <h2>Edit Absensi</h2>
 
     <form method="POST" action="{{ route('attendances.update', $attendance->id) }}">

@@ -76,6 +76,28 @@
 <!-- Hidden input untuk menyimpan data -->
 <input type="hidden" id="procedureData" name="procedureData">
 
+<!-- Modal for Tooth Notes -->
+<div class="modal fade" id="toothNotesModal" tabindex="-1" aria-labelledby="toothNotesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="toothNotesModalLabel">Enter Notes for Tooth</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="toothNotesForm">
+                    <input type="hidden" id="selectedToothNumber">
+                    <div class="mb-3">
+                        <label for="toothNotes" class="form-label">Notes</label>
+                        <textarea id="toothNotes" class="form-control" placeholder="Enter notes for the selected tooth"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="saveToothNotes()">Save Notes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const selectedProcedures = new Map();
@@ -118,12 +140,34 @@
                 return;
             }
 
+            // Show modal for notes
+            document.getElementById('selectedToothNumber').value = toothNumber;
+            const modal = new bootstrap.Modal(document.getElementById('toothNotesModal'));
+            modal.show();
+        };
+
+        window.saveToothNotes = function() {
+            const toothNumber = document.getElementById('selectedToothNumber').value;
+            const notes = document.getElementById('toothNotes').value;
+
+            const procedureSelect = document.getElementById('currentProcedure');
+            const procedureId = procedureSelect.value;
+            const procedureData = selectedProcedures.get(procedureId);
+
             if (!procedureData.teeth.includes(toothNumber)) {
                 procedureData.teeth.push(toothNumber);
             }
 
+            // Save notes
+            procedureData.notes = procedureData.notes || {};
+            procedureData.notes[toothNumber] = notes;
+
             updateSelectedProceduresDisplay();
             highlightSelectedTooth(toothNumber);
+
+            // Hide modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('toothNotesModal'));
+            modal.hide();
         };
 
         function updateSelectedProceduresDisplay() {
@@ -145,7 +189,7 @@
                         <p>Tooth ${tooth}</p>
                         <input type="hidden" name="tooth_numbers[${procedureId}][]" value="${tooth}">
                         <textarea name="procedure_notes[${procedureId}][${tooth}]" class="form-control" 
-                                placeholder="Notes for tooth ${tooth}"></textarea>
+                                placeholder="Notes for tooth ${tooth}">${data.notes[tooth] || ''}</textarea>
                     </div>
                 `).join('') : `
                     <p class="text-muted">This procedure does not require a specific tooth.</p>

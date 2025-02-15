@@ -1,7 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5">
+<div class="container mt-5 col-md-6">
     <h3 class="text-center">Edit Medical Record for Patient: {{ $medicalRecord->reservation->patient->name }}</h3>
 
     <form action="{{ route('dashboard.medical_records.update', ['patientId' => $patientId, 'recordId' => $medicalRecord->id]) }}" method="POST">

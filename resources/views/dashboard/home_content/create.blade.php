@@ -1,6 +1,7 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
+<div class="container mt-5 col-md-6">
 <h1>Add New Content</h1>
 
 <form action="{{ route('dashboard.home_content.store') }}" method="POST" enctype="multipart/form-data">
@@ -43,4 +44,5 @@
 
     <button type="submit" class="btn btn-primary">Save Content</button>
 </form>
+</div>
 @endsection
