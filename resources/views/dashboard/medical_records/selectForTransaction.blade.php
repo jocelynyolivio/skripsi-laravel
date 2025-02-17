@@ -17,9 +17,9 @@
         <tbody>
             @foreach($medicalRecords as $medicalRecord)
             <tr>
-                <td>{{ $medicalRecord->id }}</td>
-                <td>{{ $medicalRecord->patient->name }}</td>
-                <td>{{ $medicalRecord->doctor->name }}</td>
+                <td>{{ $medicalRecord->reservation->id }}</td>
+                <td>{{ $medicalRecord->reservation->patient->name }}</td>
+                <td>{{ $medicalRecord->reservation->doctor->name }}</td>
                 <td>{{ $medicalRecord->reservation->tanggal_reservasi }}</td>
                 <td>
                     <a href="{{ route('dashboard.transactions.create', $medicalRecord->id) }}" class="btn btn-success">

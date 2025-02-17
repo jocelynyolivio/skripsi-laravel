@@ -16,16 +16,16 @@ class OdontogramController extends Controller
         $odontograms = Odontogram::where('patient_id', $patientId)->get()->keyBy('tooth_number');
     
         // Ambil semua prosedur yang terkait dengan
-        $procedureOdontograms = DB::table('procedure_odontogram')
-        ->join('procedures', 'procedure_odontogram.procedure_id', '=', 'procedures.id')
-        ->whereIn('procedure_odontogram.tooth_number', range(1, 32))
-        ->whereIn('procedure_odontogram.medical_record_id', function ($query) use ($patientId) {
+        $procedureOdontograms = DB::table('medical_record_procedure')
+        ->join('procedures', 'medical_record_procedure.procedure_id', '=', 'procedures.id')
+        ->whereIn('medical_record_procedure.tooth_number', range(1, 32))
+        ->whereIn('medical_record_procedure.medical_record_id', function ($query) use ($patientId) {
             $query->select('id')->from('medical_records')
                 ->whereIn('reservation_id', function ($q) use ($patientId) {
                     $q->select('id')->from('reservations')->where('patient_id', $patientId);
                 });
         })
-        ->select('procedure_odontogram.tooth_number', 'procedures.id as procedure_id', 'procedures.name as procedure_name')
+        ->select('medical_record_procedure.tooth_number', 'procedures.id as procedure_id', 'procedures.name as procedure_name')
         ->get()
         ->groupBy('tooth_number');
 

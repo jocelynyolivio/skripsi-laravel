@@ -44,10 +44,4 @@ class MedicalRecord extends Model
     {
         return $this->hasOne(Transaction::class);
     }
-
-
-    // public function procedureOdontograms()
-    // {
-    //     return $this->hasMany(ProcedureOdontogram::class);
-    // }
 }

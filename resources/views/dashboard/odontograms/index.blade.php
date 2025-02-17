@@ -7,7 +7,7 @@
     <div class="odontogram-diagram mb-4">
     @foreach(range(1, 32) as $toothNumber)
     @php
-        // Cek apakah gigi ini ada di rekam medis (procedure_odontogram)
+
         $toothProcedures = $procedureOdontograms->get($toothNumber, collect());
         $hasMedicalRecord = $toothProcedures->isNotEmpty();
 

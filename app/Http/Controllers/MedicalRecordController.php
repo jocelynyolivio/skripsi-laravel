@@ -10,7 +10,6 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
 use App\Models\DentalMaterial;
-use App\Models\ProcedureOdontogram;
 
 class MedicalRecordController extends Controller
 {
@@ -111,13 +110,7 @@ class MedicalRecordController extends Controller
                     $combinationKey = $procedureId . '-' . $toothNumber;
                     if (!in_array($combinationKey, $uniqueCombinations)) {
                         $uniqueCombinations[] = $combinationKey;
-    
-                        // ProcedureOdontogram::create([
-                        //     'medical_record_id' => $medicalRecord->id,
-                        //     'procedure_id' => $procedureId,
-                        //     'tooth_number' => $toothNumber,
-                        //     'notes' => $procedureNotes,
-                        // ]);
+
                         $medicalRecord->procedures()->attach($procedureId, [
                             'tooth_number' => $toothNumber,
                             'notes' => $procedureNotes,
@@ -130,13 +123,6 @@ class MedicalRecordController extends Controller
     
                 if (!in_array($procedureId, $uniqueCombinations)) {
                     $uniqueCombinations[] = $procedureId;
-    
-                    // ProcedureOdontogram::create([
-                    //     'medical_record_id' => $medicalRecord->id,
-                    //     'procedure_id' => $procedureId,
-                    //     'tooth_number' => null, // Tidak perlu gigi
-                    //     'notes' => is_array($procedureNotes) ? implode(', ', $procedureNotes) : $procedureNotes,
-                    // ]);
 
                     $medicalRecord->procedures()->attach($procedureId, [
                         'tooth_number' => null, // Tidak perlu gigi
@@ -155,9 +141,6 @@ class MedicalRecordController extends Controller
         // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
     
-        // Ambil semua prosedur dari procedure_odontograms
-        // $procedureIds = $medicalRecord->procedureOdontograms->pluck('procedure_id')->unique();
-        // $procedures = Procedure::whereIn('id', $procedureIds)->get();
         $procedures = $medicalRecord->procedures;
 
         // Cek apakah rekam medis ini sudah memiliki bahan tersimpan
@@ -258,18 +241,15 @@ class MedicalRecordController extends Controller
 
     public function edit($patientId, $recordId)
     {
-        // Ambil rekam medis beserta semua prosedur yang telah tercatat dalam procedure_odontogram
         $medicalRecord = MedicalRecord::with(['procedures'])->findOrFail($recordId);
 
         // Ambil semua prosedur yang tersedia
         $procedures = Procedure::all();
 
-        // Ambil semua prosedur yang telah dipilih dalam rekam medis
-        // $selectedProcedures = $medicalRecord->procedureOdontograms->pluck('procedure_id')->toArray();
         $selectedProcedures = $medicalRecord->procedures->pluck('id')->toArray();
 
         // Ambil semua nomor gigi yang terkait dengan rekam medis ini
-        $procedureOdontograms = $medicalRecord->procedures->map(function ($po) {
+        $medicalRecordProcedure = $medicalRecord->procedures->map(function ($po) {
             return [
                 'procedure_id' => $po->procedure_id,
                 'tooth_number' => $po->tooth_number,
@@ -278,7 +258,7 @@ class MedicalRecordController extends Controller
         });
 
         return view('dashboard.medical_records.edit', compact(
-            'medicalRecord', 'patientId', 'procedures', 'selectedProcedures', 'procedureOdontograms'
+            'medicalRecord', 'patientId', 'procedures', 'selectedProcedures', 'medicalRecordProcedure'
         ));
     }
 

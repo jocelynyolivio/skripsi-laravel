@@ -43,12 +43,7 @@ class Procedure extends Model
 
     public function odontograms()
     {
-        return $this->belongsToMany(Odontogram::class, 'procedure_odontogram', 'procedure_id', 'odontogram_id')
+        return $this->belongsToMany(Odontogram::class, 'medical_record_procedure', 'procedure_id', 'odontogram_id')
             ->withTimestamps();
     }
-
-    // public function procedureOdontograms()
-    // {
-    //     return $this->hasMany(ProcedureOdontogram::class, 'medical_record_id');
-    // }
 }
