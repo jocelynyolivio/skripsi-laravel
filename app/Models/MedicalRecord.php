@@ -20,10 +20,12 @@ class MedicalRecord extends Model
         return $this->belongsTo(Reservation::class);
     }
 
-    // public function procedures()
-    // {
-    //     return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id');
-    // }
+    public function procedures()
+    {
+        return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id')
+            ->withPivot('tooth_number', 'notes');
+    }
+
 
     public function odontograms()
     {
@@ -36,7 +38,7 @@ class MedicalRecord extends Model
             ->withPivot('quantity')
             ->withTimestamps();
     }
-    
+
 
     public function transaction()
     {
@@ -44,8 +46,8 @@ class MedicalRecord extends Model
     }
 
 
-    public function procedureOdontograms()
-    {
-        return $this->hasMany(ProcedureOdontogram::class);
-    }
+    // public function procedureOdontograms()
+    // {
+    //     return $this->hasMany(ProcedureOdontogram::class);
+    // }
 }

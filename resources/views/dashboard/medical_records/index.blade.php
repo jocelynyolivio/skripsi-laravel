@@ -27,76 +27,59 @@
             <tr>
                 <td>{{ $record->reservation->tanggal_reservasi }}</td>
                 <td>{{ $record->teeth_condition }}</td>
-                <!-- <td>{{ $record->treatment }}</td> -->
                 <td>
-    @if($record->procedureOdontograms->isNotEmpty())  
-        @foreach($proceduress as $procedure) 
-            @php
-                $procedureOdontograms = $record->procedureOdontograms->where('procedure_id', $procedure->id);
-            @endphp
+                    @if($record->procedures->isNotEmpty())
+                        @foreach($proceduress as $procedure)
+                            @php
+                                // Filter prosedur pada rekam medis berdasarkan procedure_id
+                                $procedureRecords = $record->procedures->where('id', $procedure->id);
+                            @endphp
 
-            @if($procedureOdontograms->isNotEmpty())
-                <div class="mb-2">
-                    <strong>{{ $procedure->name }}</strong>
+                            @if($procedureRecords->isNotEmpty())
+                                <div class="mb-2">
+                                    <strong>{{ $procedure->name }}</strong>
 
-                    <!-- @if($procedure->requires_tooth === 1)
-                        <br>
-                        <strong>Teeth:</strong>
-                        {{ $procedureOdontograms->pluck('tooth_number')->implode(', ') }}
-                    @endif
-
-                    @php
-                        $notes = $procedureOdontograms->pluck('notes')->filter()->implode(', ');
-                    @endphp
-
-                    @if($notes)
-                        <br>
-                        <small class="text-muted">Notes: {{ $notes }}</small>
-                    @endif -->
-
-                    @if($procedure->requires_tooth === 1)
-                        <ul>
-                            @foreach($procedureOdontograms as $procedureOdontogram)
-                                <li>
-                                    Tooth: {{ $procedureOdontogram->tooth_number }}
-                                    @if($procedureOdontogram->notes)
-                                        - <small class="text-muted">{{ $procedureOdontogram->notes }}</small>
+                                    @if($procedure->requires_tooth === 1)
+                                        <ul>
+                                            @foreach($procedureRecords as $procedureRecord)
+                                                <li>
+                                                    Tooth: {{ $procedureRecord->pivot->tooth_number }}
+                                                    @if($procedureRecord->pivot->notes)
+                                                        - <small class="text-muted">{{ $procedureRecord->pivot->notes }}</small>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        @php
+                                            $notes = $procedureRecords->pluck('pivot.notes')->filter()->implode(', ');
+                                        @endphp
+                                        @if($notes)
+                                            <br>
+                                            <small class="text-muted">Notes: {{ $notes }}</small>
+                                        @endif
                                     @endif
-                                </li>
-                            @endforeach
-                        </ul>
+                                </div>
+                            @endif
+                        @endforeach
+                    @else
+                        <span class="text-muted">No procedures</span>
                     @endif
-                </div>
-            @endif
-        @endforeach
-    @else
-        <span class="text-muted">No procedures</span>
-    @endif
-</td>
-
-
-
-
-                <!-- <td>{{ $record->notes }}</td> -->
+                </td>
                 <td>{{ $record->reservation->doctor->name }}</td>
                 <td>
                     @if(!$record->transaction)
-                    <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}"
-                        class="btn btn-sm btn-success">Create Transaction</a>
+                        <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-success">Create Transaction</a>
                     @else
-                    <span class="badge bg-secondary">Transaction Created</span>
+                        <span class="badge bg-secondary">Transaction Created</span>
                     @endif
                 </td>
                 <td>
-                    <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
-                        class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning">Edit</a>
 
-                    <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}"
-                        class="btn btn-sm btn-info">Select Materials</a>
+                    <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-info">Select Materials</a>
 
-
-                    <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}"
-                        method="POST" style="display:inline;" class="delete-form">
+                    <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>

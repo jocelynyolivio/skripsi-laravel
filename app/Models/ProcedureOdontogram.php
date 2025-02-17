@@ -18,13 +18,13 @@ class ProcedureOdontogram extends Model
         'notes'
     ];
 
-    public function medicalRecord()
-    {
-        return $this->belongsTo(MedicalRecord::class);
-    }
+    // public function medicalRecord()
+    // {
+    //     return $this->belongsTo(MedicalRecord::class);
+    // }
 
-    public function procedure()
-    {
-        return $this->belongsTo(Procedure::class);
-    }
+    // public function procedure()
+    // {
+    //     return $this->belongsTo(Procedure::class);
+    // }
 }

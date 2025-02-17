@@ -18,30 +18,38 @@
         <div class="mb-3">
             <label for="tooth_numbers" class="form-label">Tooth Numbers and Procedures</label>
             <div id="tooth-container">
-                @foreach($procedureOdontograms as $odontogram)
+                @foreach($procedures as $procedure)
                     @php
-                        $procedure = $procedures->firstWhere('id', $odontogram['procedure_id']);
+                        $procedureInstances = $medicalRecord->procedures->where('id', $procedure->id);
                     @endphp
                     
-                    <div class="tooth-entry d-flex mb-2 align-items-center">
-                        <!-- Hidden input untuk id -->
-                        <input type="hidden" name="id[]" value="{{ $odontogram['id'] }}">
+                    <div class="tooth-entry d-flex flex-column mb-3">
+                        <!-- Hidden input untuk procedure_id -->
+                        <input type="hidden" name="procedure_ids[]" value="{{ $procedure->id }}">
 
                         <!-- Nama prosedur (read-only) -->
-                        <span class="form-control me-2 bg-light">{{ $procedure->name }}</span>
+                        <label class="form-label">{{ $procedure->name }}</label>
 
-                        <!-- Menampilkan nomor gigi jika prosedur membutuhkannya -->
+                        <!-- Menampilkan nomor gigi dan notes jika prosedur membutuhkannya -->
                         @if($procedure->requires_tooth)
-                            <input type="text" class="form-control me-2" 
-                                   name="tooth_numbers[]" 
-                                   value="{{ old('tooth_numbers.' . $loop->index, $odontogram['tooth_number']) }}" 
-                                   placeholder="Tooth Number">
+                            <div class="tooth-number-container">
+                                @foreach($procedureInstances as $procedureData)
+                                    <div class="d-flex mb-2">
+                                        <input type="text" class="form-control me-2" 
+                                               name="tooth_numbers[{{ $procedure->id }}][]" 
+                                               value="{{ old('tooth_numbers.' . $procedure->id, $procedureData->pivot->tooth_number ?? '') }}" 
+                                               placeholder="Tooth Number">
+                                        <input type="text" class="form-control" 
+                                               name="procedure_notes[{{ $procedure->id }}][]" 
+                                               value="{{ old('procedure_notes.' . $procedure->id, $procedureData->pivot->notes ?? '') }}" 
+                                               placeholder="Notes">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <input type="hidden" name="tooth_numbers[{{ $procedure->id }}][]" value="">
+                            <input type="hidden" name="procedure_notes[{{ $procedure->id }}][]" value="">
                         @endif
-
-                        <!-- Menampilkan notes -->
-                        <input type="text" class="form-control me-2" name="procedure_notes[]" 
-                               value="{{ old('procedure_notes.' . $loop->index, $odontogram['notes']) }}" 
-                               placeholder="Notes">
                     </div>
                 @endforeach
             </div>

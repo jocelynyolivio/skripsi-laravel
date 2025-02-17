@@ -11,43 +11,44 @@ class Procedure extends Model
 
     protected $fillable = ['name', 'description', 'requires_tooth'];
 
-     // Relasi ke Dental Materials (Many to Many)
-     public function dentalMaterials()
-{
-    return $this->belongsToMany(DentalMaterial::class, 'procedure_materials', 'procedure_id', 'dental_material_id')
-                ->withPivot('quantity');
-}
- 
-    //  // Relasi ke Medical Records (Many to Many)
-    //  public function medicalRecords()
-    //  {
-    //      return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure');
-    //  }
+    // Relasi ke Dental Materials (Many to Many)
+    public function dentalMaterials()
+    {
+        return $this->belongsToMany(DentalMaterial::class, 'procedure_materials', 'procedure_id', 'dental_material_id')
+            ->withPivot('quantity');
+    }
 
-     public function priceLists()
-{
-    return $this->hasMany(Pricelist::class);
-}
+     // Relasi ke Medical Records (Many to Many)
+     public function medicalRecords()
+     {
+         return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure')->withPivot('tooth_number','notes');
+     }
 
-// Mengambil harga dasar (non-promosi)
-public function basePrice()
-{
-    return $this->hasOne(Pricelist::class)->where('is_promo', false)->latestOfMany('effective_date');
-}
+    public function priceLists()
+    {
+        return $this->hasMany(Pricelist::class);
+    }
 
-// Mengambil harga promosi terbaru jika ada
-public function promoPrice()
-{
-    return $this->hasOne(Pricelist::class)->where('is_promo', true)->latestOfMany('effective_date');
-}
+    // Mengambil harga dasar (non-promosi)
+    public function basePrice()
+    {
+        return $this->hasOne(Pricelist::class)->where('is_promo', false)->latestOfMany('effective_date');
+    }
 
-public function odontograms()
-{
-    return $this->belongsToMany(Odontogram::class, 'procedure_odontogram', 'procedure_id', 'odontogram_id')
-        ->withTimestamps();
-}
+    // Mengambil harga promosi terbaru jika ada
+    public function promoPrice()
+    {
+        return $this->hasOne(Pricelist::class)->where('is_promo', true)->latestOfMany('effective_date');
+    }
 
-public function procedureOdontograms() {
-    return $this->hasMany(ProcedureOdontogram::class, 'medical_record_id');
-}
+    public function odontograms()
+    {
+        return $this->belongsToMany(Odontogram::class, 'procedure_odontogram', 'procedure_id', 'odontogram_id')
+            ->withTimestamps();
+    }
+
+    // public function procedureOdontograms()
+    // {
+    //     return $this->hasMany(ProcedureOdontogram::class, 'medical_record_id');
+    // }
 }
