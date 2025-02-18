@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $reservasiBelumDiproses = Reservation::whereNull('status_konfirmasi')->count();
 
         // Hitung total pendapatan hari ini
-        $pendapatanHariIni = Transaction::whereDate('created_at', Carbon::today())->sum('amount');
+        // $pendapatanHariIni = Transaction::whereDate('created_at', Carbon::today())->sum('amount');
         
         $user = Auth::user();
         return view('dashboard.index', [
@@ -30,7 +30,7 @@ class DashboardController extends Controller
             'role' => $user->role->role_name,
             'jumlahPasienHariIni' => $jumlahPasienHariIni,
             'reservasiBelumDiproses' => $reservasiBelumDiproses,
-            'pendapatanHariIni' => $pendapatanHariIni,
+            // 'pendapatanHariIni' => $pendapatanHariIni,
         ]);
     }
 

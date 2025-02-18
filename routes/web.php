@@ -168,8 +168,17 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
         ->name('transactions.selectMedicalRecord');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])->name('transactions.create');
+
+    // Route untuk transaksi dengan rekam medis
+    Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])
+        ->name('transactions.create');
+    // Route untuk transaksi tanpa rekam medis
+    Route::get('/transactions/create', [TransactionController::class, 'createWithoutMedicalRecord'])
+        ->name('transactions.createWithoutMedicalRecord');
+
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::post('/transactions/store-without-medical-record', [TransactionController::class, 'storeWithoutMedicalRecord'])->name('transactions.storeWithoutMedicalRecord');
+
     Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
 
     Route::resource('expenses', ExpenseController::class);

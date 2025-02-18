@@ -24,10 +24,16 @@ class Procedure extends Model
          return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure')->withPivot('tooth_number','notes');
      }
 
-    public function priceLists()
-    {
-        return $this->hasMany(Pricelist::class);
-    }
+     public function pricelists()
+     {
+         return $this->hasMany(Pricelist::class, 'procedure_id');
+     }
+ 
+     // Mengambil harga terbaru berdasarkan `effective_date`
+     public function latestPrice()
+     {
+         return $this->hasOne(Pricelist::class, 'procedure_id')->latest('effective_date');
+     }
 
     // Mengambil harga dasar (non-promosi)
     public function basePrice()

@@ -13,14 +13,17 @@
         {
             Schema::create('transactions', function (Blueprint $table) {
                 $table->id();
-                $table->decimal('amount', 10, 2);
-                $table->enum('payment_type', ['cash', 'credit', 'dp']);
-                $table->enum('payment_status', ['lunas', 'cicilan', 'dp']);
+                $table->unsignedBigInteger('patient_id')->nullable();
+                $table->unsignedBigInteger('medical_record_id')->nullable();
+                $table->unsignedBigInteger('admin_id');
+                $table->decimal('total_amount', 10, 2)->notNull();
+                $table->enum('payment_method', ['cash', 'card']);
                 $table->timestamps();
             
                 // Foreign keys
-                $table->foreignId('medical_record_id')->constrained()->onDelete('cascade');
-                $table->foreignId('admin_id')->nullable()->constrained('users')->onDelete('set null');
+                $table->foreign('patient_id')->references('id')->on('patients')->nullOnDelete();
+                $table->foreign('medical_record_id')->references('id')->on('medical_records')->nullOnDelete();
+                $table->foreign('admin_id')->references('id')->on('users')->cascadeOnDelete();
             });
             
         }

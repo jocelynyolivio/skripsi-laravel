@@ -28,18 +28,6 @@
         </div>
     </div>
 
-    <!-- Card: Pendapatan Hari Ini -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="card-title">Pendapatan Hari Ini</h5>
-                <p class="card-text display-5 fw-bold">Rp{{ number_format($pendapatanHariIni, 0, ',', '.') }}</p> <!-- Ganti dengan data dari database -->
-                <p class="text-muted">Total pendapatan dari pasien hari ini</p>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Section Tambahan -->
 <div class="row">
     <!-- Statistik Dokter -->
