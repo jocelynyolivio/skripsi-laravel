@@ -9,7 +9,6 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
-use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
@@ -99,77 +98,68 @@ class TransactionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        // dd('masuk');
-        // dd($request->all());
-        // Validasi input
-        $validated = $request->validate([
-            'medical_record_id' => 'nullable|exists:medical_records,id',
-            'user_id' => 'required|exists:users,id',
-            'admin_id' => 'required|exists:users,id',
-            'amount' => 'required|array',
-            'amount.*' => 'numeric|min:0',
-            'payment_method' => 'required|in:cash,card',
-        ]);
+{
+    // Validasi input
+    $validated = $request->validate([
+        'medical_record_id' => 'nullable|exists:medical_records,id',
+        'user_id' => 'required|exists:users,id',
+        'admin_id' => 'required|exists:users,id',
+        'amount' => 'required|array',
+        'amount.*' => 'numeric|min:0',
+        'discount' => 'required|array',
+        'discount.*' => 'numeric|min:0',
+        'payment_method' => 'required|in:cash,card',
+    ]);
 
-        // dd($validated);
+    $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
+    $totalAmount = 0;
 
-        // Hitung total harga transaksi dari input yang dipilih
-        $totalAmount = 0;
-        // dd($totalAmount);
+    // Buat transaksi baru
+    $transaction = Transaction::create([
+        'medical_record_id' => $validated['medical_record_id'],
+        'user_id' => $validated['user_id'],
+        'admin_id' => $validated['admin_id'],
+        'total_amount' => $totalAmount,
+        'payment_method' => $validated['payment_method'],
+    ]);
 
-        $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
-        if ($medicalRecord) {
-            // dd('masuk if');
-            foreach ($medicalRecord->procedures as $procedure) {
-                $unitPrice = Pricelist::where('procedure_id', $procedure->id)
-                    ->orderBy('effective_date', 'desc')
-                    ->value('price') ?? 0;
-                $totalAmount += $unitPrice;
-                // dd($unitPrice);
-                // dd($totalAmount);
-            }
-            // dd($totalAmount);
+    if ($medicalRecord) {
+        $procedureCounts = [];
+
+        foreach ($medicalRecord->procedures as $procedure) {
+            $procedureCounts[$procedure->id] = ($procedureCounts[$procedure->id] ?? 0) + 1;
         }
 
-        // Buat transaksi baru
-        $transaction = Transaction::create([
-            'medical_record_id' => $validated['medical_record_id'],
-            'user_id' => $validated['user_id'],
-            'admin_id' => $validated['admin_id'],
-            'total_amount' => $totalAmount,
-            'payment_method' => $validated['payment_method'],
-        ]);
+        foreach ($procedureCounts as $procedureId => $quantity) {
+            $unitPrice = Pricelist::where('procedure_id', $procedureId)
+                ->orderBy('effective_date', 'desc')
+                ->value('price') ?? 0;
 
-        // Simpan item transaksi
-        $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
+            $discount = $validated['discount'][$procedureId] ?? 0;
+            $totalPrice = $unitPrice * $quantity;
+            $finalPrice = max($totalPrice - $discount, 0);
 
-        if ($medicalRecord) {
-            $procedureCounts = [];
+            $transaction->items()->updateOrCreate(
+                ['transaction_id' => $transaction->id, 'procedure_id' => $procedureId],
+                [
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total_price' => $totalPrice,
+                    'discount' => $discount,
+                    'final_price' => $finalPrice,
+                ]
+            );
 
-            foreach ($medicalRecord->procedures as $procedure) {
-                $procedureCounts[$procedure->id] = ($procedureCounts[$procedure->id] ?? 0) + 1;
-            }
-
-            foreach ($procedureCounts as $procedureId => $quantity) {
-                $unitPrice = Pricelist::where('procedure_id', $procedureId)
-                    ->orderBy('effective_date', 'desc')
-                    ->value('price') ?? 0;
-
-                $transaction->items()->updateOrCreate(
-                    ['transaction_id' => $transaction->id, 'procedure_id' => $procedureId],
-                    [
-                        'quantity' => $quantity,
-                        'unit_price' => $unitPrice,
-                        'total_price' => $unitPrice * $quantity,
-                    ]
-                );
-            }
+            $totalAmount += $finalPrice;
         }
-
-
-        return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
     }
+
+    // Update total transaksi setelah diskon diterapkan
+    $transaction->update(['total_amount' => $totalAmount]);
+
+    return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
+}
+
 
 
     public function storeWithoutMedicalRecord(Request $request)
@@ -183,7 +173,8 @@ class TransactionController extends Controller
             'items' => 'required|array',
             'items.*.id' => 'exists:procedures,id',
             'items.*.quantity' => 'required|integer|min:1',
-            // 'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.discount' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,card',
         ]);
         // dd($validated);
@@ -192,35 +183,73 @@ class TransactionController extends Controller
         $totalAmount = 0;
         $itemsData = [];
 
-        foreach ($validated['items'] as $index => $itemData) {
-            if (!isset($itemData['id'])) {
-                continue;
-            }
+        // foreach ($validated['items'] as $index => $itemData) {
+        //     if (!isset($itemData['id'])) {
+        //         continue;
+        //     }
+        //     $procedure = Procedure::findOrFail($itemData['id']);
+        //     $quantity = $itemData['quantity'] ?? 1;
+        //     $unitPrice = Pricelist::where('procedure_id', $procedure->id)
+        //         ->orderBy('effective_date', 'desc')
+        //         ->value('price') ?? 0;
+        //     $totalPrice = $unitPrice * $quantity;
+
+        //     $itemsData[] = [
+        //         'procedure_id' => $procedure->id,
+        //         'quantity' => $quantity,
+        //         'unit_price' => $unitPrice,
+        //         'total_price' => $totalPrice,
+        //     ];
+
+        //     $totalAmount += $totalPrice;
+        // }
+        foreach ($validated['items'] as $itemData) {
             $procedure = Procedure::findOrFail($itemData['id']);
-            $quantity = $itemData['quantity'] ?? 1;
-            $unitPrice = Pricelist::where('procedure_id', $procedure->id)
-                ->orderBy('effective_date', 'desc')
-                ->value('price') ?? 0;
+            $quantity = $itemData['quantity'];
+            $unitPrice = $itemData['unit_price'];
+            $discount = $itemData['discount'] ?? 0;
+
             $totalPrice = $unitPrice * $quantity;
+            $finalPrice = max($totalPrice - $discount, 0); // Pastikan tidak negatif
+
+            // dd($validated);
 
             $itemsData[] = [
                 'procedure_id' => $procedure->id,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'total_price' => $totalPrice,
+                'discount' => $discount,
+                'final_price' => $finalPrice,
             ];
 
-            $totalAmount += $totalPrice;
+
+
+            $totalAmount += $finalPrice;
         }
 
-        // Jika tidak ada item valid, hentikan proses
-        if (empty($itemsData)) {
-            return redirect()->back()->with('error', 'No valid items selected for the transaction.');
-        }
+        // // Jika tidak ada item valid, hentikan proses
+        // if (empty($itemsData)) {
+        //     return redirect()->back()->with('error', 'No valid items selected for the transaction.');
+        // }
 
-        // Buat transaksi baru tanpa rekam medis
+        // // Buat transaksi baru tanpa rekam medis
+        // $transaction = Transaction::create([
+        //     'medical_record_id' => null, // Tidak ada rekam medis
+        //     'patient_id' => $validated['patient_id'],
+        //     'admin_id' => $validated['admin_id'],
+        //     'total_amount' => $totalAmount,
+        //     'payment_method' => $validated['payment_method'],
+        // ]);
+
+        // // Simpan item transaksi
+        // foreach ($itemsData as $data) {
+        //     $transaction->items()->create($data);
+        // }
+
+        // Buat transaksi baru
         $transaction = Transaction::create([
-            'medical_record_id' => null, // Tidak ada rekam medis
+            'medical_record_id' => null,
             'patient_id' => $validated['patient_id'],
             'admin_id' => $validated['admin_id'],
             'total_amount' => $totalAmount,
@@ -228,9 +257,12 @@ class TransactionController extends Controller
         ]);
 
         // Simpan item transaksi
+        // dd($itemsData);
         foreach ($itemsData as $data) {
+            // dd($data);
             $transaction->items()->create($data);
         }
+
 
         return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction without medical record created successfully!');
     }

@@ -101,6 +101,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');
     Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor');    
     Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store');
+    Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor');
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
     Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data');
 

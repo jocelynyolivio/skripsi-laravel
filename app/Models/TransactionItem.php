@@ -10,8 +10,15 @@ class TransactionItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'transaction_id', 'procedure_id', 'quantity', 'unit_price', 'total_price', 'tooth_number', 'notes'
+        'transaction_id',
+        'procedure_id',
+        'quantity',
+        'unit_price',
+        'total_price',
+        'discount',
+        'final_price',
     ];
+    
 
     // Relasi ke transaksi
     public function transaction()

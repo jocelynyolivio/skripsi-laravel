@@ -18,7 +18,8 @@ return new class extends Migration
             $table->integer('quantity')->unsigned()->default(1);
             $table->decimal('unit_price',10,2);
             $table->decimal('total_price',10,2);
-            $table->decimal('additional_discount', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
+            $table->decimal('final_price', 10, 2)->default(0);
             $table->string('tooth_number')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

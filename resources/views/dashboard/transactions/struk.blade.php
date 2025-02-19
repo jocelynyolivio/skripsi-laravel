@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -89,23 +89,17 @@
     <!-- Detail Transaksi -->
     <div class="detail">
         <table>
-        <tr>
-    <td><strong>ID Pasien:</strong></td>
-    <td>
-        {{ optional($transaction->medicalRecord?->reservation->patient)->id ?? $transaction->patient->id }}
-    </td>
-    <td><strong>Nama:</strong></td>
-    <td>
-        {{ optional($transaction->medicalRecord?->reservation->patient)->name ?? $transaction->patient->name }}
-    </td>
-</tr>
-
             <tr>
-            <td><strong>Drg:</strong></td>
-<td>{{ optional($transaction->medicalRecord?->reservation->doctor)->name ?? 'N/A' }}</td>
-<td><strong>SIP:</strong></td>
-<td>{{ optional($transaction->medicalRecord?->reservation->doctor)->sip ?? '-' }}</td>
-
+                <td><strong>ID Pasien:</strong></td>
+                <td>{{ optional($transaction->medicalRecord?->reservation->patient)->id ?? optional($transaction->patient)->id }}</td>
+                <td><strong>Nama:</strong></td>
+                <td>{{ optional($transaction->medicalRecord?->reservation->patient)->name ?? optional($transaction->patient)->name }}</td>
+            </tr>
+            <tr>
+                <td><strong>Drg:</strong></td>
+                <td>{{ optional($transaction->medicalRecord?->reservation->doctor)->name ?? 'N/A' }}</td>
+                <td><strong>SIP:</strong></td>
+                <td>{{ optional($transaction->medicalRecord?->reservation->doctor)->sip ?? '-' }}</td>
             </tr>
             <tr>
                 <td><strong>Tanggal:</strong></td>
@@ -131,39 +125,35 @@
             </tr>
         </thead>
         <tbody>
-    @php $total = 0; @endphp
-    @foreach($transaction->items as $index => $item)
-    @php
-        $unitPrice = $item->unit_price;
-        $subtotal = $item->total_price;
-        $total += $subtotal;
-    @endphp
-    <tr>
-        <td>{{ $index + 1 }}</td>
-        <td>{{ $item->procedure->id }}</td>
-        <td>{{ $item->procedure->name }}</td>
-        <td>{{ $item->quantity }}</td>
-        <td>Rp {{ number_format($unitPrice, 0, ',', '.') }}</td>
-        <td>0</td> <!-- Diskon % -->
-        <td>0</td> <!-- Diskon Rp -->
-        <td>Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
-    </tr>
-@endforeach
-
-</tbody>
-
-
+            @php $grandTotal = 0; @endphp
+            @foreach($transaction->items as $index => $item)
+                @php
+                    $unitPrice = $item->unit_price;
+                    $discount = $item->discount;
+                    $subtotal = $item->final_price; // Harga setelah diskon
+                    $discountPercentage = ($unitPrice > 0) ? ($discount / $unitPrice) * 100 : 0;
+                    $grandTotal += $subtotal;
+                @endphp
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ optional($item->procedure)->id ?? '-' }}</td>
+                    <td>{{ optional($item->procedure)->name ?? 'N/A' }}</td>
+                    <td>{{ $item->quantity }}</td>
+                    <td>Rp {{ number_format($unitPrice, 0, ',', '.') }}</td>
+                    <td>{{ number_format($discountPercentage, 2) }}%</td>
+                    <td>Rp {{ number_format($discount, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                </tr>
+            @endforeach
+        </tbody>
     </table>
 
     <!-- Footer -->
     <div class="footer">
-    <p class="total">Total: Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</p>
-
-    <p>1. Jenis Pembayaran: {{ ucfirst($transaction->payment_type) }}</p>
-    <p>2. Media Transaksi: {{ $transaction->payment_media ?? 'Tidak diketahui' }}</p>
-</div>
-
-
+        <p class="total">Grand Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
+        <p>1. Jenis Pembayaran: {{ ucfirst($transaction->payment_method) }}</p>
+        <p>2. Media Transaksi: {{ $transaction->payment_media ?? 'Tidak diketahui' }}</p>
+    </div>
 
     <button class="no-print" onclick="window.print()">Cetak Struk</button>
 </body>

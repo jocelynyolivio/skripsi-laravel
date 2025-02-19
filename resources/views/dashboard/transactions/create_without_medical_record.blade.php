@@ -5,9 +5,9 @@
     <h3 class="text-center">Create Transaction (Without Medical Record)</h3>
 
     @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
     @endif
 
     <form action="{{ route('dashboard.transactions.storeWithoutMedicalRecord') }}" method="POST">
@@ -17,7 +17,7 @@
             <label for="patient_id" class="form-label">Patient</label>
             <select class="form-control" id="patient_id" name="patient_id" required>
                 @foreach($patients as $patient)
-                    <option value="{{ $patient->id }}">{{ $patient->name }}</option>
+                <option value="{{ $patient->id }}">{{ $patient->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -28,11 +28,11 @@
                 <select class="form-control" id="procedure_id">
                     <option value="">-- Select Procedure --</option>
                     @foreach($proceduresWithPrices as $item)
-                        <option value="{{ $item['procedure']->id }}" 
-                                data-base-price="{{ $item['basePrice'] }}"
-                                data-promo-price="{{ $item['promoPrice'] }}">
-                            {{ $item['procedure']->name }}
-                        </option>
+                    <option value="{{ $item['procedure']->id }}"
+                        data-base-price="{{ $item['basePrice'] }}"
+                        data-promo-price="{{ $item['promoPrice'] }}">
+                        {{ $item['procedure']->name }}
+                    </option>
                     @endforeach
                 </select>
                 <button type="button" class="btn btn-primary" id="add-procedure">Add</button>
@@ -43,8 +43,8 @@
 
         <!-- Total Amount Section -->
         <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
-    <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
-</div>
+            <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
+        </div>
 
 
 
@@ -65,16 +65,15 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const procedureSelect = document.getElementById('procedure_id');
         const addProcedureButton = document.getElementById('add-procedure');
         const selectedItemsContainer = document.getElementById('selected-items');
         const totalAmountField = document.getElementById('total_amount');
         const totalAmountDisplay = document.getElementById('total-amount-display');
-        let totalAmount = 0;
         let itemIndex = 0;
 
-        addProcedureButton.addEventListener('click', function () {
+        addProcedureButton.addEventListener('click', function() {
             const selectedOption = procedureSelect.options[procedureSelect.selectedIndex];
             const procedureId = selectedOption.value;
             const procedureName = selectedOption.text;
@@ -98,7 +97,13 @@
                         <option value="${basePrice}" selected>Base Price: Rp ${basePrice.toLocaleString()}</option>
                         ${promoPrice ? `<option value="${promoPrice}">Promo Price: Rp ${promoPrice.toLocaleString()}</option>` : ''}
                     </select>
-                    
+
+                    <label>Discount (Rp):</label>
+                    <input type="number" name="items[${itemIndex}][discount]" class="form-control discount-input" value="0" min="0">
+
+                    <label>Final Price:</label>
+                    <p><strong>Rp <span class="final-price-display">0</span></strong></p>
+
                     <input type="hidden" name="items[${itemIndex}][id]" value="${procedureId}">
                 `;
                 selectedItemsContainer.appendChild(itemDiv);
@@ -107,7 +112,7 @@
             }
         });
 
-        window.removeItem = function (procedureId) {
+        window.removeItem = function(procedureId) {
             const itemDiv = document.getElementById(`item-${procedureId}`);
             if (itemDiv) {
                 itemDiv.remove();
@@ -122,18 +127,26 @@
                 const quantity = parseInt(input.value) || 1;
                 const priceSelect = document.querySelectorAll('.price-select')[index];
                 const unitPrice = parseFloat(priceSelect.value) || 0;
-                newTotal += unitPrice * quantity;
+                const discountInput = document.querySelectorAll('.discount-input')[index];
+                const discount = parseFloat(discountInput.value) || 0;
+                const finalPrice = Math.max((unitPrice * quantity) - discount, 0);
+
+                document.querySelectorAll('.final-price-display')[index].textContent = finalPrice.toLocaleString();
+                newTotal += finalPrice;
             });
 
             totalAmountField.value = newTotal.toFixed(0);
             totalAmountDisplay.textContent = newTotal.toLocaleString();
         }
 
-        document.addEventListener('change', function (event) {
-            if (event.target.classList.contains('quantity-input') || event.target.classList.contains('price-select')) {
+        document.addEventListener('change', function(event) {
+            if (event.target.classList.contains('quantity-input') ||
+                event.target.classList.contains('price-select') ||
+                event.target.classList.contains('discount-input')) {
                 updateTotal();
             }
         });
     });
 </script>
+
 @endsection

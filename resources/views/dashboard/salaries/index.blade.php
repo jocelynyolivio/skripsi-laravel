@@ -75,7 +75,6 @@
     </form>
 
     @if(isset($calculatedSalaries))
-    <!-- Tabel Hasil Perhitungan Gaji Admin -->
     <h3 class="mt-5">Hasil Perhitungan Gaji Admin</h3>
     <table id="calculatedSalariesTable" class="table table-striped table-bordered">
         <thead>
@@ -87,7 +86,6 @@
                 <th>Holiday</th>
                 <th>Lembur</th>
                 <th>Gaji Pokok</th>
-                <th>Tunjangan</th>
                 <th>Grand Total</th>
             </tr>
         </thead>
@@ -101,13 +99,22 @@
                     <td>Rp. {{ number_format($salary['holiday_shift'], 2, ',', '.') }}</td>
                     <td>Rp. {{ number_format($salary['lembur'], 2, ',', '.') }}</td>
                     <td>Rp. {{ number_format($salary['base_salary'], 2, ',', '.') }}</td>
-                    <td>Rp. {{ number_format($salary['allowance'], 2, ',', '.') }}</td>
                     <td><b>Rp. {{ number_format($salary['grand_total'], 2, ',', '.') }}</b></td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-    @endif
+
+    <!-- Form untuk menyimpan gaji -->
+    <form method="POST" action="{{ route('dashboard.salaries.store') }}">
+        @csrf
+        <input type="hidden" name="salaries" value="{{ json_encode($calculatedSalaries) }}">
+        <input type="hidden" name="month" value="{{ request('month', now()->format('m')) }}">
+        <input type="hidden" name="year" value="{{ request('year', now()->format('Y')) }}">
+        <button type="submit" class="btn btn-success mt-3">Simpan Gaji ke Database</button>
+    </form>
+@endif
+
 
     <!-- Tombol Hitung Gaji Dokter -->
     <form method="POST" action="{{ route('dashboard.salaries.doctor') }}">
@@ -118,7 +125,6 @@
     </form>
 
     @if(isset($doctorSalaries))
-    <!-- Tabel Hasil Perhitungan Gaji Dokter -->
     <h3 class="mt-5">Hasil Perhitungan Gaji Dokter</h3>
     <table id="doctorSalariesTable" class="table table-striped table-bordered">
         <thead>
@@ -146,7 +152,17 @@
             @endforeach
         </tbody>
     </table>
-    @endif
+
+    <!-- Form untuk menyimpan gaji dokter -->
+    <form method="POST" action="{{ route('dashboard.salaries.storeDoctor') }}">
+        @csrf
+        <input type="hidden" name="salaries" value="{{ json_encode($doctorSalaries) }}">
+        <input type="hidden" name="month" value="{{ request('month', now()->format('m')) }}">
+        <input type="hidden" name="year" value="{{ request('year', now()->format('Y')) }}">
+        <button type="submit" class="btn btn-success mt-3">Simpan Gaji Dokter ke Database</button>
+    </form>
+@endif
+
 </div>
 
 @section('scripts')
