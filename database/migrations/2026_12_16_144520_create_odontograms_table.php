@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('odontograms', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('patient_id');
-            $table->unsignedBigInteger('medical_record_id')->nullable(); 
+
             $table->integer('tooth_number');
             $table->string('condition', 255)->default('Healthy');
             $table->text('notes')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Foreign key constraints
             $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
-            $table->foreign('medical_record_id')->references('id')->on('medical_records')->onDelete('cascade');
+        
         });
     }
 

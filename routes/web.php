@@ -96,6 +96,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/salaries/upload-salary', [SalaryController::class, 'uploadForm']);
     Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel']);
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
+    Route::get('/salaries/slips', [SalaryController::class, 'slips'])->name('salaries.slips');
     Route::get('/salaries/slip', [SalaryController::class, 'userSalarySlip'])->name('salaries.slip');
     Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process');
     Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');

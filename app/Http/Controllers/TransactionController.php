@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Patient;
 use App\Models\Pricelist;
 use App\Models\Procedure;
+use App\Models\Reservation;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
-use App\Models\Patient;
+use App\Models\DoctorRevenueShare;
 
 class TransactionController extends Controller
 {
@@ -99,6 +101,7 @@ class TransactionController extends Controller
 
     public function store(Request $request)
 {
+    // dd($request->all());
     // Validasi input
     $validated = $request->validate([
         'medical_record_id' => 'nullable|exists:medical_records,id',
@@ -110,6 +113,8 @@ class TransactionController extends Controller
         'discount.*' => 'numeric|min:0',
         'payment_method' => 'required|in:cash,card',
     ]);
+
+    // dd($validated);
 
     $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
     $totalAmount = 0;
@@ -131,13 +136,21 @@ class TransactionController extends Controller
         }
 
         foreach ($procedureCounts as $procedureId => $quantity) {
-            $unitPrice = Pricelist::where('procedure_id', $procedureId)
-                ->orderBy('effective_date', 'desc')
-                ->value('price') ?? 0;
+            // $unitPrice = Pricelist::where('procedure_id', $procedureId)
+            //     ->orderBy('effective_date', 'desc')
+            //     ->value('price') ?? 0;
+            $unitPrice = $validated['amount'][$procedureId] ?? 0;
 
             $discount = $validated['discount'][$procedureId] ?? 0;
             $totalPrice = $unitPrice * $quantity;
             $finalPrice = max($totalPrice - $discount, 0);
+
+            $doctorId = Reservation::join('medical_records','reservations.id', '=', 'medical_records.reservation_id')->where('medical_records.id', $medicalRecord->id)->value('reservations.doctor_id');
+
+            $doctorRole = User::where('id', $doctorId)->value('role_id');
+            $revenuePercentage = ($doctorRole == 2) ? 35 : 30;
+
+            $revenueAmount = $finalPrice * ($revenuePercentage/100);
 
             $transaction->items()->updateOrCreate(
                 ['transaction_id' => $transaction->id, 'procedure_id' => $procedureId],
@@ -147,10 +160,25 @@ class TransactionController extends Controller
                     'total_price' => $totalPrice,
                     'discount' => $discount,
                     'final_price' => $finalPrice,
+                    'doctor_id' => $doctorId, // Simpan dokter langsung
+                    'revenue_percentage' => $revenuePercentage,
+                    'revenue_amount' => $revenueAmount,
                 ]
             );
 
             $totalAmount += $finalPrice;
+
+            
+
+            // DoctorRevenueShare::create([
+            //     'transaction_id' => $transaction->id,
+            //     'doctor_id' => $doctorId,
+            //     'procedure_id' => $procedureId,
+            //     'payment_net' => $finalPrice,
+            //     'revenue_percentage' => $revenuePercentage,
+            //     'revenue_amount' => $revenueShare,
+            //     'month_year' => now()->format('Y-m'),
+            // ]);
         }
     }
 

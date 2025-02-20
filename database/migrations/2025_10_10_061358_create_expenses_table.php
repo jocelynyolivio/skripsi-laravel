@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
+            // Foreign keys
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Relasi ke kategori
+            $table->foreignId('dental_material_id')->nullable()->constrained('dental_materials')->onDelete('cascade'); // Relasi ke bahan 
+            
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); // Admin yang mencatat pengeluaran
+
             $table->date('date'); // Tanggal pengeluaran
             $table->decimal('amount', 10, 2); // Jumlah pengeluaran
             $table->text('description')->nullable(); // Deskripsi pengeluaran
@@ -20,10 +26,9 @@ return new class extends Migration
             $table->integer('quantity')->nullable(); // Jumlah bahan dental yang dibeli
             $table->timestamps();
         
-            // Foreign keys
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Relasi ke kategori
-            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); // Admin yang mencatat pengeluaran
-            $table->foreignId('dental_material_id')->nullable()->constrained('dental_materials')->onDelete('cascade'); // Relasi ke bahan dental
+            
+            
+            
         });
     }
 

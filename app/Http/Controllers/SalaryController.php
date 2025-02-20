@@ -2,15 +2,101 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Dotenv\Util\Regex;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use App\Models\SalaryCalculation;
-use Dotenv\Util\Regex;
+use App\Models\TransactionItem;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Svg\Tag\Rect;
 
 class SalaryController extends Controller
 {
+    public function slips(Request $request)
+{
+    // Ambil bulan dan tahun dari request, default ke bulan sebelumnya
+    $month = str_pad($request->input('month', now()->subMonth()->format('m')), 2, '0', STR_PAD_LEFT);
+    $year = $request->input('year', now()->format('Y'));
+
+    // dd($year.$month);
+
+    $userLogged = Auth::user();
+    $roleLogged = optional($userLogged->role)->role_name; // Pastikan tidak error jika role kosong
+
+    // dd($userLogged);
+
+    $bagi_hasil = collect(); // Gunakan koleksi kosong agar tidak error
+    $gaji = null;
+
+    if ($roleLogged == 'admin') {
+        dd('masuk admin');
+        // Query untuk mengambil data gaji admin
+        $gaji = SalaryCalculation::where('user_id', $userLogged->id)
+            ->where('month', "{$year}-{$month}")
+            ->orderBy('holiday_shift', 'asc')
+            ->select([
+                'id',
+                'user_id',
+                'month',
+                'normal_shift',
+                'holiday_shift',
+                'shift_pagi',
+                'shift_siang',
+                'lembur',
+                'base_salary',
+                'allowance',
+                'grand_total'
+            ])
+            ->first(); // Ambil satu data
+
+    } else if (stripos($roleLogged, 'dokter') !== false) {
+        // Ambil data gaji dokter dari salary_calculations
+        // dd('masuk dokter');
+        $gaji = SalaryCalculation::where('user_id', $userLogged->id)
+            ->where('month', "{$year}-{$month}")
+            ->orderBy('holiday_shift', 'asc')
+            ->select([
+                'id',
+                'user_id',
+                'month',
+                'normal_shift',
+                'holiday_shift',
+                'shift_pagi',
+                'shift_siang',
+                'lembur',
+                'base_salary',
+                'allowance',
+                'grand_total'
+            ])
+            ->first(); // Ambil satu data
+        
+            // dd($gaji);
+
+        // Ambil data bagi hasil dari transaction_items
+        $bagi_hasil = TransactionItem::where('doctor_id', $userLogged->id)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->select([
+                'procedure_id',
+                'quantity',
+                'unit_price',
+                'total_price',
+                'discount',
+                'final_price',
+                'revenue_percentage',
+                'revenue_amount',
+            ])
+            ->get();
+    }
+
+    return view('dashboard.salaries.slips', compact('userLogged', 'roleLogged', 'gaji', 'bagi_hasil', 'month', 'year'));
+}
+
+
+
     public function index(Request $request)
     {
         $month = $request->input('month', now()->format('m') - 1);
@@ -65,7 +151,7 @@ class SalaryController extends Controller
             )
             ->groupBy('users.id', 'users.name')
             ->get();
-        
+
 
         // Ambil data absensi dan hitung gaji
         $salaries = DB::table('users')
@@ -86,7 +172,7 @@ class SalaryController extends Controller
                 AND TIMESTAMPDIFF(MINUTE, attendances.jam_masuk, attendances.jam_pulang) > 720 
                 THEN 1 
             END) AS lembur"),
-            
+
 
                 // 2. Jika tidak lembur, cek apakah masuk hari libur masuk holiday
                 DB::raw("COUNT(CASE 
@@ -155,7 +241,7 @@ class SalaryController extends Controller
     {
         $month = $request->input('month');
         $year = $request->input('year');
-    
+
         // Ambil data absensi dokter tetap (role_id = 2) dan tidak tetap (role_id = 3)
         $attendances = DB::table('users')
             ->join('attendances', function ($join) use ($month, $year) {
@@ -173,43 +259,42 @@ class SalaryController extends Controller
             )
             ->groupBy('users.id', 'users.name', 'users.role_id')
             ->get();
-    
+
         $doctorSalaries = [];
-    
-        // Ambil total amount dari transactions berdasarkan dokter & bulan yang dipilih
-        $bagi_hasil_data = DB::table('transactions')
-        ->join('medical_records', 'transactions.medical_record_id', '=', 'medical_records.id') // Ambil reservation_id dari medical_records
-        ->join('reservations', 'medical_records.reservation_id', '=', 'reservations.id') // Ambil doctor_id dari reservations
-        ->whereMonth('reservations.tanggal_reservasi', $month) // Filter berdasarkan bulan
-        ->whereYear('reservations.tanggal_reservasi', $year) // Filter berdasarkan tahun
-        ->groupBy('reservations.doctor_id')
-        ->select('reservations.doctor_id', DB::raw('SUM(transactions.total_amount) as bagi_hasil'))
-        ->pluck('bagi_hasil', 'doctor_id'); // Ubah hasil menjadi array dengan doctor_id sebagai key
-    
-    
+
+        $bagi_hasil_data = DB::table('transaction_items')
+            ->whereMonth('created_at', $month) // Filter bulan
+            ->whereYear('created_at', $year) // Filter tahun
+            ->groupBy('doctor_id')
+            ->select('doctor_id', DB::raw('SUM(revenue_amount) as bagi_hasil'))
+            ->pluck('bagi_hasil', 'doctor_id'); // Ubah hasil menjadi array dengan doctor_id sebagai key
+
+        // dd($bagi_hasil_data);
+
+
         foreach ($attendances as $attendance) {
             // Hitung jumlah shift berdasarkan total jam kerja dalam sehari
             $jumlah_shift = round($attendance->total_jam_kerja / 8); // Misal kerja 16 jam = 2 shift
-    
+
             // Tarif transport per shift
             $transport_per_shift = 65000;
             $total_transport = $jumlah_shift * $transport_per_shift;
-    
+
             // Ambil bagi hasil dokter dari transaksi
             $bagi_hasil = $bagi_hasil_data[$attendance->user_id] ?? 0;
-    
+
             // Tentukan persentase bagi hasil berdasarkan role_id
             if ($attendance->role_id == 2) {
-                $bagi_hasil = $bagi_hasil * 35 / 100; // Dokter tetap: 35%
+                // $bagi_hasil = $bagi_hasil * 35 / 100; // Dokter tetap: 35%
                 $base_salary = 1500000; // Dokter tetap dapat gaji pokok
             } else {
-                $bagi_hasil = $bagi_hasil * 30 / 100; // Dokter tidak tetap: 30%
+                // $bagi_hasil = $bagi_hasil * 30 / 100; // Dokter tidak tetap: 30%
                 $base_salary = 0; // Dokter tidak tetap tidak dapat gaji pokok
             }
-    
+
             // Hitung total gaji
             $grand_total = $base_salary + $total_transport + $bagi_hasil;
-    
+
             // Simpan hasil perhitungan dalam array
             $doctorSalaries[] = [
                 'user_id' => $attendance->user_id,
@@ -223,12 +308,12 @@ class SalaryController extends Controller
                 'grand_total' => $grand_total
             ];
         }
-    
+
         return view('dashboard.salaries.index', compact('doctorSalaries', 'month', 'year'));
     }
-    
-    
-    
+
+
+
 
 
     // public function storeSalaries(Request $request)
@@ -261,65 +346,65 @@ class SalaryController extends Controller
     //     return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil disimpan!');
     // }
     public function storeSalaries(Request $request)
-{
-    // Decode JSON dari input form
-    $salaries = json_decode($request->input('salaries'), true);
+    {
+        // Decode JSON dari input form
+        $salaries = json_decode($request->input('salaries'), true);
 
-    // Pastikan data berhasil di-decode
-    if (!is_array($salaries)) {
-        return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
+        // Pastikan data berhasil di-decode
+        if (!is_array($salaries)) {
+            return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
+        }
+
+        foreach ($salaries as $salary) {
+            SalaryCalculation::updateOrCreate(
+                [
+                    'user_id' => $salary['user_id'],
+                    'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
+                ],
+                [
+                    'shift_pagi' => $salary['shift_pagi'],
+                    'shift_siang' => $salary['shift_siang'],
+                    'holiday_shift' => $salary['holiday_shift'],
+                    'lembur' => $salary['lembur'],
+                    'base_salary' => $salary['base_salary'],
+                    // 'allowance' => $salary['allowance'],
+                    'grand_total' => $salary['grand_total']
+                ]
+            );
+        }
+
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil disimpan ke database!');
     }
+    public function storeDoctorSalaries(Request $request)
+    {
+        // Decode JSON dari input form
+        $salaries = json_decode($request->input('salaries'), true);
 
-    foreach ($salaries as $salary) {
-        SalaryCalculation::updateOrCreate(
-            [
-                'user_id' => $salary['user_id'],
-                'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
-            ],
-            [
-                'shift_pagi' => $salary['shift_pagi'],
-                'shift_siang' => $salary['shift_siang'],
-                'holiday_shift' => $salary['holiday_shift'],
-                'lembur' => $salary['lembur'],
-                'base_salary' => $salary['base_salary'],
-                // 'allowance' => $salary['allowance'],
-                'grand_total' => $salary['grand_total']
-            ]
-        );
+        // Pastikan data berhasil di-decode
+        if (!is_array($salaries)) {
+            return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
+        }
+
+        foreach ($salaries as $salary) {
+            SalaryCalculation::updateOrCreate(
+                [
+                    'user_id' => $salary['user_id'],
+                    'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
+                ],
+                [
+                    'shift_pagi' => $salary['bagi_hasil'], // Dokter tidak memiliki shift pagi
+                    'shift_siang' => 0, // Dokter tidak memiliki shift siang
+                    'holiday_shift' => 0, // Tidak diperlukan
+                    'lembur' => 0, // Tidak dihitung lembur
+                    'base_salary' => $salary['base_salary'],
+                    'allowance' => $salary['transport_total'] + $salary['bagi_hasil'], // Tunjangan = Transport + Bagi Hasil
+                    'grand_total' => $salary['grand_total']
+                ]
+            );
+        }
+
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji dokter berhasil disimpan ke database!');
     }
-
-    return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil disimpan ke database!');
-}
-public function storeDoctorSalaries(Request $request)
-{
-    // Decode JSON dari input form
-    $salaries = json_decode($request->input('salaries'), true);
-
-    // Pastikan data berhasil di-decode
-    if (!is_array($salaries)) {
-        return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
-    }
-
-    foreach ($salaries as $salary) {
-        SalaryCalculation::updateOrCreate(
-            [
-                'user_id' => $salary['user_id'],
-                'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
-            ],
-            [
-                'shift_pagi' => 0, // Dokter tidak memiliki shift pagi
-                'shift_siang' => 0, // Dokter tidak memiliki shift siang
-                'holiday_shift' => 0, // Tidak diperlukan
-                'lembur' => 0, // Tidak dihitung lembur
-                'base_salary' => $salary['base_salary'],
-                'allowance' => $salary['transport_total'] + $salary['bagi_hasil'], // Tunjangan = Transport + Bagi Hasil
-                'grand_total' => $salary['grand_total']
-            ]
-        );
-    }
-
-    return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji dokter berhasil disimpan ke database!');
-}
 
 
     public function uploadForm()
@@ -522,7 +607,7 @@ public function storeDoctorSalaries(Request $request)
         Attendance::create($request->all());
 
         return redirect()->route('attendances.index')
-                         ->with('success', 'Data absensi berhasil ditambahkan.');
+            ->with('success', 'Data absensi berhasil ditambahkan.');
     }
 
     /**
@@ -551,7 +636,7 @@ public function storeDoctorSalaries(Request $request)
         $attendance->update($request->all());
 
         return redirect()->route('attendances.index')
-                         ->with('success', 'Data absensi berhasil diperbarui.');
+            ->with('success', 'Data absensi berhasil diperbarui.');
     }
 
     /**
@@ -563,7 +648,7 @@ public function storeDoctorSalaries(Request $request)
         $attendance->delete();
 
         return redirect()->route('attendances.index')
-                         ->with('success', 'Data absensi berhasil dihapus.');
+            ->with('success', 'Data absensi berhasil dihapus.');
     }
 
     // public function processSalaries(Request $request)

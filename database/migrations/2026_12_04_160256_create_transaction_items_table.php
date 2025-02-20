@@ -14,21 +14,25 @@ return new class extends Migration
         Schema::create('transaction_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('transaction_id');
+            $table->unsignedBigInteger('doctor_id')->nullable();
             $table->unsignedBigInteger('procedure_id');
             $table->integer('quantity')->unsigned()->default(1);
-            $table->decimal('unit_price',10,2);
-            $table->decimal('total_price',10,2);
+            $table->decimal('unit_price', 10, 2);
+            $table->decimal('total_price', 10, 2);
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('final_price', 10, 2)->default(0);
             $table->string('tooth_number')->nullable();
+            $table->decimal('revenue_percentage', 5, 2)->nullable(); // Persentase bagi hasil dokter
+            $table->decimal('revenue_amount', 10, 2)->nullable(); // Jumlah bagi hasil dokter
             $table->text('notes')->nullable();
             $table->timestamps();
-
-            // constraintss
+        
+            // Constraints
             $table->foreign('transaction_id')->references('id')->on('transactions')->cascadeOnDelete();
+            $table->foreign('doctor_id')->references('id')->on('users')->nullOnDelete();
             $table->foreign('procedure_id')->references('id')->on('procedures')->cascadeOnDelete();
-
         });
+        
     }
 
     /**
