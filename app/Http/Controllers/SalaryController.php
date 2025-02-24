@@ -32,7 +32,7 @@ class SalaryController extends Controller
     $gaji = null;
 
     if ($roleLogged == 'admin') {
-        dd('masuk admin');
+        // dd('masuk admin');
         // Query untuk mengambil data gaji admin
         $gaji = SalaryCalculation::where('user_id', $userLogged->id)
             ->where('month', "{$year}-{$month}")

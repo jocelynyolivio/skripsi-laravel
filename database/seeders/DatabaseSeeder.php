@@ -8,10 +8,11 @@ use App\Models\Patient;
 use App\Models\Category;
 use App\Models\Pricelist;
 use App\Models\Procedure;
+use App\Models\ChartOfAccount;
 use App\Models\DentalMaterial;
-use App\Models\ProcedureMaterial;
-use App\Models\ScheduleTemplate;
 use Illuminate\Database\Seeder;
+use App\Models\ScheduleTemplate;
+use App\Models\ProcedureMaterial;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -308,5 +309,32 @@ class DatabaseSeeder extends Seeder
             ['tanggal' => '2025-09-05', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
             ['tanggal' => '2025-12-25', 'keterangan' => 'Hari Raya Natal'],
         ]);
+
+        $accounts = [
+            // Aset (Assets)
+            ['code' => '1100', 'name' => 'Kas', 'type' => 'asset'],
+            ['code' => '1200', 'name' => 'Piutang Usaha', 'type' => 'asset'],
+            ['code' => '1300', 'name' => 'Persediaan', 'type' => 'asset'],
+            ['code' => '1400', 'name' => 'Aset Tetap', 'type' => 'asset'],
+
+            // Kewajiban (Liabilities)
+            ['code' => '2100', 'name' => 'Utang Usaha', 'type' => 'liability'],
+            ['code' => '2200', 'name' => 'Utang Pajak', 'type' => 'liability'],
+
+            // Ekuitas (Equity)
+            ['code' => '3100', 'name' => 'Modal Pemilik', 'type' => 'equity'],
+            ['code' => '3200', 'name' => 'Laba Ditahan', 'type' => 'equity'],
+
+            // Pendapatan (Revenue)
+            ['code' => '4100', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
+
+            // Beban (Expenses)
+            ['code' => '5100', 'name' => 'Beban Gaji', 'type' => 'expense'],
+            ['code' => '5200', 'name' => 'Beban Sewa', 'type' => 'expense'],
+        ];
+
+        foreach ($accounts as $account) {
+            ChartOfAccount::create($account);
+        }
     }
 }

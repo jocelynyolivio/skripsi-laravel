@@ -22,7 +22,7 @@
             
                 // Foreign keys
                 $table->foreign('patient_id')->references('id')->on('patients')->nullOnDelete();
-                $table->foreign('medical_record_id')->references('id')->on('medical_records')->nullOnDelete();
+                $table->foreign('medical_record_id')->references('id')->on('medical_records')->cascadeOnDelete();
                 $table->foreign('admin_id')->references('id')->on('users')->cascadeOnDelete();
             });
             

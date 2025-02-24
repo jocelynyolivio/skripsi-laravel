@@ -14,6 +14,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\HomeContentController;
 use App\Http\Controllers\ReservationController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
+use App\Models\ChartOfAccount;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
@@ -167,6 +169,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('procedure_materials', ProcedureMaterialController::class);
 
+    Route::post('/transactions/storeWithPayment', [TransactionController::class, 'storeWithPayment'])->name('transactions.storeWithPayment');
+
     Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
         ->name('transactions.selectMedicalRecord');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
@@ -206,4 +210,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index');
         Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store');
     });
+
+    Route::resource('coa', ChartOfAccountController::class);
 });

@@ -25,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
 
     <!-- Dashboard JS -->
-    <script src="dashboard.js"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
 
     <!-- Bootstrap JS dan Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>

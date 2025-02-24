@@ -10,7 +10,6 @@ use App\Models\Reservation;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
-use App\Models\DoctorRevenueShare;
 
 class TransactionController extends Controller
 {
@@ -100,93 +99,113 @@ class TransactionController extends Controller
     }
 
     public function store(Request $request)
-{
-    // dd($request->all());
-    // Validasi input
-    $validated = $request->validate([
-        'medical_record_id' => 'nullable|exists:medical_records,id',
-        'user_id' => 'required|exists:users,id',
-        'admin_id' => 'required|exists:users,id',
-        'amount' => 'required|array',
-        'amount.*' => 'numeric|min:0',
-        'discount' => 'required|array',
-        'discount.*' => 'numeric|min:0',
-        'payment_method' => 'required|in:cash,card',
-    ]);
+    {
+        // dd($request->all());
+        // Validasi input
+        $validated = $request->validate([
+            'medical_record_id' => 'nullable|exists:medical_records,id',
+            'user_id' => 'required|exists:users,id',
+            'admin_id' => 'required|exists:users,id',
+            'amount' => 'required|array',
+            'amount.*' => 'numeric|min:0',
+            'discount' => 'required|array',
+            'discount.*' => 'numeric|min:0',
+            'payment_method' => 'required|in:cash,card',
+            'payments' => 'nullable|array',
+            'payments.*.amount' => 'required|numeric|min:0',
+            'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
+            'payments.*.notes' => 'nullable|string'
+        ]);
 
-    // dd($validated);
+        // dd($validated);
 
-    $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
-    $totalAmount = 0;
+        $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
+        $totalAmount = 0;
 
-    // Buat transaksi baru
-    $transaction = Transaction::create([
-        'medical_record_id' => $validated['medical_record_id'],
-        'user_id' => $validated['user_id'],
-        'admin_id' => $validated['admin_id'],
-        'total_amount' => $totalAmount,
-        'payment_method' => $validated['payment_method'],
-    ]);
+        // Buat transaksi baru
+        $transaction = Transaction::create([
+            'medical_record_id' => $validated['medical_record_id'],
+            'user_id' => $validated['user_id'],
+            'admin_id' => $validated['admin_id'],
+            'total_amount' => $totalAmount,
+            'payment_method' => $validated['payment_method'],
+        ]);
 
-    if ($medicalRecord) {
-        $procedureCounts = [];
+        if ($medicalRecord) {
+            $procedureCounts = [];
 
-        foreach ($medicalRecord->procedures as $procedure) {
-            $procedureCounts[$procedure->id] = ($procedureCounts[$procedure->id] ?? 0) + 1;
+            foreach ($medicalRecord->procedures as $procedure) {
+                $procedureCounts[$procedure->id] = ($procedureCounts[$procedure->id] ?? 0) + 1;
+            }
+
+            foreach ($procedureCounts as $procedureId => $quantity) {
+                // $unitPrice = Pricelist::where('procedure_id', $procedureId)
+                //     ->orderBy('effective_date', 'desc')
+                //     ->value('price') ?? 0;
+                $unitPrice = $validated['amount'][$procedureId] ?? 0;
+
+                $discount = $validated['discount'][$procedureId] ?? 0;
+                $totalPrice = $unitPrice * $quantity;
+                $finalPrice = max($totalPrice - $discount, 0);
+
+                $doctorId = Reservation::join('medical_records', 'reservations.id', '=', 'medical_records.reservation_id')->where('medical_records.id', $medicalRecord->id)->value('reservations.doctor_id');
+
+                $doctorRole = User::where('id', $doctorId)->value('role_id');
+                $revenuePercentage = ($doctorRole == 2) ? 35 : 30;
+
+                $revenueAmount = $finalPrice * ($revenuePercentage / 100);
+
+                $transaction->items()->updateOrCreate(
+                    ['transaction_id' => $transaction->id, 'procedure_id' => $procedureId],
+                    [
+                        'quantity' => $quantity,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'discount' => $discount,
+                        'final_price' => $finalPrice,
+                        'doctor_id' => $doctorId, // Simpan dokter langsung
+                        'revenue_percentage' => $revenuePercentage,
+                        'revenue_amount' => $revenueAmount,
+                    ]
+                );
+
+                $totalAmount += $finalPrice;
+
+
+
+                // DoctorRevenueShare::create([
+                //     'transaction_id' => $transaction->id,
+                //     'doctor_id' => $doctorId,
+                //     'procedure_id' => $procedureId,
+                //     'payment_net' => $finalPrice,
+                //     'revenue_percentage' => $revenuePercentage,
+                //     'revenue_amount' => $revenueShare,
+                //     'month_year' => now()->format('Y-m'),
+                // ]);
+            }
         }
 
-        foreach ($procedureCounts as $procedureId => $quantity) {
-            // $unitPrice = Pricelist::where('procedure_id', $procedureId)
-            //     ->orderBy('effective_date', 'desc')
-            //     ->value('price') ?? 0;
-            $unitPrice = $validated['amount'][$procedureId] ?? 0;
+        // Update total transaksi setelah diskon diterapkan
+        $transaction->update(['total_amount' => $totalAmount]);
 
-            $discount = $validated['discount'][$procedureId] ?? 0;
-            $totalPrice = $unitPrice * $quantity;
-            $finalPrice = max($totalPrice - $discount, 0);
+        $total_payments = 0;
+        if ($request->has('payments')) {
+            foreach ($request->payments as $payment) {
+                $transaction->payments()->create([
+                    'payment_date' => now(),
+                    'amount' => $payment['amount'],
+                    'payment_method' => $payment['payment_method'],
+                    'notes' => $payment['notes']
+                ]);
+                $total_payments += $payment['amount'];
+            }
 
-            $doctorId = Reservation::join('medical_records','reservations.id', '=', 'medical_records.reservation_id')->where('medical_records.id', $medicalRecord->id)->value('reservations.doctor_id');
-
-            $doctorRole = User::where('id', $doctorId)->value('role_id');
-            $revenuePercentage = ($doctorRole == 2) ? 35 : 30;
-
-            $revenueAmount = $finalPrice * ($revenuePercentage/100);
-
-            $transaction->items()->updateOrCreate(
-                ['transaction_id' => $transaction->id, 'procedure_id' => $procedureId],
-                [
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'total_price' => $totalPrice,
-                    'discount' => $discount,
-                    'final_price' => $finalPrice,
-                    'doctor_id' => $doctorId, // Simpan dokter langsung
-                    'revenue_percentage' => $revenuePercentage,
-                    'revenue_amount' => $revenueAmount,
-                ]
-            );
-
-            $totalAmount += $finalPrice;
-
-            
-
-            // DoctorRevenueShare::create([
-            //     'transaction_id' => $transaction->id,
-            //     'doctor_id' => $doctorId,
-            //     'procedure_id' => $procedureId,
-            //     'payment_net' => $finalPrice,
-            //     'revenue_percentage' => $revenuePercentage,
-            //     'revenue_amount' => $revenueShare,
-            //     'month_year' => now()->format('Y-m'),
-            // ]);
+            // dd($total_payments);
         }
+
+
+        return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
     }
-
-    // Update total transaksi setelah diskon diterapkan
-    $transaction->update(['total_amount' => $totalAmount]);
-
-    return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
-}
 
 
 
@@ -198,12 +217,17 @@ class TransactionController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'admin_id' => 'required|exists:users,id',
-            'items' => 'required|array',
-            'items.*.id' => 'exists:procedures,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'items.*.discount' => 'required|numeric|min:0',
+            'items' => 'nullable|array',
+            'items.*.id' => 'nullable|exists:procedures,id',
+            'items.*.quantity' => 'nullable|integer|min:1',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
+            'items.*.discount' => 'nullable|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,card',
+            'payments' => 'nullable|array',
+            'payments.*.amount' => 'required|numeric|min:0',
+            'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
+            'payments.*.notes' => 'nullable|string'
         ]);
         // dd($validated);
 
@@ -290,6 +314,19 @@ class TransactionController extends Controller
             // dd($data);
             $transaction->items()->create($data);
         }
+
+        // Simpan data payments
+if (!empty($validated['payments'])) {
+    foreach ($validated['payments'] as $paymentData) {
+        $transaction->payments()->create([
+            'payment_date' => now(), // Atau sesuaikan dengan data yang dimiliki
+            'amount' => $paymentData['amount'],
+            'payment_method' => $paymentData['payment_method'],
+            'notes' => $paymentData['notes'] ?? null
+        ]);
+    }
+}
+
 
 
         return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction without medical record created successfully!');
@@ -404,5 +441,6 @@ class TransactionController extends Controller
     //     }
 
     //     return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
-    // }
+    // }    
+
 }

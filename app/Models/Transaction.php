@@ -11,7 +11,11 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'patient_id', 'medical_record_id', 'admin_id', 'total_amount', 'payment_method'
+        'patient_id',
+        'medical_record_id',
+        'admin_id',
+        'total_amount',
+        'payment_method'
     ];
 
     // Relasi ke User (yang melakukan transaksi)
@@ -36,5 +40,10 @@ class Transaction extends Model
     public function items()
     {
         return $this->hasMany(TransactionItem::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }
