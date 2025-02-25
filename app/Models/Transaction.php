@@ -46,4 +46,15 @@ class Transaction extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function getRemainingAmountAttribute()
+    {
+        $totalPayments = $this->payments()->sum('amount');
+        return $this->total_amount - $totalPayments;
+    }
+
+    public function getPaymentStatusAttribute()
+    {
+        return $this->remaining_amount > 0 ? 'belum lunas' : 'lunas';
+    }
 }

@@ -16,13 +16,20 @@ class AttendanceController extends Controller
         // Filter berdasarkan bulan jika parameter bulan diberikan
         if ($request->has('bulan')) {
             $query->whereMonth('tanggal', Carbon::parse($request->bulan)->format('m'))
-                  ->whereYear('tanggal', Carbon::parse($request->bulan)->format('Y'));
+                ->whereYear('tanggal', Carbon::parse($request->bulan)->format('Y'));
         }
 
         $attendances = $query->get();
 
         return view('dashboard.attendances.index', compact('attendances'));
     }
+
+    public function create()
+    {
+        $users = User::all(); // Ambil data user untuk dropdown
+        return view('dashboard.attendances.create', compact('users'));
+    }
+
 
     public function store(Request $request)
     {

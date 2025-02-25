@@ -1,8 +1,8 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container">
-    <h2>Tambah Data Presensi</h2>
+<div class="container mt-5 col-md-6">
+    <h3 class="text-center">Tambah Data Presensi</h3>
 
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -43,6 +43,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Simpan</button>
+        <a href="{{ route('dashboard.attendances.index') }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
 @endsection

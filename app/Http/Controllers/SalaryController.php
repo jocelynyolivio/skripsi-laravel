@@ -11,7 +11,6 @@ use App\Models\TransactionItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Svg\Tag\Rect;
 
 class SalaryController extends Controller
 {
@@ -294,6 +293,8 @@ class SalaryController extends Controller
 
             // Hitung total gaji
             $grand_total = $base_salary + $total_transport + $bagi_hasil;
+
+            // dd($jumlah_shift);
 
             // Simpan hasil perhitungan dalam array
             $doctorSalaries[] = [

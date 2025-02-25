@@ -28,6 +28,28 @@
         </div>
     </div>
 
+    <!-- Card: Pendapatan Hari Ini -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Pendapatan Hari Ini</h5>
+                <p class="card-text display-5 fw-bold">{{ $pendapatanHariIni }}</p>
+                <p class="text-muted">Pemasukan berdasarkan transaksi hari ini</p>
+            </div>
+        </div>
+    </div>
+
+     <!-- Card: Faktur belum dibayar / piutang dapet nya dari trans-payment -->
+     <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Faktur Belum Dibayar</h5>
+                <p class="card-text display-5 fw-bold">{{ $transaksiBelumLunas }}</p>
+                <p class="text-muted">Transaksi yang belum dilunasi oleh pasien</p>
+            </div>
+        </div>
+    </div>
+
 <!-- Section Tambahan -->
 <div class="row">
     <!-- Statistik Dokter -->

@@ -10,6 +10,7 @@ use App\Models\Reservation;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
+use App\Models\Receivable;
 
 class TransactionController extends Controller
 {
@@ -122,13 +123,16 @@ class TransactionController extends Controller
         $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
         $totalAmount = 0;
 
+        $totalPayments = array_sum(array_column($validated['payments'], 'amount'));
+        $remainingAmount = max($totalAmount - $totalPayments, 0);
+
         // Buat transaksi baru
         $transaction = Transaction::create([
             'medical_record_id' => $validated['medical_record_id'],
             'user_id' => $validated['user_id'],
             'admin_id' => $validated['admin_id'],
             'total_amount' => $totalAmount,
-            'payment_method' => $validated['payment_method'],
+            'status' => ($remainingAmount > 0) ? 'belum lunas' : 'lunas',
         ]);
 
         if ($medicalRecord) {
@@ -203,6 +207,16 @@ class TransactionController extends Controller
             // dd($total_payments);
         }
 
+        Receivable::create([
+            'transaction_id' => $transaction->id,
+            'coa_id' => 2, // COA untuk Accounts Receivable
+            'amount' => $totalAmount,
+            'paid_amount' => $total_payments,
+            'remaining_amount' => $totalAmount - $total_payments,
+            'due_date' => now()->addDays(30), // Default Jatuh Tempo 30 hari
+            'status' => ($totalAmount - $total_payments > 0) ? 'belum lunas' : 'lunas'
+        ]);
+
 
         return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
     }
@@ -229,7 +243,10 @@ class TransactionController extends Controller
             'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
             'payments.*.notes' => 'nullable|string'
         ]);
-        // dd($validated);
+        // dd($validated['payments']);
+        // dd($validated['total_amount']);
+        // $totalPayment = array_sum(array_column($validated['payments'], 'amount'));
+        // dd($totalAmount);
 
         // Hitung total harga transaksi dari input yang dipilih
         $totalAmount = 0;
@@ -299,13 +316,15 @@ class TransactionController extends Controller
         //     $transaction->items()->create($data);
         // }
 
+        $totalPayments = array_sum(array_column($validated['payments'], 'amount'));
+        $remainingAmount = max($totalAmount - $totalPayments, 0);
         // Buat transaksi baru
         $transaction = Transaction::create([
             'medical_record_id' => null,
             'patient_id' => $validated['patient_id'],
             'admin_id' => $validated['admin_id'],
             'total_amount' => $totalAmount,
-            'payment_method' => $validated['payment_method'],
+            'status' => ($remainingAmount > 0) ? 'belum lunas' : 'lunas',
         ]);
 
         // Simpan item transaksi
@@ -316,16 +335,32 @@ class TransactionController extends Controller
         }
 
         // Simpan data payments
-if (!empty($validated['payments'])) {
-    foreach ($validated['payments'] as $paymentData) {
-        $transaction->payments()->create([
-            'payment_date' => now(), // Atau sesuaikan dengan data yang dimiliki
-            'amount' => $paymentData['amount'],
-            'payment_method' => $paymentData['payment_method'],
-            'notes' => $paymentData['notes'] ?? null
+        if (!empty($validated['payments'])) {
+            foreach ($validated['payments'] as $paymentData) {
+                $transaction->payments()->create([
+                    'payment_date' => now(), // Atau sesuaikan dengan data yang dimiliki
+                    'amount' => $paymentData['amount'],
+                    'payment_method' => $paymentData['payment_method'],
+                    'notes' => $paymentData['notes'] ?? null
+                ]);
+            }
+        }
+
+        // if($validated['total_amount'] > $totalPayment){
+        //     dd('tagihan lebih besar');
+
+        // }
+
+        // **Tambahkan Receivable untuk Piutang**
+        Receivable::create([
+            'transaction_id' => $transaction->id,
+            'coa_id' => 2, // COA untuk Accounts Receivable
+            'amount' => $totalAmount,
+            'paid_amount' => $totalPayments,
+            'remaining_amount' => $totalAmount - $totalPayments,
+            'due_date' => now()->addDays(30), // Default Jatuh Tempo 30 hari
+            'status' => ($totalAmount - $totalPayments > 0) ? 'belum lunas' : 'lunas'
         ]);
-    }
-}
 
 
 
@@ -343,6 +378,39 @@ if (!empty($validated['payments'])) {
             'transactions' => $transactions,
         ]);
     }
+
+    public function payRemaining(Request $request, $transactionId)
+    {
+        $transaction = Transaction::findOrFail($transactionId);
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|in:cash,card,bank_transfer,other',
+            'notes' => 'nullable|string'
+        ]);
+
+        // Tambahkan payment baru
+        $transaction->payments()->create([
+            'payment_date' => now(),
+            'amount' => $validated['amount'],
+            'payment_method' => $validated['payment_method'],
+            'notes' => $validated['notes'] ?? null
+        ]);
+
+        // Update Receivables
+        $receivable = Receivable::where('transaction_id', $transaction->id)->first();
+        $receivable->paid_amount += $validated['amount'];
+        $receivable->remaining_amount = $receivable->amount - $receivable->paid_amount;
+        $receivable->status = $receivable->remaining_amount > 0 ? 'belum lunas' : 'lunas';
+        $receivable->save();
+
+        // **Update Status di Transactions (Dari Receivables)**
+        $transaction->status = $receivable->status;
+        $transaction->save();
+
+        return redirect()->back()->with('success', 'Payment added successfully!');
+    }
+
 
 
     public function showStruk($id)

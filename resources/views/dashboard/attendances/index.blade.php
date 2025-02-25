@@ -2,7 +2,10 @@
 
 @section('container')
 <div class="container">
-    <h2>Data Presensi</h2>
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Data Presensi</h3>
+        <a href="{{ route('dashboard.attendances.create') }}" class="btn btn-primary">Tambah Presensi</a>
+    </div>
 
     <!-- Filter Per Bulan -->
     <form method="GET" action="{{ route('dashboard.attendances.index') }}" class="mb-3">
@@ -38,7 +41,7 @@
                     <td>{{ $attendance->id }}</td>
                     <td>{{ $attendance->no_id }}</td>
                     <td>{{ $attendance->nama }}</td>
-                    <td>{{ $attendance->tanggal }}</td>
+                    <td>{{ \Carbon\Carbon::parse($attendance->tanggal)->format('d M Y') }}</td>
                     <td>{{ $attendance->jam_masuk }}</td>
                     <td>{{ $attendance->jam_pulang }}</td>
                     <td>
@@ -55,6 +58,7 @@
         </table>
     @endif
 </div>
+
 <script>
     $(document).ready(function() {
         $('#attendanceTable').DataTable({
@@ -64,28 +68,28 @@
             "info": true,
             "responsive": true,
             "columnDefs": [
-                { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
+                { "orderable": false, "targets": 6 } // Kolom ke-6 adalah kolom Actions
             ]
         });
     });
 
     // Event delegation for SweetAlert confirmation
     $('#attendanceTable').on('click', '.delete-button', function(e) {
-            e.preventDefault();
-            var form = $(this).closest('form');
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+        e.preventDefault();
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: 'Apakah Anda Yakin?',
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
         });
+    });
 </script>
 @endsection

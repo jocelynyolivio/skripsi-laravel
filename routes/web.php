@@ -174,6 +174,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
         ->name('transactions.selectMedicalRecord');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::post('/transactions/{transactionId}/pay-remaining', [TransactionController::class, 'payRemaining'])->name('transactions.payRemaining');
+
 
     // Route untuk transaksi dengan rekam medis
     Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])

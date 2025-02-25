@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
+use App\Models\Receivable;
 use Carbon\Carbon;
 use App\Models\Reservation;
 use App\Models\Transaction;
@@ -13,7 +15,7 @@ class DashboardController extends Controller
     public function index()
     {
         $today = Carbon::today();
-        
+
         // Hitung jumlah pasien hari ini
         $jumlahPasienHariIni = Reservation::whereDate('tanggal_reservasi', $today)->count();
 
@@ -21,8 +23,23 @@ class DashboardController extends Controller
         $reservasiBelumDiproses = Reservation::whereNull('status_konfirmasi')->count();
 
         // Hitung total pendapatan hari ini
-        // $pendapatanHariIni = Transaction::whereDate('created_at', Carbon::today())->sum('amount');
-        
+        $pendapatanHariIni = Transaction::whereDate('created_at', Carbon::today())->sum('total_amount');
+
+        // puiutang
+        // $transaksiBelumLunas = Transaction::where('status','belum lunas')->value('total_amount');
+        // $transaksiBelumLunas = Payment::groupBy('transaction_id')->sum('amount');
+
+        // $piutang = Transaction::where('status', 'belum lunas')
+        //     ->with('payments')
+        //     ->get();
+
+        // // Total Semua Piutang (Belum Lunas)
+        // $transaksiBelumLunas = $piutang->sum('remaining_amount');
+
+        $transaksiBelumLunas = Receivable::sum('remaining_amount');
+        // dd($transaksiBelumLunas);
+
+
         $user = Auth::user();
         return view('dashboard.index', [
             'title' => 'Dashboard',
@@ -30,10 +47,8 @@ class DashboardController extends Controller
             'role' => $user->role->role_name,
             'jumlahPasienHariIni' => $jumlahPasienHariIni,
             'reservasiBelumDiproses' => $reservasiBelumDiproses,
-            // 'pendapatanHariIni' => $pendapatanHariIni,
+            'pendapatanHariIni' => $pendapatanHariIni,
+            'transaksiBelumLunas' => $transaksiBelumLunas,
         ]);
     }
-
-    
 }
-

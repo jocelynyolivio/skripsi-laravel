@@ -17,7 +17,7 @@
                 $table->unsignedBigInteger('medical_record_id')->nullable();
                 $table->unsignedBigInteger('admin_id');
                 $table->decimal('total_amount', 10, 2)->notNull();
-                $table->enum('payment_method', ['cash', 'card']);
+                $table->enum('status', ['belum lunas', 'lunas'])->default('belum lunas');
                 $table->timestamps();
             
                 // Foreign keys
