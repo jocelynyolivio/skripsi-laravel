@@ -57,4 +57,11 @@ class Transaction extends Model
     {
         return $this->remaining_amount > 0 ? 'belum lunas' : 'lunas';
     }
+
+    // Di app/Models/Transaction.php
+public function receivable()
+{
+    return $this->hasOne(Receivable::class, 'transaction_id');
+}
+
 }

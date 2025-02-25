@@ -2,31 +2,33 @@
 
 use App\Models\HomeContent;
 use Illuminate\Http\Request;
+use App\Models\ChartOfAccount;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\JournalController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\HomeContentController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
-use App\Models\ChartOfAccount;
+use App\Http\Controllers\SalaryCalculationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
@@ -214,4 +216,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     });
 
     Route::resource('coa', ChartOfAccountController::class);
+
+    Route::get('/journals', [JournalController::class, 'index'])->name('index');
+    Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
+
+    Route::resource('salary_calculations',SalaryCalculationController::class);
+
 });
