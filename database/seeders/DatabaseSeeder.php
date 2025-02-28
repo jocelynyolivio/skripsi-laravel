@@ -327,6 +327,7 @@ class DatabaseSeeder extends Seeder
             ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
 
             // Persediaan
+            //ini 12 13
             ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
             ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
 

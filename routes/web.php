@@ -225,4 +225,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('suppliers',SupplierController::class);
 
+    Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('purchases.pay');
+
 });

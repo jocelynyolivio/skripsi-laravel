@@ -105,21 +105,21 @@
             </div>
 
             <div class="form-group">
-    <label for="coa_id">Bayar Dari (Akun Kas/Bank)</label>
-    <select class="form-control" id="coa_id" name="coa_id" required>
-        <option value="">-- Pilih Akun Kas/Bank --</option>
-        @foreach ($cashAccounts as $account)
-            <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
-        @endforeach
-    </select>
-</div>
+                <label for="coa_id">Menerima Ke (Akun Kas/Bank)</label>
+                <select class="form-control" id="coa_id" name="coa_id" required>
+                    <option value="">-- Pilih Akun Kas/Bank --</option>
+                    @foreach ($cashAccounts as $account)
+                    <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
+                    @endforeach
+                </select>
+            </div>
 
 
             <label>Notes:</label>
             <input type="string" class="form-control" name="payments[0][notes]">
         </div>
 
-        <!-- Sisa Tagihan -->
+        <!-- Sisa Tagihan : jadi piutang -->
         <div class="card mt-3 bg-warning text-dark p-2 w-50 mx-auto">
             <h5 class="text-center mb-0">Sisa Tagihan: Rp <span id="remaining-amount-display">0</span></h5>
         </div>
@@ -146,15 +146,15 @@
 
         const paymentInput = document.getElementById('payment');
 
-        console.log("DOM Elements:", {
-            amountInputs,
-            discountInputs,
-            totalAmountField,
-            totalAmountDisplay,
-            remainingPaymentField,
-            remainingPaymentDisplay,
-            paymentInput
-        });
+        // console.log("DOM Elements:", {
+        //     amountInputs,
+        //     discountInputs,
+        //     totalAmountField,
+        //     totalAmountDisplay,
+        //     remainingPaymentField,
+        //     remainingPaymentDisplay,
+        //     paymentInput
+        // });
 
         // Fungsi untuk Menghitung Total Harga
         function calculateTotal() {

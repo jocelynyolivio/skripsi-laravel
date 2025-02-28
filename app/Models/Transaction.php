@@ -59,9 +59,8 @@ class Transaction extends Model
     }
 
     // Di app/Models/Transaction.php
-public function receivable()
-{
-    return $this->hasOne(Receivable::class, 'transaction_id');
-}
-
+    public function receivable()
+    {
+        return $this->hasOne(Receivable::class, 'transaction_id');
+    }
 }
