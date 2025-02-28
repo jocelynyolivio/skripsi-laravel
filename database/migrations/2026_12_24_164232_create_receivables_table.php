@@ -22,8 +22,8 @@ return new class extends Migration
             $table->enum('status', ['belum lunas', 'lunas', 'jatuh tempo'])->default('belum lunas');
             $table->timestamps();
 
-            $table->foreign('transaction_id')->references('id')->on('transactions');
-            $table->foreign('coa_id')->references('id')->on('chart_of_accounts');
+            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
+            $table->foreign('coa_id')->references('id')->on('chart_of_accounts')->onDelete('cascade');
         });
     }
 

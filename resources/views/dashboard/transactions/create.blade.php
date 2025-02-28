@@ -104,6 +104,17 @@
                 </select>
             </div>
 
+            <div class="form-group">
+    <label for="coa_id">Bayar Dari (Akun Kas/Bank)</label>
+    <select class="form-control" id="coa_id" name="coa_id" required>
+        <option value="">-- Pilih Akun Kas/Bank --</option>
+        @foreach ($cashAccounts as $account)
+            <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
+        @endforeach
+    </select>
+</div>
+
+
             <label>Notes:</label>
             <input type="string" class="form-control" name="payments[0][notes]">
         </div>

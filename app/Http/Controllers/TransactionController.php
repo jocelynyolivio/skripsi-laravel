@@ -24,6 +24,15 @@ class TransactionController extends Controller
         $totalAmount = 0;
         $users = $medicalRecord ? null : User::all();
 
+        $cashAccounts = \App\Models\ChartOfAccount::where('type', 'asset')
+            ->where(function ($query) {
+                $query->where('name', 'LIKE', '%Kas%')
+                    ->orWhere('name', 'LIKE', '%Bank%')
+                    ->orWhere('name', 'LIKE', '%Petty Cash%');
+            })
+            ->get();
+
+
         if (!$medicalRecordId) {
             return redirect()->route('dashboard.transactions.selectMedicalRecord');
         }
@@ -76,7 +85,8 @@ class TransactionController extends Controller
             'medicalRecord' => $medicalRecord,
             'proceduresWithPrices' => $proceduresWithPrices,
             'totalAmount' => $totalAmount,
-            'users' => $users
+            'users' => $users,
+            'cashAccounts' => $cashAccounts
         ]);
     }
 
@@ -93,160 +103,170 @@ class TransactionController extends Controller
             ];
         });
 
+        $cashAccounts = \App\Models\ChartOfAccount::where('type', 'asset')
+    ->where(function($query) {
+        $query->where('name', 'LIKE', '%Kas%')
+              ->orWhere('name', 'LIKE', '%Bank%')
+              ->orWhere('name', 'LIKE', '%Petty Cash%');
+    })
+    ->get();
+
+
         $patients = Patient::all(); // Ambil daftar pengguna
 
         return view('dashboard.transactions.create_without_medical_record', [
             'title' => 'Create Transaction Without Medical Record',
             'proceduresWithPrices' => $proceduresWithPrices,
             'patients' => $patients,
+            'cashAccounts' => $cashAccounts
         ]);
     }
 
     public function store(Request $request)
-{
-    // Validasi input
-    $validated = $request->validate([
-        'medical_record_id' => 'nullable|exists:medical_records,id',
-        'user_id' => 'required|exists:users,id',
-        'admin_id' => 'required|exists:users,id',
-        'amount' => 'required|array',
-        'amount.*' => 'numeric|min:0',
-        'discount' => 'required|array',
-        'discount.*' => 'numeric|min:0',
-        'payment_method' => 'required|in:cash,card',
-        'payments' => 'nullable|array',
-        'payments.*.amount' => 'required|numeric|min:0',
-        'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
-        'payments.*.notes' => 'nullable|string'
-    ]);
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'medical_record_id' => 'nullable|exists:medical_records,id',
+            'user_id' => 'required|exists:users,id',
+            'admin_id' => 'required|exists:users,id',
+            'amount' => 'required|array',
+            'amount.*' => 'numeric|min:0',
+            'discount' => 'required|array',
+            'discount.*' => 'numeric|min:0',
+            'payment_method' => 'required|in:cash,card',
+            'coa_id' => 'required|exists:chart_of_accounts,id', // coa
+            'payments' => 'nullable|array',
+            'payments.*.amount' => 'required|numeric|min:0',
+            'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
+            'payments.*.notes' => 'nullable|string'
+        ]);
 
-    $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
-    $totalAmount = 0;
-    $itemsData = [];
+        $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
+        $totalAmount = 0;
+        $itemsData = [];
 
-    // Hitung Total Amount dari Procedures
-    if ($medicalRecord) {
-        $procedureCounts = [];
-        foreach ($medicalRecord->procedures as $procedure) {
-            $procedureCounts[$procedure->id] = ($procedureCounts[$procedure->id] ?? 0) + 1;
+        // Hitung Total Amount dari Procedures
+        if ($medicalRecord) {
+            $procedureCounts = [];
+            foreach ($medicalRecord->procedures as $procedure) {
+                $procedureCounts[$procedure->id] = ($procedureCounts[$procedure->id] ?? 0) + 1;
+            }
+
+            foreach ($procedureCounts as $procedureId => $quantity) {
+                $unitPrice = $validated['amount'][$procedureId] ?? 0;
+                $discount = $validated['discount'][$procedureId] ?? 0;
+                $totalPrice = $unitPrice * $quantity;
+                $finalPrice = max($totalPrice - $discount, 0);
+
+                $doctorId = Reservation::join('medical_records', 'reservations.id', '=', 'medical_records.reservation_id')
+                    ->where('medical_records.id', $medicalRecord->id)
+                    ->value('reservations.doctor_id');
+
+                $doctorRole = User::where('id', $doctorId)->value('role_id');
+                $revenuePercentage = ($doctorRole == 2) ? 35 : 30;
+                $revenueAmount = $finalPrice * ($revenuePercentage / 100);
+
+                $itemsData[] = [
+                    'procedure_id' => $procedureId,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total_price' => $totalPrice,
+                    'discount' => $discount,
+                    'final_price' => $finalPrice,
+                    'doctor_id' => $doctorId,
+                    'revenue_percentage' => $revenuePercentage,
+                    'revenue_amount' => $revenueAmount,
+                ];
+
+                $totalAmount += $finalPrice;
+            }
         }
 
-        foreach ($procedureCounts as $procedureId => $quantity) {
-            $unitPrice = $validated['amount'][$procedureId] ?? 0;
-            $discount = $validated['discount'][$procedureId] ?? 0;
-            $totalPrice = $unitPrice * $quantity;
-            $finalPrice = max($totalPrice - $discount, 0);
+        // Buat transaksi baru
+        $transaction = Transaction::create([
+            'medical_record_id' => $validated['medical_record_id'],
+            'user_id' => $validated['user_id'],
+            'admin_id' => $validated['admin_id'],
+            'total_amount' => $totalAmount,
+            'status' => 'belum lunas', // Default status
+        ]);
 
-            $doctorId = Reservation::join('medical_records', 'reservations.id', '=', 'medical_records.reservation_id')
-                ->where('medical_records.id', $medicalRecord->id)
-                ->value('reservations.doctor_id');
-
-            $doctorRole = User::where('id', $doctorId)->value('role_id');
-            $revenuePercentage = ($doctorRole == 2) ? 35 : 30;
-            $revenueAmount = $finalPrice * ($revenuePercentage / 100);
-
-            $itemsData[] = [
-                'procedure_id' => $procedureId,
-                'quantity' => $quantity,
-                'unit_price' => $unitPrice,
-                'total_price' => $totalPrice,
-                'discount' => $discount,
-                'final_price' => $finalPrice,
-                'doctor_id' => $doctorId,
-                'revenue_percentage' => $revenuePercentage,
-                'revenue_amount' => $revenueAmount,
-            ];
-
-            $totalAmount += $finalPrice;
+        // Simpan Item Transaksi
+        foreach ($itemsData as $data) {
+            $transaction->items()->create($data);
         }
-    }
 
-    // Buat transaksi baru
-    $transaction = Transaction::create([
-        'medical_record_id' => $validated['medical_record_id'],
-        'user_id' => $validated['user_id'],
-        'admin_id' => $validated['admin_id'],
-        'total_amount' => $totalAmount,
-        'status' => 'belum lunas', // Default status
-    ]);
+        // Simpan Payments
+        $totalPayments = 0;
+        if (!empty($validated['payments'])) {
+            foreach ($validated['payments'] as $paymentData) {
+                $transaction->payments()->create([
+                    'payment_date' => now(),
+                    'amount' => $paymentData['amount'],
+                    'payment_method' => $paymentData['payment_method'],
+                    'notes' => $paymentData['notes'] ?? null
+                ]);
+                $totalPayments += $paymentData['amount'];
+            }
+        }
 
-    // Simpan Item Transaksi
-    foreach ($itemsData as $data) {
-        $transaction->items()->create($data);
-    }
+        // **Hitung Total Payment dan Remaining Amount**
+        $totalPayments = array_sum(array_column($validated['payments'], 'amount'));
+        $remainingAmount = $totalAmount - $totalPayments;
 
-    // Simpan Payments
-    $totalPayments = 0;
-    if (!empty($validated['payments'])) {
-        foreach ($validated['payments'] as $paymentData) {
-            $transaction->payments()->create([
-                'payment_date' => now(),
-                'amount' => $paymentData['amount'],
-                'payment_method' => $paymentData['payment_method'],
-                'notes' => $paymentData['notes'] ?? null
+        // **Update Status Transaksi Secara Dinamis**
+        $transaction->status = ($remainingAmount > 0) ? 'belum lunas' : 'lunas';
+        $transaction->save();
+
+        // Simpan Receivable
+        Receivable::create([
+            'transaction_id' => $transaction->id,
+            'coa_id' => 11, // COA untuk Accounts Receivable
+            'amount' => $totalAmount,
+            'paid_amount' => $totalPayments,
+            'remaining_amount' => $remainingAmount,
+            'due_date' => now()->addDays(30), // Default Jatuh Tempo 30 hari
+            'status' => ($remainingAmount > 0) ? 'belum lunas' : 'lunas'
+        ]);
+
+        // **Journal Entries untuk Penjualan**
+        $journalEntry = JournalEntry::create([
+            'transaction_id' => $transaction->id,
+            'entry_date' => now(),
+            'description' => 'Penjualan pada ' . now()->format('d-m-Y'),
+        ]);
+
+        // **Journal untuk Penjualan & Piutang Usaha**
+        // Debit: Piutang Usaha (Sisa Tagihan / Remaining Amount)
+        if ($remainingAmount > 0) {
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id' => 11, // Piutang Usaha
+                'debit' => $remainingAmount,
+                'credit' => 0
             ]);
-            $totalPayments += $paymentData['amount'];
         }
-    }
 
-    // **Hitung Total Payment dan Remaining Amount**
-    $totalPayments = array_sum(array_column($validated['payments'], 'amount'));
-    $remainingAmount = $totalAmount - $totalPayments;
+        // Debit: Kas atau Bank (Total Pembayaran yang Diterima)
+        if ($totalPayments > 0) {
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id' => $validated['coa_id'], // Langsung gunakan coa_id yang dipilih
+                'debit' => $totalPayments,
+                'credit' => 0
+            ]);
+        }
 
-    // **Update Status Transaksi Secara Dinamis**
-    $transaction->status = ($remainingAmount > 0) ? 'belum lunas' : 'lunas';
-    $transaction->save();
-
-    // Simpan Receivable
-    Receivable::create([
-        'transaction_id' => $transaction->id,
-        'coa_id' => 2, // COA untuk Accounts Receivable
-        'amount' => $totalAmount,
-        'paid_amount' => $totalPayments,
-        'remaining_amount' => $remainingAmount,
-        'due_date' => now()->addDays(30), // Default Jatuh Tempo 30 hari
-        'status' => ($remainingAmount > 0) ? 'belum lunas' : 'lunas'
-    ]);
-
-    // **Journal Entries untuk Penjualan**
-    $journalEntry = JournalEntry::create([
-        'transaction_id' => $transaction->id,
-        'entry_date' => now(),
-        'description' => 'Penjualan pada ' . now()->format('d-m-Y'),
-    ]);
-
-    // **Journal untuk Penjualan & Piutang Usaha**
-    // Debit: Piutang Usaha (Sisa Tagihan / Remaining Amount)
-    if ($remainingAmount > 0) {
+        // Kredit: Pendapatan Penjualan (Total Transaksi)
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => ChartOfAccount::where('code', '1200')->value('id'), // Piutang Usaha
-            'debit' => $remainingAmount,
-            'credit' => 0
+            'coa_id' => 18, // Pendapatan Penjualan
+            'debit' => 0,
+            'credit' => $totalAmount
         ]);
+
+        return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
     }
-
-    // Debit: Kas atau Bank (Total Pembayaran yang Diterima)
-    if ($totalPayments > 0) {
-        $coaCode = ($validated['payment_method'] == 'cash') ? '1100' : '1100'; // Kas atau Bank
-        JournalDetail::create([
-            'journal_entry_id' => $journalEntry->id,
-            'coa_id' => ChartOfAccount::where('code', $coaCode)->value('id'),
-            'debit' => $totalPayments,
-            'credit' => 0
-        ]);
-    }
-
-    // Kredit: Pendapatan Penjualan (Total Transaksi)
-    JournalDetail::create([
-        'journal_entry_id' => $journalEntry->id,
-        'coa_id' => ChartOfAccount::where('code', '4100')->value('id'), // Pendapatan Penjualan
-        'debit' => 0,
-        'credit' => $totalAmount
-    ]);
-
-    return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
-}
 
 
 
@@ -263,6 +283,7 @@ class TransactionController extends Controller
             'items.*.discount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,card',
+            'coa_id' => 'required|exists:chart_of_accounts,id', // Validasi coa_id
             'payments' => 'nullable|array',
             'payments.*.amount' => 'required|numeric|min:0',
             'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
@@ -332,7 +353,7 @@ class TransactionController extends Controller
 
         Receivable::create([
             'transaction_id' => $transaction->id,
-            'coa_id' => 2, // COA untuk Accounts Receivable
+            'coa_id' => 11, // COA untuk Accounts Receivable
             'amount' => $totalAmount,
             'paid_amount' => $totalPayments,
             'remaining_amount' => $totalAmount - $totalPayments,
@@ -352,7 +373,7 @@ class TransactionController extends Controller
         if ($remainingAmount > 0) {
             JournalDetail::create([
                 'journal_entry_id' => $journalEntry->id,
-                'coa_id' => ChartOfAccount::where('code', '1200')->value('id'), // Piutang Usaha
+                'coa_id' => 11, // Piutang Usaha
                 'debit' => $remainingAmount,
                 'credit' => 0
             ]);
@@ -360,10 +381,9 @@ class TransactionController extends Controller
 
         // Debit: Kas atau Bank (Total Pembayaran yang Diterima)
         if ($totalPayments > 0) {
-            $coaCode = ($validated['payment_method'] == 'cash') ? '1100' : '1100'; // Kas atau Bank
             JournalDetail::create([
                 'journal_entry_id' => $journalEntry->id,
-                'coa_id' => ChartOfAccount::where('code', $coaCode)->value('id'),
+                'coa_id' => $validated['coa_id'], // Langsung gunakan coa_id yang dipilih
                 'debit' => $totalPayments,
                 'credit' => 0
             ]);
@@ -372,7 +392,7 @@ class TransactionController extends Controller
         // Kredit: Pendapatan Penjualan (Total Transaksi)
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => ChartOfAccount::where('code', '4100')->value('id'), // Pendapatan Penjualan
+            'coa_id' => 18, // Pendapatan Penjualan
             'debit' => 0,
             'credit' => $totalAmount
         ]);
@@ -587,13 +607,13 @@ class TransactionController extends Controller
         ]);
 
         // Debit: Kas/Bank
-        $coaKas = $validated['payment_method'] == 'cash'
-            ? ChartOfAccount::where('code', '1100')->value('id')  // Kas
-            : ChartOfAccount::where('code', '1100')->value('id'); // Bank
+        // $coaKas = $validated['payment_method'] == 'cash'
+        //     ? ChartOfAccount::where('code', '1100')->value('id')  // Kas
+        //     : ChartOfAccount::where('code', '1100')->value('id'); // Bank
 
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => $coaKas,
+            'coa_id' => 1 ,
             'debit' => $validated['amount'],
             'credit' => 0
         ]);
@@ -601,7 +621,7 @@ class TransactionController extends Controller
         // Kredit: Piutang Usaha
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => ChartOfAccount::where('code', '1200')->value('id'), // Piutang Usaha
+            'coa_id' => 11, // Piutang Usaha
             'debit' => 0,
             'credit' => $validated['amount']
         ]);

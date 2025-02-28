@@ -7,7 +7,10 @@ use App\Models\Patient;
 use App\Models\Procedure;
 use App\Models\Odontogram;
 use App\Models\Reservation;
+use App\Models\Transaction;
+use App\Models\JournalEntry;
 use Illuminate\Http\Request;
+use App\Models\JournalDetail;
 use App\Models\MedicalRecord;
 use App\Models\DentalMaterial;
 
@@ -83,30 +86,30 @@ class MedicalRecordController extends Controller
             'tooth_numbers' => 'nullable|array',
             'procedure_notes' => 'nullable|array',
         ]);
-    
+
         // Temukan reservasi pasien
         $reservation = Reservation::findOrFail($validatedData['reservation_id']);
-    
+
         // Simpan rekam medis
         $medicalRecord = new MedicalRecord();
         $medicalRecord->reservation_id = $reservation->id;
         $medicalRecord->teeth_condition = $validatedData['teeth_condition'];
         $medicalRecord->save();
-    
+
         // Ambil daftar prosedur yang memerlukan nomor gigi
         $proceduresRequiringTeeth = Procedure::where('requires_tooth', 1)->pluck('id')->toArray();
         $uniqueCombinations = [];
-    
+
         foreach ($validatedData['procedure_id'] as $procedureId) {
             if (in_array($procedureId, $proceduresRequiringTeeth)) {
                 // Jika prosedur memerlukan nomor gigi, pastikan ada data
                 if (!isset($validatedData['tooth_numbers'][$procedureId]) || !is_array($validatedData['tooth_numbers'][$procedureId])) {
                     return redirect()->back()->with('error', "Tooth number is required for procedure ID: $procedureId");
                 }
-    
+
                 foreach ($validatedData['tooth_numbers'][$procedureId] as $toothNumber) {
                     $procedureNotes = $validatedData['procedure_notes'][$procedureId][$toothNumber] ?? null;
-    
+
                     $combinationKey = $procedureId . '-' . $toothNumber;
                     if (!in_array($combinationKey, $uniqueCombinations)) {
                         $uniqueCombinations[] = $combinationKey;
@@ -120,7 +123,7 @@ class MedicalRecordController extends Controller
             } else {
                 // Jika prosedur tidak membutuhkan gigi, cukup simpan prosedurnya dengan notes (jika ada)
                 $procedureNotes = $validatedData['procedure_notes'][$procedureId] ?? null;
-    
+
                 if (!in_array($procedureId, $uniqueCombinations)) {
                     $uniqueCombinations[] = $procedureId;
 
@@ -131,7 +134,7 @@ class MedicalRecordController extends Controller
                 }
             }
         }
-    
+
         return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
             ->with('success', 'Medical Record and Odontogram have been saved successfully.');
     }
@@ -140,15 +143,15 @@ class MedicalRecordController extends Controller
     {
         // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
-    
+
         $procedures = $medicalRecord->procedures;
 
         // Cek apakah rekam medis ini sudah memiliki bahan tersimpan
         $hasMaterials = $medicalRecord->dentalMaterials()->exists(); // True jika sudah ada bahan tersimpan
-    
+
         // Menyimpan bahan yang dibutuhkan untuk setiap prosedur
         $materials = [];
-    
+
         foreach ($procedures as $procedure) {
             foreach ($procedure->dentalMaterials as $material) {
                 if (!isset($materials[$material->id])) {
@@ -165,7 +168,7 @@ class MedicalRecordController extends Controller
                 }
             }
         }
-    
+
         return view('dashboard.medical_records.selectMaterials', [
             'medicalRecordId' => $medicalRecordId,
             'procedures' => $procedures,
@@ -175,44 +178,77 @@ class MedicalRecordController extends Controller
     }
 
     public function saveMaterials(Request $request, $medicalRecordId)
-{
-    $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
+    {
+        $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
-    // Validasi input bahan dan kuantitas
-    $validatedData = $request->validate([
-        'quantities' => 'required|array',
-    ]);
+        // Validasi input bahan dan kuantitas
+        $validatedData = $request->validate([
+            'quantities' => 'required|array',
+        ]);
 
-    foreach ($validatedData['quantities'] as $materialId => $quantity) {
-        $quantity = (int) $quantity; // Konversi ke integer
+        $totalHPP = 0;
 
-        if ($quantity > 0) {
-            $material = DentalMaterial::findOrFail($materialId);
+        foreach ($validatedData['quantities'] as $materialId => $quantity) {
+            $quantity = (int) $quantity; // Konversi ke integer
 
-            // Debugging stok sebelum update
-            // dd('Sebelum Penyimpanan', $materialId, $quantity, $material->stock_quantity);
+            if ($quantity > 0) {
+                $material = DentalMaterial::findOrFail($materialId);
 
-            if ($material->stock_quantity < $quantity) {
-                return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                // Debugging stok sebelum update
+                // dd('Sebelum Penyimpanan', $materialId, $quantity, $material->stock_quantity);
+
+                if ($material->stock_quantity < $quantity) {
+                    return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                }
+
+                // Kurangi stok bahan
+                $material->stock_quantity -= $quantity;
+                $material->save();
+
+                // Simpan hubungan antara rekam medis dan bahan dengan syncWithoutDetaching
+                $medicalRecord->dentalMaterials()->syncWithoutDetaching([
+                    $materialId => ['quantity' => $quantity]
+                ]);
+
+                // Hitung HPP
+                $materialHPP = $quantity * $material->unit_price;
+                $totalHPP += $materialHPP;
+
+                // Debugging setelah penyimpanan
+                // dd('Setelah Penyimpanan', $medicalRecord->dentalMaterials()->get());
             }
+        }
 
-            // Kurangi stok bahan
-            $material->stock_quantity -= $quantity;
-            $material->save();
+        $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
 
-            // Simpan hubungan antara rekam medis dan bahan dengan syncWithoutDetaching
-            $medicalRecord->dentalMaterials()->syncWithoutDetaching([
-                $materialId => ['quantity' => $quantity]
+
+        if ($totalHPP > 0) {
+            // 1. Buat Journal Entry
+            $journalEntry = new JournalEntry();
+            $journalEntry->transaction_id = $transactionId; // Gunakan transaction_id dinamis
+            $journalEntry->entry_date = now();
+            $journalEntry->description = 'HPP untuk Prosedur pada Medical Record ' . $medicalRecord->id;
+            $journalEntry->save();
+
+            // 2. Debit HPP Bahan Dental
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id' => 20, // ID COA HPP Bahan Dental
+                'debit' => $totalHPP,
+                'credit' => 0
             ]);
 
-            // Debugging setelah penyimpanan
-            // dd('Setelah Penyimpanan', $medicalRecord->dentalMaterials()->get());
+            // 3. Kredit Persediaan Bahan Dental
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id' => 13, // ID COA Persediaan Bahan Dental
+                'debit' => 0,
+                'credit' => $totalHPP
+            ]);
         }
+        return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->reservation->patient_id])
+            ->with('success', 'Dental materials have been successfully saved.');
     }
-
-    return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->reservation->patient_id])
-        ->with('success', 'Dental materials have been successfully saved.');
-}
 
     public function removeMaterial($medicalRecordId, $materialId)
     {
@@ -258,7 +294,11 @@ class MedicalRecordController extends Controller
         });
 
         return view('dashboard.medical_records.edit', compact(
-            'medicalRecord', 'patientId', 'procedures', 'selectedProcedures', 'medicalRecordProcedure'
+            'medicalRecord',
+            'patientId',
+            'procedures',
+            'selectedProcedures',
+            'medicalRecordProcedure'
         ));
     }
 
@@ -271,19 +311,19 @@ class MedicalRecordController extends Controller
             'tooth_numbers' => 'nullable|array',
             'procedure_notes' => 'nullable|array',
         ]);
-    
+
         // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($recordId);
-    
+
         // Update kondisi gigi pada rekam medis
         $medicalRecord->update(['teeth_condition' => $validatedData['teeth_condition']]);
-    
+
         // Siapkan data untuk sinkronisasi langsung ke pivot table
         $syncData = [];
         foreach ($validatedData['procedure_ids'] as $procedureId) {
             $toothNumbers = $validatedData['tooth_numbers'][$procedureId] ?? [];
             $notesArray = $validatedData['procedure_notes'][$procedureId] ?? [];
-    
+
             foreach ($toothNumbers as $index => $toothNumber) {
                 $syncData[$procedureId][] = [
                     'tooth_number' => $toothNumber,
@@ -291,7 +331,7 @@ class MedicalRecordController extends Controller
                 ];
             }
         }
-    
+
         // Hapus data lama dan masukkan data baru secara langsung
         $medicalRecord->procedures()->detach();
         foreach ($syncData as $procedureId => $entries) {
@@ -299,11 +339,11 @@ class MedicalRecordController extends Controller
                 $medicalRecord->procedures()->attach($procedureId, $entry);
             }
         }
-    
+
         return redirect()->route('dashboard.medical_records.index', ['patientId' => $patientId])
             ->with('success', 'Medical record updated successfully.');
     }
-    
+
 
     public function destroy($patientId, $recordId)
     {

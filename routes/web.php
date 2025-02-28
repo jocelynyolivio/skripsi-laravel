@@ -29,6 +29,7 @@ use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
@@ -221,5 +222,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
 
     Route::resource('salary_calculations',SalaryCalculationController::class);
+
+    Route::resource('suppliers',SupplierController::class);
 
 });

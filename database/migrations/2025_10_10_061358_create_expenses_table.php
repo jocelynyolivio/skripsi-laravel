@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             // Foreign keys
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Relasi ke kategori
+            $table->unsignedBigInteger('supplier_id')->nullable();
             $table->foreignId('dental_material_id')->nullable()->constrained('dental_materials')->onDelete('cascade'); // Relasi ke bahan 
+            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
             
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null'); // Admin yang mencatat pengeluaran
 

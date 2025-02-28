@@ -6,6 +6,19 @@
     <form action="{{ route('dashboard.expenses.update', $expense->id) }}" method="POST">
         @csrf
         @method('PUT')
+
+        <div class="mb-3">
+            <label for="supplier_id" class="form-label">Supplier</label>
+            <select name="supplier_id" class="form-control">
+                <option value="">-- Select Supplier --</option>
+                @foreach ($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ $expense->supplier_id == $supplier->id ? 'selected' : '' }}>
+                    {{ $supplier->nama }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="mb-3">
             <label for="date" class="form-label">Date</label>
             <input type="date" name="date" class="form-control" value="{{ $expense->date }}" required>

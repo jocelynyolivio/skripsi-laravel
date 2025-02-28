@@ -13,6 +13,7 @@ class Expense extends Model
         'date',
         'amount',
         'category_id',
+        'supplier_id',
         'description',
         'expired_at',
         'created_by',
@@ -31,9 +32,15 @@ class Expense extends Model
     }
 
     // App\Models\Expense.php
-public function admin()
-{
-    return $this->belongsTo(User::class, 'created_by');
-}
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
+    // app/Models/Expense.php
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
 }

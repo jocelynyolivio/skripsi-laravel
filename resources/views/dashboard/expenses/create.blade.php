@@ -24,7 +24,6 @@
     @if(request('category_id'))
     <form action="{{ route('dashboard.expenses.store') }}" method="POST">
         @csrf
-
         <div class="mb-3">
             <label for="date" class="form-label">Date</label>
             <input type="date" name="date" class="form-control" value="{{ old('date') }}" required>
@@ -46,6 +45,18 @@
                 @foreach ($dentalMaterials as $material)
                 <option value="{{ $material->id }}" {{ old('dental_material_id') == $material->id ? 'selected' : '' }}>
                     {{ $material->name }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="supplier_id" class="form-label">Supplier</label>
+            <select name="supplier_id" class="form-control">
+                <option value="">-- Select Supplier --</option>
+                @foreach ($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                    {{ $supplier->nama }}
                 </option>
                 @endforeach
             </select>

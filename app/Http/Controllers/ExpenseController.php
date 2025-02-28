@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\Category;
 use App\Models\DentalMaterial;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -19,6 +20,7 @@ class ExpenseController extends Controller
     public function create(Request $request)
     {
         $categories = Category::all();
+        $suppliers = Supplier::all();
         $dentalMaterials = null;
 
         if ($request->has('category_id')) {
@@ -28,7 +30,7 @@ class ExpenseController extends Controller
             }
         }
 
-        return view('dashboard.expenses.create', compact('categories', 'dentalMaterials'));
+        return view('dashboard.expenses.create', compact('categories', 'dentalMaterials','suppliers'));
     }
 
     public function store(Request $request)
@@ -38,6 +40,7 @@ class ExpenseController extends Controller
             'date' => 'required|date',
             'amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
+            'supplier_id' => 'required|exists:suppliers,id',
             'description' => 'nullable|string',
             'expired_at' => 'nullable|date', // Tambahkan validasi expired date
             'dental_material_id' => 'nullable|exists:dental_materials,id',
@@ -50,6 +53,7 @@ class ExpenseController extends Controller
             'date' => $request->date,
             'amount' => $request->amount,
             'category_id' => $request->category_id,
+            'supplier_id' => $request->supplier_id, // Simpan supplier_id
             'description' => $request->description,
             'expired_at' => $request->expired_at, // Simpan tanggal expired
             'created_by' => auth()->id(),
@@ -75,7 +79,9 @@ class ExpenseController extends Controller
     {
         $expense = Expense::findOrFail($id);
         $categories = Category::all();
-        return view('dashboard.expenses.edit', compact('expense', 'categories'));
+        $suppliers = Supplier::all(); // Ambil Semua Supplier
+
+        return view('dashboard.expenses.edit', compact('expense', 'categories','suppliers'));
     }
 
     public function update(Request $request, $id)
@@ -84,6 +90,7 @@ class ExpenseController extends Controller
             'date' => 'required|date',
             'amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id', // Tambahkan ini
             'description' => 'nullable|string',
         ]);
 
@@ -92,6 +99,7 @@ class ExpenseController extends Controller
             'date' => $request->date,
             'amount' => $request->amount,
             'category_id' => $request->category_id,
+            'supplier_id' => 'nullable|exists:suppliers,id', // Tambahkan ini
             'description' => $request->description,
         ]);
 

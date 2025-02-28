@@ -311,26 +311,40 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $accounts = [
-            // Aset (Assets)
-            ['code' => '1100', 'name' => 'Kas', 'type' => 'asset'],
-            ['code' => '1200', 'name' => 'Piutang Usaha', 'type' => 'asset'],
-            ['code' => '1300', 'name' => 'Persediaan', 'type' => 'asset'],
-            ['code' => '1400', 'name' => 'Aset Tetap', 'type' => 'asset'],
+            // Aset Lancar (Current Assets)
+            ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
+            ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset'],
+            ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset'],
+            ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset'],
+            ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset'],
+            ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset'],
+            ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset'],
+            ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset'],
+            ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
+            ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
+
+            // Piutang Usaha
+            ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
+
+            // Persediaan
+            ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
+            ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
 
             // Kewajiban (Liabilities)
-            ['code' => '2100', 'name' => 'Utang Usaha', 'type' => 'liability'],
-            ['code' => '2200', 'name' => 'Utang Pajak', 'type' => 'liability'],
+            ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
+            ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
 
             // Ekuitas (Equity)
-            ['code' => '3100', 'name' => 'Modal Pemilik', 'type' => 'equity'],
-            ['code' => '3200', 'name' => 'Laba Ditahan', 'type' => 'equity'],
+            ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
+            ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity'],
 
             // Pendapatan (Revenue)
-            ['code' => '4100', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
+            ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
 
             // Beban (Expenses)
-            ['code' => '5100', 'name' => 'Beban Gaji', 'type' => 'expense'],
-            ['code' => '5200', 'name' => 'Beban Sewa', 'type' => 'expense'],
+            ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
+            ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
+            ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
         ];
 
         foreach ($accounts as $account) {
