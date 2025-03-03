@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Models\Category;
 use App\Models\Purchase;
 use App\Models\Supplier;
+use App\Models\StockCard;
 use App\Models\JournalEntry;
 use Illuminate\Http\Request;
 use App\Models\JournalDetail;
@@ -76,9 +77,13 @@ class ExpenseController extends Controller
         if ($request->category_id && $request->dental_material_id) {
             $category = Category::find($request->category_id);
             if ($category && $category->name === 'Bahan Baku') {
-                $dentalMaterial = DentalMaterial::findOrFail($request->dental_material_id);
-                $dentalMaterial->stock_quantity += $request->quantity;
-                $dentalMaterial->save();
+                // $dentalMaterial = DentalMaterial::findOrFail($request->dental_material_id);
+                // $dentalMaterial->stock_quantity += $request->quantity;
+                // $dentalMaterial->save();
+                if ($request->quantity > 0) {
+                    $unitPrice = $request->amount / $request->quantity;
+                    $this->updateStockCard($request->dental_material_id, $request->quantity, $unitPrice, $expense->id);
+                }
             }
         }
 
@@ -153,6 +158,7 @@ class ExpenseController extends Controller
                 'credit' => $totalDebt
             ]);
         }
+
 
         return redirect()->route('dashboard.expenses.index')->with('success', 'Expense recorded successfully!');
     }
@@ -278,5 +284,29 @@ class ExpenseController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Hutang berhasil dibayar!');
+    }
+
+    public function updateStockCard($dentalMaterialId, $quantity, $price, $referenceNumber)
+    {
+        $latestStock = StockCard::where('dental_material_id', $dentalMaterialId)
+            ->latest('created_at')
+            ->first();
+
+        // Hitung stok dan harga rata-rata baru
+        $newStock = ($latestStock ? $latestStock->remaining_stock : 0) + $quantity;
+        $newAveragePrice = $latestStock
+            ? (($latestStock->remaining_stock * $latestStock->average_price) + ($quantity * $price)) / $newStock
+            : $price;
+
+        // Simpan ke kartu stok
+        StockCard::create([
+            'dental_material_id' => $dentalMaterialId,
+            'date' => now(),
+            'reference_number' => $referenceNumber,
+            'price_in' => $price,
+            'quantity_in' => $quantity,
+            'remaining_stock' => $newStock,
+            'average_price' => $newAveragePrice
+        ]);
     }
 }

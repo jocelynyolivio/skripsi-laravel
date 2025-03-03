@@ -13,6 +13,8 @@ use App\Models\DentalMaterial;
 use Illuminate\Database\Seeder;
 use App\Models\ScheduleTemplate;
 use App\Models\ProcedureMaterial;
+use App\Models\Reservation;
+use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -145,29 +147,21 @@ class DatabaseSeeder extends Seeder
         DentalMaterial::create([
             'name' => 'Resin Komposit',
             'description' => 'Bahan untuk penambalan gigi berlubang',
-            'stock_quantity' => 50,
-            'unit_price' => 150.00,
         ]);
 
         DentalMaterial::create([
             'name' => 'Anestesi',
             'description' => 'Cairan anestesi lokal untuk prosedur dental',
-            'stock_quantity' => 30,
-            'unit_price' => 25.00,
         ]);
 
         DentalMaterial::create([
             'name' => 'Cavity Liner',
             'description' => 'Bahan pelapis untuk restorasi tambalan',
-            'stock_quantity' => 20,
-            'unit_price' => 45.00,
         ]);
 
         DentalMaterial::create([
             'name' => 'Amalgam',
             'description' => 'Bahan tambalan yang mengandung logam',
-            'stock_quantity' => 10,
-            'unit_price' => 100.00,
         ]);
 
         Procedure::create([
@@ -351,5 +345,34 @@ class DatabaseSeeder extends Seeder
         foreach ($accounts as $account) {
             ChartOfAccount::create($account);
         }
+
+        Supplier::create([
+            'nama' => 'supplier1',
+            'alamat' => 'kenjeran',
+            'nomor_telepon' => '0811100029292',
+            'email' => 'supplier1@gmail.com'
+        ]);
+
+        Reservation::create([
+            'patient_id' => 1,
+            'doctor_id' => 23,
+            'tanggal_reservasi' => '2025-01-23',
+            'jam_mulai' => '09:00',
+            'jam_selesai' => '10:00' 
+        ]);
+        Reservation::create([
+            'patient_id' => 1,
+            'doctor_id' => 24,
+            'tanggal_reservasi' => '2025-01-24',
+            'jam_mulai' => '13:00',
+            'jam_selesai' => '14:00' 
+        ]);
+        Reservation::create([
+            'patient_id' => 1,
+            'doctor_id' => 25,
+            'tanggal_reservasi' => '2025-01-25',
+            'jam_mulai' => '12:00',
+            'jam_selesai' => '13:00' 
+        ]);
     }
 }

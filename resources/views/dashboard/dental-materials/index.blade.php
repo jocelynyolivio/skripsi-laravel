@@ -4,10 +4,10 @@
 @section('container')
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
-        <h3 class="text-center">Dental Materials</h3>
+        <h3 class="text-center">Dental Materials with Stock Card</h3>
         <a href="{{ route('dashboard.dental-materials.create') }}" class="btn btn-primary mb-3">
-        Add New Material
-    </a>
+            Add New Material
+        </a>
     </div>
 
     @if(session('success'))
@@ -19,8 +19,8 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Stock Quantity</th>
-                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Latest Avg Price</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -29,8 +29,18 @@
             <tr>
                 <td>{{ $material->name }}</td>
                 <td>{{ $material->description }}</td>
-                <td>{{ $material->stock_quantity }}</td>
-                <td>{{ $material->unit_price }}</td>
+                <td>
+                    @php
+                    $stock = $stockCards->firstWhere('dental_material_id', $material->id);
+                    @endphp
+                    {{ $stock ? $stock->remaining_stock : 0 }}
+                </td>
+                <td>
+                    @php
+                    $stock = $stockCards->firstWhere('dental_material_id', $material->id);
+                    @endphp
+                    {{ $stock ? $stock->average_price : 0 }}
+                </td>
                 <td>
                     <a href="{{ route('dashboard.dental-materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
                     <form action="{{ route('dashboard.dental-materials.destroy', $material->id) }}" method="POST" class="d-inline delete-form">
@@ -62,7 +72,7 @@
         e.preventDefault();
         var form = $(this).closest('form');
         Swal.fire({
-            title: 'Are you sure?', 
+            title: 'Are you sure?',
             text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
@@ -74,6 +84,6 @@
                 form.submit();
             }
         });
-    }); 
+    });
 </script>
 @endsection

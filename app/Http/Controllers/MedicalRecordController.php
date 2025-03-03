@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Procedure;
+use App\Models\StockCard;
 use App\Models\Odontogram;
 use App\Models\Reservation;
 use App\Models\Transaction;
@@ -149,18 +150,33 @@ class MedicalRecordController extends Controller
         // Cek apakah rekam medis ini sudah memiliki bahan tersimpan
         $hasMaterials = $medicalRecord->dentalMaterials()->exists(); // True jika sudah ada bahan tersimpan
 
+        // Ambil daftar bahan dari prosedur yang terkait
+        $dentalMaterialIds = $procedures->flatMap->dentalMaterials->pluck('id')->unique();
+
+        // Ambil stok terbaru dari StockCard berdasarkan dental_material_id
+        $stockCards = StockCard::select('dental_material_id', 'remaining_stock', 'average_price')
+            ->whereIn('dental_material_id', $dentalMaterialIds)
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('dental_material_id');
+
         // Menyimpan bahan yang dibutuhkan untuk setiap prosedur
         $materials = [];
 
         foreach ($procedures as $procedure) {
             foreach ($procedure->dentalMaterials as $material) {
                 if (!isset($materials[$material->id])) {
+                    // Cari stok terbaru untuk bahan ini
+                    $stock = $stockCards->firstWhere('dental_material_id', $material->id);
+    
                     // Menambahkan bahan hanya sekali, jika belum ada dalam array $materials
                     $materials[$material->id] = [
                         'name' => $material->name,
-                        'stock_quantity' => $material->stock_quantity,
-                        'quantity' => $material->pivot->quantity, // Menyimpan jumlah bahan yang diperlukan untuk prosedur
-                        'procedure_id' => $procedure->id // Menyimpan id prosedur untuk menghubungkan bahan ke prosedur
+                        'stock_quantity' => $stock ? $stock->remaining_stock : 0, // Pakai stok terbaru
+                        'average_price' => $stock ? $stock->average_price : 0, // Pakai harga rata-rata terbaru
+                        'quantity' => $material->pivot->quantity, // Jumlah bahan yang diperlukan
+                        'procedure_id' => $procedure->id // Hubungkan ke prosedur
                     ];
                 } else {
                     // Jika bahan sudah ada, tambah jumlah kuantitas untuk prosedur yang sama
@@ -177,8 +193,82 @@ class MedicalRecordController extends Controller
         ]);
     }
 
+    // public function saveMaterials(Request $request, $medicalRecordId)
+    // {
+    //     $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
+
+    //     // Validasi input bahan dan kuantitas
+    //     $validatedData = $request->validate([
+    //         'quantities' => 'required|array',
+    //     ]);
+
+    //     $totalHPP = 0;
+
+    //     foreach ($validatedData['quantities'] as $materialId => $quantity) {
+    //         $quantity = (int) $quantity; // Konversi ke integer
+
+    //         if ($quantity > 0) {
+    //             $material = DentalMaterial::findOrFail($materialId);
+
+    //             // Debugging stok sebelum update
+    //             // dd('Sebelum Penyimpanan', $materialId, $quantity, $material->stock_quantity);
+
+    //             if ($material->stock_quantity < $quantity) {
+    //                 return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+    //             }
+
+    //             // Kurangi stok bahan
+    //             $material->stock_quantity -= $quantity;
+    //             $material->save();
+
+    //             // Simpan hubungan antara rekam medis dan bahan dengan syncWithoutDetaching
+    //             $medicalRecord->dentalMaterials()->syncWithoutDetaching([
+    //                 $materialId => ['quantity' => $quantity]
+    //             ]);
+
+    //             // Hitung HPP
+    //             $materialHPP = $quantity * $material->unit_price;
+    //             $totalHPP += $materialHPP;
+
+    //             // Debugging setelah penyimpanan
+    //             // dd('Setelah Penyimpanan', $medicalRecord->dentalMaterials()->get());
+    //         }
+    //     }
+
+    //     $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
+
+
+    //     if ($totalHPP > 0) {
+    //         // 1. Buat Journal Entry
+    //         $journalEntry = new JournalEntry();
+    //         $journalEntry->transaction_id = $transactionId; // Gunakan transaction_id dinamis
+    //         $journalEntry->entry_date = now();
+    //         $journalEntry->description = 'HPP untuk Prosedur pada Medical Record ' . $medicalRecord->id;
+    //         $journalEntry->save();
+
+    //         // 2. Debit HPP Bahan Dental
+    //         JournalDetail::create([
+    //             'journal_entry_id' => $journalEntry->id,
+    //             'coa_id' => 20, // ID COA HPP Bahan Dental
+    //             'debit' => $totalHPP,
+    //             'credit' => 0
+    //         ]);
+
+    //         // 3. Kredit Persediaan Bahan Dental
+    //         JournalDetail::create([
+    //             'journal_entry_id' => $journalEntry->id,
+    //             'coa_id' => 13, // ID COA Persediaan Bahan Dental
+    //             'debit' => 0,
+    //             'credit' => $totalHPP
+    //         ]);
+    //     }
+    //     return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->reservation->patient_id])
+    //         ->with('success', 'Dental materials have been successfully saved.');
+    // }
+
     public function saveMaterials(Request $request, $medicalRecordId)
     {
+        // dd('a');
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
         // Validasi input bahan dan kuantitas
@@ -188,39 +278,63 @@ class MedicalRecordController extends Controller
 
         $totalHPP = 0;
 
+        // dd($validatedData['quantities']);
+
         foreach ($validatedData['quantities'] as $materialId => $quantity) {
             $quantity = (int) $quantity; // Konversi ke integer
 
+            // dd($quantity);
+
             if ($quantity > 0) {
                 $material = DentalMaterial::findOrFail($materialId);
+                // dd('ada');
 
-                // Debugging stok sebelum update
-                // dd('Sebelum Penyimpanan', $materialId, $quantity, $material->stock_quantity);
+                // Ambil data stok terakhir dari kartu stok
+                $latestStock = StockCard::where('dental_material_id', $materialId)
+                    ->latest('date')
+                    ->first();
 
-                if ($material->stock_quantity < $quantity) {
+                if (!$latestStock || $latestStock->remaining_stock < $quantity) {
                     return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
                 }
 
-                // Kurangi stok bahan
-                $material->stock_quantity -= $quantity;
-                $material->save();
+                // Kurangi stok di kartu stok
+                $newStock = $latestStock->remaining_stock - $quantity;
+                $hppPrice = $latestStock->average_price; // Harga per unit berdasarkan rata-rata
 
-                // Simpan hubungan antara rekam medis dan bahan dengan syncWithoutDetaching
+                // Simpan ke kartu stok
+                StockCard::create([
+                    'dental_material_id' => $materialId,
+                    'date' => now(),
+                    'reference_number' => 'MR-' . $medicalRecordId, // Nomor referensi dari rekam medis
+                    'price_out' => $hppPrice,
+                    'quantity_out' => $quantity,
+                    'remaining_stock' => $newStock,
+                    'average_price' => $latestStock->average_price, // Harga tetap sama
+                ]);
+
+                // dd('saved');
+
+                // if ($material->stock_quantity < $quantity) {
+                //     return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                // }
+
+                // Simpan hubungan antara rekam medis dan bahan
                 $medicalRecord->dentalMaterials()->syncWithoutDetaching([
                     $materialId => ['quantity' => $quantity]
                 ]);
 
                 // Hitung HPP
-                $materialHPP = $quantity * $material->unit_price;
+                $materialHPP = $quantity * $hppPrice;
                 $totalHPP += $materialHPP;
-
-                // Debugging setelah penyimpanan
-                // dd('Setelah Penyimpanan', $medicalRecord->dentalMaterials()->get());
             }
         }
+        // dd('saved');
+        // dd($totalHPP);
 
         $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
 
+        // dd($transactionId);
 
         if ($totalHPP > 0) {
             // 1. Buat Journal Entry
@@ -246,25 +360,51 @@ class MedicalRecordController extends Controller
                 'credit' => $totalHPP
             ]);
         }
+
         return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->reservation->patient_id])
             ->with('success', 'Dental materials have been successfully saved.');
     }
 
+
     public function removeMaterial($medicalRecordId, $materialId)
     {
-        // Temukan rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
-        // Periksa apakah bahan terkait dengan rekam medis tersebut
-        if ($medicalRecord->dentalMaterials()->where('dental_material_id', $materialId)->exists()) {
-            // Menghapus hubungan antara rekam medis dan bahan dental
+        // Ambil jumlah bahan yang digunakan
+        $materialUsage = $medicalRecord->dentalMaterials()->where('dental_material_id', $materialId)->first();
+
+        if ($materialUsage) {
+            $quantityUsed = $materialUsage->pivot->quantity;
+
+            // Ambil data stok terakhir
+            $latestStock = StockCard::where('dental_material_id', $materialId)
+                ->latest('date')
+                ->first();
+
+            if ($latestStock) {
+                // Tambah stok kembali
+                $newStock = $latestStock->remaining_stock + $quantityUsed;
+
+                // Simpan ke kartu stok
+                StockCard::create([
+                    'dental_material_id' => $materialId,
+                    'date' => now(),
+                    'reference_number' => 'MR-' . $medicalRecordId . '-REMOVED',
+                    'price_in' => $latestStock->average_price,
+                    'quantity_in' => $quantityUsed,
+                    'remaining_stock' => $newStock,
+                    'average_price' => $latestStock->average_price, // Harga tetap sama
+                ]);
+            }
+
+            // Hapus hubungan rekam medis dengan bahan
             $medicalRecord->dentalMaterials()->detach($materialId);
         }
 
-        // Redirect kembali ke halaman dengan pesan sukses
         return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecordId])
             ->with('success', 'Dental material removed successfully.');
     }
+
 
     public function procedureMaterialsPage()
     {

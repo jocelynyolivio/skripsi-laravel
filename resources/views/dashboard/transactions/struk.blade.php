@@ -151,7 +151,6 @@
     <!-- Footer -->
     <div class="footer">
         <p class="total">Grand Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
-        <p>1. Jenis Pembayaran: {{ ucfirst($transaction->payment_method) }}</p>
         <p>2. Media Transaksi: {{ $transaction->payment_media ?? 'Tidak diketahui' }}</p>
     </div>
 

@@ -104,12 +104,12 @@ class TransactionController extends Controller
         });
 
         $cashAccounts = \App\Models\ChartOfAccount::where('type', 'asset')
-    ->where(function($query) {
-        $query->where('name', 'LIKE', '%Kas%')
-              ->orWhere('name', 'LIKE', '%Bank%')
-              ->orWhere('name', 'LIKE', '%Petty Cash%');
-    })
-    ->get();
+            ->where(function ($query) {
+                $query->where('name', 'LIKE', '%Kas%')
+                    ->orWhere('name', 'LIKE', '%Bank%')
+                    ->orWhere('name', 'LIKE', '%Petty Cash%');
+            })
+            ->get();
 
 
         $patients = Patient::all(); // Ambil daftar pengguna
@@ -133,11 +133,9 @@ class TransactionController extends Controller
             'amount.*' => 'numeric|min:0',
             'discount' => 'required|array',
             'discount.*' => 'numeric|min:0',
-            'payment_method' => 'required|in:cash,card',
             'coa_id' => 'required|exists:chart_of_accounts,id', // coa
             'payments' => 'nullable|array',
             'payments.*.amount' => 'required|numeric|min:0',
-            'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
             'payments.*.notes' => 'nullable|string'
         ]);
 
@@ -203,7 +201,6 @@ class TransactionController extends Controller
                 $transaction->payments()->create([
                     'payment_date' => now(),
                     'amount' => $paymentData['amount'],
-                    'payment_method' => $paymentData['payment_method'],
                     'notes' => $paymentData['notes'] ?? null
                 ]);
                 $totalPayments += $paymentData['amount'];
@@ -282,11 +279,9 @@ class TransactionController extends Controller
             'items.*.unit_price' => 'nullable|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,card',
             'coa_id' => 'required|exists:chart_of_accounts,id', // Validasi coa_id
             'payments' => 'nullable|array',
             'payments.*.amount' => 'required|numeric|min:0',
-            'payments.*.payment_method' => 'required|in:cash,card,bank_transfer,other',
             'payments.*.notes' => 'nullable|string'
         ]);
 
@@ -336,7 +331,6 @@ class TransactionController extends Controller
                 $transaction->payments()->create([
                     'payment_date' => now(),
                     'amount' => $paymentData['amount'],
-                    'payment_method' => $paymentData['payment_method'],
                     'notes' => $paymentData['notes'] ?? null
                 ]);
                 $totalPayments += $paymentData['amount'];
@@ -572,10 +566,12 @@ class TransactionController extends Controller
     {
         // Ambil semua transaksi dengan informasi terkait
         $transactions = Transaction::with(['patient', 'admin', 'medicalRecord.reservation.patient'])->get();
+        $coa = ChartOfAccount::all();
 
         return view('dashboard.transactions.index', [
             'title' => 'Transactions',
             'transactions' => $transactions,
+            'cashAccounts' => $coa,
         ]);
     }
 
@@ -588,15 +584,14 @@ class TransactionController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1|max:' . $receivable->remaining_amount,
-            'payment_method' => 'required|in:cash,card,bank_transfer,other',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'coa_id' => 'required|exists:chart_of_accounts,id', // Pastikan coa_id valid
         ]);
 
         // Tambahkan payment baru
         $transaction->payments()->create([
             'payment_date' => now(),
             'amount' => $validated['amount'],
-            'payment_method' => $validated['payment_method'],
             'notes' => $validated['notes'] ?? null
         ]);
 
@@ -606,14 +601,12 @@ class TransactionController extends Controller
             'description' => 'Pembayaran pada ' . now()->format('d-m-Y'),
         ]);
 
-        // Debit: Kas/Bank
-        // $coaKas = $validated['payment_method'] == 'cash'
-        //     ? ChartOfAccount::where('code', '1100')->value('id')  // Kas
-        //     : ChartOfAccount::where('code', '1100')->value('id'); // Bank
+        // Ambil ID akun kas/bank berdasarkan pilihan user
+        $coaKas = ChartOfAccount::where('id', $validated['coa_id'])->value('id');
 
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => 1 ,
+            'coa_id' => $coaKas,
             'debit' => $validated['amount'],
             'credit' => 0
         ]);

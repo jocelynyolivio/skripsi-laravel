@@ -4,14 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DentalMaterial;
+use App\Models\StockCard;
 
 class DentalMaterialController extends Controller
 {
     public function index()
-    {
-        $dentalMaterials = DentalMaterial::all(); // Ambil semua bahan dental
-        return view('dashboard.dental-materials.index', compact('dentalMaterials'));
-    }
+{
+    $dentalMaterials = DentalMaterial::all(); // Ambil semua bahan dental
+
+    // Ambil latest remaining_stock untuk setiap dental_material_id
+    $stockCards = StockCard::select('dental_material_id', 'remaining_stock', 'average_price')
+        ->whereIn('dental_material_id', $dentalMaterials->pluck('id'))
+        ->orderBy('date', 'desc')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->unique('dental_material_id'); // Ambil yang terbaru per material
+
+    return view('dashboard.dental-materials.index', compact('dentalMaterials', 'stockCards'));
+}
+
 
     public function create()
     {
@@ -23,8 +34,6 @@ class DentalMaterialController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'stock_quantity' => 'required|integer',
-            'unit_price' => 'nullable|numeric',
         ]);
 
         DentalMaterial::create($validatedData);
@@ -42,8 +51,6 @@ class DentalMaterialController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'stock_quantity' => 'required|integer',
-            'unit_price' => 'nullable|numeric',
         ]);
 
         $dentalMaterial = DentalMaterial::findOrFail($id);
@@ -60,10 +67,9 @@ class DentalMaterialController extends Controller
     }
 
     public function report()
-{
-    $materials = DentalMaterial::with(['procedures'])->get();
+    {
+        $materials = DentalMaterial::with(['procedures'])->get();
 
-    return view('dashboard.dental-materials.report', compact('materials'));
-}
-
+        return view('dashboard.dental-materials.report', compact('materials'));
+    }
 }

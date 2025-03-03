@@ -15,7 +15,6 @@ class Transaction extends Model
         'medical_record_id',
         'admin_id',
         'total_amount',
-        'payment_method'
     ];
 
     // Relasi ke User (yang melakukan transaksi)

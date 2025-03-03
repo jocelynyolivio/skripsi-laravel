@@ -9,7 +9,7 @@ class DentalMaterial extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'stock_quantity', 'unit_price'];
+    protected $fillable = ['name', 'description'];
 
     public function procedures()
     {

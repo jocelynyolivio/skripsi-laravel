@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dental_materials', function (Blueprint $table) {
+        Schema::create('purchase_payments', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Nama bahan dental
-            $table->string('description')->nullable(); // Deskripsi bahan dental
             $table->timestamps();
         });
     }
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dental_materials');
+        Schema::dropIfExists('purchase_payments');
     }
 };

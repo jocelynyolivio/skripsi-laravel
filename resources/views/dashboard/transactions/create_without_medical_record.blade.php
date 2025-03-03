@@ -48,29 +48,12 @@
         </div>
         <input type="hidden" id="total_amount" name="total_amount" value="0">
 
-        <!-- Metode Pembayaran -->
-        <div class="mb-3">
-            <label for="payment_method" class="form-label">Payment Method</label>
-            <select class="form-control" id="payment_method" name="payment_method" required>
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-            </select>
-        </div>
-
         <!-- Input untuk Payments -->
         <h5>Payments:</h5>
         <div id="payments-container">
             <div class="payment-item mb-3">
                 <label>Payment Amount:</label>
                 <input type="number" class="form-control" id="payment" name="payments[0][amount]" min="0" value="0" required>
-
-                <label>Payment Method:</label>
-                <select class="form-control" name="payments[0][payment_method]" required>
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="other">Other</option>
-                </select>
             </div>
 
             <div class="form-group">
