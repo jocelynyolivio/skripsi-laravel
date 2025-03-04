@@ -69,29 +69,26 @@ class JournalController extends Controller
             }
         }
 
-        // ini haruse nti ambil dari stock card
-        // Jika ini adalah Journal untuk HPP, cari dari procedure_materials
         if ($isHPP && $journal->transaction_id) {
             $transaction = \App\Models\Transaction::find($journal->transaction_id);
 
-            // Ambil Medical Record dari Transaction
-            $medicalRecord = \App\Models\MedicalRecord::where('id', $transaction->medical_record_id)->first();
+            if ($transaction) {
+                $medicalRecord = \App\Models\MedicalRecord::find($transaction->medical_record_id);
 
-            // Cek apakah Medical Record ada
-            if ($medicalRecord) {
-                // Ambil Semua Prosedur yang terkait dengan Medical Record
-                $procedures = $medicalRecord->procedures;
+                if ($medicalRecord) {
+                    // Cari semua stock keluar yang berhubungan dengan medical record ini
+                    $stockCards = \App\Models\StockCard::where('reference_number', 'LIKE', 'MR-' . $medicalRecord->id)
+                        ->whereNotNull('price_out') // Pastikan ini adalah stok yang keluar
+                        ->get();
 
-                // Loop Semua Prosedur untuk Ambil Bahan Dental yang Digunakan
-                foreach ($procedures as $procedure) {
-                    foreach ($procedure->dentalMaterials as $material) {
-                        $quantityUsed = $material->pivot->quantity;
-                        $unitPrice = $material->unit_price;
+                    foreach ($stockCards as $stock) {
+                        $quantityUsed = $stock->quantity_out;
+                        $unitPrice = $stock->average_price;
                         $totalPrice = $quantityUsed * $unitPrice;
 
-                        // Simpan Detail ke Array
+                        // Simpan ke HPP Details
                         $hppDetails[] = [
-                            'name' => $material->name,
+                            'name' => $stock->dentalMaterial->name, // Ambil nama material dari relasi
                             'quantity' => $quantityUsed,
                             'unit_price' => $unitPrice,
                             'total_price' => $totalPrice
@@ -103,6 +100,8 @@ class JournalController extends Controller
                 }
             }
         }
+
+
 
         return view('dashboard.journals.show', [
             'title' => 'Journal Details',

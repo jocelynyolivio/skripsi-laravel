@@ -345,67 +345,116 @@ class SalaryController extends Controller
     //     }
 
     //     return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil disimpan!');
-    // }
     public function storeSalaries(Request $request)
     {
-        // Decode JSON dari input form
         $salaries = json_decode($request->input('salaries'), true);
-
-        // Pastikan data berhasil di-decode
+    
         if (!is_array($salaries)) {
             return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
         }
+    
+        DB::transaction(function () use ($request, $salaries) {
+            foreach ($salaries as $salary) {
+                // Simpan atau update data gaji
+                $salaryRecord = SalaryCalculation::updateOrCreate(
+                    [
+                        'user_id' => $salary['user_id'],
+                        'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
+                    ],
+                    [
+                        'shift_pagi' => $salary['shift_pagi'],
+                        'shift_siang' => $salary['shift_siang'],
+                        'holiday_shift' => $salary['holiday_shift'],
+                        'lembur' => $salary['lembur'],
+                        'base_salary' => $salary['base_salary'],
+                        'allowance' => $salary['allowance'] ?? 0,
+                        'grand_total' => $salary['grand_total']
+                    ]
+                );
+    
+                // Simpan Journal Entry (langsung masuk ke Beban Gaji)
+            $journal = \App\Models\JournalEntry::create([
+                'entry_date' => now(),
+                'description' => "Pembayaran Gaji bulan " . $salaryRecord->month . " untuk user ID: " . $salary['user_id'],
+            ]);
 
-        foreach ($salaries as $salary) {
-            SalaryCalculation::updateOrCreate(
-                [
-                    'user_id' => $salary['user_id'],
-                    'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
-                ],
-                [
-                    'shift_pagi' => $salary['shift_pagi'],
-                    'shift_siang' => $salary['shift_siang'],
-                    'holiday_shift' => $salary['holiday_shift'],
-                    'lembur' => $salary['lembur'],
-                    'base_salary' => $salary['base_salary'],
-                    // 'allowance' => $salary['allowance'],
-                    'grand_total' => $salary['grand_total']
-                ]
-            );
-        }
+            // Simpan Journal Details (Debit - Beban Gaji)
+            \App\Models\JournalDetail::create([
+                'journal_entry_id' => $journal->id,
+                'coa_id' => 19, // ID akun Beban Gaji (pastikan ini sesuai database)
+                'debit' => $salary['grand_total'] ?? 0,
+                'credit' => 0,
+            ]);
 
-        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil disimpan ke database!');
+            // Simpan Journal Details (Kredit - Kas/Bank)
+            \App\Models\JournalDetail::create([
+                'journal_entry_id' => $journal->id,
+                'coa_id' => 1, // ID akun Kas/Bank
+                'debit' => 0,
+                'credit' => $salary['grand_total'] ?? 0,
+            ]);
+            }
+        });
+    
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil dibayarkan dan jurnal diperbarui!');
     }
+    
+
     public function storeDoctorSalaries(Request $request)
     {
-        // Decode JSON dari input form
         $salaries = json_decode($request->input('salaries'), true);
-
-        // Pastikan data berhasil di-decode
+    
         if (!is_array($salaries)) {
             return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
         }
+    
+        DB::transaction(function () use ($request, $salaries) {
+            foreach ($salaries as $salary) {
+                // Simpan atau update data gaji dokter
+                $salaryRecord = SalaryCalculation::updateOrCreate(
+                    [
+                        'user_id' => $salary['user_id'],
+                        'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
+                    ],
+                    [
+                        'shift_pagi' => $salary['bagi_hasil'], 
+                        'shift_siang' => 0, 
+                        'holiday_shift' => 0,
+                        'lembur' => 0, 
+                        'base_salary' => $salary['base_salary'],
+                        'allowance' => $salary['transport_total'] + $salary['bagi_hasil'], 
+                        'grand_total' => $salary['grand_total']
+                    ]
+                );
+    
+                // Simpan Journal Entry (langsung masuk ke Beban Gaji)
+            $journal = \App\Models\JournalEntry::create([
+                'entry_date' => now(),
+                'description' => "Pembayaran Gaji Dokter bulan " . $salaryRecord->month . " untuk user ID: " . $salary['user_id'],
+            ]);
 
-        foreach ($salaries as $salary) {
-            SalaryCalculation::updateOrCreate(
-                [
-                    'user_id' => $salary['user_id'],
-                    'month' => $request->input('year') . '-' . str_pad($request->input('month'), 2, '0', STR_PAD_LEFT)
-                ],
-                [
-                    'shift_pagi' => $salary['bagi_hasil'], // Dokter tidak memiliki shift pagi
-                    'shift_siang' => 0, // Dokter tidak memiliki shift siang
-                    'holiday_shift' => 0, // Tidak diperlukan
-                    'lembur' => 0, // Tidak dihitung lembur
-                    'base_salary' => $salary['base_salary'],
-                    'allowance' => $salary['transport_total'] + $salary['bagi_hasil'], // Tunjangan = Transport + Bagi Hasil
-                    'grand_total' => $salary['grand_total']
-                ]
-            );
-        }
+            // Simpan Journal Details (Debit - Beban Gaji Dokter)
+            \App\Models\JournalDetail::create([
+                'journal_entry_id' => $journal->id,
+                'coa_id' => 19, // ID akun Beban Gaji (pastikan sesuai database)
+                'debit' => $salary['grand_total'],
+                'credit' => 0,
+            ]);
 
-        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji dokter berhasil disimpan ke database!');
+            // Simpan Journal Details (Kredit - Kas/Bank)
+            \App\Models\JournalDetail::create([
+                'journal_entry_id' => $journal->id,
+                'coa_id' => 1, // ID akun Kas/Bank
+                'debit' => 0,
+                'credit' => $salary['grand_total'],
+            ]);
+            }
+        });
+    
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji dokter berhasil dibayarkan dan jurnal diperbarui!');
     }
+    
+
 
 
     public function uploadForm()

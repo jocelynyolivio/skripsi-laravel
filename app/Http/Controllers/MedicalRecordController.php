@@ -291,7 +291,7 @@ class MedicalRecordController extends Controller
 
                 // Ambil data stok terakhir dari kartu stok
                 $latestStock = StockCard::where('dental_material_id', $materialId)
-                    ->latest('date')
+                    ->latest('created_at')
                     ->first();
 
                 if (!$latestStock || $latestStock->remaining_stock < $quantity) {

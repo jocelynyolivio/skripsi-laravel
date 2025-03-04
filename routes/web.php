@@ -28,6 +28,7 @@ use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SalaryCalculationController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -105,7 +106,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/salaries/slip', [SalaryController::class, 'userSalarySlip'])->name('salaries.slip');
     Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process');
     Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');
-    Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor');    
+    Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor');
     Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store');
     Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor');
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
@@ -136,7 +137,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
     Route::get('/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
-    ->name('schedules.get-doctors-by-date');
+        ->name('schedules.get-doctors-by-date');
     Route::get('/schedules/get-patients', [ScheduleController::class, 'getPatients'])->name('schedules.get-patients');
     Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
 
@@ -221,10 +222,18 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/journals', [JournalController::class, 'index'])->name('index');
     Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
 
-    Route::resource('salary_calculations',SalaryCalculationController::class);
+    Route::resource('salary_calculations', SalaryCalculationController::class);
 
-    Route::resource('suppliers',SupplierController::class);
+    Route::resource('suppliers', SupplierController::class);
 
     Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('purchases.pay');
+
+    Route::resource('purchases', PurchaseController::class);
+
+    Route::get('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
+    Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
+
+    Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay');
+    Route::post('/purchases/pay', [PurchaseController::class, 'payDebt'])->name('purchases.payDebt');
 
 });

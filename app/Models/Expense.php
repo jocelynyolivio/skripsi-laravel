@@ -10,42 +10,26 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
-        'date',
-        'amount',
-        'category_id',
-        'supplier_id',
-        'description',
-        'expired_at',
+        'expense_date',
         'created_by',
-        'dental_material_id',
-        'quantity',
+        'coa_out',
+        'coa_in',
+        'amount',
+        'description',
+        'reference_number',
     ];
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function dentalMaterial()
-    {
-        return $this->belongsTo(DentalMaterial::class, 'dental_material_id');
-    }
-
-    // App\Models\Expense.php
     public function admin()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // app/Models/Expense.php
-
-    public function supplier()
+    public function coaOut()
     {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
+        return $this->belongsTo(ChartOfAccount::class, 'coa_out');
     }
 
-    public function purchases()
+    public function coaIn()
     {
-        return $this->hasMany(Purchase::class, 'expense_id');
+        return $this->belongsTo(ChartOfAccount::class, 'coa_in');
     }
 }
