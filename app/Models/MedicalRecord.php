@@ -32,13 +32,6 @@ class MedicalRecord extends Model
         return $this->hasMany(Odontogram::class, 'medical_record_id');
     }
 
-    public function dentalMaterials()
-    {
-        return $this->belongsToMany(DentalMaterial::class, 'medical_record_dental_material')
-            ->withPivot('quantity')
-            ->withTimestamps();
-    }
-
 
     public function transaction()
     {

@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+
 use Carbon\Carbon;
 use App\Models\Role;
 use App\Models\User;
@@ -147,22 +148,30 @@ class DatabaseSeeder extends Seeder
         DentalMaterial::create([
             'name' => 'Resin Komposit',
             'description' => 'Bahan untuk penambalan gigi berlubang',
+            'unit_type' => 'ml'
         ]);
 
         DentalMaterial::create([
             'name' => 'Anestesi',
             'description' => 'Cairan anestesi lokal untuk prosedur dental',
+            'unit_type' => 'ml'
         ]);
 
         DentalMaterial::create([
             'name' => 'Cavity Liner',
             'description' => 'Bahan pelapis untuk restorasi tambalan',
+            'unit_type' => 'ml'
         ]);
 
         DentalMaterial::create([
             'name' => 'Amalgam',
             'description' => 'Bahan tambalan yang mengandung logam',
+            'unit_type' => 'ml'
         ]);
+
+        DentalMaterial::create(['name' => 'Alkohol 70%', 'description' => 'Cairan antiseptik', 'unit_type' => 'ml']);
+        DentalMaterial::create(['name' => 'Gigi Tiruan', 'description' => 'Gigi palsu', 'unit_type' => 'pcs']);
+        DentalMaterial::create(['name' => 'Bubuk Gips', 'description' => 'Bahan cetakan', 'unit_type' => 'g']);
 
         Procedure::create([
             'name' => 'Tambal Gigi',
@@ -358,21 +367,21 @@ class DatabaseSeeder extends Seeder
             'doctor_id' => 23,
             'tanggal_reservasi' => '2025-01-23',
             'jam_mulai' => '09:00',
-            'jam_selesai' => '10:00' 
+            'jam_selesai' => '10:00'
         ]);
         Reservation::create([
             'patient_id' => 1,
             'doctor_id' => 24,
             'tanggal_reservasi' => '2025-01-24',
             'jam_mulai' => '13:00',
-            'jam_selesai' => '14:00' 
+            'jam_selesai' => '14:00'
         ]);
         Reservation::create([
             'patient_id' => 1,
             'doctor_id' => 25,
             'tanggal_reservasi' => '2025-01-25',
             'jam_mulai' => '12:00',
-            'jam_selesai' => '13:00' 
+            'jam_selesai' => '13:00'
         ]);
     }
 }

@@ -9,20 +9,11 @@ class DentalMaterial extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'unit_type'];
 
     public function procedures()
     {
         return $this->belongsToMany(Procedure::class, 'procedure_materials', 'dental_material_id', 'procedure_id')
-                    ->withPivot('quantity');
+            ->withPivot('quantity');
     }
-
-    public function medicalRecords()
-{
-    return $this->belongsToMany(MedicalRecord::class, 'medical_record_dental_material')
-        ->withPivot('quantity')
-        ->withTimestamps();
-}
-
-
 }

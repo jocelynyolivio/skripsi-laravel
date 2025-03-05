@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('purchase_invoice_id')->constrained('purchase_invoices')->onDelete('cascade');
             $table->foreignId('dental_material_id')->constrained('dental_materials')->onDelete('cascade');
             $table->integer('quantity');
-            $table->string('unit');
             $table->decimal('unit_price', 15, 2);
             $table->decimal('subtotal', 15, 2);
             $table->timestamps();

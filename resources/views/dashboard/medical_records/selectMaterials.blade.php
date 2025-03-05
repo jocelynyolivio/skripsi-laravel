@@ -33,28 +33,16 @@
                             <td>{{ $material['quantity'] }} (Required)</td>
                             <td>{{ $material['stock_quantity'] }}</td>
                             <td>
-                                @if(!$hasMaterials)
-                                    <!-- Form Input Jika Belum Tersimpan -->
-                                    <input type="number" name="quantities[{{ $materialId }}]" 
-                                           value="{{ $material['quantity'] }}" 
-                                           min="0" max="{{ $material['stock_quantity'] }}">
-                                @else
-                                    <!-- Tampilkan angka saja jika sudah tersimpan -->
-                                    {{ $material['quantity'] }}
-                                @endif
+                                <input type="number" name="quantities[{{ $materialId }}]" 
+                                       value="{{ old('quantities.' . $materialId, $material['quantity']) }}" 
+                                       min="0" max="{{ $material['stock_quantity'] }}">
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
 
-            @if(!$hasMaterials)
-                <button type="submit" class="btn btn-primary">Save Materials</button>
-            @else
-                <div class="alert alert-success mt-3">
-                    <strong>Note:</strong> Materials have already been saved for this medical record. You can only view them.
-                </div>
-            @endif
+            <button type="submit" class="btn btn-primary">Save Materials</button>
         </form>
     </div>
 </div>

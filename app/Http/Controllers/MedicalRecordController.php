@@ -45,27 +45,25 @@ class MedicalRecordController extends Controller
         $selectedProcedureIds = $request->input('procedure_id', []);
 
         // Mengumpulkan bahan dental yang terkait dengan prosedur yang dipilih
+        // Mengumpulkan bahan dental yang terkait dengan prosedur yang dipilih
         $selectedMaterials = [];
         if (!empty($selectedProcedureIds)) {
-            // Mengambil semua prosedur yang dipilih
             $selectedProcedures = Procedure::whereIn('id', $selectedProcedureIds)->with('dentalMaterials')->get();
 
-            // Menggabungkan bahan dental dari prosedur yang dipilih
             foreach ($selectedProcedures as $procedure) {
                 foreach ($procedure->dentalMaterials as $material) {
                     if (!isset($selectedMaterials[$material->id])) {
-                        // Jika bahan dental belum ada di daftar, tambahkan
                         $selectedMaterials[$material->id] = [
                             'name' => $material->name,
-                            'quantity' => $material->pivot->quantity,
+                            'quantity' => $material->pivot->quantity, // ❌ Masih menggunakan pivot dari `medical_record_dental_material`
                         ];
                     } else {
-                        // Jika sudah ada, tambahkan jumlahnya
                         $selectedMaterials[$material->id]['quantity'] += $material->pivot->quantity;
                     }
                 }
             }
         }
+
 
         // Mengirim data ke view create
         return view('dashboard.medical_records.create', [
@@ -147,16 +145,12 @@ class MedicalRecordController extends Controller
 
         $procedures = $medicalRecord->procedures;
 
-        // Cek apakah rekam medis ini sudah memiliki bahan tersimpan
-        $hasMaterials = $medicalRecord->dentalMaterials()->exists(); // True jika sudah ada bahan tersimpan
-
         // Ambil daftar bahan dari prosedur yang terkait
         $dentalMaterialIds = $procedures->flatMap->dentalMaterials->pluck('id')->unique();
 
         // Ambil stok terbaru dari StockCard berdasarkan dental_material_id
         $stockCards = StockCard::select('dental_material_id', 'remaining_stock', 'average_price')
             ->whereIn('dental_material_id', $dentalMaterialIds)
-            ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
             ->get()
             ->unique('dental_material_id');
@@ -169,7 +163,7 @@ class MedicalRecordController extends Controller
                 if (!isset($materials[$material->id])) {
                     // Cari stok terbaru untuk bahan ini
                     $stock = $stockCards->firstWhere('dental_material_id', $material->id);
-    
+
                     // Menambahkan bahan hanya sekali, jika belum ada dalam array $materials
                     $materials[$material->id] = [
                         'name' => $material->name,
@@ -189,7 +183,6 @@ class MedicalRecordController extends Controller
             'medicalRecordId' => $medicalRecordId,
             'procedures' => $procedures,
             'materials' => $materials,
-            'hasMaterials' => $hasMaterials, // Kirim status apakah sudah tersimpan atau belum
         ]);
     }
 
@@ -319,11 +312,6 @@ class MedicalRecordController extends Controller
                 //     return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
                 // }
 
-                // Simpan hubungan antara rekam medis dan bahan
-                $medicalRecord->dentalMaterials()->syncWithoutDetaching([
-                    $materialId => ['quantity' => $quantity]
-                ]);
-
                 // Hitung HPP
                 $materialHPP = $quantity * $hppPrice;
                 $totalHPP += $materialHPP;
@@ -396,9 +384,6 @@ class MedicalRecordController extends Controller
                     'average_price' => $latestStock->average_price, // Harga tetap sama
                 ]);
             }
-
-            // Hapus hubungan rekam medis dengan bahan
-            $medicalRecord->dentalMaterials()->detach($materialId);
         }
 
         return redirect()->route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $medicalRecordId])

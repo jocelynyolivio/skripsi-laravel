@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('dental_materials', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Nama bahan dental
+            $table->string('unit_type')->default('pcs'); // Default 'pcs'
             $table->string('description')->nullable(); // Deskripsi bahan dental
             $table->timestamps();
         });

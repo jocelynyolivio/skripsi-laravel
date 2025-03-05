@@ -19,7 +19,8 @@
 
         <div class="mb-3">
             <label class="form-label">Purchase Date:</label>
-            <input type="date" class="form-control" name="purchase_date" required>
+            <input type="date" class="form-control" name="purchase_date" required
+                value="{{ old('purchase_date', now()->format('Y-m-d')) }}">
         </div>
 
         <!-- TABEL DENTAL MATERIAL -->
@@ -29,34 +30,34 @@
                 <tr>
                     <th>Material</th>
                     <th>Quantity</th>
-                    <th>Unit</th>
-                    <th>Unit Price</th>
-                    <th>Subtotal</th>
+                    <th>Price (Total Purchase Price)</th>
+                    <th>Unit Price (Auto Calculate)</th>
                     <th><button type="button" class="btn btn-sm btn-success" id="addRow">+</button></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>
-                        <select name="dental_material_id[]" class="form-control" required>
+                        <select name="dental_material_id[]" class="form-control material-select" required>
                             @foreach($materials as $material)
-                            <option value="{{ $material->id }}">{{ $material->name }}</option>
+                            <option value="{{ $material->id }}" data-unit="{{ $material->unit_type }}">
+                                {{ $material->name }} ({{ $material->unit_type }})
+                            </option>
                             @endforeach
                         </select>
                     </td>
-                    <td><input type="number" name="quantity[]" class="form-control quantity" required></td>
-                    <td><input type="text" name="unit[]" class="form-control" required></td>
-                    <td><input type="number" name="unit_price[]" class="form-control unit_price" required></td>
-                    <td><input type="number" name="subtotal[]" class="form-control subtotal" readonly></td>
-                    <td><button type="button" class="btn btn-sm btn-danger removeRow">-</button></td>
+                    <td><input type="number" name="quantity[]" class="form-control quantity" required min="1"></td>
+                    <td><input type="number" name="total_price[]" class="form-control total_price" required></td>
+                    <td><input type="number" name="unit_price[]" class="form-control unit_price" readonly></td>
+
                 </tr>
             </tbody>
         </table>
 
-        <div class="mb-3">
-            <label class="form-label">Total Amount:</label>
-            <input type="number" class="form-control" name="total_amount" id="totalAmount" readonly>
+        <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
+            <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
         </div>
+        <input type="hidden" id="total_amount" name="total_amount" value="0">
 
         <!-- Purchase Payments Section -->
         <h5>Purchase Payments</h5>
@@ -80,42 +81,100 @@
             <input type="text" class="form-control" name="payment_notes">
         </div>
 
+        <!-- Sisa Tagihan : jadi HUTANG--> 
+        <div class="card mt-3 bg-warning text-dark p-2 w-50 mx-auto">
+            <h5 class="text-center mb-0">Sisa Tagihan: Rp <span id="remaining-amount-display">0</span></h5>
+        </div>
+        <input type="hidden" id="remaining_amount" name="remaining_amount" value="0">
+
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    function calculateTotal() {
-        let total = 0;
-        document.querySelectorAll('.subtotal').forEach(subtotal => {
-            total += parseFloat(subtotal.value) || 0;
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Event listener untuk menghitung unit price, total harga, dan sisa tagihan
+        document.addEventListener('input', function (event) {
+            if (event.target.classList.contains('quantity') || event.target.classList.contains('total_price')) {
+                calculateUnitPrice(event.target);
+                calculateTotalAmount();
+            }
+
+            if (event.target.id === 'paymentAmount') {
+                calculateTotalAmount();
+            }
         });
-        document.getElementById('totalAmount').value = total;
-    }
 
-    document.getElementById('addRow').addEventListener('click', function () {
-        let newRow = document.querySelector('#materialsTable tbody tr').cloneNode(true);
-        newRow.querySelectorAll('input').forEach(input => input.value = '');
-        document.querySelector('#materialsTable tbody').appendChild(newRow);
-    });
+        // Fungsi menghitung unit price otomatis (Total Price / Quantity)
+        function calculateUnitPrice(inputElement) {
+            let row = inputElement.closest('tr');
+            let qty = parseFloat(row.querySelector('.quantity').value) || 0;
+            let totalPrice = parseFloat(row.querySelector('.total_price').value) || 0;
+            let unitPriceField = row.querySelector('.unit_price');
 
-    document.addEventListener('input', function (event) {
-        if (event.target.classList.contains('quantity') || event.target.classList.contains('unit_price')) {
-            let row = event.target.closest('tr');
-            let qty = row.querySelector('.quantity').value;
-            let price = row.querySelector('.unit_price').value;
-            row.querySelector('.subtotal').value = (qty * price) || 0;
-            calculateTotal();
+            if (qty > 0 && totalPrice > 0) {
+                unitPriceField.value = (totalPrice / qty).toFixed(2);
+            } else {
+                unitPriceField.value = '';
+            }
         }
-    });
 
-    document.addEventListener('click', function (event) {
-        if (event.target.classList.contains('removeRow')) {
-            event.target.closest('tr').remove();
-            calculateTotal();
+        // Fungsi untuk menghitung total amount dan sisa tagihan
+        function calculateTotalAmount() {
+            let total = 0;
+            document.querySelectorAll('.total_price').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+
+            // Update tampilan Total Amount
+            document.getElementById('total-amount-display').textContent = total.toLocaleString('id-ID', { minimumFractionDigits: 2 });
+            document.getElementById('total_amount').value = total.toFixed(2);
+
+            // Ambil jumlah pembayaran dari input Payment Amount
+            let paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            let remainingAmount = total - paymentAmount;
+
+            // Pastikan Sisa Tagihan tidak negatif
+            // if (remainingAmount < 0) {
+            //     remainingAmount = 0;
+            // }
+
+            // Update tampilan Sisa Tagihan
+            document.getElementById('remaining-amount-display').textContent = remainingAmount.toLocaleString('id-ID', { minimumFractionDigits: 2 });
+            document.getElementById('remaining_amount').value = remainingAmount.toFixed(2);
         }
+
+        // Fungsi untuk menambahkan baris material baru
+        document.getElementById('addRow').addEventListener('click', function () {
+            let tableBody = document.querySelector('#materialsTable tbody');
+            let newRow = tableBody.querySelector('tr').cloneNode(true);
+
+            // Reset semua input dalam row baru
+            newRow.querySelectorAll('input').forEach(input => input.value = '');
+
+            let materialSelect = newRow.querySelector('.material-select');
+            let unitField = newRow.querySelector('.unit');
+
+            // Menyesuaikan unit saat material dipilih
+            materialSelect.addEventListener('change', function () {
+                let selectedOption = this.options[this.selectedIndex];
+                if (unitField) {
+                    unitField.value = selectedOption.dataset.unit;
+                }
+            });
+
+            tableBody.appendChild(newRow);
+        });
+
+        // Fungsi untuk menghapus baris material
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('removeRow')) {
+                event.target.closest('tr').remove();
+                calculateTotalAmount();
+            }
+        });
+
     });
-});
 </script>
+
 @endsection
