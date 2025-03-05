@@ -105,34 +105,61 @@ class DatabaseSeeder extends Seeder
             'role_name' => 'manager'
         ]);
 
-        Patient::create([
-            'name' => 'yoli',
-            'email' => 'emailnyayoli@gmail.com',
-            'email_verified_at' => now(),
-            'password' => bcrypt('12345'),
-            'nomor_telepon' => '081230333587'
-        ]);
-        Patient::create([
-            'name' => 'pasien1',
-            'email' => 'pasien1@gmail.com',
-            'email_verified_at' => now(),
-            'password' => bcrypt('pasien'),
-            'nomor_telepon' => '1479575675367'
-        ]);
-        Patient::create([
-            'name' => 'pasien2',
-            'email' => 'pasien2@gmail.com',
-            'email_verified_at' => now(),
-            'password' => bcrypt('pasien'),
-            'nomor_telepon' => '89786785'
-        ]);
-        Patient::create([
-            'name' => 'pasien3',
-            'email' => 'pasien3@gmail.com',
-            'email_verified_at' => now(),
-            'password' => bcrypt('pasien'),
-            'nomor_telepon' => '0000000'
-        ]);
+        $patients = [
+            [
+                'name' => 'Yoli',
+                'email' => 'emailnyayoli@gmail.com',
+                'password' => Hash::make('12345'),
+                'home_mobile' => '081230333587',
+            ],
+            [
+                'name' => 'Pasien1',
+                'email' => 'pasien1@gmail.com',
+                'password' => Hash::make('pasien'),
+                'home_mobile' => '1479575675367',
+            ],
+            [
+                'name' => 'Pasien2',
+                'email' => 'pasien2@gmail.com',
+                'password' => Hash::make('pasien'),
+                'home_mobile' => '89786785',
+            ],
+            [
+                'name' => 'Pasien3',
+                'email' => 'pasien3@gmail.com',
+                'password' => Hash::make('pasien'),
+                'home_mobile' => '0000000',
+            ],
+        ];
+
+        foreach ($patients as $data) {
+            // Generate Patient ID
+            $initialLetter = strtoupper(substr($data['name'], 0, 1));
+            $lastPatient = Patient::where('patient_id', 'like', "$initialLetter%")->latest('id')->first();
+
+            if ($lastPatient) {
+                $lastNumber = (int) substr($lastPatient->patient_id, 1);
+                $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                $newNumber = '001';
+            }
+
+            $data['patient_id'] = $initialLetter . $newNumber;
+
+            // Tambahkan data lainnya yang tidak boleh null
+            $data['gender'] = 'Male'; // Default gender
+            $data['nik'] = '1234567890123456'; // Default NIK
+            $data['blood_type'] = 'O'; // Default Blood Type
+            $data['place_of_birth'] = 'Jakarta'; // Default Place of Birth
+            $data['date_of_birth'] = '1990-01-01'; // Default Date of Birth
+            $data['nationality'] = 'Indonesian'; // Default Nationality
+            $data['home_address'] = 'Jl. Default No. 1'; // Default Home Address
+            $data['home_city'] = 'Jakarta'; // Default Home City
+            $data['emergency_contact_name'] = 'John Doe'; // Default Emergency Contact
+            $data['emergency_contact_phone'] = '081234567890'; // Default Emergency Contact Phone
+
+            Patient::create($data);
+        }
 
         ScheduleTemplate::create([
             'doctor_id' => 23,

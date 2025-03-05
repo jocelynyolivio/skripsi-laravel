@@ -10,20 +10,20 @@
     <table id="patientTable" class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Patient ID</th>
                 <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th>Gender</th>
+                <th>Mobile Number</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach($patients as $patient)
             <tr>
-                <td>{{ $patient->id }}</td>
+                <td>{{ $patient->patient_id }}</td>
                 <td>{{ $patient->name }}</td>
-                <td>{{ $patient->email }}</td>
-                <td>{{ $patient->nomor_telepon }}</td>
+                <td>{{ $patient->gender }}</td>
+                <td>{{ $patient->home_mobile }}</td>
                 <td>
                     <a href="{{ route('dashboard.masters.patients.edit', $patient->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.masters.patients.destroy', $patient->id) }}" method="POST" style="display:inline;" class="delete-form">

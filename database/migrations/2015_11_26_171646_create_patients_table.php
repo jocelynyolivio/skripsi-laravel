@@ -13,11 +13,52 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
+            $table->string('patient_id')->unique();
+
+            // informasi pribadi
             $table->string('name');
-            $table->string('email')->unique();
+            $table->enum('gender', ['Male', 'Female', 'Other']);
+            $table->string('nik');
+            $table->string('blood_type');
+            $table->string('parent_name')->nullable();
+            $table->string('place_of_birth');
+            $table->date('date_of_birth');
+            $table->string('religion')->nullable();
+            $table->enum('marital_status', ['Single', 'Married', 'Divorced', 'Widowed'])->nullable();
+            $table->string('family_status')->nullable();
+            $table->string('occupation')->nullable();
+            $table->string('nationality')->nullable();
+
+            // Alamat Rumah
+            $table->text('home_address');
+            $table->string('home_city')->nullable();
+            $table->string('home_zip_code')->nullable();
+            $table->string('home_country')->nullable();
+            $table->string('home_phone')->nullable();
+            $table->string('home_mobile');
+            $table->string('home_email')->nullable();
+
+            // Alamat Kantor
+            $table->text('office_address')->nullable();
+            $table->string('office_city')->nullable();
+            $table->string('office_zip_code')->nullable();
+            $table->string('office_country')->nullable();
+            $table->string('office_phone')->nullable();
+            $table->string('office_mobile')->nullable();
+            $table->string('office_email')->nullable();
+
+            // Kontak Darurat
+            $table->string('emergency_contact_name');
+            $table->string('emergency_contact_phone');
+
+            // Upload Dokumen
+            $table->string('form_data_awal')->nullable(); // Upload form awal
+            $table->string('informed_consent')->nullable(); // Upload persetujuan pasien
+
+            $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('nomor_telepon');
+            $table->string('password')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });

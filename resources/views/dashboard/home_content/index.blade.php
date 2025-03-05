@@ -13,12 +13,6 @@
     <h3>About Text:</h3>
     <p>{{ $contents->first()->about_text ?? 'No about text available' }}</p>
 
-    <h3>About Image:</h3>
-    @if ($contents->first()->about_image)
-        <img src="{{ asset('storage/' . $contents->first()->about_image) }}" alt="About Image" width="100">
-    @else
-        <p>No about image available</p>
-    @endif
 
     <h3>Services Text:</h3>
     <p>{{ $contents->first()->services_text ?? 'No services text available' }}</p>
