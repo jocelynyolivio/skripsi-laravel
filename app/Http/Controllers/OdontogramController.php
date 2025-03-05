@@ -11,19 +11,16 @@ use Illuminate\Support\Facades\DB;
 class OdontogramController extends Controller
 {
     public function index($patientId)
-    {
-        // Ambil data odontogram yang diinput secara manual
-        $odontograms = Odontogram::where('patient_id', $patientId)->get()->keyBy('tooth_number');
-    
-        // Ambil semua prosedur yang terkait dengan
-        $procedureOdontograms = DB::table('medical_record_procedure')
+{
+    // Ambil data odontogram yang diinput secara manual
+    $odontograms = Odontogram::where('patient_id', $patientId)->get()->keyBy('tooth_number');
+
+    // Ambil semua prosedur yang terkait dengan rekam medis pasien ini
+    $procedureOdontograms = DB::table('medical_record_procedure')
         ->join('procedures', 'medical_record_procedure.procedure_id', '=', 'procedures.id')
         ->whereIn('medical_record_procedure.tooth_number', range(1, 32))
         ->whereIn('medical_record_procedure.medical_record_id', function ($query) use ($patientId) {
-            $query->select('id')->from('medical_records')
-                ->whereIn('reservation_id', function ($q) use ($patientId) {
-                    $q->select('id')->from('reservations')->where('patient_id', $patientId);
-                });
+            $query->select('id')->from('medical_records')->where('patient_id', $patientId);
         })
         ->select('medical_record_procedure.tooth_number', 'procedures.id as procedure_id', 'procedures.name as procedure_name')
         ->get()
@@ -34,6 +31,7 @@ class OdontogramController extends Controller
 
     return view('dashboard.odontograms.index', compact('odontograms', 'procedureOdontograms', 'procedures', 'patient'));
 }
+
     
 
     public function store(Request $request, $patientId)

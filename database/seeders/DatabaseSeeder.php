@@ -14,7 +14,6 @@ use App\Models\DentalMaterial;
 use Illuminate\Database\Seeder;
 use App\Models\ScheduleTemplate;
 use App\Models\ProcedureMaterial;
-use App\Models\Reservation;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -360,28 +359,6 @@ class DatabaseSeeder extends Seeder
             'alamat' => 'kenjeran',
             'nomor_telepon' => '0811100029292',
             'email' => 'supplier1@gmail.com'
-        ]);
-
-        Reservation::create([
-            'patient_id' => 1,
-            'doctor_id' => 23,
-            'tanggal_reservasi' => '2025-01-23',
-            'jam_mulai' => '09:00',
-            'jam_selesai' => '10:00'
-        ]);
-        Reservation::create([
-            'patient_id' => 1,
-            'doctor_id' => 24,
-            'tanggal_reservasi' => '2025-01-24',
-            'jam_mulai' => '13:00',
-            'jam_selesai' => '14:00'
-        ]);
-        Reservation::create([
-            'patient_id' => 1,
-            'doctor_id' => 25,
-            'tanggal_reservasi' => '2025-01-25',
-            'jam_mulai' => '12:00',
-            'jam_selesai' => '13:00'
         ]);
     }
 }

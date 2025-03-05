@@ -26,7 +26,7 @@
         <thead>
             <tr>
                 <th>Transaction ID</th>
-                <th>User</th>
+                <th>Pasien</th>
                 <th>Admin</th>
                 <th>Amount</th>
                 <th>Sisa Tagihan</th>
@@ -40,7 +40,7 @@
             <tr>
                 <td>{{ $transaction->id }}</td>
                 <td>
-                    {{ optional($transaction->medicalRecord?->reservation->patient)->name 
+                    {{ optional($transaction->medicalRecord?->patient)->name 
                     ?? optional($transaction->patient)->name 
                     ?? 'N/A' }}
                 </td>

@@ -9,9 +9,9 @@
             <strong>Medical Record Details</strong>
         </div>
         <div class="card-body">
-            <p><strong>Patient:</strong> {{ $medicalRecord->reservation->patient->name }}</p>
-            <p><strong>Doctor:</strong> {{ $medicalRecord->reservation->doctor->name }}</p>
-            <p><strong>Reservation Date:</strong> {{ $medicalRecord->reservation->tanggal_reservasi }}</p>
+            <p><strong>Patient:</strong> {{ $medicalRecord->patient->name }}</p>
+            <p><strong>Doctor:</strong> {{ $medicalRecord->doctor->name }}</p>
+            <p><strong>Reservation Date:</strong> {{ $medicalRecord->tanggal_reservasi }}</p>
             <p><strong>Procedures:</strong></p>
             <ul class="list-group">
                 @foreach($proceduresWithPrices as $item)

@@ -112,7 +112,8 @@
             if (!procedureId) {
                 alert('Please select a procedure first');
                 return;
-           l }
+                l
+            }
 
             if (!selectedProcedures.has(procedureId)) {
                 selectedProcedures.set(procedureId, {

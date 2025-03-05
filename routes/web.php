@@ -142,13 +142,18 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
 
     Route::post('/reservations', [ScheduleController::class, 'storeReservation'])->name('reservations.store');
-    Route::get('/reservations', [ReservationController::class, 'list'])->name('reservations.index');
+
+    // pppppppp
+    Route::get('/reservations', [MedicalRecordController::class, 'list'])->name('reservations.index');
+
     Route::get('/reservations/{reservation}/edit', [ScheduleController::class, 'editReservation'])->name('reservations.edit');
     Route::put('/reservations/{reservation}', [ScheduleController::class, 'updateReservation'])->name('reservations.update');
-    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    Route::delete('/reservations/{reservation}', [MedicalRecordController::class, 'destroyReservation'])->name('reservations.destroy');
     Route::get('/reservations/get-available-times', [ScheduleController::class, 'getAvailableTimes'])->name('reservations.getAvailableTimes');
-    Route::get('/reservations/whatsapp/{id}', [ReservationController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
-    Route::get('/reservations/whatsappConfirm/{id}', [ReservationController::class, 'waConfirmation'])->name('reservations.whatsappConfirm');
+
+    // ppppp
+    Route::get('/reservations/whatsapp/{id}', [MedicalRecordController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
+    Route::get('/reservations/whatsappConfirm/{id}', [MedicalRecordController::class, 'waConfirmation'])->name('reservations.whatsappConfirm');
 
     Route::prefix('patients/{patientId}')->group(function () {
         // Route to list all medical records for a patient

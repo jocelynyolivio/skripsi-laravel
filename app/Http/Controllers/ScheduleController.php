@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class ScheduleController extends Controller
                 });
 
                 // Cek apakah sesi sudah terreservasi
-                $isReserved = Reservation::where('doctor_id', $template->doctor_id)
+                $isReserved = MedicalRecord::where('doctor_id', $template->doctor_id)
                     ->where('tanggal_reservasi', $selectedDate)
                     ->where('jam_mulai', date('H:i', $currentStartTime))
                     ->exists();
@@ -216,7 +217,7 @@ class ScheduleController extends Controller
 
     public function editReservation($id)
     {
-        $reservation = Reservation::with(['patient', 'doctor'])->findOrFail($id);
+        $reservation = MedicalRecord::with(['patient', 'doctor'])->findOrFail($id);
         $patients = Patient::all();
         $doctors = ScheduleTemplate::with('doctor')->get()->pluck('doctor')->unique();
 
@@ -299,7 +300,7 @@ public function saveReservation(Request $request, $id = null)
     ]);
 
     // Jika ID diberikan, update reservasi yang ada, jika tidak buat baru
-    $reservation = $id ? Reservation::findOrFail($id) : new Reservation();
+    $reservation = $id ? MedicalRecord::findOrFail($id) : new MedicalRecord();
 
     // dd('masuk save');
 
@@ -317,7 +318,7 @@ public function saveReservation(Request $request, $id = null)
     $message = $id ? 'Reservasi berhasil diperbarui.' : 'Reservasi berhasil dibuat.';
     session()->flash('success', $message);
  
-    return redirect()->route('dashboard.schedules.index');
+    return redirect()->route('dashboard.reservations.index');
 }
 
 // Store Reservation memanggil saveReservation

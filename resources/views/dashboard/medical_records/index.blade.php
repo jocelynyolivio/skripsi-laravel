@@ -3,7 +3,6 @@
 @section('container')
 <div class="container mt-5">
     <h3 class="text-center">Medical Records for Patient: {{ $patientName }}</h3>
-    <a href="{{ route('dashboard.medical_records.create', ['patientId' => $patientId]) }}" class="btn btn-primary mb-3">Add Medical Record</a>
 
     @if(session('success'))
     <div class="alert alert-success">
@@ -25,13 +24,12 @@
         <tbody>
             @foreach($medicalRecords as $record)
             <tr>
-                <td>{{ $record->reservation->tanggal_reservasi }}</td>
+                <td>{{ $record->tanggal_reservasi }}</td>
                 <td>{{ $record->teeth_condition }}</td>
                 <td>
                     @if($record->procedures->isNotEmpty())
                         @foreach($proceduress as $procedure)
                             @php
-                                // Filter prosedur pada rekam medis berdasarkan procedure_id
                                 $procedureRecords = $record->procedures->where('id', $procedure->id);
                             @endphp
 
@@ -66,7 +64,7 @@
                         <span class="text-muted">No procedures</span>
                     @endif
                 </td>
-                <td>{{ $record->reservation->doctor->name }}</td>
+                <td>{{ $record->doctor->name }}</td>
                 <td>
                     @if(!$record->transaction)
                         <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-success">Create Transaction</a>
@@ -75,7 +73,10 @@
                     @endif
                 </td>
                 <td>
-                    <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning">Edit</a>
+                    @if($record->procedures->isEmpty())
+                        <!-- Tampilkan tombol Edit hanya jika belum ada prosedur -->
+                        <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning">Tambahkan Medical Record</a>
+                    @endif
 
                     <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-info">Select Materials</a>
 

@@ -30,11 +30,7 @@
             Welcome Back, {{ Auth::guard('patient')->user()->name }}
           </a>
           <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                <i class="bi bi-person"></i> Profile
-              </a>
-            </li>
+
             <li>
               <hr class="dropdown-divider">
             </li>

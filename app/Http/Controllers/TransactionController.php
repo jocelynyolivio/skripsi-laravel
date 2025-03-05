@@ -7,7 +7,6 @@ use App\Models\Patient;
 use App\Models\Pricelist;
 use App\Models\Procedure;
 use App\Models\Receivable;
-use App\Models\Reservation;
 use App\Models\Transaction;
 use App\Models\JournalEntry;
 use Illuminate\Http\Request;
@@ -39,8 +38,6 @@ class TransactionController extends Controller
 
         if ($medicalRecordId) {
             $medicalRecord = MedicalRecord::with([
-                'reservation.patient',
-                'reservation.doctor',
                 'procedures'
             ])->findOrFail(($medicalRecordId));
 
@@ -155,10 +152,7 @@ class TransactionController extends Controller
                 $discount = $validated['discount'][$procedureId] ?? 0;
                 $totalPrice = $unitPrice * $quantity;
                 $finalPrice = max($totalPrice - $discount, 0);
-
-                $doctorId = Reservation::join('medical_records', 'reservations.id', '=', 'medical_records.reservation_id')
-                    ->where('medical_records.id', $medicalRecord->id)
-                    ->value('reservations.doctor_id');
+                $doctorId = MedicalRecord::where('id', $validated['medical_record_id'])->value('doctor_id');
 
                 $doctorRole = User::where('id', $doctorId)->value('role_id');
                 $revenuePercentage = ($doctorRole == 2) ? 35 : 30;
@@ -565,7 +559,7 @@ class TransactionController extends Controller
     public function index()
     {
         // Ambil semua transaksi dengan informasi terkait
-        $transactions = Transaction::with(['patient', 'admin', 'medicalRecord.reservation.patient'])->get();
+        $transactions = Transaction::with(['patient', 'admin', 'medicalRecord.patient'])->get();
         $coa = ChartOfAccount::all();
 
         return view('dashboard.transactions.index', [
@@ -639,8 +633,8 @@ class TransactionController extends Controller
         // Ambil transaksi dengan item transaksi terkait
         $transaction = Transaction::with([
             'items.procedure', // Ambil prosedur dari transaction_items
-            'medicalRecord.reservation.patient',
-            'medicalRecord.reservation.doctor',
+            'medicalRecord.patient',
+            'medicalRecord.doctor',
             'patient' // Tambahkan relasi ke user sebagai pasien jika tidak ada rekam medis
         ])->findOrFail($id);
 

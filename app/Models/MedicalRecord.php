@@ -10,15 +10,14 @@ class MedicalRecord extends Model
     use HasFactory;
 
     protected $fillable = [
-        'reservation_id',
+        'patient_id',
+        'doctor_id',
+        'tanggal_reservasi',
+        'jam_mulai',
+        'jam_selesai',
+        'status_konfirmasi',
         'teeth_condition'
     ];
-
-    // Relasi dengan reservasi
-    public function reservation()
-    {
-        return $this->belongsTo(Reservation::class);
-    }
 
     public function procedures()
     {
@@ -36,5 +35,15 @@ class MedicalRecord extends Model
     public function transaction()
     {
         return $this->hasOne(Transaction::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(User::class, 'doctor_id');
+    }
+    
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'patient_id');
     }
 }

@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MedicalRecord;
 use App\Models\Payment;
 use App\Models\Receivable;
 use Carbon\Carbon;
-use App\Models\Reservation;
 use App\Models\Transaction;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -17,10 +16,10 @@ class DashboardController extends Controller
         $today = Carbon::today();
 
         // Hitung jumlah pasien hari ini
-        $jumlahPasienHariIni = Reservation::whereDate('tanggal_reservasi', $today)->count();
+        $jumlahPasienHariIni = MedicalRecord::whereDate('tanggal_reservasi', $today)->count();
 
         // Hitung jumlah reservasi yang belum diproses
-        $reservasiBelumDiproses = Reservation::whereNull('status_konfirmasi')->count();
+        $reservasiBelumDiproses = MedicalRecord::whereNull('status_konfirmasi')->count();
 
         // Hitung total pendapatan hari ini
         $pendapatanHariIni = Transaction::whereDate('created_at', Carbon::today())->sum('total_amount');

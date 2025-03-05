@@ -13,9 +13,18 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('reservation_id')->constrained('reservations')->onDelete('cascade');
+            $table->unsignedBigInteger('patient_id');
+            $table->unsignedBigInteger('doctor_id');
+            $table->date('tanggal_reservasi');
+            $table->time('jam_mulai');
+            $table->time('jam_selesai');
+            $table->string('status_konfirmasi')->nullable();
             $table->string('teeth_condition')->nullable();
             $table->timestamps();
+
+            // Foreign key constraints
+            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
+            $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
