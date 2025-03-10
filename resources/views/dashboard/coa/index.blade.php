@@ -42,7 +42,7 @@
     });
 
     // Event delegation for SweetAlert confirmation
-    $('#holidaysTable').on('click', '.delete-button', function(e) {
+    $('#coaTable').on('click', '.delete-button', function(e) {
         e.preventDefault();
         var form = $(this).closest('form');
         Swal.fire({

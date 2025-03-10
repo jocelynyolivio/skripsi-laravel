@@ -40,9 +40,12 @@
                         <button type="submit" class="btn btn-danger btn-sm delete-button">Delete</button>
                     </form>
 
+                    @if ($purchase->status !== 'received')
                     <a href="{{ route('dashboard.purchases.receive', $purchase->id) }}" class="btn btn-primary">
-                        Terima Barang
+                        Receive Goods
                     </a>
+                    @endif
+
 
 
                     @if ($purchase->latestPayment && $purchase->latestPayment->total_debt > 0)

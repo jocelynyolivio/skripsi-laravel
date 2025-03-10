@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <h3 class="text-center">Journal Entries</h3>
 
-    <table class="table table-bordered">
+    <table id="journalTable" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>ID</th>
@@ -29,4 +29,14 @@
         </tbody>
     </table>
 </div>
+
+<script>$(document).ready(function() {
+        $('#journalTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+        });
+    });</script>
 @endsection

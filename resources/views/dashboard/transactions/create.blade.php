@@ -12,25 +12,9 @@
             <p><strong>Patient:</strong> {{ $medicalRecord->patient->name }}</p>
             <p><strong>Doctor:</strong> {{ $medicalRecord->doctor->name }}</p>
             <p><strong>Reservation Date:</strong> {{ $medicalRecord->tanggal_reservasi }}</p>
-            <p><strong>Procedures:</strong></p>
-            <ul class="list-group">
-                @foreach($proceduresWithPrices as $item)
-                <li class="list-group-item">
-                    <strong>{{ $item['procedure']->name }}</strong> (x{{ $item['quantity'] }})<br>
-                    <!-- <strong>Base Price:</strong> Rp {{ number_format($item['basePrice'], 0, ',', '.') }} <br> -->
-                    <!-- <strong>Total Price:</strong> Rp {{ number_format($item['basePrice'] * $item['quantity'], 0, ',', '.') }} -->
-                    <!-- @if($item['promoPrice'])
-                            <br>
-                            <strong>Promo Price:</strong> Rp {{ number_format($item['promoPrice'], 0, ',', '.') }} <br>
-                            <strong>Total Promo Price:</strong> Rp {{ number_format($item['promoPrice'] * $item['quantity'], 0, ',', '.') }}
-                        @endif -->
-                </li>
-                @endforeach
-            </ul>
         </div>
     </div>
 
-    <!-- Formulir Transaksi -->
     <form action="{{ route('dashboard.transactions.store') }}" method="POST">
         @csrf
         <input type="hidden" name="medical_record_id" value="{{ $medicalRecord->id }}">
@@ -42,44 +26,38 @@
 
         <div class="mb-3">
             <label><strong>{{ $item['procedure']->name }}</strong> (x{{ $item['quantity'] }})</label>
+            <input type="hidden" class="quantity-input" value="{{ $item['quantity'] }}">
 
             <div class="form-check">
-                <input class="form-check-input amount-input" type="radio"
-                    name="amount[{{ $item['procedure']->id }}]"
-                    value="{{ $item['basePrice'] }}"
-                    data-quantity="{{ $item['quantity'] }}"
-                    checked>
-                <label class="form-check-label">
-                    Base Price: Rp {{ number_format($item['basePrice'], 0, ',', '.') }}
-                </label>
+                <input class="form-check-input amount-input" type="radio" name="amount[{{ $item['procedure']->id }}]" value="{{ $item['basePrice'] }}" checked>
+                <label class="form-check-label">Base Price: Rp {{ number_format($item['basePrice'], 0, ',', '.') }}</label>
             </div>
 
             @if($item['promoPrice'])
             <div class="form-check">
-                <input class="form-check-input amount-input" type="radio"
-                    name="amount[{{ $item['procedure']->id }}]"
-                    value="{{ $item['promoPrice'] }}"
-                    data-quantity="{{ $item['quantity'] }}">
-                <label class="form-check-label">
-                    Promo Price: Rp {{ number_format($item['promoPrice'], 0, ',', '.') }}
-                </label>
+                <input class="form-check-input amount-input" type="radio" name="amount[{{ $item['procedure']->id }}]" value="{{ $item['promoPrice'] }}">
+                <label class="form-check-label">Promo Price: Rp {{ number_format($item['promoPrice'], 0, ',', '.') }}</label>
             </div>
             @endif
 
-            <!-- Input Diskon -->
-            <label for="discount[{{ $item['procedure']->id }}]">Discount (Rp):</label>
-            <input type="number" name="discount[{{ $item['procedure']->id }}]" class="form-control discount-input" value="0" min="0">
+            <label>Discount:</label>
+            <div class="input-group">
+                <input type="number" name="discount[{{ $item['procedure']->id }}]" class="form-control discount-input" value="0" min="0">
+                <select class="form-select discount-type">
+                    <option value="rp" selected>Rp</option>
+                    <option value="percent">%</option>
+                </select>
+            </div>
+            <p class="text-muted">Discount Applied: Rp <span class="discount-amount-display">0</span></p>
+            <input type="hidden" class="discount-hidden" name="discount_final[{{ $item['procedure']->id }}]" value="0">
         </div>
         @endforeach
 
-
-        <!-- Total Amount -->
         <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
             <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
         </div>
         <input type="hidden" id="total_amount" name="total_amount" value="0">
 
-        <!-- Input untuk Payments -->
         <h5>Payments:</h5>
         <div id="payments-container">
             <div class="payment-item mb-3">
@@ -97,124 +75,69 @@
                 </select>
             </div>
 
-
             <label>Notes:</label>
             <input type="string" class="form-control" name="payments[0][notes]">
         </div>
 
-        <!-- Sisa Tagihan : jadi piutang -->
         <div class="card mt-3 bg-warning text-dark p-2 w-50 mx-auto">
-            <h5 class="text-center mb-0">Sisa Tagihan: Rp <span id="remaining-amount-display">0</span></h5>
+            <h5 class="text-center mb-0">Remaining Amount: Rp <span id="remaining-amount-display">0</span></h5>
         </div>
         <input type="hidden" id="remaining_amount" name="remaining_amount" value="0">
+
+        <button type="submit" class="btn btn-success">Create Transaction</button>
+    </form>
 </div>
 
-<button type="submit" class="btn btn-success">Create Transaction</button>
-</form>
-</div>
-
-<!-- Script Perhitungan Total Harga -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("Script Loaded: Form transaction with medical record is ready!");
-
-        // Deklarasi Variabel untuk Element DOM
         const amountInputs = document.querySelectorAll('.amount-input');
         const discountInputs = document.querySelectorAll('.discount-input');
+        const discountTypes = document.querySelectorAll('.discount-type');
+        const discountDisplays = document.querySelectorAll('.discount-amount-display');
+        const discountHiddenInputs = document.querySelectorAll('.discount-hidden');
         const totalAmountField = document.getElementById('total_amount');
         const totalAmountDisplay = document.getElementById('total-amount-display');
-
-        const remainingPaymentField = document.getElementById('remaining_amount');
-        const remainingPaymentDisplay = document.getElementById('remaining-amount-display');
-
         const paymentInput = document.getElementById('payment');
+        const remainingAmountField = document.getElementById('remaining_amount');
+        const remainingAmountDisplay = document.getElementById('remaining-amount-display');
 
-        // console.log("DOM Elements:", {
-        //     amountInputs,
-        //     discountInputs,
-        //     totalAmountField,
-        //     totalAmountDisplay,
-        //     remainingPaymentField,
-        //     remainingPaymentDisplay,
-        //     paymentInput
-        // });
-
-        // Fungsi untuk Menghitung Total Harga
         function calculateTotal() {
-            console.log("Calculating Total...");
-
             let total = 0;
-
-            amountInputs.forEach(input => {
+            amountInputs.forEach((input, index) => {
                 if (input.checked) {
-                    const procedureId = input.name.match(/\d+/)[0]; // Ambil ID prosedur
-                    const unitPrice = parseFloat(input.value) || 0;
-                    const discountInput = document.querySelector(`input[name="discount[${procedureId}]"]`);
-                    const quantity = parseInt(input.dataset.quantity) || 1; // Ambil quantity dari data-quantity
-
-                    const discount = parseFloat(discountInput?.value) || 0;
-                    const finalPrice = Math.max((unitPrice * quantity) - discount, 0);
-                    total += finalPrice;
-
-                    // Console Log untuk Debugging
-                    console.log(`Procedure ID: ${procedureId}`);
-                    console.log(`Unit Price: Rp ${unitPrice}`);
-                    console.log(`Quantity: ${quantity}`);
-                    console.log(`Discount: Rp ${discount}`);
-                    console.log(`Final Price: Rp ${finalPrice}`);
+                    const quantity = parseInt(input.closest('.mb-3').querySelector('.quantity-input').value) || 1;
+                    let unitPrice = parseFloat(input.value);
+                    let discountInput = discountInputs[index];
+                    let discountType = discountTypes[index].value;
+                    let discount = parseFloat(discountInput.value) || 0;
+                    let finalDiscount = discountType === 'percent' ? ((unitPrice * quantity) * (discount / 100)) : discount;
+                    discountDisplays[index].textContent = finalDiscount.toLocaleString();
+                    discountHiddenInputs[index].value = finalDiscount;
+                    total += Math.max((unitPrice * quantity) - finalDiscount, 0);
                 }
             });
-
-            console.log(`Total Amount: Rp ${total}`);
-
-            totalAmountField.value = total.toFixed(0);
+            totalAmountField.value = total;
             totalAmountDisplay.textContent = total.toLocaleString();
-
-            calculateRemainingPayment(total);
+            calculateRemainingPayment();
         }
 
-        // Fungsi untuk Menghitung Sisa Tagihan
-        function calculateRemainingPayment(total) {
-            console.log("Calculating Remaining Payment...");
-
-            const payment = parseFloat(paymentInput.value) || 0;
-            const remaining = Math.max(total - payment, 0);
-
-            remainingPaymentField.value = remaining.toFixed(0);
-            remainingPaymentDisplay.textContent = remaining.toLocaleString();
-
-            console.log(`Payment Made: Rp ${payment}`);
-            console.log(`Remaining Payment: Rp ${remaining}`);
+        function calculateRemainingPayment() {
+            let total = parseFloat(totalAmountField.value);
+            let payment = parseFloat(paymentInput.value) || 0;
+            if (payment > total) {
+                paymentInput.value = total;
+            }
+            let remaining = Math.max(total - payment, 0);
+            remainingAmountField.value = remaining;
+            remainingAmountDisplay.textContent = remaining.toLocaleString();
         }
 
-        // Event Listener untuk Perubahan Harga
-        amountInputs.forEach(input => {
-            input.addEventListener('change', () => {
-                console.log(`Price Changed: ${input.value}`);
-                calculateTotal();
-            });
-        });
+        amountInputs.forEach(input => input.addEventListener('change', calculateTotal));
+        discountInputs.forEach(input => input.addEventListener('input', calculateTotal));
+        discountTypes.forEach(select => select.addEventListener('change', calculateTotal));
+        paymentInput.addEventListener('input', calculateRemainingPayment);
 
-        // Event Listener untuk Perubahan Diskon
-        discountInputs.forEach(input => {
-            input.addEventListener('input', () => {
-                console.log(`Discount Changed: ${input.value}`);
-                calculateTotal();
-            });
-        });
-
-        // Event Listener untuk Perubahan Pembayaran
-        paymentInput.addEventListener('input', () => {
-            console.log(`Payment Input Changed: ${paymentInput.value}`);
-            const total = parseFloat(totalAmountField.value) || 0;
-            calculateRemainingPayment(total);
-        });
-
-        // Hitung total awal saat halaman dimuat
         calculateTotal();
     });
 </script>
-
-
-
 @endsection

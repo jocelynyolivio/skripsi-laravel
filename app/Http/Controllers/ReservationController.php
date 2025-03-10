@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use App\Models\MedicalRecord;
+use Illuminate\Support\Facades\Mail;
 
 class ReservationController extends Controller
 {
@@ -172,9 +174,10 @@ class ReservationController extends Controller
 
         // Mengambil ID pasien yang sedang login
         $patientId = auth()->guard('patient')->user()->id;
+        $patientName = auth()->guard('patient')->user()->name;
 
         // Simpan data reservasi ke database
-        $reservation = Reservation::create([
+        MedicalRecord::create([
             'patient_id' => $patientId,
             'doctor_id' => $request->doctor_id,
             'tanggal_reservasi' => $request->tanggal_reservasi,
@@ -182,6 +185,19 @@ class ReservationController extends Controller
             'jam_selesai' => $request->jam_selesai,
         ]);
 
+        // Kirim Email ke Admin TANPA Mail Class
+        Mail::raw(
+            "🔔 Notifikasi Reservasi Baru! \n\n" .
+                "📌 Pasien: {$patientName} \n" .
+                "🩺 Dokter ID: {$request->doctor_id} \n" .
+                "📅 Tanggal: {$request->tanggal_reservasi} \n" .
+                "⏰ Jam: {$request->jam_mulai} - {$request->jam_selesai} \n\n" .
+                "Cek sistem untuk lebih lanjut.",
+            function ($message) {
+                $message->to('emailnyayoli@gmail.com')
+                    ->subject('🔔 Reservasi Baru dari Pasien!');
+            }
+        );
         // Menyimpan flash message ke session
         session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
 
@@ -189,19 +205,19 @@ class ReservationController extends Controller
     }
 
     public function upcomingReservations()
-{
-    // Ambil user yang sedang login
-    $patientId = auth()->id();
+    {
+        // Ambil user yang sedang login
+        $patientId = auth()->id();
 
-    // Ambil daftar reservasi yang masih berlaku (tanggal >= hari ini)
-    $reservations = Reservation::where('patient_id', $patientId)
-        ->whereDate('tanggal_reservasi', '>=', now()->toDateString()) // Cek jika tanggal masih berlaku
-        ->with('doctor') // Ambil data dokter
-        ->orderBy('tanggal_reservasi', 'asc') // Urutkan berdasarkan tanggal
-        ->get();
+        // Ambil daftar reservasi yang masih berlaku (tanggal >= hari ini)
+        $reservations = MedicalRecord::where('patient_id', $patientId)
+            ->whereDate('tanggal_reservasi', '>=', now()->toDateString()) // Cek jika tanggal masih berlaku
+            ->with('doctor') // Ambil data dokter
+            ->orderBy('tanggal_reservasi', 'asc') // Urutkan berdasarkan tanggal
+            ->get();
 
-    return view('reservation.upcoming', compact('reservations'));
-}
+        return view('reservation.upcoming', compact('reservations'));
+    }
 
 
     // public function createForAdmin()

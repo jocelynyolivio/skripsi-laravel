@@ -104,6 +104,28 @@
 
             <!-- Divider -->
             <hr class="border-light">
+            <h6 class="text-uppercase px-3 text-light mt-3">PURCHASES</h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.purchases.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Purchase Invoice
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Divider -->
+            <hr class="border-light">
+            <h6 class="text-uppercase px-3 text-light mt-3">JOURNALS</h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.journals.index') }}">
+                        <i class="bi bi-calendar-plus"></i> Journal Details
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Divider -->
+            <hr class="border-light">
 
             <h6 class="text-uppercase px-3 text-light mt-3">Schedules Management</h6>
             <ul class="nav flex-column">

@@ -57,14 +57,14 @@
             </div>
 
             <div class="form-group">
-    <label for="coa_id">Bayar Dari (Akun Kas/Bank)</label>
-    <select class="form-control" id="coa_id" name="coa_id" required>
-        <option value="">-- Pilih Akun Kas/Bank --</option>
-        @foreach ($cashAccounts as $account)
-            <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
-        @endforeach
-    </select>
-</div>
+                <label for="coa_id">Bayar Dari (Akun Kas/Bank)</label>
+                <select class="form-control" id="coa_id" name="coa_id" required>
+                    <option value="">-- Pilih Akun Kas/Bank --</option>
+                    @foreach ($cashAccounts as $account)
+                    <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
+                    @endforeach
+                </select>
+            </div>
 
 
             <label>Notes:</label>
@@ -83,160 +83,185 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    console.log("Script Loaded: Form Transaction Without Medical Record is Ready!");
+        console.log("Script Loaded: Form Transaction Without Medical Record is Ready!");
 
-    const procedureSelect = document.getElementById('procedure_id');
-    const addProcedureButton = document.getElementById('add-procedure');
-    const selectedItemsContainer = document.getElementById('selected-items');
-    const totalAmountField = document.getElementById('total_amount');
-    const totalAmountDisplay = document.getElementById('total-amount-display');
-    const remainingPaymentDisplay = document.getElementById('remaining-amount-display');
-    let itemIndex = 0;
+        const procedureSelect = document.getElementById('procedure_id');
+        const addProcedureButton = document.getElementById('add-procedure');
+        const selectedItemsContainer = document.getElementById('selected-items');
+        const totalAmountField = document.getElementById('total_amount');
+        const totalAmountDisplay = document.getElementById('total-amount-display');
+        const remainingPaymentDisplay = document.getElementById('remaining-amount-display');
+        const paymentInput = document.getElementById('payment');
 
-    // Event Listener untuk Tombol "Add"
-    addProcedureButton.addEventListener('click', function() {
-        const selectedOption = procedureSelect.options[procedureSelect.selectedIndex];
-        const procedureId = selectedOption.value;
-        const procedureName = selectedOption.text;
-        const basePrice = parseFloat(selectedOption.getAttribute('data-base-price')) || 0;
-        const promoPrice = parseFloat(selectedOption.getAttribute('data-promo-price')) || null;
+        let itemIndex = 0;
 
-        console.log(`Selected Procedure ID: ${procedureId}`);
-        console.log(`Selected Procedure Name: ${procedureName}`);
-        console.log(`Base Price: Rp ${basePrice}`);
-        console.log(`Promo Price: Rp ${promoPrice}`);
+        function updateTotal() {
+            console.log("Menghitung Total Amount...");
+            let newTotal = 0;
 
-        // Cek Apakah Item Sudah Ada
-        if (procedureId && !document.getElementById(`item-${procedureId}`)) {
-            console.log("Adding Procedure to List...");
+            document.querySelectorAll('.quantity-input').forEach((input, index) => {
+                const quantity = parseInt(input.value) || 1;
+                const priceSelect = document.querySelectorAll('.price-select')[index];
+                const unitPrice = parseFloat(priceSelect.value) || 0;
+                const discountInput = document.querySelectorAll('.discount-input')[index];
+                const discountType = document.querySelectorAll('.discount-type')[index].value;
 
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('card', 'p-2', 'mb-2');
-            itemDiv.id = `item-${procedureId}`;
-            itemDiv.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <span><strong>${procedureName}</strong></span>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem('${procedureId}')">Remove</button>
-                </div>
-                <label>Quantity:</label>
-                <input type="number" name="items[${itemIndex}][quantity]" class="form-control w-50 quantity-input" value="1" min="1">
-                
-                <label>Price:</label>
-                <select name="items[${itemIndex}][unit_price]" class="form-control price-select">
-                    <option value="${basePrice}" selected>Base Price: Rp ${formatCurrency(basePrice)}</option>
-                    ${promoPrice ? `<option value="${promoPrice}">Promo Price: Rp ${formatCurrency(promoPrice)}</option>` : ''}
-                </select>
+                let discount = parseFloat(discountInput.value) || 0;
+                let finalDiscount = discount;
 
-                <label>Discount (Rp):</label>
-                <input type="number" name="items[${itemIndex}][discount]" class="form-control discount-input" value="0" min="0">
+                if (discountType === 'percent') {
+                    finalDiscount = Math.min((unitPrice * quantity) * (discount / 100), unitPrice * quantity);
+                    discountInput.value = finalDiscount.toFixed(0); // Update nilai di form input
+                }
 
-                <label>Final Price:</label>
-                <p><strong>Rp <span class="final-price-display">0</span></strong></p>
+                const finalPrice = Math.max((unitPrice * quantity) - finalDiscount, 0);
+                document.querySelectorAll('.final-price-display')[index].textContent = formatCurrency(finalPrice);
 
-                <input type="hidden" name="items[${itemIndex}][id]" value="${procedureId}">
-            `;
-            selectedItemsContainer.appendChild(itemDiv);
-            itemIndex++;
-            console.log("Procedure Added. Updating Total...");
-            updateTotal();
-        } else {
-            console.log("Procedure is already in the list or not selected.");
+                console.log(`Item Index: ${index}`);
+                console.log(`Quantity: ${quantity}`);
+                console.log(`Unit Price: Rp ${unitPrice}`);
+                console.log(`Discount Type: ${discountType}`);
+                console.log(`Discount: Rp ${discount}`);
+                console.log(`Final Discount (Rp): ${finalDiscount}`);
+                console.log(`Final Price: Rp ${finalPrice}`);
+
+                newTotal += finalPrice;
+            });
+
+            console.log(`New Total Amount: Rp ${newTotal}`);
+            totalAmountField.value = newTotal.toFixed(0);
+            totalAmountDisplay.textContent = formatCurrency(newTotal);
+
+            updatePaymentLimit(newTotal);
+            calculateRemainingPayment(newTotal);
         }
-    });
 
-    // Fungsi untuk Menghapus Item
-    window.removeItem = function(procedureId) {
-        console.log(`Removing Procedure ID: ${procedureId}`);
-        const itemDiv = document.getElementById(`item-${procedureId}`);
-        if (itemDiv) {
-            itemDiv.remove();
-            console.log("Procedure Removed. Updating Total...");
-            updateTotal();
+
+        function calculateRemainingPayment(total) {
+            console.log("Calculating Remaining Payment...");
+            let payment = parseFloat(paymentInput.value) || 0;
+            let remaining = Math.max(total - payment, 0);
+
+            remainingPaymentDisplay.textContent = formatCurrency(remaining);
+
+            console.log(`Payment Made: Rp ${payment}`);
+            console.log(`Remaining Payment: Rp ${remaining}`);
         }
-    }
 
-    // Fungsi untuk Menghitung Total Harga
-    function updateTotal() {
-        console.log("Calculating Total Amount...");
-        let newTotal = 0;
+        function updatePaymentLimit(total) {
+            console.log("Updating Payment Input Limit...");
 
-        document.querySelectorAll('.quantity-input').forEach((input, index) => {
-            const quantity = parseInt(input.value) || 1;
-            const priceSelect = document.querySelectorAll('.price-select')[index];
-            const unitPrice = parseFloat(priceSelect.value) || 0;
-            const discountInput = document.querySelectorAll('.discount-input')[index];
-            const discount = parseFloat(discountInput.value) || 0;
-            const finalPrice = Math.max((unitPrice * quantity) - discount, 0);
+            paymentInput.max = total;
+            let payment = parseFloat(paymentInput.value) || 0;
 
-            console.log(`Item Index: ${index}`);
-            console.log(`Quantity: ${quantity}`);
-            console.log(`Unit Price: Rp ${unitPrice}`);
-            console.log(`Discount: Rp ${discount}`);
-            console.log(`Final Price: Rp ${finalPrice}`);
+            if (payment > total) {
+                console.warn("⚠️ Payment amount exceeds total due. Adjusting...");
+                paymentInput.value = total;
+                payment = total;
+            }
 
-            document.querySelectorAll('.final-price-display')[index].textContent = formatCurrency(finalPrice);
-            newTotal += finalPrice;
+            calculateRemainingPayment(total);
+        }
+
+        addProcedureButton.addEventListener('click', function() {
+            const selectedOption = procedureSelect.options[procedureSelect.selectedIndex];
+            const procedureId = selectedOption.value;
+            const procedureName = selectedOption.text;
+            const basePrice = parseFloat(selectedOption.getAttribute('data-base-price')) || 0;
+            const promoPrice = parseFloat(selectedOption.getAttribute('data-promo-price')) || null;
+
+            console.log(`Selected Procedure ID: ${procedureId}`);
+            console.log(`Selected Procedure Name: ${procedureName}`);
+            console.log(`Base Price: Rp ${basePrice}`);
+            console.log(`Promo Price: Rp ${promoPrice}`);
+
+            if (procedureId && !document.getElementById(`item-${procedureId}`)) {
+                console.log("Adding Procedure to List...");
+
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('card', 'p-2', 'mb-2');
+                itemDiv.id = `item-${procedureId}`;
+                itemDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><strong>${procedureName}</strong></span>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeItem('${procedureId}')">Remove</button>
+                    </div>
+                    <label>Quantity:</label>
+                    <input type="number" name="items[${itemIndex}][quantity]" class="form-control w-50 quantity-input" value="1" min="1">
+
+                    <label>Price:</label>
+                    <select name="items[${itemIndex}][unit_price]" class="form-control price-select">
+                        <option value="${basePrice}" selected>Base Price: Rp ${formatCurrency(basePrice)}</option>
+                        ${promoPrice ? `<option value="${promoPrice}">Promo Price: Rp ${formatCurrency(promoPrice)}</option>` : ''}
+                    </select>
+
+                    <label>Discount:</label>
+                    <div class="input-group">
+                        <input type="number" name="items[${itemIndex}][discount]" class="form-control discount-input" value="0" min="0">
+                        <select class="form-select discount-type" data-index="${itemIndex}">
+                            <option value="rp" selected>Rp</option>
+                            <option value="percent">%</option>
+                        </select>
+                    </div>
+
+                    <label>Final Price:</label>
+                    <p><strong>Rp <span class="final-price-display">0</span></strong></p>
+
+                    <input type="hidden" name="items[${itemIndex}][id]" value="${procedureId}">
+                `;
+                selectedItemsContainer.appendChild(itemDiv);
+                itemIndex++;
+                console.log("Procedure Added. Updating Total...");
+                updateTotal();
+            } else {
+                console.log("Procedure is already in the list or not selected.");
+            }
         });
 
-        console.log(`New Total Amount: Rp ${newTotal}`);
-        totalAmountField.value = newTotal.toFixed(0);
-        totalAmountDisplay.textContent = formatCurrency(newTotal);
+        window.removeItem = function(procedureId) {
+            console.log(`Removing Procedure ID: ${procedureId}`);
+            const itemDiv = document.getElementById(`item-${procedureId}`);
+            if (itemDiv) {
+                itemDiv.remove();
+                console.log("Procedure Removed. Updating Total...");
+                updateTotal();
+            }
+        };
 
-        calculateRemainingPayment(newTotal);
-    }
-
-    // Fungsi untuk Menghitung Sisa Tagihan
-    function calculateRemainingPayment(total) {
-        console.log("Calculating Remaining Payment...");
-        const paymentInputs = document.querySelectorAll('#payments-container input[type="number"]');
-        let totalPayment = 0;
-
-        paymentInputs.forEach(input => {
-            const paymentAmount = parseFloat(input.value) || 0;
-            totalPayment += paymentAmount;
-            console.log(`Payment Amount: Rp ${paymentAmount}`);
+        document.addEventListener('input', function(event) {
+            if (event.target.classList.contains('quantity-input') ||
+                event.target.classList.contains('discount-input')) {
+                console.log("Quantity atau Diskon diubah. Mengupdate total...");
+                updateTotal();
+            }
         });
 
-        const remaining = Math.max(total - totalPayment, 0);
-        console.log(`Remaining Payment: Rp ${remaining}`);
-        remainingPaymentDisplay.textContent = formatCurrency(remaining);
-    }
+        document.addEventListener('change', function(event) {
+            if (event.target.classList.contains('price-select') ||
+                event.target.classList.contains('discount-type')) {
+                console.log("Harga atau tipe diskon berubah. Mengupdate total...");
+                updateTotal();
+            }
+        });
 
-    // Fungsi untuk Memformat ke Rupiah
-    function formatCurrency(amount) {
-        return amount.toLocaleString('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0
-        }).replace('Rp', '').trim();
-    }
 
-    // Event Listener untuk Perubahan Quantity atau Diskon
-    document.addEventListener('input', function(event) {
-        if (event.target.classList.contains('quantity-input') ||
-            event.target.classList.contains('discount-input')) {
-            console.log("Quantity or Discount Changed. Updating Total...");
-            updateTotal();
-        }
-    });
-
-    // Event Listener untuk Perubahan Harga
-    document.addEventListener('change', function(event) {
-        if (event.target.classList.contains('price-select')) {
-            console.log("Price Changed. Updating Total...");
-            updateTotal();
-        }
-    });
-
-    // Event Listener untuk Perubahan Pembayaran
-    document.querySelectorAll('#payments-container input[type="number"]').forEach(paymentInput => {
         paymentInput.addEventListener('input', function() {
-            console.log("Payment Changed. Calculating Remaining Payment...");
-            updateTotal();
+            console.log("Payment Changed. Updating Remaining Payment...");
+            let total = parseFloat(totalAmountField.value) || 0;
+            updatePaymentLimit(total);
         });
-    });
-});
 
+        function formatCurrency(amount) {
+            return amount.toLocaleString('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).replace('Rp', '').trim();
+        }
+
+        updateTotal();
+    });
 </script>
+
 
 @endsection

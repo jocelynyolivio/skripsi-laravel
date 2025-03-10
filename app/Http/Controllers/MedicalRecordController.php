@@ -12,6 +12,7 @@ use App\Models\JournalEntry;
 use Illuminate\Http\Request;
 use App\Models\JournalDetail;
 use App\Models\MedicalRecord;
+use App\Models\ChartOfAccount;
 use App\Models\DentalMaterial;
 use PHPUnit\Framework\Attributes\Medium;
 
@@ -369,10 +370,16 @@ class MedicalRecordController extends Controller
             $journalEntry->description = 'HPP untuk Prosedur pada Medical Record ' . $medicalRecord->id;
             $journalEntry->save();
 
+            $idBahanDental = ChartOfAccount::where('name', 'HPP Bahan Dental')->value('id');
+            $idPersediaanBahanDental = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
+
+            // dd($idBahanDental, $idPersediaanBahanDental);
+
             // 2. Debit HPP Bahan Dental
             JournalDetail::create([
                 'journal_entry_id' => $journalEntry->id,
-                'coa_id' => 20, // ID COA HPP Bahan Dental
+                // 'coa_id' => 20, // ID COA HPP Bahan Dental
+                'coa_id' => $idBahanDental, // ID COA HPP Bahan Dental
                 'debit' => $totalHPP,
                 'credit' => 0
             ]);
@@ -380,7 +387,8 @@ class MedicalRecordController extends Controller
             // 3. Kredit Persediaan Bahan Dental
             JournalDetail::create([
                 'journal_entry_id' => $journalEntry->id,
-                'coa_id' => 13, // ID COA Persediaan Bahan Dental
+                // 'coa_id' => 13, // ID COA Persediaan Bahan Dental
+                'coa_id' => $idPersediaanBahanDental,
                 'debit' => 0,
                 'credit' => $totalHPP
             ]);

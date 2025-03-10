@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
+use App\Models\JournalEntry;
 use Illuminate\Http\Request;
+use App\Models\JournalDetail;
 use App\Models\ChartOfAccount;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,14 +49,14 @@ class ExpenseController extends Controller
         ]);
 
         // Simpan Journal Entry
-        $journal = \App\Models\JournalEntry::create([
+        $journal = JournalEntry::create([
             'transaction_id' => $request->id,
             'entry_date' => $request->expense_date,
             'description' => "Expense: " . $request->description,
         ]);
 
         // Simpan Journal Details (Debit - Beban)
-        \App\Models\JournalDetail::create([
+        JournalDetail::create([
             'journal_entry_id' => $journal->id,
             'coa_id' => $request->coa_in, // Akun Beban
             'debit' => $request->amount,
@@ -62,7 +64,7 @@ class ExpenseController extends Controller
         ]);
 
         // Simpan Journal Details (Kredit - Kas/Bank)
-        \App\Models\JournalDetail::create([
+        JournalDetail::create([
             'journal_entry_id' => $journal->id,
             'coa_id' => $request->coa_out, // Akun Kas/Bank
             'debit' => 0,

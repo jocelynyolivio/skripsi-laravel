@@ -339,6 +339,45 @@ class DatabaseSeeder extends Seeder
             ['tanggal' => '2025-12-25', 'keterangan' => 'Hari Raya Natal'],
         ]);
 
+        // $accounts = [
+        //     // Aset Lancar (Current Assets)
+        //     ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
+        //     ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset'],
+        //     ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset'],
+        //     ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset'],
+        //     ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset'],
+        //     ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset'],
+        //     ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset'],
+        //     ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset'],
+        //     ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
+        //     ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
+
+        //     // Piutang Usaha
+        //     ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
+
+        //     // Persediaan
+        //     //ini 12 13
+        //     ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
+        //     ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
+
+        //     // Kewajiban (Liabilities)
+        //     ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
+        //     ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
+
+        //     // Ekuitas (Equity)
+        //     ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
+        //     ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity'],
+
+        //     // Pendapatan (Revenue)
+        //     ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
+
+        //     // Beban (Expenses)
+        //     ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
+        //     ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
+        //     ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
+        // ];
+
+        // tambahan
         $accounts = [
             // Aset Lancar (Current Assets)
             ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
@@ -352,17 +391,31 @@ class DatabaseSeeder extends Seeder
             ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
             ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
 
-            // Piutang Usaha
+            // Piutang Usaha (acount receivables)
             ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
 
-            // Persediaan
+            // Persediaan (inventory bahan medis)
             //ini 12 13
             ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
             ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
 
+            // beban dibayar dimuka (prepaid expenses)
+            ['code' => '1-10300', 'name' => 'Beban Dibayar di Muka', 'type' => 'asset'],
+
+            // fixed asset dan depreciation : berhubungan kyk tanah dll yang ada dpresiasi nya
+            // harusnya ga kepake sih 
+            ['code' => '1-10400', 'name' => 'Aset Tetap', 'type' => 'asset'],
+            ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'asset'],
+            ['code' => '1-10600', 'name' => 'Aset Lain-Lain', 'type' => 'asset'],
+
             // Kewajiban (Liabilities)
+            // accounts payable
             ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
             ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
+
+            // Accrued liabilities harus dicatat pada periode di mana transaksi terjadi, bukan saat pembayaran dilakukan, agar sesuai dengan prinsip akuntansi akrual.
+            // Sebagai contoh, jika sebuah perusahaan berlangganan layanan perangkat lunak bulanan senilai Rp5.000.000, tetapi pembayaran dilakukan setiap tiga bulan, maka setiap bulan perusahaan tersebut harus mencatat Rp5.000.000 sebagai accrued liabilities hingga faktur dibayarkan. Setelah pembayaran dilakukan, accrued liabilities akan berkurang.
+            // ['code' => '2-20100', 'name' => 'Accrued Liabi', 'type' => 'liability'],
 
             // Ekuitas (Equity)
             ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
@@ -370,11 +423,21 @@ class DatabaseSeeder extends Seeder
 
             // Pendapatan (Revenue)
             ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
+            // Sales Returns and Allowances adalah suatu peristiwa dimana barang yang kita jual dan telah sampai kepada pelanggan mengalami cacat produksi atau adanya kerusakan ketika terjadi pengiriman yang adanya kesepakatan bahwa risiko pengiriman ditanggung oleh perusahaan.
+            // ['code' => '4-10100', 'name' => 'Retur Penjualan dan Pengurangan Harga', 'type' => 'revenue'],
 
             // Beban (Expenses)
             ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
             ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
             ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
+            ['code' => '5-10004', 'name' => 'Beban Iklan', 'type' => 'expense'],
+            ['code' => '5-10005', 'name' => 'Biaya Admin Bank', 'type' => 'expense'],
+            ['code' => '5-10006', 'name' => 'Beban ATK', 'type' => 'expense'],
+            ['code' => '5-10007', 'name' => 'Beban Listrik', 'type' => 'expense'],
+            ['code' => '5-10008', 'name' => 'Beban Air', 'type' => 'expense'],
+            ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
+            ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
+            // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
         ];
 
         foreach ($accounts as $account) {

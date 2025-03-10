@@ -128,8 +128,10 @@ class TransactionController extends Controller
             'admin_id' => 'required|exists:users,id',
             'amount' => 'required|array',
             'amount.*' => 'numeric|min:0',
-            'discount' => 'required|array',
-            'discount.*' => 'numeric|min:0',
+            // 'discount' => 'required|array',
+            // 'discount.*' => 'numeric|min:0',
+            'discount_final' => 'required|array',
+            'discount_final.*' => 'numeric|min:0',
             'coa_id' => 'required|exists:chart_of_accounts,id', // coa
             'payments' => 'nullable|array',
             'payments.*.amount' => 'required|numeric|min:0',
@@ -149,7 +151,7 @@ class TransactionController extends Controller
 
             foreach ($procedureCounts as $procedureId => $quantity) {
                 $unitPrice = $validated['amount'][$procedureId] ?? 0;
-                $discount = $validated['discount'][$procedureId] ?? 0;
+                $discount = $validated['discount_final'][$procedureId] ?? 0;
                 $totalPrice = $unitPrice * $quantity;
                 $finalPrice = max($totalPrice - $discount, 0);
                 $doctorId = MedicalRecord::where('id', $validated['medical_record_id'])->value('doctor_id');
@@ -227,12 +229,14 @@ class TransactionController extends Controller
             'description' => 'Penjualan pada ' . now()->format('d-m-Y'),
         ]);
 
+        $idPiutangUsaha = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
+
         // **Journal untuk Penjualan & Piutang Usaha**
         // Debit: Piutang Usaha (Sisa Tagihan / Remaining Amount)
         if ($remainingAmount > 0) {
             JournalDetail::create([
                 'journal_entry_id' => $journalEntry->id,
-                'coa_id' => 11, // Piutang Usaha
+                'coa_id' => $idPiutangUsaha, // Piutang Usaha
                 'debit' => $remainingAmount,
                 'credit' => 0
             ]);
@@ -248,10 +252,12 @@ class TransactionController extends Controller
             ]);
         }
 
+        $idPendapatanPenjualan = ChartOfAccount::where('name', 'Pendapatan Penjualan')->value('id');
+
         // Kredit: Pendapatan Penjualan (Total Transaksi)
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => 18, // Pendapatan Penjualan
+            'coa_id' => $idPendapatanPenjualan, // Pendapatan Penjualan
             'debit' => 0,
             'credit' => $totalAmount
         ]);
@@ -356,12 +362,14 @@ class TransactionController extends Controller
             'description' => 'Penjualan pada ' . now()->format('d-m-Y'),
         ]);
 
+        $idPiutangUsaha = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
+
         // **Journal untuk Penjualan & Piutang Usaha**
         // Debit: Piutang Usaha (Sisa Tagihan / Remaining Amount)
         if ($remainingAmount > 0) {
             JournalDetail::create([
                 'journal_entry_id' => $journalEntry->id,
-                'coa_id' => 11, // Piutang Usaha
+                'coa_id' => $idPiutangUsaha, // Piutang Usaha
                 'debit' => $remainingAmount,
                 'credit' => 0
             ]);
@@ -377,10 +385,12 @@ class TransactionController extends Controller
             ]);
         }
 
+        $idPendapatanPenjualan = ChartOfAccount::where('name', 'Pendapatan Penjualan')->value('id');
+
         // Kredit: Pendapatan Penjualan (Total Transaksi)
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => 18, // Pendapatan Penjualan
+            'coa_id' => $idPendapatanPenjualan, // Pendapatan Penjualan
             'debit' => 0,
             'credit' => $totalAmount
         ]);
@@ -596,19 +606,23 @@ class TransactionController extends Controller
         ]);
 
         // Ambil ID akun kas/bank berdasarkan pilihan user
-        $coaKas = ChartOfAccount::where('id', $validated['coa_id'])->value('id');
+        // $coaKas = ChartOfAccount::where('id', $validated['coa_id'])->value('id');
+
+        // dd($validated['coa_id'], $coaKas);
 
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => $coaKas,
+            'coa_id' => $validated['coa_id'],
             'debit' => $validated['amount'],
             'credit' => 0
         ]);
 
+        $idPiutangUsaha = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
+
         // Kredit: Piutang Usaha
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => 11, // Piutang Usaha
+            'coa_id' => $idPiutangUsaha, // Piutang Usaha
             'debit' => 0,
             'credit' => $validated['amount']
         ]);

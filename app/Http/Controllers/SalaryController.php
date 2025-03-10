@@ -6,10 +6,12 @@ use App\Models\User;
 use Dotenv\Util\Regex;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
-use App\Models\SalaryCalculation;
+use App\Models\JournalDetail;
+use App\Models\ChartOfAccount;
 use App\Models\TransactionItem;
-use Illuminate\Support\Facades\Auth;
+use App\Models\SalaryCalculation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class SalaryController extends Controller
@@ -378,18 +380,21 @@ class SalaryController extends Controller
                 'description' => "Pembayaran Gaji bulan " . $salaryRecord->month . " untuk user ID: " . $salary['user_id'],
             ]);
 
+            $idBebanGaji = ChartOfAccount::where('name', 'Beban Gaji')->value('id');
+            $idKas = ChartOfAccount::where('name', 'Kas')->value('id');
+
             // Simpan Journal Details (Debit - Beban Gaji)
-            \App\Models\JournalDetail::create([
+            JournalDetail::create([
                 'journal_entry_id' => $journal->id,
-                'coa_id' => 19, // ID akun Beban Gaji (pastikan ini sesuai database)
+                'coa_id' => $idBebanGaji, // ID akun Beban Gaji (pastikan ini sesuai database)
                 'debit' => $salary['grand_total'] ?? 0,
                 'credit' => 0,
             ]);
 
             // Simpan Journal Details (Kredit - Kas/Bank)
-            \App\Models\JournalDetail::create([
+            JournalDetail::create([
                 'journal_entry_id' => $journal->id,
-                'coa_id' => 1, // ID akun Kas/Bank
+                'coa_id' => $idKas, // ID akun Kas/Bank
                 'debit' => 0,
                 'credit' => $salary['grand_total'] ?? 0,
             ]);
@@ -434,7 +439,7 @@ class SalaryController extends Controller
             ]);
 
             // Simpan Journal Details (Debit - Beban Gaji Dokter)
-            \App\Models\JournalDetail::create([
+            JournalDetail::create([
                 'journal_entry_id' => $journal->id,
                 'coa_id' => 19, // ID akun Beban Gaji (pastikan sesuai database)
                 'debit' => $salary['grand_total'],
@@ -442,7 +447,7 @@ class SalaryController extends Controller
             ]);
 
             // Simpan Journal Details (Kredit - Kas/Bank)
-            \App\Models\JournalDetail::create([
+            JournalDetail::create([
                 'journal_entry_id' => $journal->id,
                 'coa_id' => 1, // ID akun Kas/Bank
                 'debit' => 0,

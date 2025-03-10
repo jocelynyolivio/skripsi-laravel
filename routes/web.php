@@ -12,8 +12,10 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\OdontogramController;
@@ -25,12 +27,11 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
+use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
-use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SalaryCalculationController;
-use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
@@ -224,7 +225,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('coa', ChartOfAccountController::class);
 
-    Route::get('/journals', [JournalController::class, 'index'])->name('index');
+    Route::get('/journals', [JournalController::class, 'index'])->name('journals.index');
     Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
 
     Route::resource('salary_calculations', SalaryCalculationController::class);
@@ -241,4 +242,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay');
     Route::post('/purchases/pay', [PurchaseController::class, 'payDebt'])->name('purchases.payDebt');
 
+    Route::get('/reports/balance_sheet', [FinancialReportController::class, 'balanceSheet'])->name('reports.balance_sheet');
+    Route::get('/reports/income_statement', [FinancialReportController::class, 'incomeStatement'])->name('reports.income_statement');
+    Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow');
 });

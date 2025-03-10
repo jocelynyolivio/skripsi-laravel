@@ -199,8 +199,8 @@ class PurchaseController extends Controller
         ]);
 
         // **6. Journal Entries**
-        $inventoryAccount = 13; // COA ID untuk Persediaan Barang Medis
-        $accountsPayable = 14;  // COA ID untuk Hutang Usaha
+        $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');; // COA ID untuk Persediaan Barang Medis
+        $accountsPayable = ChartOfAccount::where('name', 'Utang Usaha')->value('id');;  // COA ID untuk Hutang Usaha
 
         // **6.1. Debit: Persediaan Barang**
         JournalDetail::create([
@@ -374,10 +374,12 @@ class PurchaseController extends Controller
             'description' => 'Pembayaran Hutang untuk Purchase ID: ' . $purchase->id,
         ]);
 
+        $idUtangUsaha = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+
         // Debit: Utang Usaha
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => 14, // Utang Usaha
+            'coa_id' => $idUtangUsaha, // Utang Usaha
             'debit' => $request->amount,
             'credit' => 0
         ]);

@@ -2,19 +2,37 @@
 
 @section('container')
 <div class="container mt-5">
+
     <!-- Carousel -->
     <div id="clinicCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
         <div class="carousel-inner">
             @if($contents->isEmpty())
+                <!-- Jika database kosong, gunakan gambar lokal -->
                 <div class="carousel-item active">
-                    <img src="https://via.placeholder.com/800x400?text=No+Content+Available" class="d-block w-100" alt="No Content">
+                    <img src="{{ asset('assets/klinik1.jpeg') }}" class="d-block w-100" alt="Clinic Image">
+                    <div class="carousel-caption">
+                        <h5>Welcome to Our Clinic</h5>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ asset('assets/klinik2.jpeg') }}" class="d-block w-100" alt="Clinic Image">
+                    <div class="carousel-caption">
+                        <h5>Providing the Best Dental Care</h5>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ asset('assets/klinik3.jpeg') }}" class="d-block w-100" alt="Clinic Image">
+                    <div class="carousel-caption">
+                        <h5>Your Smile, Our Priority</h5>
+                    </div>
                 </div>
             @else
+                <!-- Jika database ada konten, tampilkan dari storage -->
                 @foreach($contents as $content)
                     <div class="carousel-item @if ($loop->first) active @endif">
-                        <img src="{{ asset('storage/' . $content->carousel_image) }}" class="d-block w-100" alt="{{ $content->carousel_text }}">
+                        <img src="{{ asset($content->carousel_image ? 'storage/' . $content->carousel_image : 'assets/klinik1.jpeg') }}" class="d-block w-100" alt="{{ $content->carousel_text ?? 'Clinic Image' }}">
                         <div class="carousel-caption">
-                            <h5>{{ $content->carousel_text }}</h5>
+                            <h5>{{ $content->carousel_text ?? 'Welcome to Our Clinic' }}</h5>
                         </div>
                     </div>
                 @endforeach
@@ -31,20 +49,25 @@
     </div>
 
     <!-- Welcome Section -->
-    @if($contents->isNotEmpty())
+    <div class="text-center mt-4">
         <h3>{{ $contents->first()->welcome_title ?? 'Welcome to Our Dental Clinic' }}</h3>
         <p class="lead">{{ $contents->first()->welcome_message ?? 'Your trusted clinic for quality dental care.' }}</p>
-    @endif
+    </div>
 
     <!-- About Section -->
-    @if($contents->isNotEmpty())
-    <div class="row mt-5">
+    @if($contents->isNotEmpty() && $contents->first()->about_text)
+    <div class="row mt-5 align-items-center">
         <div class="col-md-6">
             <h4>About Our Clinic</h4>
             <p>{{ $contents->first()->about_text }}</p>
         </div>
-        <div class="col-md-6">
-            <img src="{{ asset('storage/' . $contents->first()->about_image) }}" class="img-fluid rounded" alt="Clinic Image">
+        <div class="col-md-6 text-center">
+        @if($contents->isNotEmpty() && $contents->first()->about_image)
+    <img src="{{ asset('storage/' . $contents->first()->about_image) }}" class="img-fluid rounded shadow" alt="Clinic Image">
+@else
+    <img src="{{ asset('assets/klinik2.jpeg') }}" class="img-fluid rounded shadow" alt="Default Clinic Image">
+@endif
+
         </div>
     </div>
     @endif

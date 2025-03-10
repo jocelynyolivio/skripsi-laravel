@@ -3,7 +3,7 @@
 @section('container')
 <div class="container">
     <h3>Konfirmasi Penerimaan Barang</h3>
-    <form action="{{ route('dashboard.purchases.storeReceived', $purchase->id) }}" method="POST">
+    <form id="receiveForm" action="{{ route('dashboard.purchases.storeReceived', $purchase->id) }}" method="POST">
         @csrf
         <table class="table">
             <thead>
@@ -27,7 +27,30 @@
                 @endforeach
             </tbody>
         </table>
-        <button type="submit" class="btn btn-success">Simpan</button>
+        <button type="button" id="submitBtn" class="btn btn-success">Simpan</button>
     </form>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('#submitBtn').click(function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Konfirmasi Simpan?',
+            text: "Pastikan data yang dimasukkan sudah benar.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#receiveForm').submit(); // Kirim form setelah konfirmasi
+            }
+        });
+    });
+});
+
+</script>
 @endsection
