@@ -21,7 +21,9 @@ class SalaryCalculation extends Model
         'lembur',
         'base_salary',
         'allowance',
-        'grand_total'
+        'grand_total',
+        'adjustment',
+        'adjustment_notes'
     ];
 
     /**

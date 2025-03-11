@@ -34,6 +34,7 @@ class DentalMaterialController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'unit_type' => 'nullable|string',
         ]);
 
         DentalMaterial::create($validatedData);

@@ -112,6 +112,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor');
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
     Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data');
+    Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store');
+
 
     Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
     Route::resource('/home_content', HomeContentController::class);

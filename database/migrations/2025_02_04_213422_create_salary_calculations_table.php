@@ -30,6 +30,9 @@ return new class extends Migration
             $table->decimal('allowance', 15, 2)->default(0); // Tunjangan total
             $table->decimal('grand_total', 15, 2)->default(0); // Total keseluruhan
 
+            $table->decimal('adjustment', 15, 2)->default(0);
+            $table->text('adjustment_notes')->nullable();
+
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 

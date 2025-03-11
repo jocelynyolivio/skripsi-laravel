@@ -437,6 +437,7 @@ class DatabaseSeeder extends Seeder
             ['code' => '5-10008', 'name' => 'Beban Air', 'type' => 'expense'],
             ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
             ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
+            ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense'],
             // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
         ];
 
