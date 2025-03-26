@@ -53,10 +53,11 @@
             "info": true,
             "responsive": true,
         });
-    });
-    $('#templateTable').on('click', '.delete-button', function(e) {
-            e.preventDefault();
-            var form = $(this).closest('form');
+
+        // Ensure the delete confirmation is set up correctly
+        $('#templateTable').on('click', '.delete-button', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+            var form = $(this).closest('form'); // Get the closest form element
             Swal.fire({
                 title: 'Are you sure?', 
                 text: "You won't be able to revert this!",
@@ -67,10 +68,11 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.submit();          
+                    form.submit(); // Submit the form if confirmed
                 }
             });
-        }); 
+        });
+    });
 </script>
 
 

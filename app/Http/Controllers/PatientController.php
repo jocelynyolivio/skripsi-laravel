@@ -37,6 +37,8 @@ class PatientController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
+        // dd('hai');
         // Validasi input
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -150,17 +152,83 @@ class PatientController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $patient = Patient::findOrFail($id);
+
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:patients,email,' . $id,
-            'nomor_telepon' => 'required|string|max:20',
+            'gender' => 'required|in:Male,Female,Other',
+            'nik' => 'required|string|max:20' . $id,
+            'blood_type' => 'required|string|max:5',
+            'place_of_birth' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'religion' => 'nullable|string|max:100',
+            'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
+            'family_status' => 'nullable|string|max:100',
+            'occupation' => 'nullable|string|max:255',
+            'nationality' => 'nullable|string|max:100',
+
+            // Alamat Rumah
+            'home_address' => 'required|string',
+            'home_city' => 'nullable|string|max:255',
+            'home_zip_code' => 'nullable|string|max:10',
+            'home_country' => 'nullable|string|max:255',
+            'home_phone' => 'nullable|string|max:20',
+            'home_mobile' => 'required|string|max:20',
+            'home_email' => 'nullable|email|max:255',
+
+            // Alamat Kantor
+            'office_address' => 'nullable|string',
+            'office_city' => 'nullable|string|max:255',
+            'office_zip_code' => 'nullable|string|max:10',
+            'office_country' => 'nullable|string|max:255',
+            'office_phone' => 'nullable|string|max:20',
+            'office_mobile' => 'nullable|string|max:20',
+            'office_email' => 'nullable|email|max:255',
+
+            // Kontak Darurat
+            'emergency_contact_name' => 'required|string|max:255',
+            'emergency_contact_phone' => 'required|string|max:20',
+
+            // Upload Dokumen
+            'form_data_awal' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'informed_consent' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+
+            // Email & Password
+            'email' => 'nullable|email' . $id,
+            'password' => 'nullable|string|min:6',
         ]);
 
-        $patient = Patient::findOrFail($id);
-        $patient->update($request->only(['name', 'email', 'nomor_telepon']));
+        // Jika password tidak diisi, gunakan password lama
+        if (!$request->filled('password')) {
+            $validatedData['password'] = $patient->password;
+        } else {
+            $validatedData['password'] = bcrypt($request->password);
+        }
+
+        // Handle file upload untuk Form Data Awal
+        if ($request->hasFile('form_data_awal')) {
+            $validatedData['form_data_awal'] = $request->file('form_data_awal')->store('patients/forms', 'public');
+        } else {
+            $validatedData['form_data_awal'] = $patient->form_data_awal;
+        }
+
+        // Handle file upload untuk Informed Consent
+        if ($request->hasFile('informed_consent')) {
+            $validatedData['informed_consent'] = $request->file('informed_consent')->store('patients/consent', 'public');
+        } else {
+            $validatedData['informed_consent'] = $patient->informed_consent;
+        }
+
+        // Pastikan `patient_id` tidak berubah
+        $validatedData['patient_id'] = $patient->patient_id;
+
+        // Update data pasien
+        $patient->update($validatedData);
 
         return redirect()->route('dashboard.masters.patients')->with('success', 'Patient updated successfully!');
     }
+
+
 
     /**
      * Remove the specified resource from storage.

@@ -62,26 +62,27 @@ class FinancialReportController extends Controller
         $profitOrLoss = JournalDetail::selectRaw("
         SUM(journal_details.credit) - SUM(journal_details.debit) as net_income
     ")
-    ->join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
-    ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
-    ->whereIn('chart_of_accounts.type', ['revenue', 'expense']) // Hanya akun laba rugi
-    ->whereDate('journal_entries.entry_date', '<=', $date)
-    ->first();
+            ->join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+            ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
+            ->whereIn('chart_of_accounts.type', ['revenue', 'expense']) // Hanya akun laba rugi
+            ->whereDate('journal_entries.entry_date', '<=', $date)
+            ->first();
 
-// Jika ada laba/rugi, tambahkan ke laporan neraca
-if ($profitOrLoss) {
-    $netIncome = $profitOrLoss->net_income;
+        // Jika ada laba/rugi, tambahkan ke laporan neraca
+        if ($profitOrLoss) {
+            $netIncome = $profitOrLoss->net_income;
 
-    // Jika laba positif, masuk ke Kredit di ekuitas
-    // Jika rugi, masuk ke Debit di ekuitas
-    $coaSummary->push((object)[
-        'coa_id' => null,
-        'coa_name' => 'Laba Ditahan (Setelah Laba/Rugi)',
-        'type' => 'equity',
-        'total_debit' => ($netIncome < 0) ? abs($netIncome) : 0,
-        'total_credit' => ($netIncome > 0) ? $netIncome : 0,
-    ]);
-}
+            // Jika laba positif, masuk ke Kredit di ekuitas
+            // Jika rugi, masuk ke Debit di ekuitas
+            // harusnya nanti disini kalo untung masuk sebagai nett incomee
+            $coaSummary->push((object)[
+                'coa_id' => null,
+                'coa_name' => 'Laba Ditahan (Setelah Laba/Rugi)',
+                'type' => 'equity',
+                'total_debit' => ($netIncome < 0) ? abs($netIncome) : 0,
+                'total_credit' => ($netIncome > 0) ? $netIncome : 0,
+            ]);
+        }
 
         return view('dashboard.reports.balance_sheet', compact('coaSummary', 'period', 'date'));
     }
@@ -139,25 +140,18 @@ if ($profitOrLoss) {
         }
 
         // Arus Kas dari Aktivitas Operasional
-        $operatingCashIn = (clone $query)->where('chart_of_accounts.type', 'revenue')
-            ->sum('credit');
-
-        $operatingCashOut = (clone $query)->where('chart_of_accounts.type', 'expense')
-            ->sum('debit');
+        $operatingCashIn = (clone $query)->where('chart_of_accounts.type', 'revenue')->sum('credit');
+        $operatingCashOut = (clone $query)->where('chart_of_accounts.type', 'expense')->sum('debit');
 
         // Arus Kas dari Aktivitas Investasi
-        $investmentCashIn = (clone $query)->where('chart_of_accounts.name', 'LIKE', '%Investasi%')
-            ->sum('credit');
-
-        $investmentCashOut = (clone $query)->where('chart_of_accounts.name', 'LIKE', '%Investasi%')
-            ->sum('debit');
+        $investmentCashIn = (clone $query)->where('chart_of_accounts.type', 'asset')->where('chart_of_accounts.name', 'LIKE', '%Investasi%')->sum('credit');
+        $investmentCashOut = (clone $query)->where('chart_of_accounts.type', 'asset')->where('chart_of_accounts.name', 'LIKE', '%Investasi%')->sum('debit');
 
         // Arus Kas dari Aktivitas Pendanaan
-        $financingCashIn = (clone $query)->where('chart_of_accounts.type', 'equity')
-            ->sum('credit');
+        $financingCashIn = (clone $query)->where('chart_of_accounts.type', 'equity')->sum('credit')
+            + (clone $query)->where('chart_of_accounts.type', 'liability')->sum('credit');
 
-        $financingCashOut = (clone $query)->where('chart_of_accounts.type', 'liability')
-            ->sum('debit');
+        $financingCashOut = (clone $query)->where('chart_of_accounts.type', 'liability')->sum('debit');
 
         $netCashFlow = ($operatingCashIn - $operatingCashOut) + ($investmentCashIn - $investmentCashOut) + ($financingCashIn - $financingCashOut);
 

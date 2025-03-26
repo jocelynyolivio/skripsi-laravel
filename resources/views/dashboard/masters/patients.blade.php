@@ -7,6 +7,12 @@
         <a href="{{ route('dashboard.masters.patients.create') }}" class="btn btn-primary mb-3">Add New Patient</a>
     </div>
 
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+
     <table id="patientTable" class="table table-striped table-bordered">
         <thead>
             <tr>

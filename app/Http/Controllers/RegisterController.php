@@ -26,6 +26,19 @@ class RegisterController extends Controller
 
         $validatedData['password'] = bcrypt($validatedData['password']);
 
+        // Generate Patient ID
+        $initialLetter = strtoupper(substr($request->name, 0, 1)); // Ambil huruf pertama dari nama
+        $lastPatient = Patient::where('patient_id', 'like', "$initialLetter%")->orderBy('id', 'desc')->first();
+
+        if ($lastPatient) {
+            $lastNumber = (int) substr($lastPatient->patient_id, 1); // Ambil angka setelah huruf
+            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT); // Format angka jadi 3 digit
+        } else {
+            $newNumber = '001';
+        }
+
+        $validatedData['patient_id'] = $initialLetter . $newNumber; // Contoh: Y001, A002
+
         $patient = Patient::create($validatedData);
 
         // Kirim email verifikasi

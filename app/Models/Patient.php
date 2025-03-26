@@ -31,7 +31,9 @@ class Patient extends Authenticatable implements MustVerifyEmail
         'form_data_awal', 'informed_consent',
     
         // Akun & Keamanan
-        'email', 'password'
+        'email', 'password',
+
+        'email_verified_at'
     ];
     
     

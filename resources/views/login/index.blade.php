@@ -20,7 +20,7 @@
         @endif
 
         <main class="form-signin w-100 m-auto">
-            <h1 class="h3 mb-3 fw-normal">Please Login</h1>
+            <h1 class="h3 mb-3 fw-normal">Internal Login</h1>
             <form action='/login' method='post'>
                 @csrf
                 <div class="form-floating">
@@ -38,7 +38,6 @@
                 </div>
                 <button class="btn btn-primary w-100 py-2" type="submit">Log in</button>
             </form>
-            <small class="d-block mt-3">Not registered yet? <a href="/register">Register now.</a></small>
         </main>
     </div>
 </div>

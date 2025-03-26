@@ -69,6 +69,6 @@ class LoginController extends Controller
         // Regenerate token untuk keamanan
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login');
     }
 }

@@ -87,7 +87,10 @@
         </div>
         <input type="hidden" id="remaining_amount" name="remaining_amount" value="0">
 
-        <button type="submit" class="btn btn-primary">Save</button>
+        <br>
+        <!-- <button type="submit" class="btn btn-primary">Save</button> -->
+        <button type="submit" class="btn btn-success w-100 d-block mx-auto">Create Purchase Invoice</button>
+
     </form>
 </div>
 <script>

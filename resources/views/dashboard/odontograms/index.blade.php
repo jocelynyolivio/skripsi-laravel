@@ -1,118 +1,284 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5">
-    <h3 class="text-center">Odontogram for {{ $patient->name }}</h3>
-
-    <div class="odontogram-diagram mb-4">
-    @foreach(range(1, 32) as $toothNumber)
-    @php
-
-        $toothProcedures = $procedureOdontograms->get($toothNumber, collect());
-        $hasMedicalRecord = $toothProcedures->isNotEmpty();
-
-        // Cek apakah gigi ini ada di odontogram manual
-        $toothManual = $odontograms->get($toothNumber);
-        $manualCondition = $toothManual->condition ?? null;
-
-        // Tentukan warna berdasarkan prioritas
-        if ($hasMedicalRecord) {
-            $buttonClass = 'btn-success'; // Gigi yang sudah ditangani di rekam medis
-        } elseif ($manualCondition) {
-            $buttonClass = match($manualCondition) {
-                'Cavity' => 'btn-warning',
-                'Filled' => 'btn-danger',
-                'Extracted' => 'btn-secondary',
-                default => 'btn-primary',
-            };
-        } else {
-            $buttonClass = 'btn-outline-primary'; // Default untuk gigi sehat
-        }
-    @endphp
-
-    <button
-        type="button"
-        class="tooth btn {{ $buttonClass }} mb-2"
-        data-bs-toggle="modal"
-        data-bs-target="#editToothModal"
-        data-tooth-number="{{ $toothNumber }}"
-        data-condition="{{ $manualCondition ?? 'Healthy' }}"
-        data-notes="{{ $toothManual->notes ?? '' }}"
-        data-procedures="{{ json_encode($toothProcedures->pluck('procedure_id')) }}">
-        {{ $toothNumber }}
-    </button>
-@endforeach
-
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">ODONTOGRAM - {{ $patient->name }}</h4>
+        </div>
+        
+        <div class="card-body">
+            <!-- Odontogram Visual Layout -->
+            <div class="odontogram-wrapper">
+                <!-- Upper Jaw -->
+                <div class="jaw upper-jaw">
+                    <div class="quadrant right-upper">
+                        @foreach([18,17,16,15,14,13,12,11] as $toothNumber)
+                            @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
+                        @endforeach
+                    </div>
+                    <div class="quadrant left-upper">
+                        @foreach([21,22,23,24,25,26,27,28] as $toothNumber)
+                            @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
+                        @endforeach
+                    </div>
+                </div>
+                
+                <!-- Lower Jaw -->
+                <div class="jaw lower-jaw">
+                    <div class="quadrant left-lower">
+                        @foreach([38,37,36,35,34,33,32,31] as $toothNumber)
+                            @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
+                        @endforeach
+                    </div>
+                    <div class="quadrant right-lower">
+                        @foreach([48,47,46,45,44,43,42,41] as $toothNumber)
+                            @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tooth Symbols Legend -->
+            <div class="legend-container mt-4 p-3 border rounded">
+                <h5 class="text-center mb-3">SIMBOL DAN KETERANGAN ODONTOGRAM</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="symbol healthy me-2"></div>
+                            <span>Gigi Sehat</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="symbol cavity me-2"></div>
+                            <span>Karies (Lubang)</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="symbol filled me-2"></div>
+                            <span>Tambalan</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="symbol extracted me-2"></div>
+                            <span>Gigi Dicabut</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="modal fade" id="editToothModal" tabindex="-1" aria-labelledby="editToothModalLabel" aria-hidden="true">
+<!-- Tooth Detail Modal -->
+<div class="modal fade" id="toothDetailModal" tabindex="-1" aria-labelledby="toothDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <form action="{{ route('dashboard.odontograms.store', ['patientId' => $patient->id]) }}" method="POST">
-            @csrf
-            <input type="hidden" name="tooth_number" id="tooth_number">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editToothModalLabel">Edit Tooth</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="toothDetailModalLabel">Detail Gigi #<span id="modalToothNumber"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="toothForm" action="{{ route('dashboard.odontograms.store', ['patientId' => $patient->id]) }}" method="POST">
+                @csrf
+                <input type="hidden" name="tooth_number" id="formToothNumber">
+                
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="condition" class="form-label">Condition</label>
-                        <select name="condition" id="condition" class="form-select">
-                            <option value="Healthy">Healthy</option>
-                            <option value="Cavity">Cavity</option>
-                            <option value="Filled">Filled</option>
-                            <option value="Extracted">Extracted</option>
-                        </select>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Kondisi Gigi</label>
+                            <select name="condition" class="form-select" id="toothCondition">
+                                <option value="healthy">Sehat</option>
+                                <option value="cavity">Karies</option>
+                                <option value="filled">Tambalan</option>
+                                <option value="extracted">Dicabut</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Prosedur</label>
+                            <select name="procedure_id[]" class="form-select" multiple id="toothProcedures">
+                                @foreach($procedures as $procedure)
+                                    <option value="{{ $procedure->id }}">{{ $procedure->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-
+                    
                     <div class="mb-3">
-                        <label class="form-label">Procedures</label>
-                        <select name="procedure_id[]" id="procedures" class="form-select" multiple>
-                            @foreach($procedures as $procedure)
-                                <option value="{{ $procedure->id }}">{{ $procedure->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea name="notes" id="notes" class="form-control"></textarea>
+                        <label class="form-label">Catatan</label>
+                        <textarea name="notes" class="form-control" id="toothNotes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
+<style>
+    .odontogram-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .jaw {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+    }
+    
+    .upper-jaw {
+        border-bottom: 2px solid #333;
+        padding-bottom: 30px;
+    }
+    
+    .lower-jaw {
+        border-top: 2px solid #333;
+        padding-top: 30px;
+    }
+    
+    .quadrant {
+        display: flex;
+        flex-wrap: wrap;
+        width: 45%;
+        gap: 5px;
+    }
+    
+    .tooth-container {
+        width: 50px;
+        height: 70px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .tooth-number {
+        font-size: 10px;
+        color: #333;
+        margin-bottom: 2px;
+    }
+    
+    .tooth-shape {
+        width: 40px;
+        height: 50px;
+        border: 1px solid #333;
+        border-radius: 5px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Condition Styles */
+    .healthy .tooth-shape {
+        background-color: #f8f9fa;
+    }
+    
+    .cavity .tooth-shape {
+        background: repeating-linear-gradient(
+            45deg,
+            #f8f9fa,
+            #f8f9fa 5px,
+            #ffc107 5px,
+            #ffc107 10px
+        );
+    }
+    
+    .filled .tooth-shape {
+        background-color: #0dcaf0;
+    }
+    
+    .extracted .tooth-shape {
+        background-color: #6c757d;
+    }
+    
+    .extracted .tooth-shape:after {
+        content: "×";
+        position: absolute;
+        font-size: 30px;
+        color: white;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .has-procedure .tooth-shape {
+        background-color: #198754;
+    }
+    
+    /* Legend Styles */
+    .symbol {
+        width: 25px;
+        height: 30px;
+        border: 1px solid #333;
+        border-radius: 3px;
+    }
+    
+    .symbol.healthy { background-color: #f8f9fa; }
+    .symbol.cavity { background: repeating-linear-gradient(45deg, #f8f9fa, #f8f9fa 3px, #ffc107 3px, #ffc107 6px); }
+    .symbol.filled { background-color: #0dcaf0; }
+    .symbol.extracted { background-color: #6c757d; position: relative; }
+    .symbol.extracted:after {
+        content: "×";
+        position: absolute;
+        font-size: 20px;
+        color: white;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toothButtons = document.querySelectorAll('.tooth');
-
-        toothButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const toothNumber = this.getAttribute('data-tooth-number');
-                const condition = this.getAttribute('data-condition');
-                const notes = this.getAttribute('data-notes');
-                const procedures = JSON.parse(this.getAttribute('data-procedures') || '[]');
-
-                document.getElementById('tooth_number').value = toothNumber;
-                document.getElementById('condition').value = condition;
-                document.getElementById('notes').value = notes;
-
-                const procedureSelect = document.getElementById('procedures');
-                [...procedureSelect.options].forEach(option => option.selected = false);
-                procedures.forEach(procedureId => {
-                    const option = procedureSelect.querySelector(`option[value="${procedureId}"]`);
-                    if (option) option.selected = true;
-                });
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize modal
+    const toothDetailModal = new bootstrap.Modal(document.getElementById('toothDetailModal'));
+    
+    // Handle tooth clicks
+    document.querySelectorAll('.tooth-container').forEach(tooth => {
+        tooth.addEventListener('click', function() {
+            const toothNumber = this.getAttribute('data-tooth-number');
+            document.getElementById('modalToothNumber').textContent = toothNumber;
+            document.getElementById('formToothNumber').value = toothNumber;
+            
+            // Here you would typically load existing data via AJAX
+            // For now we'll just reset the form
+            document.getElementById('toothCondition').value = 'healthy';
+            document.getElementById('toothNotes').value = '';
+            
+            // Initialize Select2
+            $('#toothProcedures').select2({
+                placeholder: "Pilih prosedur",
+                width: '100%',
+                dropdownParent: $('#toothDetailModal')
             });
+            
+            toothDetailModal.show();
         });
     });
+    
+    // Handle form submission
+    document.getElementById('toothForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                toothDetailModal.hide();
+                location.reload(); // Refresh to show changes
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
 </script>
 @endsection

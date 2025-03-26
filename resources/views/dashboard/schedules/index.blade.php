@@ -1,170 +1,257 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container mt-5 col-md-6">
-    <h3 class="mb-4">Schedules</h3>
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
-    <!-- Dropdown Pasien -->
-    <form id="filterForm" action="{{ route('dashboard.schedules.get-doctors-by-date') }}" method="GET">
-        <div class="form-group">
-            <label for="patient">Select Patient:</label>
-            <select id="patient" name="patient" class="form-control" required>
-                <option value="">-- Select a Patient --</option>
-            </select>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Make Reservations</h3>
         </div>
-
-        <div class="form-group mt-3">
-            <label for="date">Select Date:</label>
-            <input type="date" id="date" name="date" class="form-control" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Filter</button>
-    </form>
-
-    <div id="results" class="mt-4">
-        <!-- Results will appear here -->
-    </div>
-
-    <div id="resultsClicked" class="mt-4">
-        <!-- Results will appear here -->
-    </div>
-
-    <!-- Reservation Form (without AJAX) -->
-    <form id="reservationForm" action="{{ route('dashboard.schedules.store-reservation') }}" method="POST" style="display: none;">
-        @csrf
-        <input type="hidden" name="patient_id" id="patient_id">
-        <input type="hidden" name="doctor_id" id="doctor_id">
-        <input type="hidden" name="tanggal_reservasi" id="reservation_date">
-        <input type="hidden" name="jam_mulai" id="time_start">
-        <input type="hidden" name="jam_selesai" id="time_end">
         
-        <button type="submit" class="btn btn-success mt-3">Make Reservation</button>
-    </form>
+        <div class="card-body">
+            @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            @endif
+
+            <!-- Search Form -->
+            <form id="filterForm" action="{{ route('dashboard.schedules.get-doctors-by-date') }}" method="GET">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="patient" class="form-label">Select Patient</label>
+                        <select id="patient" name="patient" class="form-select" required>
+                            <option value="">-- Select a Patient --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="date" class="form-label">Select Date</label>
+                        <input type="date" id="date" name="date" class="form-control" 
+                               value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i> Search Available Schedule
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Search Results -->
+            <div id="results" class="mt-4">
+                <!-- Results will appear here -->
+            </div>
+
+            <!-- Selected Schedule -->
+            <div id="resultsClicked" class="mt-4">
+                <!-- Selected schedule will appear here -->
+            </div>
+
+            <!-- Reservation Form -->
+            <form id="reservationForm" action="{{ route('dashboard.schedules.store-reservation') }}" method="POST" class="mt-4" style="display: none;">
+                @csrf
+                <input type="hidden" name="patient_id" id="patient_id">
+                <input type="hidden" name="doctor_id" id="doctor_id">
+                <input type="hidden" name="tanggal_reservasi" id="reservation_date">
+                <input type="hidden" name="jam_mulai" id="time_start">
+                <input type="hidden" name="jam_selesai" id="time_end">
+                
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-calendar-check me-2"></i> Confirm Reservation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<style>
+    .schedule-badge {
+        transition: all 0.2s ease;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .schedule-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .doctor-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .selected-schedule {
+        border-left: 4px solid #0d6efd;
+        background-color: #f8f9fa;
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
-    // ambil data dari form
     const patientSelect = document.getElementById('patient');
     const reservationForm = document.getElementById('reservationForm');
     const resultsDiv = document.getElementById('results');
     const resultsClickedDiv = document.getElementById('resultsClicked');
-    let selectedSchedule = null; // buat menyimpan jadwal yang dipilih
+    let selectedSchedule = null;
 
-    // fetch isi dropdown
+    // Fetch patients data
     try {
-        const response = await fetch('/dashboard/schedules/get-patients'); // Fetch data pasien dari API
-        const patients = await response.json(); // Konversi response ke JSON
+        const response = await fetch('/dashboard/schedules/get-patients');
+        const patients = await response.json();
 
-        // Looping untuk menambahkan opsi ke dropdown pasien
         patients.forEach(patient => {
             const option = document.createElement('option');
-            option.value = patient.id; // Set nilai option ke ID pasien
-            option.textContent = patient.name; // Set teks option ke nama pasien
-            patientSelect.appendChild(option); // Tambahkan option ke dropdown pasien
+            option.value = patient.id;
+            option.textContent = patient.name;
+            patientSelect.appendChild(option);
         });
     } catch (error) {
-        console.error('Error fetching patients:', error); // Jika terjadi error, tampilkan di console
+        console.error('Error fetching patients:', error);
+        patientSelect.innerHTML = '<option value="">Error loading patients</option>';
     }
 
-    // jadwal dokter berdasarkan tanggal
+    // Handle form submission
     document.getElementById('filterForm').addEventListener('submit', async function(e) {
-        e.preventDefault(); // Mencegah reload halaman saat submit form
+        e.preventDefault();
+        
+        const date = document.getElementById('date').value;
+        const patientId = document.getElementById('patient').value;
 
-        const date = document.getElementById('date').value; // Ambil tanggal dari input
-        const patientId = document.getElementById('patient').value; // Ambil ID pasien yang dipilih
-
-        if (!patientId) { // Jika pasien belum dipilih, tampilkan peringatan
+        if (!patientId) {
             alert('Please select a patient first.');
             return;
         }
 
         try {
-            const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`); // Fetch jadwal dokter berdasarkan tanggal
-            const data = await response.json(); // Konversi response ke JSON
+            const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
+            const data = await response.json();
 
-            // Tampilkan daftar jadwal dokter dalam tabel
+            if (data.doctors.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        No available schedules found for ${data.date} (${data.day_of_week}).
+                    </div>
+                `;
+                return;
+            }
+
             resultsDiv.innerHTML = ` 
-                <h5>Jadwal Tersedia untuk ${data.date} (${data.day_of_week}):</h5>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nama Dokter</th>
-                                <th>Jam Tersedia</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.doctors.map(doctor => `
-                                <tr data-doctor-id="${doctor.doctor.id}">
-                                    <td><strong>${doctor.doctor.name}</strong></td> 
-                                    <td>
-                                        ${doctor.schedules.filter(schedule => schedule.is_available).map(schedule => 
-                                            `<span class="badge bg-success schedule-badge" 
-                                                  data-time-start="${schedule.time_start}" 
-                                                  data-time-end="${schedule.time_end}" 
-                                                  data-doctor-id="${doctor.doctor.id}" 
-                                                  style="cursor:pointer;">
-                                                ${schedule.time_start} - ${schedule.time_end}
-                                            </span>`
-                                        ).join(' ')}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Available Schedules for ${data.date} (${data.day_of_week})</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="40%">Doctor</th>
+                                        <th>Available Times</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.doctors.map(doctor => `
+                                        <tr class="doctor-row" data-doctor-id="${doctor.doctor.id}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-0">${doctor.doctor.name}</h6>
+                                                    </div>
+                                                </div>
+                                            </td> 
+                                            <td>
+                                                ${doctor.schedules.filter(schedule => schedule.is_available).map(schedule => 
+                                                    `<span class="badge bg-primary schedule-badge" 
+                                                          data-time-start="${schedule.time_start}" 
+                                                          data-time-end="${schedule.time_end}" 
+                                                          data-doctor-id="${doctor.doctor.id}"
+                                                          data-doctor-name="${doctor.doctor.name}">
+                                                        ${schedule.time_start} - ${schedule.time_end}
+                                                    </span>`
+                                                ).join(' ')}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             `;
 
         } catch (error) {
-            console.error('Error:', error); // Jika terjadi error, tampilkan di console
-            resultsDiv.innerHTML = '<p class="text-danger">Terjadi kesalahan saat mengambil data jadwal</p>';
+            console.error('Error:', error);
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    Error loading schedule data. Please try again later.
+                </div>
+            `;
         }
     });
 
-    /** 🔹 Event klik pada jadwal (badge) untuk memilih jadwal */
+    // Handle schedule selection
     resultsDiv.addEventListener('click', function(event) {
-        if (event.target.classList.contains('schedule-badge')) { // Pastikan yang diklik adalah elemen dengan class 'schedule-badge'
-            const selectedTimeStart = event.target.dataset.timeStart; // Ambil jam mulai dari badge
-            const selectedTimeEnd = event.target.dataset.timeEnd; // Ambil jam selesai dari badge
-            const doctorId = event.target.dataset.doctorId; // Ambil ID dokter dari badge
-
-            // Simpan jadwal yang dipilih ke dalam variabel
+        if (event.target.classList.contains('schedule-badge')) {
+            // Remove previous selection highlights
+            document.querySelectorAll('.schedule-badge').forEach(badge => {
+                badge.classList.remove('bg-success');
+                badge.classList.add('bg-primary');
+            });
+            
+            // Highlight selected badge
+            event.target.classList.remove('bg-primary');
+            event.target.classList.add('bg-success');
+            
+            // Get selected schedule data
             selectedSchedule = {
-                time_start: selectedTimeStart,
-                time_end: selectedTimeEnd,
-                doctor_id: doctorId,
+                time_start: event.target.dataset.timeStart,
+                time_end: event.target.dataset.timeEnd,
+                doctor_id: event.target.dataset.doctorId,
+                doctor_name: event.target.dataset.doctorName,
                 date: document.getElementById('date').value
             };
 
-            // Set nilai pada input hidden form reservasi
+            // Set hidden form values
             document.getElementById('patient_id').value = document.getElementById('patient').value;
             document.getElementById('doctor_id').value = selectedSchedule.doctor_id;
             document.getElementById('reservation_date').value = selectedSchedule.date;
             document.getElementById('time_start').value = selectedSchedule.time_start;
             document.getElementById('time_end').value = selectedSchedule.time_end;
 
-            // Tampilkan jadwal yang telah dipilih di bagian konfirmasi
+            // Show confirmation
             resultsClickedDiv.innerHTML = `
-                <div class="alert alert-info mt-3">
-                    <h5>Konfirmasi Jadwal yang Dipilih</h5>
-                    <p><strong>Tanggal:</strong> ${selectedSchedule.date}</p>
-                    <p><strong>Jam:</strong> ${selectedSchedule.time_start} - ${selectedSchedule.time_end}</p>
-                    <p><strong>Dokter:</strong> ID ${selectedSchedule.doctor_id}</p>
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Selected Appointment</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Date:</strong> ${selectedSchedule.date}</p>
+                                <p><strong>Time:</strong> ${selectedSchedule.time_start} - ${selectedSchedule.time_end}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Doctor:</strong> ${selectedSchedule.doctor_name}</p>
+                                <p><strong>Patient:</strong> ${patientSelect.options[patientSelect.selectedIndex].text}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
 
-            // Tampilkan form reservasi
+            // Show reservation form
             reservationForm.style.display = 'block';
+            
+            // Scroll to confirmation
+            resultsClickedDiv.scrollIntoView({ behavior: 'smooth' });
         }
     });
-
 });
 </script>
-
 @endsection

@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Patient;
 use App\Models\HomeContent;
 use Illuminate\Http\Request;
-use App\Models\ChartOfAccount;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
@@ -33,6 +33,7 @@ use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Auth\PatientVerifyEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +53,7 @@ Route::get('/', function () {
         "active" => "home",
         "contents" => $contents,
     ]);
-});
+})->name('index');
 
 Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'authenticate']);
@@ -68,17 +69,102 @@ Route::get('/email/verify', function () {
     ]);
 })->middleware('auth:patient')->name('verification.notice');
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-    return redirect('/'); // Redirect ke halaman setelah verifikasi
-})->middleware(['auth:patient', 'signed'])->name('verification.verify');
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//     dd("Verifikasi Route Berjalan!");
+
+//     $request->fulfill();
+//     return redirect('/patient/login'); // Redirect ke halaman setelah verifikasi
+// })->middleware(['auth:patient', 'signed'])->name('verification.verify');
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//     $request->fulfill();
+
+//     dd(auth('patient')->user()); // Debug: Cek apakah user terautentikasi dengan guard patient
+
+//     return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
+// })->middleware(['auth:patient', 'signed'])->name('verification.verify');
+
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//     $request->fulfill();
+
+//     dd("Email Berhasil Diverifikasi!", auth('patient')->user());
+    
+//     return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
+// })->middleware(['auth:patient', 'signed'])->name('verification.verify');
+
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//     $patient = $request->user();
+
+//     if (!$patient) {
+//         return redirect('/patient/login')->with('error', 'You need to login first.');
+//     }
+
+//     if (!$patient->hasVerifiedEmail()) {
+//         $patient->email_verified_at = now(); // Paksa update
+//         $patient->save();
+//     }
+
+//     return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
+// })->middleware(['auth:patient', 'signed'])->name('verification.verify');
+
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//     dd("Route Verifikasi Berjalan!");
+// });
+
+// Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+//     $patient = Patient::find($id);
+
+//     // Cek apakah pasien ditemukan
+//     if (!$patient) {
+//         dd("ERROR: Pasien tidak ditemukan!", $id);
+//     }
+
+//     // Cek apakah email sudah diverifikasi sebelumnya
+//     if ($patient->hasVerifiedEmail()) {
+//         dd("Email sudah diverifikasi sebelumnya!", $patient);
+//     }
+
+//     // Coba update email_verified_at
+//     $patient->email_verified_at = now();
+//     $saveResult = $patient->save(); // Simpan perubahan ke database
+
+//     // Debug apakah save berhasil
+//     // dd("Hasil Update:", $saveResult, "Data Pasien Setelah Update:", $patient);
+//     return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
+// })->name('verification.verify');
+
+
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    $patient = Patient::find($id);
+
+    // Cek apakah pasien ditemukan
+    if (!$patient) {
+        return redirect('/')->with('error', 'Patient not found. Please register or contact support.');
+    }
+
+    // Cek apakah email sudah diverifikasi sebelumnya
+    if ($patient->hasVerifiedEmail()) {
+        return redirect('/')->with('info', 'Email has already been verified. You can login now.');
+    }
+
+    // Coba update email_verified_at
+    $patient->email_verified_at = now();
+    $saveResult = $patient->save(); // Simpan perubahan ke database
+
+    return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
+})->name('verification.verify');
+
+
+
+// Route::get('/email/verify/{id}/{hash}', PatientVerifyEmailController::class)
+//     ->middleware(['auth:patient', 'signed'])
+//     ->name('verification.verify');
 
 Route::post('/email/resend', function (Request $request) {
     $request->user('patient')->sendEmailVerificationNotification();
     return back()->with('message', 'Verification email sent!');
 })->middleware(['auth:patient', 'throttle:6,1'])->name('verification.resend');
 
-Route::get('/patient/register', [RegisterController::class, 'index'])->name('register')->middleware('guest');
+Route::get('/patient/register', [RegisterController::class, 'index'])->name('patient.register')->middleware('guest');
 // kalo ada req ke halaman register tapi method post maka nanti akan panggil yg store
 Route::post('/patient/register', [RegisterController::class, 'store']);
 
@@ -86,13 +172,22 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('internal')
     ->name('dashboard');
 
+// If you have a separate route for fetching data via AJAX, you can define it as follows:
+    Route::get('/dashboard/data', [DashboardController::class, 'fetchData'])->name('dashboard.data');
+
 Route::get('/reservation', [ReservationController::class, 'index'])
     ->name('reservation.index')
     ->middleware(['auth:patient', 'verified']);
 Route::get('/reservation/upcoming', [ReservationController::class, 'upcomingReservations'])
     ->name('reservations.upcoming')
     ->middleware(['auth:patient', 'verified']); // Pastikan hanya pasien yang login yang bisa melihat
-Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store')->middleware(['auth:patient', 'verified']);
+Route::post('/reservation', [ReservationController::class, 'store'])
+    ->name('reservation.store')
+    ->middleware(['auth:patient', 'verified']);
+
+    
+    Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
+        ->name('dashboard.schedules.get-doctors-by-date');
 
 // isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
@@ -100,7 +195,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/salaries/upload-salary', [SalaryController::class, 'uploadForm']);
+    Route::get('/salaries/upload-salary', [SalaryController::class, 'uploadForm'])->name('salaries.upload');
     Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel']);
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
     Route::get('/salaries/slips', [SalaryController::class, 'slips'])->name('salaries.slips');
@@ -126,6 +221,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/masters/patients', [PatientController::class, 'store'])->name('masters.patients.store');
 
     Route::get('/masters', [UserController::class, 'index'])->name('masters.index');
+    Route::get('/masters/create', [UserController::class, 'create'])->name('masters.create');
+    Route::post('/masters', [UserController::class, 'store'])->name('masters.store');
     Route::get('/masters/{id}/edit', [UserController::class, 'edit'])->name('masters.edit');
     Route::put('/masters/{id}', [UserController::class, 'update'])->name('masters.update');
     Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('masters.destroy');
@@ -136,11 +233,11 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::prefix('schedules')->name('schedules.')->group(function () {
         Route::resource('templates', ScheduleTemplateController::class);
         Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
+       
     });
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
-    Route::get('/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
-        ->name('schedules.get-doctors-by-date');
+
     Route::get('/schedules/get-patients', [ScheduleController::class, 'getPatients'])->name('schedules.get-patients');
     Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
 
@@ -247,4 +344,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/reports/balance_sheet', [FinancialReportController::class, 'balanceSheet'])->name('reports.balance_sheet');
     Route::get('/reports/income_statement', [FinancialReportController::class, 'incomeStatement'])->name('reports.income_statement');
     Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow');
+});
+
+Route::prefix('dashboard/schedules/overrides')->name('dashboard.schedules.overrides.')->group(function () {
+
 });

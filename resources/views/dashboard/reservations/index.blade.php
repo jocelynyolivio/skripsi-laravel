@@ -4,6 +4,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Reservations List</h3>
+        <a href="{{ route('dashboard.schedules.index') }}" class="btn btn-primary mb-3">Add New Reservation</a>
     </div>
 
     <table id="reservationTable" class="table table-striped table-bordered">
@@ -43,13 +44,18 @@
                 {{ $reservation->status_konfirmasi ?? 'Belum Dikonfirmasi' }}
             </td>
             <td>
-                <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;" class="delete-form">
-                    @csrf
-                    @method('DELETE')
-                    <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
-                </form>
-            </td>
+    @if(!$reservation->teeth_condition && !$reservation->procedures()->exists())
+        <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
+        <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;" class="delete-form">
+            @csrf
+            @method('DELETE')
+            <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
+        </form>
+    @else
+        <span class="badge bg-secondary">Locked</span>
+        <small class="text-muted d-block">Cannot edit/delete</small>
+    @endif
+</td>
         </tr>
         @endforeach
     </tbody>

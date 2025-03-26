@@ -50,12 +50,13 @@
 </style>
 
 <body>
-
+@if (!request()->routeIs('login'))
   @include('partial.navbar')
+  @endif
   <div class="container" style="margin-top: 5vh;">
     @yield('container')
   </div>
-  @if (!request()->routeIs('reservation.index') && !request()->routeIs('reservations.upcoming'))
+  @if (request()->routeIs('index'))
       @include('partial.footer')
   @endif
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

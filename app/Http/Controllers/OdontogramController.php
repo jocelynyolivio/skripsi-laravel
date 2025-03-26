@@ -57,8 +57,11 @@ class OdontogramController extends Controller
         if (!empty($validated['procedure_id'])) {
             $odontogram->procedures()->sync($validated['procedure_id']);
         }
+
+        return response()->json(['success' => true]);
+
     
-        return redirect()->back()->with('success', 'Odontogram updated successfully.');
+        // return redirect()->back()->with('success', 'Odontogram updated successfully.');
     }
     
 }

@@ -17,9 +17,12 @@
           @endif
         </li>
 
-        <li>
+        <li class="nav-item">
+          @if(Auth::guard('patient')->check())
           <a href="{{ route('reservations.upcoming') }}" class="nav-link">My Reservations
-          </a>
+            @else
+            <a class="nav-link" href="{{ route('patient.login') }}">Make Reservations</a>
+            @endif
         </li>
       </ul>
 

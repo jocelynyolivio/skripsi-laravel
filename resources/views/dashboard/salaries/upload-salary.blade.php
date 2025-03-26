@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5">
-    <h1 class="text-center">Upload File Gaji</h1>
+    <h1 class="text-center">Upload File Presensi</h1>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form action="{{ url('dashboard/salaries/process-salary') }}" method="POST" enctype="multipart/form-data">

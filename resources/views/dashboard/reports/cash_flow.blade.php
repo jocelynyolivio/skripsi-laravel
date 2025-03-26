@@ -14,11 +14,22 @@
         <input type="date" name="date" value="{{ $date }}" class="form-control mt-2">
         <button type="submit" class="btn btn-primary mt-2">Filter</button>
     </form>
+    <h4>🔹 **Arus Kas dari Aktivitas Operasi**</h4>
+    <p>Kas Masuk: {{ number_format($operatingCashIn, 2) }}</p>
+    <p>Kas Keluar: {{ number_format($operatingCashOut, 2) }}</p>
+    <p><strong>Kas Bersih: {{ number_format($operatingCashIn - $operatingCashOut, 2) }}</strong></p>
 
-    <h4>Kas Bersih dari Operasional: {{ number_format($operatingCashIn - $operatingCashOut, 2) }}</h4>
-    <h4>Kas Bersih dari Investasi: {{ number_format($investmentCashIn - $investmentCashOut, 2) }}</h4>
-    <h4>Kas Bersih dari Pendanaan: {{ number_format($financingCashIn - $financingCashOut, 2) }}</h4>
+    <h4>🔹 **Arus Kas dari Aktivitas Investasi**</h4>
+    <p>Kas Masuk: {{ number_format($investmentCashIn, 2) }}</p>
+    <p>Kas Keluar: {{ number_format($investmentCashOut, 2) }}</p>
+    <p><strong>Kas Bersih: {{ number_format($investmentCashIn - $investmentCashOut, 2) }}</strong></p>
 
-    <h3>Total Arus Kas Bersih: {{ number_format($netCashFlow, 2) }}</h3>
+    <h4>🔹 **Arus Kas dari Aktivitas Pendanaan**</h4>
+    <p>Kas Masuk: {{ number_format($financingCashIn, 2) }}</p>
+    <p>Kas Keluar: {{ number_format($financingCashOut, 2) }}</p>
+    <p><strong>Kas Bersih: {{ number_format($financingCashIn - $financingCashOut, 2) }}</strong></p>
+
+    <h3>✅ **Total Arus Kas Bersih**: {{ number_format($netCashFlow, 2) }}</h3>
+
 </div>
 @endsection

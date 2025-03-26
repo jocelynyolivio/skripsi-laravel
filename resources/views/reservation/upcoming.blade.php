@@ -1,8 +1,9 @@
 @extends('layouts.main')
 
 @section('container')
-<div class="container mt-5">
-    <h3 class="mb-4">Upcoming Reservations</h3>
+<div class="container mt-5 col-md-6 justify-content-center">
+    
+    <h3 class="mb-4 text-center">Upcoming Reservations</h3>
 
     @if($reservations->isEmpty())
         <div class="alert alert-info">No upcoming reservations.</div>

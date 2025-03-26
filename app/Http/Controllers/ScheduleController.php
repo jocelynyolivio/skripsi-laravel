@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\MedicalRecord;
 use App\Models\Patient;
-use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\ScheduleOverride;
 use App\Models\ScheduleTemplate;

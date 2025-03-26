@@ -134,6 +134,7 @@ class TransactionController extends Controller
             'discount_final.*' => 'numeric|min:0',
             'coa_id' => 'required|exists:chart_of_accounts,id', // coa
             'payments' => 'nullable|array',
+            'payments.*.method' => 'required',
             'payments.*.amount' => 'required|numeric|min:0',
             'payments.*.notes' => 'nullable|string'
         ]);
@@ -197,6 +198,7 @@ class TransactionController extends Controller
                 $transaction->payments()->create([
                     'payment_date' => now(),
                     'amount' => $paymentData['amount'],
+                    'payment_method' => $paymentData['method'],
                     'notes' => $paymentData['notes'] ?? null
                 ]);
                 $totalPayments += $paymentData['amount'];
@@ -281,9 +283,12 @@ class TransactionController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'coa_id' => 'required|exists:chart_of_accounts,id', // Validasi coa_id
             'payments' => 'nullable|array',
+            'payments.*.method' => 'required',
             'payments.*.amount' => 'required|numeric|min:0',
-            'payments.*.notes' => 'nullable|string'
+            'payments.*.notes' => 'nullable|string',
         ]);
+
+        // dd($validated);
 
         // Hitung Total Harga Transaksi
         $totalAmount = 0;
@@ -331,6 +336,7 @@ class TransactionController extends Controller
                 $transaction->payments()->create([
                     'payment_date' => now(),
                     'amount' => $paymentData['amount'],
+                    'payment_method' => $paymentData['method'],
                     'notes' => $paymentData['notes'] ?? null
                 ]);
                 $totalPayments += $paymentData['amount'];
@@ -572,10 +578,20 @@ class TransactionController extends Controller
         $transactions = Transaction::with(['patient', 'admin', 'medicalRecord.patient'])->get();
         $coa = ChartOfAccount::all();
 
+        // Hitung total transaksi lunas dalam 30 hari terakhir
+        $paidTransactions = Transaction::where('status', 'lunas')
+            ->where('updated_at', '>=', now()->subDays(30))
+            ->sum('total_amount');
+
+        // Hitung total transaksi yang belum lunas
+        $unpaidTransactions = $transactions->sum('remaining_amount');
+
         return view('dashboard.transactions.index', [
             'title' => 'Transactions',
             'transactions' => $transactions,
             'cashAccounts' => $coa,
+            'paidTransactions' => $paidTransactions,
+            'unpaidTransactions' => $unpaidTransactions,
         ]);
     }
 
@@ -583,62 +599,58 @@ class TransactionController extends Controller
     {
         $transaction = Transaction::findOrFail($transactionId);
         $receivable = $transaction->receivable;
-
-        // dd($receivable);
-
+    
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1|max:' . $receivable->remaining_amount,
             'notes' => 'nullable|string',
-            'coa_id' => 'required|exists:chart_of_accounts,id', // Pastikan coa_id valid
+            'coa_id' => 'required|exists:chart_of_accounts,id',
+            'payments' => 'required|array',
+            'payments.0.method' => 'required|string' // This matches your select name="payments[0][method]"
         ]);
-
+    
         // Tambahkan payment baru
-        $transaction->payments()->create([
+        $payment = $transaction->payments()->create([
             'payment_date' => now(),
             'amount' => $validated['amount'],
-            'notes' => $validated['notes'] ?? null
+            'notes' => $validated['notes'] ?? null,
+            'payment_method' => $validated['payments'][0]['method'], // Access the nested array
+            'coa_id' => $validated['coa_id']
         ]);
-
+    
+        // Create journal entry
         $journalEntry = JournalEntry::create([
             'transaction_id' => $transaction->id,
             'entry_date' => now(),
-            'description' => 'Pembayaran pada ' . now()->format('d-m-Y'),
+            'description' => 'Pembayaran via ' . $validated['payments'][0]['method'] . ' pada ' . now()->format('d-m-Y'),
         ]);
-
-        // Ambil ID akun kas/bank berdasarkan pilihan user
-        // $coaKas = ChartOfAccount::where('id', $validated['coa_id'])->value('id');
-
-        // dd($validated['coa_id'], $coaKas);
-
+    
+        // Debit: Kas/Bank
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
             'coa_id' => $validated['coa_id'],
             'debit' => $validated['amount'],
             'credit' => 0
         ]);
-
-        $idPiutangUsaha = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
-
+    
         // Kredit: Piutang Usaha
+        $idPiutangUsaha = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id' => $idPiutangUsaha, // Piutang Usaha
+            'coa_id' => $idPiutangUsaha,
             'debit' => 0,
             'credit' => $validated['amount']
         ]);
-
-
+    
         // Update Receivables
-        $receivable = Receivable::where('transaction_id', $transaction->id)->first();
         $receivable->paid_amount += $validated['amount'];
         $receivable->remaining_amount = $receivable->amount - $receivable->paid_amount;
         $receivable->status = $receivable->remaining_amount > 0 ? 'belum lunas' : 'lunas';
         $receivable->save();
-
-        // **Update Status di Transactions (Dari Receivables)**
+    
+        // Update Transaction status
         $transaction->status = $receivable->status;
         $transaction->save();
-
+    
         return redirect()->back()->with('success', 'Payment added successfully!');
     }
 

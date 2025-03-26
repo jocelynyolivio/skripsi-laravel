@@ -1,8 +1,17 @@
 @extends('dashboard.layouts.main')
 
 @section('container')
-<div class="container">
-    <h3 class="my-4">All Users</h3>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">Master Users</h3>
+        <a href="{{ route('dashboard.masters.create') }}" class="btn btn-primary mb-3">Add New Users</a>
+    </div>
+
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
 
     <!-- Dropdown Filter -->
     <div class="mb-3">
@@ -35,19 +44,19 @@
                 <td>{{ $user->email }}</td>
                 <td>
                     @if ($user->role_id == 1)
-                        Admin
+                    Admin
                     @elseif ($user->role_id == 2)
-                        Doctor
+                    Doctor
                     @elseif ($user->role_id == 3)
-                        Manager
+                    Manager
                     @endif
                 </td>
                 <td>
                     <!-- Tombol Edit -->
                     <a href="{{ route('dashboard.masters.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    
+
                     <!-- Tombol Delete -->
-                    <form action="{{ route('dashboard.masters.destroy', $user->id) }}" method="POST" class="d-inline delete-form">
+                    <form action="{{ route('dashboard.masters.destroy', $user->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
@@ -67,14 +76,17 @@
             "ordering": true,
             "info": true,
             "responsive": true,
-            "columnDefs": [
-                { "orderable": false, "targets": 4 } // Kolom ke-4 adalah kolom Actions
+            "columnDefs": [{
+                    "orderable": false,
+                    "targets": 4
+                } // Kolom ke-4 adalah kolom Actions
             ]
         });
 
         // Event delegation for SweetAlert confirmation
         $('#usersTable').on('click', '.delete-button', function(e) {
             e.preventDefault();
+            console.log('Delete button clicked'); // Tambahkan ini untuk debugging
             var form = $(this).closest('form');
             Swal.fire({
                 title: 'Are you sure?',

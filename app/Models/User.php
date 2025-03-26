@@ -16,7 +16,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id', // Tambahkan 'role_id' jika perlu
+        'role_id',
+        'tanggal_bergabung',
+        'nomor_sip',
+        'nik',
+        'nomor_telepon',
+        'alamat',
+        'nomor_rekening',
+        'deskripsi',
     ];
 
     protected $hidden = [
@@ -43,5 +50,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Schedules::class, 'doctor_id');
     }
-
 }

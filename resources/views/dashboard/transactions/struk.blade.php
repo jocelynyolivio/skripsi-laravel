@@ -151,7 +151,23 @@
     <!-- Footer -->
     <div class="footer">
         <p class="total">Grand Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
-        <p>2. Media Transaksi: {{ $transaction->payment_media ?? 'Tidak diketahui' }}</p>
+        
+        <div class="payment-info">
+            <p><strong>Pembayaran:</strong></p>
+            @if($transaction->payments->count() > 0)
+                @foreach($transaction->payments as $payment)
+                <p>
+                    {{ $loop->iteration }}. {{ $payment->payment_method }}: 
+                    Rp {{ number_format($payment->amount, 0, ',', '.') }} 
+                </p>
+                @endforeach
+            @else
+                <p>Belum ada pembayaran</p>
+            @endif
+            
+            <p><strong>Sisa Tagihan:</strong> Rp {{ number_format($transaction->remaining_amount, 0, ',', '.') }}</p>
+            <p><strong>Status:</strong> {{ ucfirst($transaction->payment_status) }}</p>
+        </div>
     </div>
 
     <button class="no-print" onclick="window.print()">Cetak Struk</button>

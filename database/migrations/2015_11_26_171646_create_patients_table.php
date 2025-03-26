@@ -16,13 +16,13 @@ return new class extends Migration
             $table->string('patient_id')->unique();
 
             // informasi pribadi
-            $table->string('name');
-            $table->enum('gender', ['Male', 'Female', 'Other']);
-            $table->string('nik');
-            $table->string('blood_type');
+            $table->string('name')->nullable();
+            $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
+            $table->string('nik')->nullable();
+            $table->string('blood_type')->nullable();
             $table->string('parent_name')->nullable();
-            $table->string('place_of_birth');
-            $table->date('date_of_birth');
+            $table->string('place_of_birth')->nullable();
+            $table->date('date_of_birth')->nullable();
             $table->string('religion')->nullable();
             $table->enum('marital_status', ['Single', 'Married', 'Divorced', 'Widowed'])->nullable();
             $table->string('family_status')->nullable();
@@ -30,12 +30,12 @@ return new class extends Migration
             $table->string('nationality')->nullable();
 
             // Alamat Rumah
-            $table->text('home_address');
+            $table->text('home_address')->nullable();
             $table->string('home_city')->nullable();
             $table->string('home_zip_code')->nullable();
             $table->string('home_country')->nullable();
             $table->string('home_phone')->nullable();
-            $table->string('home_mobile');
+            $table->string('home_mobile')->nullable();
             $table->string('home_email')->nullable();
 
             // Alamat Kantor
@@ -48,8 +48,8 @@ return new class extends Migration
             $table->string('office_email')->nullable();
 
             // Kontak Darurat
-            $table->string('emergency_contact_name');
-            $table->string('emergency_contact_phone');
+            $table->string('emergency_contact_name')->nullable();
+            $table->string('emergency_contact_phone')->nullable();
 
             // Upload Dokumen
             $table->string('form_data_awal')->nullable(); // Upload form awal

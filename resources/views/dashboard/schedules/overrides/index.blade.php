@@ -53,22 +53,23 @@
         });
     });
     $('#overrideTable').on('click', '.delete-button', function(e) {
-            e.preventDefault();
-            var form = $(this).closest('form');
-            Swal.fire({
-                title: 'Are you sure?', 
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+        e.preventDefault();
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
         });
+    });
 </script>
 
 @endsection 

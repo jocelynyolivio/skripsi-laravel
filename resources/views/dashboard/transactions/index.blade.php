@@ -1,5 +1,13 @@
 @extends('dashboard.layouts.main')
 
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Transactions']
+        ]
+    ])
+@endsection
+
 @section('container')
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
@@ -88,6 +96,63 @@
                                                 @foreach ($cashAccounts as $account)
                                                 <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
                                                 @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="payment_method" class="form-label">Cara Bayar</label>
+                                            <select class="form-control" id="payment_method" name="payments[0][method]" required>
+
+                                                <option value="">-- Pilih Metode Pembayaran --</option>
+
+                                                <!-- QRIS -->
+                                                <optgroup label="QRIS">
+                                                    <option value="QRIS BCA">QRIS BCA</option>
+                                                    <option value="QRIS CIMB Niaga">QRIS CIMB Niaga</option>
+                                                    <option value="QRIS Mandiri">QRIS Mandiri</option>
+                                                    <option value="QRIS BRI">QRIS BRI</option>
+                                                    <option value="QRIS BNI">QRIS BNI</option>
+                                                    <option value="QRIS Permata">QRIS Permata</option>
+                                                    <option value="QRIS Maybank">QRIS Maybank</option>
+                                                    <option value="QRIS Danamon">QRIS Danamon</option>
+                                                    <option value="QRIS Bank Mega">QRIS Bank Mega</option>
+                                                </optgroup>
+
+                                                <!-- Kartu Kredit/Debit -->
+                                                <optgroup label="Kartu Kredit/Debit">
+                                                    <option value="Visa">Visa</option>
+                                                    <option value="Mastercard">Mastercard</option>
+                                                    <option value="JCB">JCB</option>
+                                                    <option value="American Express">American Express (AMEX)</option>
+                                                    <option value="GPN">GPN (Gerbang Pembayaran Nasional)</option>
+                                                    <option value="Kartu Kredit BCA">Kartu Kredit BCA</option>
+                                                    <option value="Kartu Kredit Mandiri">Kartu Kredit Mandiri</option>
+                                                    <option value="Kartu Kredit BRI">Kartu Kredit BRI</option>
+                                                    <option value="Kartu Kredit BNI">Kartu Kredit BNI</option>
+                                                    <option value="Kartu Kredit CIMB Niaga">Kartu Kredit CIMB Niaga</option>
+                                                </optgroup>
+
+                                                <!-- Transfer Bank -->
+                                                <optgroup label="Transfer Bank">
+                                                    <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+                                                    <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+                                                    <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+                                                    <option value="Transfer Bank BNI">Transfer Bank BNI</option>
+                                                    <option value="Transfer Bank CIMB Niaga">Transfer Bank CIMB Niaga</option>
+                                                    <option value="Transfer Bank Permata">Transfer Bank Permata</option>
+                                                    <option value="Transfer Bank Maybank">Transfer Bank Maybank</option>
+                                                </optgroup>
+
+                                                <!-- E-Wallet -->
+                                                <optgroup label="E-Wallet">
+                                                    <option value="GoPay">GoPay</option>
+                                                    <option value="OVO">OVO</option>
+                                                    <option value="Dana">Dana</option>
+                                                    <option value="LinkAja">LinkAja</option>
+                                                    <option value="ShopeePay">ShopeePay</option>
+                                                    <option value="Doku Wallet">Doku Wallet</option>
+                                                    <option value="PayPal">PayPal</option>
+                                                </optgroup>
                                             </select>
                                         </div>
 

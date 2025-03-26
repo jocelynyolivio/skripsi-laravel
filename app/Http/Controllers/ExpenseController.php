@@ -96,9 +96,32 @@ class ExpenseController extends Controller
         return redirect()->route('dashboard.expenses.index')->with('success', 'Expense updated successfully!');
     }
 
+    // public function destroy(Expense $expense)
+    // {
+    //     $expense->delete();
+    //     return redirect()->route('dashboard.expenses.index')->with('success', 'Expense deleted successfully!');
+    // }
     public function destroy(Expense $expense)
     {
+        // Cari JournalEntry yang sesuai dengan deskripsi Expense (atau sesuaikan jika pakai relasi atau transaction_id)
+        $journal = JournalEntry::where('entry_date', $expense->expense_date)
+        ->where('description', 'Expense: ' . $expense->description)
+        ->whereHas('details', function ($query) use ($expense) {
+            $query->where('debit', $expense->amount);
+        })
+        ->first();
+
+        if ($journal) {
+            // Hapus JournalDetail yang terkait
+            JournalDetail::where('journal_entry_id', $journal->id)->delete();
+
+            // Hapus JournalEntry
+            $journal->delete();
+        }
+
+        // Hapus Expense
         $expense->delete();
+
         return redirect()->route('dashboard.expenses.index')->with('success', 'Expense deleted successfully!');
     }
 }

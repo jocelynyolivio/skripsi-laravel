@@ -1,5 +1,14 @@
 @extends('dashboard.layouts.main')
 
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['url' => route('dashboard.transactions.index'), 'text' => 'Transactions'],
+            ['text' => 'Create']
+        ]
+    ])
+@endsection
+
 @section('container')
 <div class="container mt-5 col-md-6">
     <h3 class="text-center">Create Transaction for Medical Record ID: {{ $medicalRecord->id }}</h3>
@@ -66,7 +75,7 @@
             </div>
 
             <div class="form-group">
-                <label for="coa_id">Menerima Ke (Akun Kas/Bank)</label>
+                <label for="coa_id">Setor Ke (Akun Kas/Bank)</label>
                 <select class="form-control" id="coa_id" name="coa_id" required>
                     <option value="">-- Pilih Akun Kas/Bank --</option>
                     @foreach ($cashAccounts as $account)
@@ -74,6 +83,64 @@
                     @endforeach
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label for="payment_method" class="form-label">Cara Bayar</label>
+                <select class="form-control" id="payment_method" name="payments[0][method]" required>
+
+                    <option value="">-- Pilih Metode Pembayaran --</option>
+
+                    <!-- QRIS -->
+                    <optgroup label="QRIS">
+                        <option value="QRIS BCA">QRIS BCA</option>
+                        <option value="QRIS CIMB Niaga">QRIS CIMB Niaga</option>
+                        <option value="QRIS Mandiri">QRIS Mandiri</option>
+                        <option value="QRIS BRI">QRIS BRI</option>
+                        <option value="QRIS BNI">QRIS BNI</option>
+                        <option value="QRIS Permata">QRIS Permata</option>
+                        <option value="QRIS Maybank">QRIS Maybank</option>
+                        <option value="QRIS Danamon">QRIS Danamon</option>
+                        <option value="QRIS Bank Mega">QRIS Bank Mega</option>
+                    </optgroup>
+
+                    <!-- Kartu Kredit/Debit -->
+                    <optgroup label="Kartu Kredit/Debit">
+                        <option value="Visa">Visa</option>
+                        <option value="Mastercard">Mastercard</option>
+                        <option value="JCB">JCB</option>
+                        <option value="American Express">American Express (AMEX)</option>
+                        <option value="GPN">GPN (Gerbang Pembayaran Nasional)</option>
+                        <option value="Kartu Kredit BCA">Kartu Kredit BCA</option>
+                        <option value="Kartu Kredit Mandiri">Kartu Kredit Mandiri</option>
+                        <option value="Kartu Kredit BRI">Kartu Kredit BRI</option>
+                        <option value="Kartu Kredit BNI">Kartu Kredit BNI</option>
+                        <option value="Kartu Kredit CIMB Niaga">Kartu Kredit CIMB Niaga</option>
+                    </optgroup>
+
+                    <!-- Transfer Bank -->
+                    <optgroup label="Transfer Bank">
+                        <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+                        <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+                        <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+                        <option value="Transfer Bank BNI">Transfer Bank BNI</option>
+                        <option value="Transfer Bank CIMB Niaga">Transfer Bank CIMB Niaga</option>
+                        <option value="Transfer Bank Permata">Transfer Bank Permata</option>
+                        <option value="Transfer Bank Maybank">Transfer Bank Maybank</option>
+                    </optgroup>
+
+                    <!-- E-Wallet -->
+                    <optgroup label="E-Wallet">
+                        <option value="GoPay">GoPay</option>
+                        <option value="OVO">OVO</option>
+                        <option value="Dana">Dana</option>
+                        <option value="LinkAja">LinkAja</option>
+                        <option value="ShopeePay">ShopeePay</option>
+                        <option value="Doku Wallet">Doku Wallet</option>
+                        <option value="PayPal">PayPal</option>
+                    </optgroup>
+                </select>
+            </div>
+
 
             <label>Notes:</label>
             <input type="string" class="form-control" name="payments[0][notes]">
@@ -90,54 +157,91 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const amountInputs = document.querySelectorAll('.amount-input');
-        const discountInputs = document.querySelectorAll('.discount-input');
-        const discountTypes = document.querySelectorAll('.discount-type');
-        const discountDisplays = document.querySelectorAll('.discount-amount-display');
-        const discountHiddenInputs = document.querySelectorAll('.discount-hidden');
-        const totalAmountField = document.getElementById('total_amount');
-        const totalAmountDisplay = document.getElementById('total-amount-display');
-        const paymentInput = document.getElementById('payment');
-        const remainingAmountField = document.getElementById('remaining_amount');
-        const remainingAmountDisplay = document.getElementById('remaining-amount-display');
+    console.log('Script loaded');
+    
+    // Get all procedure items containers
+    const procedureItems = document.querySelectorAll('.mb-3');
+    const totalAmountField = document.getElementById('total_amount');
+    const totalAmountDisplay = document.getElementById('total-amount-display');
+    const paymentInput = document.getElementById('payment');
+    const remainingAmountField = document.getElementById('remaining_amount');
+    const remainingAmountDisplay = document.getElementById('remaining-amount-display');
 
-        function calculateTotal() {
-            let total = 0;
-            amountInputs.forEach((input, index) => {
-                if (input.checked) {
-                    const quantity = parseInt(input.closest('.mb-3').querySelector('.quantity-input').value) || 1;
-                    let unitPrice = parseFloat(input.value);
-                    let discountInput = discountInputs[index];
-                    let discountType = discountTypes[index].value;
-                    let discount = parseFloat(discountInput.value) || 0;
-                    let finalDiscount = discountType === 'percent' ? ((unitPrice * quantity) * (discount / 100)) : discount;
-                    discountDisplays[index].textContent = finalDiscount.toLocaleString();
-                    discountHiddenInputs[index].value = finalDiscount;
-                    total += Math.max((unitPrice * quantity) - finalDiscount, 0);
-                }
-            });
-            totalAmountField.value = total;
-            totalAmountDisplay.textContent = total.toLocaleString();
-            calculateRemainingPayment();
-        }
+    function calculateTotal() {
+        let total = 0;
+        
+        procedureItems.forEach((item, index) => {
+            // Skip if not a procedure item (there might be other mb-3 elements)
+            if (!item.querySelector('.amount-input')) return;
 
-        function calculateRemainingPayment() {
-            let total = parseFloat(totalAmountField.value);
-            let payment = parseFloat(paymentInput.value) || 0;
-            if (payment > total) {
-                paymentInput.value = total;
+            const quantity = parseInt(item.querySelector('.quantity-input').value) || 1;
+            const selectedPriceInput = item.querySelector('.amount-input:checked');
+            const discountInput = item.querySelector('.discount-input');
+            const discountType = item.querySelector('.discount-type').value;
+            const discountDisplay = item.querySelector('.discount-amount-display');
+            const discountHidden = item.querySelector('.discount-hidden');
+
+            if (selectedPriceInput) {
+                let unitPrice = parseFloat(selectedPriceInput.value);
+                let discount = parseFloat(discountInput.value) || 0;
+                let finalDiscount = discountType === 'percent' 
+                    ? ((unitPrice * quantity) * (discount / 100)) 
+                    : discount;
+                
+                // Ensure discount doesn't make price negative
+                finalDiscount = Math.min(finalDiscount, unitPrice * quantity);
+                
+                discountDisplay.textContent = finalDiscount.toLocaleString();
+                discountHidden.value = finalDiscount;
+                total += Math.max((unitPrice * quantity) - finalDiscount, 0);
             }
-            let remaining = Math.max(total - payment, 0);
-            remainingAmountField.value = remaining;
-            remainingAmountDisplay.textContent = remaining.toLocaleString();
+        });
+        
+        totalAmountField.value = total;
+        totalAmountDisplay.textContent = total.toLocaleString();
+        calculateRemainingPayment();
+    }
+
+    function calculateRemainingPayment() {
+        let total = parseFloat(totalAmountField.value) || 0;
+        let payment = parseFloat(paymentInput.value) || 0;
+        
+        // Prevent overpayment
+        if (payment > total) {
+            payment = total;
+            paymentInput.value = total;
         }
+        
+        let remaining = Math.max(total - payment, 0);
+        remainingAmountField.value = remaining;
+        remainingAmountDisplay.textContent = remaining.toLocaleString();
+    }
 
-        amountInputs.forEach(input => input.addEventListener('change', calculateTotal));
-        discountInputs.forEach(input => input.addEventListener('input', calculateTotal));
-        discountTypes.forEach(select => select.addEventListener('change', calculateTotal));
-        paymentInput.addEventListener('input', calculateRemainingPayment);
-
-        calculateTotal();
+    // Add event listeners to all relevant elements
+    procedureItems.forEach(item => {
+        const amountInputs = item.querySelectorAll('.amount-input');
+        const discountInput = item.querySelector('.discount-input');
+        const discountType = item.querySelector('.discount-type');
+        
+        if (amountInputs) {
+            amountInputs.forEach(input => {
+                input.addEventListener('change', calculateTotal);
+            });
+        }
+        
+        if (discountInput) {
+            discountInput.addEventListener('input', calculateTotal);
+        }
+        
+        if (discountType) {
+            discountType.addEventListener('change', calculateTotal);
+        }
     });
+
+    paymentInput.addEventListener('input', calculateRemainingPayment);
+
+    // Initial calculation
+    calculateTotal();
+});
 </script>
 @endsection

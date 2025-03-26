@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('transaction_id');
             $table->date('payment_date')->default(DB::raw('CURRENT_DATE'));
             $table->decimal('amount', 10, 2);
-            $table->enum('payment_method', ['cash', 'card', 'bank_transfer', 'other']);
+            $table->text('payment_method');
             $table->text('notes')->nullable();
             $table->timestamps();
 

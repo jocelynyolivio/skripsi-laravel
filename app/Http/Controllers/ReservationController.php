@@ -66,9 +66,12 @@ class ReservationController extends Controller
 
     public function index(Request $request)
     {
+        // dd('hai');
         if ($request->has('date')) {
             $date = $request->date;
             $dayOfWeek = Carbon::parse($date)->format('l');
+
+            dd($request['date']);
 
             // Mengambil jadwal dokter yang tersedia untuk tanggal yang dipilih
             $schedules = Schedules::where('date', $date)
@@ -186,20 +189,20 @@ class ReservationController extends Controller
         ]);
 
         // Kirim Email ke Admin TANPA Mail Class
-        Mail::raw(
-            "🔔 Notifikasi Reservasi Baru! \n\n" .
-                "📌 Pasien: {$patientName} \n" .
-                "🩺 Dokter ID: {$request->doctor_id} \n" .
-                "📅 Tanggal: {$request->tanggal_reservasi} \n" .
-                "⏰ Jam: {$request->jam_mulai} - {$request->jam_selesai} \n\n" .
-                "Cek sistem untuk lebih lanjut.",
-            function ($message) {
-                $message->to('emailnyayoli@gmail.com')
-                    ->subject('🔔 Reservasi Baru dari Pasien!');
-            }
-        );
+        // Mail::raw(
+        //     "🔔 Notifikasi Reservasi Baru! \n\n" .
+        //         "📌 Pasien: {$patientName} \n" .
+        //         "🩺 Dokter ID: {$request->doctor_id} \n" .
+        //         "📅 Tanggal: {$request->tanggal_reservasi} \n" .
+        //         "⏰ Jam: {$request->jam_mulai} - {$request->jam_selesai} \n\n" .
+        //         "Cek sistem untuk lebih lanjut.",
+        //     function ($message) {
+        //         $message->to('emailnyayoli@gmail.com')
+        //             ->subject('🔔 Reservasi Baru dari Pasien!');
+        //     }
+        // );
         // Menyimpan flash message ke session
-        session()->flash('success', 'Reservasi berhasil dibuat. Silakan cek data reservasi.');
+        session()->flash('success', 'Reservation created. Please check to My Reservations');
 
         return redirect()->route('reservation.index'); // Redirect ke halaman reservasi setelah sukses
     }
