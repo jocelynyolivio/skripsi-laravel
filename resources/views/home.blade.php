@@ -2,7 +2,6 @@
 
 @section('container')
 <div class="container mt-5">
-    <!-- Tambahkan ini di bagian yang sesuai, biasanya di atas konten utama -->
 <div class="container mt-3">
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

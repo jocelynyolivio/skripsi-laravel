@@ -174,6 +174,8 @@
 
 @endif
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
 <script>
     $(document).ready(function() {
         const renderPasienBelumKonfirmasi = (reservasiList) => {
@@ -295,7 +297,7 @@
                                     data: data,
                                     fill: true,
                                     borderColor: 'rgba(75, 192, 192, 1)',
-                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
                                     tension: 0.3
                                 }]
                             },
@@ -306,6 +308,29 @@
                                         display: true,
                                         position: 'top',
                                     },
+                                    title: {
+                                        display: true,
+                                        text: 'Grafik Tren Kunjungan Pasien Bulanan',
+                                        font: {
+                                            size: 18
+                                        }
+                                    },
+                                    datalabels: {
+                                        anchor: 'center',
+                                        align: 'center',
+                                        color: '#000',
+                                        font: {
+                                            weight: 'bold',
+                                            size: 12
+                                        },
+                                        formatter: function(value) {
+                                            return value;
+                                        }
+                                    }
+                                },
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false,
                                 },
                                 scales: {
                                     x: {
@@ -322,7 +347,8 @@
                                         beginAtZero: true
                                     }
                                 }
-                            }
+                            },
+                            plugins: [ChartDataLabels]
                         });
 
                     },

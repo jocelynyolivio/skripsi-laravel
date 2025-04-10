@@ -2,8 +2,12 @@
 
 @section('container')
 <div class="container mt-5">
+
+
+    <div class="d-flex justify-content-between mb-3">
     <h3 class="mb-4">Schedule Overrides</h3>
     <a href="{{ route('dashboard.schedules.overrides.create') }}" class="btn btn-primary mb-3">Add New Override</a>
+    </div>
 
     <table class="table table-striped" id="overrideTable">
         <thead>
@@ -56,14 +60,13 @@
         e.preventDefault();
         var form = $(this).closest('form');
         Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini tidak dapat dikembalikan!",
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
+            confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
                 form.submit();

@@ -86,7 +86,7 @@
         // Event delegation for SweetAlert confirmation
         $('#usersTable').on('click', '.delete-button', function(e) {
             e.preventDefault();
-            console.log('Delete button clicked'); // Tambahkan ini untuk debugging
+            console.log('Delete button clicked');
             var form = $(this).closest('form');
             Swal.fire({
                 title: 'Are you sure?',

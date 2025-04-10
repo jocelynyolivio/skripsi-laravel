@@ -19,7 +19,7 @@
         @method('PUT')
 
         <div class="mb-3">
-            <label for="name" class="form-label">Nama</label>
+            <label for="name" class="form-label">Name</label>
             <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}">
         </div>
 
@@ -29,7 +29,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="password" class="form-label">Password (Kosongkan jika tidak ingin diubah)</label>
+            <label for="password" class="form-label">Password (Optional)</label>
             <div class="input-group">
                 <input type="password" class="form-control" id="password" name="password">
                 <button class="btn btn-outline-secondary" type="button" id="togglePassword">
@@ -48,13 +48,13 @@
         </div>
 
         <div class="mb-3">
-            <label for="tanggal_bergabung" class="form-label">Tanggal Bergabung</label>
+            <label for="tanggal_bergabung" class="form-label">Date Joined</label>
             <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung" 
                 value="{{ old('tanggal_bergabung', $user->tanggal_bergabung ?? date('Y-m-d')) }}">
         </div>
 
         <div class="mb-3">
-            <label for="nomor_sip" class="form-label">Nomor SIP</label>
+            <label for="nomor_sip" class="form-label">SIP Number</label>
             <input type="text" class="form-control" id="nomor_sip" name="nomor_sip" value="{{ old('nomor_sip', $user->nomor_sip) }}">
         </div>
 
@@ -64,22 +64,22 @@
         </div>
 
         <div class="mb-3">
-            <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
+            <label for="nomor_telepon" class="form-label">Phone Number</label>
             <input type="text" class="form-control" id="nomor_telepon" name="nomor_telepon" value="{{ old('nomor_telepon', $user->nomor_telepon) }}">
         </div>
 
         <div class="mb-3">
-            <label for="alamat" class="form-label">Alamat</label>
-            <textarea class="form-control" id="alamat" name="alamat">{{ old('alamat', $user->alamat) }}</textarea>
+            <label for="alamat" class="form-label">Address</label>
+            <input type="text" class="form-control" id="alamat" name="alamat" value="{{ old('alamat', $user->alamat) }}">
         </div>
 
         <div class="mb-3">
-            <label for="nomor_rekening" class="form-label">Nomor Rekening</label>
+            <label for="nomor_rekening" class="form-label">Bank Account Number</label>
             <input type="text" class="form-control" id="nomor_rekening" name="nomor_rekening" value="{{ old('nomor_rekening', $user->nomor_rekening) }}">
         </div>
 
         <div class="mb-3">
-            <label for="deskripsi" class="form-label">Deskripsi</label>
+            <label for="deskripsi" class="form-label">Description</label>
             <textarea class="form-control" id="deskripsi" name="deskripsi">{{ old('deskripsi', $user->deskripsi) }}</textarea>
         </div>
 

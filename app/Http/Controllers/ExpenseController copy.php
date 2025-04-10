@@ -283,7 +283,7 @@ class ExpenseController extends Controller
             'credit' => $request->amount
         ]);
 
-        return redirect()->back()->with('success', 'Hutang berhasil dibayar!');
+        return redirect()->back()->with('success', 'Debt successfully paid');
     }
 
     public function updateStockCard($dentalMaterialId, $quantity, $price, $referenceNumber)

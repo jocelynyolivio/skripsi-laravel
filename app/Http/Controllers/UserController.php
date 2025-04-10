@@ -50,7 +50,7 @@ class UserController extends Controller
         $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
-        return redirect()->route('dashboard.masters.index')->with('success', 'User berhasil ditambahkan.');
+        return redirect()->route('dashboard.masters.index')->with('success', 'User Created');
     }
 
     /**

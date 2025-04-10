@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h2>Tambah Hari Libur</h2>
+    <h2>Add Holidays</h2>
     <form action="{{ route('dashboard.holidays.store') }}" method="POST">
         @csrf
         <div class="form-group">

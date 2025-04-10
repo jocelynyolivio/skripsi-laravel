@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h3 class="text-center">Tambah Data Presensi</h3>
+    <h3 class="text-center">Add Attendances</h3>
 
     @if ($errors->any())
         <div class="alert alert-danger">

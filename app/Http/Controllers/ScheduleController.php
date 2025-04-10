@@ -33,7 +33,10 @@ class ScheduleController extends Controller
         $dayOfWeek = date('l', strtotime($selectedDate));
 
         // Ambil template berdasarkan hari
-        $templates = ScheduleTemplate::where('day_of_week', $dayOfWeek)->get();
+        // $templates = ScheduleTemplate::where('day_of_week', $dayOfWeek)->get();
+        $templates = ScheduleTemplate::where('day_of_week', $dayOfWeek)
+        ->where('is_active', true) // Hanya template aktif
+        ->get();
 
         // Ambil override pada tanggal tersebut
         $overrides = ScheduleOverride::where('override_date', $selectedDate)->get();
@@ -314,7 +317,7 @@ public function saveReservation(Request $request, $id = null)
     $reservation->save();
 
     // Menyimpan flash message ke session
-    $message = $id ? 'Reservasi berhasil diperbarui.' : 'Reservasi berhasil dibuat.';
+    $message = $id ? 'Reservation Updated' : 'Reservation Created.';
     session()->flash('success', $message);
  
     return redirect()->route('dashboard.reservations.index');

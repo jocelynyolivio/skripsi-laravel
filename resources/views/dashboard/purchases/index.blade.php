@@ -116,7 +116,6 @@
         });
     });
 
-    // SweetAlert untuk Konfirmasi Hapus
     $('#purchasesTable').on('click', '.delete-button', function(e) {
         e.preventDefault();
         var form = $(this).closest('form');

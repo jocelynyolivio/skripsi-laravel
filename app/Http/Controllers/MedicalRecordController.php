@@ -52,6 +52,26 @@ class MedicalRecordController extends Controller
         $reservation->save();
         return redirect()->back()->with('success', 'Reservation confirmed successfully!');
     }
+
+//     public function updateConfirmation($id)
+// {
+//     $reservation = MedicalRecord::findOrFail($id);
+    
+//     $action = request('action');
+    
+//     if ($action === 'confirm') {
+//         $reservation->confirmation_status = 'confirmed';
+//         $reservation->confirmed_at = now();
+//         $message = 'Reservation confirmed successfully!';
+//     } elseif ($action === 'cancel') {
+//         $reservation->confirmation_status = 'cancelled';
+//         $message = 'Reservation cancelled successfully!';
+//     }
+    
+//     $reservation->save();
+    
+//     return back()->with('success', $message);
+// }
     
     public function index($patientId)
     {

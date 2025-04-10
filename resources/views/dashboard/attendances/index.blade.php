@@ -4,7 +4,7 @@
 <div class="container">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Data Presensi</h3>
-        <a href="{{ route('dashboard.attendances.create') }}" class="btn btn-primary">Tambah Presensi</a>
+        <a href="{{ route('dashboard.attendances.create') }}" class="btn btn-primary">Add Attendances</a>
     </div>
 
     <!-- Filter Per Bulan -->
@@ -49,7 +49,7 @@
                         <form action="{{ route('dashboard.attendances.destroy', $attendance->id) }}" method="POST" class="d-inline delete-form">
                             @csrf
                             @method('DELETE')
-                            <button type="button" class="btn btn-danger btn-sm delete-button">Hapus</button>
+                            <button type="button" class="btn btn-danger btn-sm delete-button">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -78,13 +78,13 @@
         e.preventDefault();
         var form = $(this).closest('form');
         Swal.fire({
-            title: 'Apakah Anda Yakin?',
-            text: "Data yang dihapus tidak bisa dikembalikan!",
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Hapus!'
+            confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
                 form.submit();

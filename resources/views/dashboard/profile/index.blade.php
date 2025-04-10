@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5">
-    <h1 class="h2">Profil Saya</h1>
+    <h1 class="h2">My Profile</h1>
     <hr>
 
     @if(session('success'))
@@ -13,7 +13,7 @@
 
     <!-- Menampilkan informasi profil pengguna -->
     <div class="mb-3">
-        <label class="form-label"><strong>Nama:</strong></label>
+        <label class="form-label"><strong>Name:</strong></label>
         <p>{{ $user->name }}</p>
     </div>
 
@@ -23,6 +23,6 @@
     </div>
 
     <!-- Tombol Edit Profil -->
-    <a href="{{ route('dashboard.profile.edit') }}" class="btn btn-warning">Edit Profil</a>
+    <a href="{{ route('dashboard.profile.edit') }}" class="btn btn-warning">Edit Profile</a>
 </div>
 @endsection

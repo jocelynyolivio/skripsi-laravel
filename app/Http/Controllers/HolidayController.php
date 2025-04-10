@@ -30,7 +30,7 @@ class HolidayController extends Controller
             'keterangan' => $request->keterangan,
         ]);
 
-        return redirect()->route('dashboard.holidays.index')->with('success', 'Libur berhasil ditambahkan');
+        return redirect()->route('dashboard.holidays.index')->with('success', 'Holiday created');
     }
 
     public function show($id)
@@ -57,12 +57,12 @@ class HolidayController extends Controller
             'keterangan' => $request->keterangan,
         ]);
 
-        return redirect()->route('dashboard.holidays.index')->with('success', 'Libur berhasil diperbarui');
+        return redirect()->route('dashboard.holidays.index')->with('success', 'Holiday updated');
     }
 
     public function destroy($id)
     {
         DB::table('holidays')->where('id', $id)->delete();
-        return redirect()->route('dashboard.holidays.index')->with('success', 'Libur berhasil dihapus');
+        return redirect()->route('dashboard.holidays.index')->with('success', 'Holiday deleted');
     }
 }

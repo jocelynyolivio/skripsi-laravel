@@ -46,7 +46,7 @@ class AttendanceController extends Controller
 
         Attendance::create($validatedData);
 
-        return redirect()->route('dashboard.attendances.index')->with('success', 'Data berhasil ditambahkan.');
+        return redirect()->route('dashboard.attendances.index')->with('success', 'Data successfully created');
     }
 
     public function edit(Attendance $attendance)
@@ -70,12 +70,12 @@ class AttendanceController extends Controller
 
         $attendance->update($validatedData);
 
-        return redirect()->route('dashboard.attendances.index')->with('success', 'Data berhasil diperbarui.');
+        return redirect()->route('dashboard.attendances.index')->with('success', 'Data successfully updated.');
     }
 
     public function destroy(Attendance $attendance)
     {
         $attendance->delete();
-        return redirect()->route('dashboard.attendances.index')->with('success', 'Data berhasil dihapus.');
+        return redirect()->route('dashboard.attendances.index')->with('success', 'Data successfully deleted.');
     }
 }

@@ -5,7 +5,7 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Chart of Accounts</h3>
-        <a href="{{ route('dashboard.coa.create') }}" class="btn btn-primary">Tambah COA</a>
+        <a href="{{ route('dashboard.coa.create') }}" class="btn btn-primary">Add New Account</a>
 
     </div>
     @if(session('success'))

@@ -21,8 +21,7 @@
                     <td>{{ $journal->entry_date }}</td>
                     <td>
                         <a href="{{ route('dashboard.journals.show', ['id' => $journal->id]) }}" class="btn btn-info">
-                            Lihat Detail
-                        </a>
+Details                        </a>
                     </td>
                 </tr>
             @endforeach

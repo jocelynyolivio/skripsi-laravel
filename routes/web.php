@@ -233,7 +233,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::prefix('schedules')->name('schedules.')->group(function () {
         Route::resource('templates', ScheduleTemplateController::class);
         Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
-       
     });
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');

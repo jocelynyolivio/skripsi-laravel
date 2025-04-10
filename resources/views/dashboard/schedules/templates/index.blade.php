@@ -2,9 +2,11 @@
 
 @section('container')
 <div class="container mt-5">
+
+    <div class="d-flex justify-content-between mb-3">
     <h3 class="mb-4">Schedule Templates</h3>
     <a href="{{ route('dashboard.schedules.templates.create') }}" class="btn btn-primary mb-3">Add New Template</a>
-
+    </div>
 
     @if($templates->isEmpty())
         <p>No templates available.</p>

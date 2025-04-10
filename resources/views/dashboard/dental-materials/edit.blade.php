@@ -23,16 +23,6 @@
             <textarea class="form-control" id="description" name="description">{{ $dentalMaterial->description }}</textarea>
         </div>
 
-        <div class="mb-3">
-            <label for="stock_quantity" class="form-label">Stock Quantity</label>
-            <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" value="{{ $dentalMaterial->stock_quantity }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="unit_price" class="form-label">Unit Price</label>
-            <input type="number" class="form-control" id="unit_price" name="unit_price" value="{{ $dentalMaterial->unit_price }}" step="0.01">
-        </div>
-
         <button type="submit" class="btn btn-primary">Update Material</button>
     </form>
 </div>

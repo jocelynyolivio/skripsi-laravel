@@ -13,6 +13,12 @@
     </div>
     @endif
 
+    @if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+
     <table id="patientTable" class="table table-striped table-bordered">
         <thead>
             <tr>

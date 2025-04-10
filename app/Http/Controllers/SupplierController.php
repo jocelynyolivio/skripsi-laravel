@@ -46,7 +46,7 @@ class SupplierController extends Controller
         Supplier::create($validated);
 
         // Redirect ke Index Supplier dengan Pesan Sukses
-        return redirect()->route('dashboard.suppliers.index')->with('success', 'Data Supplier berhasil ditambahkan');
+        return redirect()->route('dashboard.suppliers.index')->with('success', 'Supplier Created');
     }
 
     /**
@@ -84,7 +84,7 @@ class SupplierController extends Controller
         $supplier->update($validated);
 
         // Redirect ke Index Supplier dengan Pesan Sukses
-        return redirect()->route('dashboard.suppliers.index')->with('success', 'Data Supplier berhasil diupdate');
+        return redirect()->route('dashboard.suppliers.index')->with('success', 'Supplier Updated');
     }
 
     /**
@@ -96,6 +96,6 @@ class SupplierController extends Controller
         $supplier->delete();
 
         // Redirect ke Index Supplier dengan Pesan Sukses
-        return redirect()->route('dashboard.suppliers.index')->with('success', 'Data Supplier berhasil dihapus');
+        return redirect()->route('dashboard.suppliers.index')->with('success', 'Suppplier Deleted');
     }
 }

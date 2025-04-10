@@ -42,14 +42,19 @@ class ScheduleTemplateController extends Controller
 
     public function update(Request $request, ScheduleTemplate $template)
     {
-        $request->validate([
-            'doctor_id' => 'required|exists:users,id',
-            'day_of_week' => 'required',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
+        $validated = $request->validate([
+            'doctor_id'   => 'required|exists:users,id',
+            'day_of_week' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time'  => 'required|date_format:H:i',
+            'end_time'    => 'required|date_format:H:i|after:start_time',
         ]);
-
+        
         $template->update($request->all());
+
+        // Handle checkbox manually
+        $validated['is_active'] = $request->has('is_active');
+
+        $template->update($validated);
 
         return redirect()->route('dashboard.schedules.templates.index')->with('success', 'Schedule Template updated successfully.');
     }

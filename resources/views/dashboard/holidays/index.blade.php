@@ -5,7 +5,7 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Holidays</h3>
-        <a href="{{ route('dashboard.holidays.create') }}" class="btn btn-primary">Tambah Libur</a>
+        <a href="{{ route('dashboard.holidays.create') }}" class="btn btn-primary">Add Holiday</a>
 
     </div>
     @if(session('success'))
@@ -29,7 +29,7 @@
                     <form action="{{ route('dashboard.holidays.destroy', $holiday->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
-                        <button type="button" class="btn btn-danger btn-sm delete-button">Hapus</button>
+                        <button type="button" class="btn btn-danger btn-sm delete-button">Delete</button>
                     </form>
                 </td>
             </tr>

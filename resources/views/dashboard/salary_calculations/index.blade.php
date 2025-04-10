@@ -3,7 +3,7 @@
 @section('container')
 <div class="container">
     <h1>Daftar Gaji</h1>
-    <a href="{{ route('dashboard.salary_calculations.create') }}" class="btn btn-primary mb-3">Tambah Data Gaji</a>
+    <a href="{{ route('dashboard.salary_calculations.create') }}" class="btn btn-primary mb-3">Add Salaries</a>
     @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
@@ -45,7 +45,7 @@
                         <form action="{{ route('salary_calculations.destroy', $salary->id) }}" method="POST" style="display:inline-block;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are You Sure?')">Delete</button>
                         </form>
                     </td>
                 </tr>

@@ -4,7 +4,7 @@
 <div class="container mt-5 col-md-6">
     <h3 class="mb-4">Edit Schedule Override</h3>
 
-    <form action="{{ route('dashboard.schedules.overrides.update', $override->id) }}" method="POST">
+    <form id="overrideForm" action="{{ route('dashboard.schedules.overrides.update', $override->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="mb-3">
@@ -38,7 +38,24 @@
             <label for="reason" class="form-label">Reason</label>
             <input type="text" name="reason" id="reason" class="form-control" value="{{ $override->reason }}">
         </div>
-        <button type="submit" class="btn btn-primary">Update Override</button>
+        <button type="button" class="btn btn-primary" id="submitOverrideBtn">Update Override</button>
     </form>
 </div>
+<script>
+    document.getElementById('submitOverrideBtn').addEventListener('click', function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You are about to update this override schedule.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Yes, update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('overrideForm').submit();
+            }
+        });
+    });
+</script>
 @endsection

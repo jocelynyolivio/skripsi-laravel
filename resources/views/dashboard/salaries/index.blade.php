@@ -3,14 +3,15 @@
 @section('container')
 <div class="container-fluid py-4">
 <div class="d-flex justify-content-between mb-3">
-        <h3 class="text-center">Presences and Salaries</h3>
-        <a href="{{ route('dashboard.salaries.upload') }}" class="btn btn-primary mb-3">Upload Presences File</a>
+        <h3 class="text-center">Attendances and Salaries</h3>
+        <a href="{{ route('dashboard.salaries.upload') }}" class="btn btn-primary mb-3">Upload Attendances File</a>
     </div>
+
     <!-- Header and Filter Section -->
     <div class="card shadow-lg mb-4">
         <div class="card-header bg-primary text-white">
             <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Data Gaji Berdasarkan Absensi</h4>
+                <h4 class="mb-0">Attendances by Month</h4>
                 @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
                     {{ session('success') }}
@@ -24,7 +25,7 @@
             <form method="GET" action="{{ route('dashboard.salaries.index') }}">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-4">
-                        <label for="month" class="form-label">Pilih Bulan</label>
+                        <label for="month" class="form-label">Month</label>
                         <select name="month" id="month" class="form-select">
                             @for ($m = 1; $m <= 12; $m++)
                             <option value="{{ str_pad($m, 2, '0', STR_PAD_LEFT) }}"
@@ -36,7 +37,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label for="year" class="form-label">Pilih Tahun</label>
+                        <label for="year" class="form-label">Year</label>
                         <select name="year" id="year" class="form-select">
                             @for ($y = now()->year - 5; $y <= now()->year + 1; $y++)
                             <option value="{{ $y }}" {{ request('year', now()->format('Y')) == $y ? 'selected' : '' }}>
@@ -59,7 +60,7 @@
     <!-- Attendance Data Section -->
     <div class="card shadow-lg mb-4">
         <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">Absensi Bulan {{ date('F Y', strtotime(request('year', now()->format('Y')) . '-' . request('month', now()->format('m')) . '-01')) }}</h5>
+            <h5 class="mb-0">Attendances {{ date('F Y', strtotime(request('year', now()->format('Y')) . '-' . request('month', now()->format('m')) . '-01')) }}</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -67,7 +68,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>No ID</th>
-                            <th>Nama</th>
+                            <th>Name</th>
                             <th class="text-center">Normal Shift</th>
                             <th class="text-center">Holiday Shift</th>
                         </tr>
@@ -90,7 +91,7 @@
     <!-- Admin Salary Calculation Section -->
     <div class="card shadow-lg mb-4">
         <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Perhitungan Gaji Admin</h5>
+            <h5 class="mb-0">Staffs' Salaries Calculation</h5>
         </div>
         <div class="card-body">
             <form method="POST" action="{{ route('dashboard.salaries.store') }}">
@@ -100,7 +101,7 @@
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
                     <button type="submit" name="action" value="calculate" class="btn btn-primary">
-                        <i class="fas fa-calculator me-2"></i> Hitung Gaji Admin
+                        <i class="fas fa-calculator me-2"></i>Generate Salaries for Staffs
                     </button>
                 </div>
 
@@ -111,13 +112,13 @@
                             <tr>
                                 <th>No ID</th>
                                 <th>Nama</th>
-                                <th class="text-end">Shift Pagi</th>
-                                <th class="text-end">Shift Siang</th>
-                                <th class="text-end">Holiday</th>
-                                <th class="text-end">Lembur</th>
-                                <th class="text-end">Gaji Pokok</th>
+                                <th class="text-end">Morning Shift</th>
+                                <th class="text-end">Afternoon shift</th>
+                                <th class="text-end">Holiday Shift</th>
+                                <th class="text-end">Overtime</th>
+                                <th class="text-end">Basic Salary</th>
                                 <th class="text-end">Grand Total</th>
-                                <th class="text-end">Adjustment</th>
+                                <th class="text-end">Adjustments (Optional)</th>
                                 <th>Adjustment Notes</th>
                             </tr>
                         </thead>
@@ -167,9 +168,9 @@
 
                 <div class="row mt-4">
                     <div class="col-md-6">
-                        <label for="coa_out" class="form-label">Bayar Dari (Akun Kas/Bank)</label>
+                        <label for="coa_out" class="form-label">Account for Salaries</label>
                         <select class="form-select" id="coa_out" name="coa_out" required>
-                            <option value="">-- Pilih Akun Kas/Bank --</option>
+                            <option value="">-- Choose Account --</option>
                             @foreach ($coa as $account)
                             <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
                             @endforeach
@@ -177,7 +178,7 @@
                     </div>
                     <div class="col-md-6 d-flex align-items-end justify-content-end">
                         <button type="submit" name="action" value="store" class="btn btn-success">
-                            <i class="fas fa-save me-2"></i> Simpan Gaji ke Database
+                            <i class="fas fa-save me-2"></i> Save Salaries to Database
                         </button>
                     </div>
                 </div>
@@ -189,7 +190,7 @@
     <!-- Doctor Salary Calculation Section -->
     <div class="card shadow-lg">
         <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">Perhitungan Gaji Dokter</h5>
+            <h5 class="mb-0">Medical Personnels' Salaries Calculation</h5>
         </div>
         <div class="card-body">
             <form method="POST" action="{{ route('dashboard.salaries.doctor') }}">
@@ -199,7 +200,7 @@
                 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-calculator me-2"></i> Hitung Gaji Dokter
+                        <i class="fas fa-calculator me-2"></i>Generate Salaries for Medical Personnels
                     </button>
                 </div>
             </form>
@@ -217,11 +218,11 @@
                                 <th>No ID</th>
                                 <th>Nama</th>
                                 <th class="text-center">Shift</th>
-                                <th class="text-end">Total Transport</th>
-                                <th class="text-end">Bagi Hasil</th>
-                                <th class="text-end">Gaji Pokok</th>
+                                <th class="text-end">Accomodation</th>
+                                <th class="text-end">Shared Revenue</th>
+                                <th class="text-end">Basic Salary</th>
                                 <th class="text-end">Grand Total</th>
-                                <th class="text-end">Adjustment</th>
+                                <th class="text-end">Adjustment (Optional) </th>
                                 <th>Adjustment Notes</th>
                             </tr>
                         </thead>
@@ -267,9 +268,9 @@
 
                 <div class="row mt-4">
                     <div class="col-md-6">
-                        <label for="coa_out" class="form-label">Bayar Dari (Akun Kas/Bank)</label>
+                        <label for="coa_out" class="form-label">Account for Salaries</label>
                         <select class="form-select" id="coa_out" name="coa_out" required>
-                            <option value="">-- Pilih Akun Kas/Bank --</option>
+                            <option value="">-- Choose Account --</option>
                             @foreach ($coa as $account)
                             <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
                             @endforeach
@@ -277,7 +278,7 @@
                     </div>
                     <div class="col-md-6 d-flex align-items-end justify-content-end">
                         <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save me-2"></i> Simpan Gaji Dokter ke Database
+                            <i class="fas fa-save me-2"></i> Save Salaries to Database
                         </button>
                     </div>
                 </div>

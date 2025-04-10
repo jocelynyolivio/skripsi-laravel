@@ -329,7 +329,7 @@ class PurchaseController extends Controller
         // **Update status purchase menjadi "received"**
         $purchase->update(['status' => 'received']);
 
-        return redirect()->route('dashboard.purchases.index')->with('success', 'Stock berhasil diperbarui.');
+        return redirect()->route('dashboard.purchases.index')->with('success', 'Stock successfully updated');
     }
     public function receive(PurchaseInvoice $purchase)
     {

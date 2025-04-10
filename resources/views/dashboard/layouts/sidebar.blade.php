@@ -1,6 +1,6 @@
-<div class="sidebar bg-dark col-md-3 col-lg-2 p-0 text-white vh-100">
-    <div class="offcanvas-md offcanvas-end bg-dark" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-        <div class="offcanvas-header border-bottom border-secondary">
+<div class="sidebar bg-dark col-md-3 col-lg-2 p-0 text-white d-flex flex-column"> <!-- Tambahkan d-flex flex-column -->
+<div class="offcanvas-md offcanvas-end bg-dark flex-grow-1" tabindex="-1" id="sidebarMenu"> <!-- Tambahkan flex-grow-1 -->
+<div class="offcanvas-header border-bottom border-secondary">
             <h5 class="offcanvas-title fw-bold text-white" id="sidebarMenuLabel">SenyumQu Dental</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
         </div>
@@ -24,12 +24,12 @@
                         <span class="fs-6">Attendances & Slips</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/home_content/') ? 'active' : '' }}" href="/dashboard/home_content/">
                         <i class="bi bi-house-door me-3 fs-5"></i>
                         <span class="fs-6">Home Content</span>
                     </a>
-                </li>
+                </li> -->
             </ul>
 
             <!-- Divider -->
@@ -46,7 +46,7 @@
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/master/patients') ? 'active' : '' }}" href="{{ route('dashboard.masters.patients') }}">
                         <i class="bi bi-person-badge me-3 fs-5"></i>
-                        <span class="fs-6">Master Pasien</span>
+                        <span class="fs-6">Master Patients</span>
                     </a>
                 </li>
             </ul>
@@ -59,7 +59,7 @@
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/reservations') ? 'active' : '' }}" href="{{ route('dashboard.reservations.index') }}">
                         <i class="bi bi-calendar-check me-3 fs-5"></i>
-                        <span class="fs-6">Data Reservasi</span>
+                        <span class="fs-6">Reservations</span>
                     </a>
                 </li>
                 <!-- <li class="nav-item">

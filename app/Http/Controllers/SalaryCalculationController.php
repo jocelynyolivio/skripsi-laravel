@@ -39,7 +39,7 @@ class SalaryCalculationController extends Controller
         SalaryCalculation::create($request->all());
 
         return redirect()->route('salary_calculations.index')
-                         ->with('success', 'Data gaji berhasil ditambahkan.');
+                         ->with('success', 'Data Salaries Saved');
     }
 
     // Edit - Form untuk mengedit data
@@ -69,7 +69,7 @@ class SalaryCalculationController extends Controller
         $salary->update($request->all());
 
         return redirect()->route('salary_calculations.index')
-                         ->with('success', 'Data gaji berhasil diperbarui.');
+                         ->with('success', 'Data Salaries Updated');
     }
 
     // Destroy - Menghapus data dari database
@@ -79,6 +79,6 @@ class SalaryCalculationController extends Controller
         $salary->delete();
 
         return redirect()->route('salary_calculations.index')
-                         ->with('success', 'Data gaji berhasil dihapus.');
+                         ->with('success', 'Data Salaries Deleted');
     }
 }

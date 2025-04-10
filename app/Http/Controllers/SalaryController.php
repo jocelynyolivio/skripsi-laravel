@@ -108,6 +108,7 @@ class SalaryController extends Controller
 
         // Ambil data absensi
         $data = DB::table('users')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
             ->join('attendances', function ($join) use ($month, $year) {
                 $join->on('users.id', '=', 'attendances.no_id')
                     ->whereMonth('attendances.tanggal', $month)
@@ -116,12 +117,13 @@ class SalaryController extends Controller
             ->select(
                 'users.id as no_id',
                 'users.name as nama',
+                'roles.role_name as role_name', // ini nama role dari join
                 DB::raw("COUNT(CASE WHEN NOT EXISTS (SELECT 1 FROM holidays WHERE holidays.tanggal = attendances.tanggal) THEN 1 END) AS normal_shift"),
                 DB::raw("COUNT(CASE WHEN EXISTS (SELECT 1 FROM holidays WHERE holidays.tanggal = attendances.tanggal) THEN 1 END) AS holiday_shift")
-
             )
-            ->groupBy('users.id', 'users.name')
+            ->groupBy('users.id', 'users.name', 'roles.role_name')
             ->get();
+
 
 
         return view('dashboard.salaries.index', compact('data', 'month', 'year'));
@@ -238,7 +240,7 @@ class SalaryController extends Controller
 
         // dd($calculatedSalaries);
 
-        return view('dashboard.salaries.index', compact('calculatedSalaries', 'month', 'year', 'data','coa'));
+        return view('dashboard.salaries.index', compact('calculatedSalaries', 'month', 'year', 'data', 'coa'));
     }
     public function calculateDoctorSalaries(Request $request)
     {
@@ -316,7 +318,7 @@ class SalaryController extends Controller
 
         $coa = ChartOfAccount::all();
 
-        return view('dashboard.salaries.index', compact('doctorSalaries', 'month', 'year','coa'));
+        return view('dashboard.salaries.index', compact('doctorSalaries', 'month', 'year', 'coa'));
     }
 
     // public function storeSalaries(Request $request)
@@ -475,7 +477,7 @@ class SalaryController extends Controller
             }
         });
 
-        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji berhasil disimpan dan jurnal diperbarui!');
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Salaries and Journal Created');
     }
 
 
@@ -601,7 +603,7 @@ class SalaryController extends Controller
             }
         });
 
-        return redirect()->route('dashboard.salaries.index')->with('success', 'Gaji dokter berhasil dibayarkan dan jurnal diperbarui!');
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Salaries and Journals Created');
     }
 
     public function uploadForm()
@@ -744,18 +746,18 @@ class SalaryController extends Controller
                 }
 
                 // Simpan semua data dokter ke dalam array
-                $dataSummary[] = [
-                    'sheet' => $sheetName,
-                    'departemen' => $departemen,
-                    'nama' => $nama,
-                    'no_id' => $noId,
-                    'kehadiran' => $kehadiran,
-                ];
+                // $dataSummary[] = [
+                //     'sheet' => $sheetName,
+                //     'departemen' => $departemen,
+                //     'nama' => $nama,
+                //     'no_id' => $noId,
+                //     'kehadiran' => $kehadiran,
+                // ];
             }
         }
 
         // Kirim data ke view untuk ditampilkan
-        return view('dashboard.salaries.salary-result', compact('dataSummary'));
+        return redirect()->route('dashboard.salaries.index')->with('success', 'Salaries Created');
     }
 
 
@@ -804,7 +806,7 @@ class SalaryController extends Controller
         Attendance::create($request->all());
 
         return redirect()->route('attendances.index')
-            ->with('success', 'Data absensi berhasil ditambahkan.');
+            ->with('success', 'Attendances Created');
     }
 
     /**
@@ -833,7 +835,7 @@ class SalaryController extends Controller
         $attendance->update($request->all());
 
         return redirect()->route('attendances.index')
-            ->with('success', 'Data absensi berhasil diperbarui.');
+            ->with('success', 'Attendances Updated');
     }
 
     /**
@@ -845,7 +847,7 @@ class SalaryController extends Controller
         $attendance->delete();
 
         return redirect()->route('attendances.index')
-            ->with('success', 'Data absensi berhasil dihapus.');
+            ->with('success', 'Attendances Deleted');
     }
 
     // public function processSalaries(Request $request)
