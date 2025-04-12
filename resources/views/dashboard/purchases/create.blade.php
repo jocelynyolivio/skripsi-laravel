@@ -2,17 +2,29 @@
 
 @section('container')
 <div class="container mt-5 col-md-8">
-    <h3 class="text-center">Create Purchase Invoice</h3>
-    <form action="{{ route('dashboard.purchases.store') }}" method="POST">
+    <h3 class="text-center">
+        @isset($purchaseRequest)
+            Create Purchase Invoice from Request #{{ $purchaseRequest->id }}
+        @else
+            Create Purchase Invoice
+        @endisset
+    </h3>
+    
+    <form action="{{ isset($purchaseRequest) ? route('dashboard.purchases.storeFromRequest', $purchaseRequest->id) : route('dashboard.purchases.store') }}" method="POST">
         @csrf
 
         <!-- Purchase Invoice Details -->
         <div class="mb-3">
             <label class="form-label">Supplier:</label>
             <select name="supplier_id" class="form-control" required>
-                <option value="" disabled selected>Choose Supplier</option>
+                <option value="" disabled {{ !isset($purchaseRequest) ? 'selected' : '' }}>Choose Supplier</option>
                 @foreach($suppliers as $supplier)
-                <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
+                <option value="{{ $supplier->id }}" 
+                    @isset($purchaseRequest)
+                        {{ $supplier->id == $purchaseRequest->supplier_id ? 'selected' : '' }}
+                    @endisset>
+                    {{ $supplier->nama }}
+                </option>
                 @endforeach
             </select>
         </div>
@@ -36,21 +48,42 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <select name="dental_material_id[]" class="form-control material-select" required>
-                            @foreach($materials as $material)
-                            <option value="{{ $material->id }}" data-unit="{{ $material->unit_type }}">
-                                {{ $material->name }} ({{ $material->unit_type }})
-                            </option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td><input type="number" name="quantity[]" class="form-control quantity" required min="1"></td>
-                    <td><input type="number" name="total_price[]" class="form-control total_price" required></td>
-                    <td><input type="number" name="unit_price[]" class="form-control unit_price" readonly></td>
-
-                </tr>
+                @isset($purchaseRequest)
+                    @foreach($purchaseRequest->details as $detail)
+                    <tr>
+                        <td>
+                            <select name="dental_material_id[]" class="form-control material-select" required>
+                                @foreach($materials as $material)
+                                <option value="{{ $material->id }}" data-unit="{{ $material->unit_type }}"
+                                    {{ $material->id == $detail->dental_material_id ? 'selected' : '' }}>
+                                    {{ $material->name }} ({{ $material->unit_type }})
+                                </option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td><input type="number" name="quantity[]" class="form-control quantity" value="{{ $detail->quantity }}" required></td>
+                        <td><input type="number" name="total_price[]" class="form-control total_price" required></td>
+                        <td><input type="number" name="unit_price[]" class="form-control unit_price" readonly></td>
+                        <td><button type="button" class="btn btn-danger btn-sm removeRow">-</button></td>
+                    </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td>
+                            <select name="dental_material_id[]" class="form-control material-select" required>
+                                @foreach($materials as $material)
+                                <option value="{{ $material->id }}" data-unit="{{ $material->unit_type }}">
+                                    {{ $material->name }} ({{ $material->unit_type }})
+                                </option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td><input type="number" name="quantity[]" class="form-control quantity" required min="1"></td>
+                        <td><input type="number" name="total_price[]" class="form-control total_price" required></td>
+                        <td><input type="number" name="unit_price[]" class="form-control unit_price" readonly></td>
+                        <td><button type="button" class="btn btn-danger btn-sm removeRow">-</button></td>
+                    </tr>
+                @endisset
             </tbody>
         </table>
 
@@ -88,14 +121,14 @@
         <input type="hidden" id="remaining_amount" name="remaining_amount" value="0">
 
         <br>
-        <!-- <button type="submit" class="btn btn-primary">Save</button> -->
-        <button type="submit" class="btn btn-success w-100 d-block mx-auto">Create Purchase Invoice</button>
-
+        <button type="submit" class="btn btn-success w-100 d-block mx-auto">
+            Create Purchase Invoice
+        </button>
     </form>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-
         // Event listener untuk menghitung unit price, total harga, dan sisa tagihan
         document.addEventListener('input', function (event) {
             if (event.target.classList.contains('quantity') || event.target.classList.contains('total_price')) {
@@ -137,11 +170,6 @@
             let paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
             let remainingAmount = total - paymentAmount;
 
-            // Pastikan Sisa Tagihan tidak negatif
-            // if (remainingAmount < 0) {
-            //     remainingAmount = 0;
-            // }
-
             // Update tampilan Sisa Tagihan
             document.getElementById('remaining-amount-display').textContent = remainingAmount.toLocaleString('id-ID', { minimumFractionDigits: 2 });
             document.getElementById('remaining_amount').value = remainingAmount.toFixed(2);
@@ -177,6 +205,8 @@
             }
         });
 
+        // Hitung total amount saat pertama kali load
+        calculateTotalAmount();
     });
 </script>
 

@@ -105,11 +105,11 @@ class ExpenseController extends Controller
     {
         // Cari JournalEntry yang sesuai dengan deskripsi Expense (atau sesuaikan jika pakai relasi atau transaction_id)
         $journal = JournalEntry::where('entry_date', $expense->expense_date)
-        ->where('description', 'Expense: ' . $expense->description)
-        ->whereHas('details', function ($query) use ($expense) {
-            $query->where('debit', $expense->amount);
-        })
-        ->first();
+            ->where('description', 'Expense: ' . $expense->description)
+            ->whereHas('details', function ($query) use ($expense) {
+                $query->where('debit', $expense->amount);
+            })
+            ->first();
 
         if ($journal) {
             // Hapus JournalDetail yang terkait
@@ -123,5 +123,13 @@ class ExpenseController extends Controller
         $expense->delete();
 
         return redirect()->route('dashboard.expenses.index')->with('success', 'Expense deleted successfully!');
+    }
+
+    public function duplicate(Expense $expense)
+    {
+        return view('dashboard.expenses.create', [
+            'coa' => ChartOfAccount::all(),
+            'expense' => $expense,
+        ]);
     }
 }

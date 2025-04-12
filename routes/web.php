@@ -34,6 +34,8 @@ use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Auth\PatientVerifyEmailController;
+use App\Http\Controllers\PurchaseRequestController;
+use App\Models\PurchaseRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,7 +89,7 @@ Route::get('/email/verify', function () {
 //     $request->fulfill();
 
 //     dd("Email Berhasil Diverifikasi!", auth('patient')->user());
-    
+
 //     return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
 // })->middleware(['auth:patient', 'signed'])->name('verification.verify');
 
@@ -173,7 +175,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 // If you have a separate route for fetching data via AJAX, you can define it as follows:
-    Route::get('/dashboard/data', [DashboardController::class, 'fetchData'])->name('dashboard.data');
+Route::get('/dashboard/data', [DashboardController::class, 'fetchData'])->name('dashboard.data');
 
 Route::get('/reservation', [ReservationController::class, 'index'])
     ->name('reservation.index')
@@ -185,9 +187,9 @@ Route::post('/reservation', [ReservationController::class, 'store'])
     ->name('reservation.store')
     ->middleware(['auth:patient', 'verified']);
 
-    
-    Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
-        ->name('dashboard.schedules.get-doctors-by-date');
+
+Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
+    ->name('dashboard.schedules.get-doctors-by-date');
 
 // isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
@@ -234,6 +236,15 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         Route::resource('templates', ScheduleTemplateController::class);
         Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
     });
+
+    Route::resource('/purchase_requests', PurchaseRequestController::class);
+    Route::post('/purchase_requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase_requests.approve');
+    Route::post('/purchFase_requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase_requests.reject');
+    // Route::get('purchase_requests/{purchaseRequest}/generate-invoice', [PurchaseController::class, 'createFromRequest'])->name('dashboard.purchases.create-from-request');
+    Route::get('/purchases/from-request/{purchaseRequest}', [PurchaseController::class, 'createFromRequest'])->name('purchases.createFromRequest');
+    Route::post('/purchases/from-request/{purchaseRequest}', [PurchaseController::class, 'store'])
+    ->name('purchases.storeFromRequest');
+    Route::get('/purchase_requests/{purchaseRequest}/duplicate', [PurchaseRequestController::class, 'duplicate'])->name('purchase_requests.duplicate');
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
 
@@ -298,6 +309,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
 
     Route::resource('expenses', ExpenseController::class);
+    Route::get('/expenses/{expense}/duplicate', [ExpenseController::class, 'duplicate'])->name('expenses.duplicate');
 
     Route::resource('expense_requests', ExpenseRequestController::class);
     Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
@@ -345,6 +357,4 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow');
 });
 
-Route::prefix('dashboard/schedules/overrides')->name('dashboard.schedules.overrides.')->group(function () {
-
-});
+Route::prefix('dashboard/schedules/overrides')->name('dashboard.schedules.overrides.')->group(function () {});

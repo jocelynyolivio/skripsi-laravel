@@ -20,6 +20,8 @@ return new class extends Migration
             $table->decimal('discount', 15, 2)->default(0);
             $table->decimal('grand_total', 15, 2);
             $table->enum('status', ['pending', 'received'])->default('pending');
+            $table->foreignId('purchase_request_id')->nullable()->constrained('purchase_requests');
+
 
             $table->timestamps();
 

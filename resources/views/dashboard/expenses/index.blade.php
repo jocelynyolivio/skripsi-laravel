@@ -37,6 +37,7 @@
                 <td>{{ $expense->admin?->name ?? 'N/A' }}</td>
                 <td>
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ route('dashboard.expenses.duplicate', $expense->id) }}" class="btn btn-sm btn-secondary">Duplicate</a>
                     <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
