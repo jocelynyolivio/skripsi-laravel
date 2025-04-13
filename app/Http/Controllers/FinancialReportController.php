@@ -84,51 +84,201 @@ class FinancialReportController extends Controller
             ]);
         }
 
-        return view('dashboard.reports.balance_sheet', compact('coaSummary', 'period', 'date'));
+        //     return view('dashboard.reports.balance_sheet', compact('coaSummary', 'period', 'date'));
+        $assets = $coaSummary->where('type', 'asset');
+        $liabilities = $coaSummary->where('type', 'liability');
+        $equities = $coaSummary->where('type', 'equity');
+
+        // Hitung subtotal
+        $totalAssets = $assets->sum(function ($item) {
+            return $item->total_debit - $item->total_credit;
+        });
+
+        $totalLiabilities = $liabilities->sum(function ($item) {
+            return $item->total_credit - $item->total_debit;
+        });
+
+        $totalEquities = $equities->sum(function ($item) {
+            return $item->total_credit - $item->total_debit;
+        });
+        // dd($totalEquities);
+
+        return view('dashboard.reports.balance_sheet', compact(
+            'period',
+            'date',
+            'assets',
+            'liabilities',
+            'equities',
+            'totalAssets',
+            'totalLiabilities',
+            'totalEquities'
+        ));
     }
+
+    // public function incomeStatement(Request $request)
+    // {
+    //     $period = $request->get('period', 'monthly');
+    //     $date = $request->get('date', Carbon::now()->format('Y-m-d'));
+
+    //     $query = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+    //         ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id');
+
+    //     if ($period == 'monthly') {
+    //         $query->whereMonth('journal_entries.entry_date', Carbon::parse($date)->month)
+    //             ->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+    //     } elseif ($period == 'yearly') {
+    //         $query->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+    //     }
+
+    //     $revenues = (clone $query)->where('chart_of_accounts.type', 'revenue')
+    //         ->selectRaw('chart_of_accounts.name, SUM(credit) as saldo')
+    //         ->groupBy('chart_of_accounts.name')
+    //         ->get();
+
+    //     $hpp = (clone $query)->where('chart_of_accounts.name', 'LIKE', '%HPP%')
+    //         ->selectRaw('chart_of_accounts.name, SUM(debit) as saldo')
+    //         ->groupBy('chart_of_accounts.name')
+    //         ->get();
+
+    //     $operatingExpenses = (clone $query)->where('chart_of_accounts.type', 'expense')
+    //         ->where('chart_of_accounts.name', 'NOT LIKE', '%HPP%')
+    //         ->selectRaw('chart_of_accounts.name, SUM(debit) as saldo')
+    //         ->groupBy('chart_of_accounts.name')
+    //         ->get();
+
+    //     $netIncome = $revenues->sum('saldo') - $hpp->sum('saldo') - $operatingExpenses->sum('saldo');
+
+    //     return view('dashboard.reports.income_statement', compact('revenues', 'hpp', 'operatingExpenses', 'netIncome', 'period', 'date'));
+    // }
 
     public function incomeStatement(Request $request)
     {
+        $request->validate([
+            'period' => 'sometimes|in:monthly,yearly',
+            'date' => 'sometimes|date'
+        ]);
+
         $period = $request->get('period', 'monthly');
         $date = $request->get('date', Carbon::now()->format('Y-m-d'));
 
-        $query = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
-            ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id');
+        try {
+            $query = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+                ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id');
 
-        if ($period == 'monthly') {
-            $query->whereMonth('journal_entries.entry_date', Carbon::parse($date)->month)
-                ->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
-        } elseif ($period == 'yearly') {
-            $query->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+            if ($period == 'monthly') {
+                $query->whereMonth('journal_entries.entry_date', Carbon::parse($date)->month)
+                    ->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+            } elseif ($period == 'yearly') {
+                $query->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+            }
+
+            // Pendapatan
+            $revenues = (clone $query)->where('chart_of_accounts.type', 'revenue')
+                ->selectRaw('chart_of_accounts.name, chart_of_accounts.code, SUM(credit) as amount')
+                ->groupBy('chart_of_accounts.name', 'chart_of_accounts.code')
+                ->orderBy('chart_of_accounts.code')
+                ->get();
+
+            $totalRevenue = $revenues->sum('amount');
+
+            // HPP
+            $hpp = (clone $query)->where('chart_of_accounts.name', 'LIKE', '%HPP%')
+                ->selectRaw('chart_of_accounts.name, chart_of_accounts.code, SUM(debit) as amount')
+                ->groupBy('chart_of_accounts.name', 'chart_of_accounts.code')
+                ->orderBy('chart_of_accounts.code')
+                ->get();
+
+            $totalHpp = $hpp->sum('amount');
+
+            // Beban Operasional
+            $operatingExpenses = (clone $query)->where('chart_of_accounts.type', 'expense')
+                ->where('chart_of_accounts.name', 'NOT LIKE', '%HPP%')
+                ->selectRaw('chart_of_accounts.name, chart_of_accounts.code, SUM(debit) as amount')
+                ->groupBy('chart_of_accounts.name', 'chart_of_accounts.code')
+                ->orderBy('chart_of_accounts.code')
+                ->get();
+
+            $totalOperatingExpenses = $operatingExpenses->sum('amount');
+
+            // Laba Kotor
+            $grossProfit = $totalRevenue - $totalHpp;
+
+            // Laba Bersih
+            $netIncome = $grossProfit - $totalOperatingExpenses;
+
+            return view('dashboard.reports.income_statement', compact(
+                'revenues',
+                'totalRevenue',
+                'hpp',
+                'totalHpp',
+                'grossProfit',
+                'operatingExpenses',
+                'totalOperatingExpenses',
+                'netIncome',
+                'period',
+                'date'
+            ));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memuat laporan: ' . $e->getMessage());
         }
-
-        $revenues = (clone $query)->where('chart_of_accounts.type', 'revenue')
-            ->selectRaw('chart_of_accounts.name, SUM(credit) as saldo')
-            ->groupBy('chart_of_accounts.name')
-            ->get();
-
-        $hpp = (clone $query)->where('chart_of_accounts.name', 'LIKE', '%HPP%')
-            ->selectRaw('chart_of_accounts.name, SUM(debit) as saldo')
-            ->groupBy('chart_of_accounts.name')
-            ->get();
-
-        $operatingExpenses = (clone $query)->where('chart_of_accounts.type', 'expense')
-            ->where('chart_of_accounts.name', 'NOT LIKE', '%HPP%')
-            ->selectRaw('chart_of_accounts.name, SUM(debit) as saldo')
-            ->groupBy('chart_of_accounts.name')
-            ->get();
-
-        $netIncome = $revenues->sum('saldo') - $hpp->sum('saldo') - $operatingExpenses->sum('saldo');
-
-        return view('dashboard.reports.income_statement', compact('revenues', 'hpp', 'operatingExpenses', 'netIncome', 'period', 'date'));
     }
 
+
+    // public function cashFlow(Request $request)
+    // {
+    //     $period = $request->get('period', 'monthly');
+    //     $date = $request->get('date', Carbon::now()->format('Y-m-d'));
+
+    //     $query = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+    //         ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id');
+
+    //     if ($period == 'monthly') {
+    //         $query->whereMonth('journal_entries.entry_date', Carbon::parse($date)->month)
+    //             ->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+    //     } elseif ($period == 'yearly') {
+    //         $query->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
+    //     }
+
+    //     // Arus Kas dari Aktivitas Operasional
+    //     $operatingCashIn = (clone $query)->where('chart_of_accounts.type', 'revenue')->sum('credit');
+    //     $operatingCashOut = (clone $query)->where('chart_of_accounts.type', 'expense')->sum('debit');
+
+    //     // Arus Kas dari Aktivitas Investasi
+    //     $investmentCashIn = (clone $query)->where('chart_of_accounts.type', 'asset')->where('chart_of_accounts.name', 'LIKE', '%Investasi%')->sum('credit');
+    //     $investmentCashOut = (clone $query)->where('chart_of_accounts.type', 'asset')->where('chart_of_accounts.name', 'LIKE', '%Investasi%')->sum('debit');
+
+    //     // Arus Kas dari Aktivitas Pendanaan
+    //     $financingCashIn = (clone $query)->where('chart_of_accounts.type', 'equity')->sum('credit')
+    //         + (clone $query)->where('chart_of_accounts.type', 'liability')->sum('credit');
+
+    //     $financingCashOut = (clone $query)->where('chart_of_accounts.type', 'liability')->sum('debit');
+
+    //     $netCashFlow = ($operatingCashIn - $operatingCashOut) + ($investmentCashIn - $investmentCashOut) + ($financingCashIn - $financingCashOut);
+
+    //     return view('dashboard.reports.cash_flow', compact(
+    //         'operatingCashIn',
+    //         'operatingCashOut',
+    //         'investmentCashIn',
+    //         'investmentCashOut',
+    //         'financingCashIn',
+    //         'financingCashOut',
+    //         'netCashFlow',
+    //         'period',
+    //         'date'
+    //     ));
+    // }
 
     public function cashFlow(Request $request)
-    {
-        $period = $request->get('period', 'monthly');
-        $date = $request->get('date', Carbon::now()->format('Y-m-d'));
+{
+    $request->validate([
+        'period' => 'sometimes|in:monthly,yearly',
+        'date' => 'sometimes|date'
+    ]);
 
+    $period = $request->get('period', 'monthly');
+    $date = $request->get('date', Carbon::now()->format('Y-m-d'));
+
+    try {
         $query = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
             ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id');
 
@@ -139,32 +289,90 @@ class FinancialReportController extends Controller
             $query->whereYear('journal_entries.entry_date', Carbon::parse($date)->year);
         }
 
+        // Saldo awal kas
+        $beginningCashQuery = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+            ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
+            ->where('chart_of_accounts.type', 'asset')
+            ->where('chart_of_accounts.name', 'LIKE', '%Kas%');
+
+        if ($period == 'monthly') {
+            $beginningCashQuery->where('journal_entries.entry_date', '<', Carbon::parse($date)->startOfMonth());
+        } else {
+            $beginningCashQuery->where('journal_entries.entry_date', '<', Carbon::parse($date)->startOfYear());
+        }
+
+        $beginningCashBalance = $beginningCashQuery->sum('debit') - $beginningCashQuery->sum('credit');
+
         // Arus Kas dari Aktivitas Operasional
-        $operatingCashIn = (clone $query)->where('chart_of_accounts.type', 'revenue')->sum('credit');
-        $operatingCashOut = (clone $query)->where('chart_of_accounts.type', 'expense')->sum('debit');
+        $operatingActivities = (clone $query)
+            ->where(function($q) {
+                $q->where('chart_of_accounts.type', 'revenue')
+                  ->orWhere('chart_of_accounts.type', 'expense')
+                  ->orWhere('chart_of_accounts.name', 'LIKE', '%Piutang%')
+                  ->orWhere('chart_of_accounts.name', 'LIKE', '%Utang%');
+            })
+            ->selectRaw('chart_of_accounts.name, chart_of_accounts.code, 
+                SUM(credit) as cash_in, 
+                SUM(debit) as cash_out')
+            ->groupBy('chart_of_accounts.name', 'chart_of_accounts.code')
+            ->orderBy('chart_of_accounts.code')
+            ->get();
+
+        $operatingCashIn = $operatingActivities->sum('cash_in');
+        $operatingCashOut = $operatingActivities->sum('cash_out');
 
         // Arus Kas dari Aktivitas Investasi
-        $investmentCashIn = (clone $query)->where('chart_of_accounts.type', 'asset')->where('chart_of_accounts.name', 'LIKE', '%Investasi%')->sum('credit');
-        $investmentCashOut = (clone $query)->where('chart_of_accounts.type', 'asset')->where('chart_of_accounts.name', 'LIKE', '%Investasi%')->sum('debit');
+        $investmentActivities = (clone $query)
+            ->where(function($q) {
+                $q->where('chart_of_accounts.name', 'LIKE', '%Aktiva Tetap%')
+                  ->orWhere('chart_of_accounts.name', 'LIKE', '%Investasi%')
+                  ->orWhere('chart_of_accounts.name', 'LIKE', '%Peralatan%');
+            })
+            ->selectRaw('chart_of_accounts.name, chart_of_accounts.code, 
+                SUM(credit) as cash_in, 
+                SUM(debit) as cash_out')
+            ->groupBy('chart_of_accounts.name', 'chart_of_accounts.code')
+            ->orderBy('chart_of_accounts.code')
+            ->get();
+
+        $investmentCashIn = $investmentActivities->sum('cash_in');
+        $investmentCashOut = $investmentActivities->sum('cash_out');
 
         // Arus Kas dari Aktivitas Pendanaan
-        $financingCashIn = (clone $query)->where('chart_of_accounts.type', 'equity')->sum('credit')
-            + (clone $query)->where('chart_of_accounts.type', 'liability')->sum('credit');
+        $financingActivities = (clone $query)
+            ->where(function($q) {
+                $q->where('chart_of_accounts.type', 'equity')
+                  ->orWhere('chart_of_accounts.type', 'liability')
+                  ->where('chart_of_accounts.name', 'NOT LIKE', '%Utang Usaha%');
+            })
+            ->selectRaw('chart_of_accounts.name, chart_of_accounts.code, 
+                SUM(credit) as cash_in, 
+                SUM(debit) as cash_out')
+            ->groupBy('chart_of_accounts.name', 'chart_of_accounts.code')
+            ->orderBy('chart_of_accounts.code')
+            ->get();
 
-        $financingCashOut = (clone $query)->where('chart_of_accounts.type', 'liability')->sum('debit');
+        $financingCashIn = $financingActivities->sum('cash_in');
+        $financingCashOut = $financingActivities->sum('cash_out');
 
-        $netCashFlow = ($operatingCashIn - $operatingCashOut) + ($investmentCashIn - $investmentCashOut) + ($financingCashIn - $financingCashOut);
+        // Perhitungan total
+        $netOperating = $operatingCashIn - $operatingCashOut;
+        $netInvesting = $investmentCashIn - $investmentCashOut;
+        $netFinancing = $financingCashIn - $financingCashOut;
+        $netCashFlow = $netOperating + $netInvesting + $netFinancing;
+        $endingCashBalance = $beginningCashBalance + $netCashFlow;
 
         return view('dashboard.reports.cash_flow', compact(
-            'operatingCashIn',
-            'operatingCashOut',
-            'investmentCashIn',
-            'investmentCashOut',
-            'financingCashIn',
-            'financingCashOut',
-            'netCashFlow',
-            'period',
-            'date'
+            'beginningCashBalance',
+            'operatingActivities', 'netOperating',
+            'investmentActivities', 'netInvesting',
+            'financingActivities', 'netFinancing',
+            'netCashFlow', 'endingCashBalance',
+            'period', 'date'
         ));
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal memuat laporan: '.$e->getMessage());
     }
+}
 }

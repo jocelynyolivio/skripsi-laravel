@@ -69,7 +69,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let rowIndex = {{ count($materialsInput) }};
+        let rowIndex = count($materialsInput);
 
         document.getElementById('addRow').addEventListener('click', function () {
             const tableBody = document.querySelector('#materialsTable tbody');
