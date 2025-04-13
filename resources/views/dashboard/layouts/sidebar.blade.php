@@ -104,12 +104,6 @@
                         <span class="fs-6">Expenses</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/expense_requests*') ? 'active' : '' }}" href="{{ route('dashboard.expense_requests.index') }}">
-                        <i class="bi bi-send-check me-3 fs-5"></i>
-                        <span class="fs-6">Expenses Request</span>
-                    </a>
-                </li>
             </ul>
 
             <!-- Divider -->
