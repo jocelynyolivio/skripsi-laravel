@@ -1,8 +1,15 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['url' => route('dashboard.holidays.index'), 'text' => 'Holidays'],
+            ['text' => 'Create Holidays']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h2>Add Holidays</h2>
+    <h2>Create Holidays</h2>
     <form action="{{ route('dashboard.holidays.store') }}" method="POST">
         @csrf
         <div class="form-group">

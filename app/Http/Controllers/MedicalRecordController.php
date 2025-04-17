@@ -494,6 +494,7 @@ class MedicalRecordController extends Controller
 
     public function update(Request $request, $patientId, $recordId)
     {
+        $updated_by = auth()->id();
         $validatedData = $request->validate([
             'teeth_condition' => 'required|string',
             'procedure_id' => 'required|array',
@@ -547,6 +548,10 @@ class MedicalRecordController extends Controller
                 }
             }
         }
+
+
+        $validatedData['updated_by'] = $updated_by;
+        $medicalRecord->update($validatedData);
 
         // Hapus data lama dan masukkan data baru secara langsung
         // $medicalRecord->procedures()->detach();

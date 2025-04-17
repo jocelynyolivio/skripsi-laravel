@@ -57,7 +57,11 @@
                 <td>
                     Rp {{ number_format($transaction->remaining_amount, 0, ',', '.') }}
                 </td>
-                <td>{{ $transaction->created_at->format('d M Y H:i') }}</td>
+                <td>
+
+                <p>Last edited by: {{ $transaction->editor->name ?? 'Unknown' }}</p>
+    <p>Last edited at: {{ $transaction->created_at->format('d M Y H:i') }}</p>
+                </td>
                 <td>
                     <span class="badge bg-{{ $transaction->payment_status == 'belum lunas' ? 'danger' : 'success' }}">
                         {{ ucfirst($transaction->payment_status) }}
@@ -72,6 +76,7 @@
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentModal-{{ $transaction->id }}">
                         Add Payments
                     </button>
+                    <a href="{{ route('dashboard.transactions.show', $transaction->id) }}">show</a>
 
                     <!-- Modal Add Payments -->
                     <div class="modal fade" id="addPaymentModal-{{ $transaction->id }}" tabindex="-1" aria-labelledby="addPaymentModalLabel-{{ $transaction->id }}" aria-hidden="true">

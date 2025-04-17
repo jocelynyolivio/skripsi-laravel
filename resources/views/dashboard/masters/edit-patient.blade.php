@@ -1,18 +1,25 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Master Patients', 'url' => route('dashboard.masters.patients')],
+            ['text' => 'Edit Patient']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-8">
     <h3 class="text-center mb-4">Edit Patient</h3>
 
     {{-- Tampilkan error jika ada --}}
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
     <form id="editPatientForm" action="{{ route('dashboard.masters.patients.update', $patient->id) }}" method="POST" enctype="multipart/form-data">
@@ -83,27 +90,31 @@
             <label for="form_data_awal" class="form-label">Upload Form Data Awal</label>
             <input type="file" name="form_data_awal" id="form_data_awal" class="form-control">
             @if($patient->form_data_awal)
-                <p class="mt-2">Current File: <a href="{{ asset('storage/' . $patient->form_data_awal) }}" target="_blank">View File</a></p>
+            <p class="mt-2">Current File: <a href="{{ asset('storage/' . $patient->form_data_awal) }}" target="_blank">View File</a></p>
             @endif
         </div>
         <div class="mb-3">
             <label for="informed_consent" class="form-label">Upload Informed Consent</label>
             <input type="file" name="informed_consent" id="informed_consent" class="form-control">
             @if($patient->informed_consent)
-                <p class="mt-2">Current File: <a href="{{ asset('storage/' . $patient->informed_consent) }}" target="_blank">View File</a></p>
+            <p class="mt-2">Current File: <a href="{{ asset('storage/' . $patient->informed_consent) }}" target="_blank">View File</a></p>
             @endif
         </div>
 
         <button type="submit" class="btn btn-primary w-100 mt-4">Update Patient</button>
     </form>
+
+    <p>Last edited by: {{ $patient->editor->name ?? 'Unknown' }}</p>
+    <p>Last edited at: {{ $patient->updated_at->format('d M Y H:i') }}</p>
+
 </div>
 
 {{-- JavaScript untuk SweetAlert2 confirmation --}}
 <script>
     // SweetAlert2 confirmation before form submit
-    document.getElementById('editPatientForm').addEventListener('submit', function (e) {
-        e.preventDefault();  // Prevent the form from submitting immediately
-        
+    document.getElementById('editPatientForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent the form from submitting immediately
+
         Swal.fire({
             title: 'Are you sure?',
             text: "You are about to update the patient's information.",
@@ -114,7 +125,7 @@
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                this.submit();  // Submit the form if confirmed
+                this.submit(); // Submit the form if confirmed
             }
         });
     });

@@ -1,5 +1,11 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Attendances'],
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container">
     <div class="d-flex justify-content-between mb-3">

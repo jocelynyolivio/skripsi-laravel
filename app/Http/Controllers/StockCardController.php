@@ -10,10 +10,19 @@ class StockCardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = StockCard::with('dentalMaterial')->latest();
+    
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('date', [$request->start_date, $request->end_date]);
+        }
+    
+        $stockCards = $query->get();
+    
+        return view('dashboard.stock_cards.index', compact('stockCards'));
     }
+
 
     /**
      * Show the form for creating a new resource.

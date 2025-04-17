@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Patient;
+use App\Models\StockCard;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
+use App\Models\PurchaseRequest;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -32,8 +34,8 @@ class DashboardController extends Controller
         if ($role === 'manager') {
             // **Data Kunjungan Pasien & Omzet Hari Ini**
             $data['jumlahPasienHariIni'] = MedicalRecord::whereDate('tanggal_reservasi', $today)->count();
-            $data['pendapatanHariIni'] = Transaction::whereDate('created_at', $today)                ->where('status','lunas')
-            ->sum('total_amount');
+            $data['pendapatanHariIni'] = Transaction::whereDate('created_at', $today)->where('status', 'lunas')
+                ->sum('total_amount');
 
             // **Jumlah Rata-rata Kunjungan Pasien dalam 1 Bulan (Grafik)**
             $data['kunjunganBulanan'] = MedicalRecord::selectRaw('DATE(tanggal_reservasi) as date, COUNT(*) as jumlah')
@@ -41,6 +43,8 @@ class DashboardController extends Controller
                 ->groupBy('date')
                 ->orderBy('date')
                 ->get();
+
+            $data['purchaseRequestBelumApprove'] = PurchaseRequest::whereNull('approved_at')->count();;
 
             // **Filter Data Pasien Berdasarkan Request**
             $query = Patient::query();
@@ -75,6 +79,7 @@ class DashboardController extends Controller
             $data['pasienAkanDatang'] = MedicalRecord::whereBetween('tanggal_reservasi', [$today, $today->copy()->endOfWeek()])->count();
 
             $data['pasienPerluReminder'] = MedicalRecord::whereNull('status_konfirmasi')->count(); // Hanya hitung jumlah
+
             $data['pasienReminderList'] = MedicalRecord::with(['patient', 'doctor']) // Ambil data pasien yang perlu diingatkan
                 ->whereNull('status_konfirmasi')
                 ->orderBy('tanggal_reservasi', 'asc')
@@ -83,6 +88,15 @@ class DashboardController extends Controller
                     $item->whatsapp_url = route('dashboard.reservations.whatsapp', $item->id);
                     $item->whatsapp_confirm_url = route('dashboard.reservations.whatsappConfirm', $item->id);
                     return $item;
+                });
+
+            $data['lowStockItems'] = StockCard::with('dentalMaterial')
+                ->where('remaining_stock', '<', 10)
+                ->groupBy('dental_material_id')
+                ->selectRaw('MAX(id) as id')
+                ->get()
+                ->map(function ($item) {
+                    return StockCard::with('dentalMaterial')->find($item->id);
                 });
         } elseif ($role === 'dokter tetap') {
             $data['pasienAkanDatang'] = MedicalRecord::whereDate('tanggal_reservasi', $today)->count();

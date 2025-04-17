@@ -1,4 +1,11 @@
 @extends('dashboard.layouts.main')
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Profile']
+        ]
+    ])
+@endsection
 
 @section('container')
 <div class="container mt-5">

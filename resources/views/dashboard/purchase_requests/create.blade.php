@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Purchase Requests', 'url' => route('dashboard.purchase_requests.index')],
+            ['text' => 'Create Purchase Request']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-8">
     <h3 class="text-center">Create Purchase Request</h3>
@@ -69,7 +76,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let rowIndex = count($materialsInput);
+        let rowIndex = document.querySelectorAll('#materialsTable tbody tr').length;
 
         document.getElementById('addRow').addEventListener('click', function () {
             const tableBody = document.querySelector('#materialsTable tbody');

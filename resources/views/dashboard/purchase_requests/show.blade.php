@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Purchase Requests', 'url' => route('dashboard.purchase_requests.index')],
+            ['text' => 'Detail Purchase Request ' . $purchaseRequest->request_number]
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5">
     <h3>Request Detail: {{ $purchaseRequest->request_number }}</h3>
@@ -40,6 +47,12 @@
         Duplicate Request
     </a>
     @endif
+
+    <p>Last edited by: {{ $purchaseRequest->editor->name ?? 'Unknown' }}</p>
+    <p>Last edited at: {{ $purchaseRequest->updated_at->format('d M Y H:i') }}</p>
+
+    <p>Approved by: {{ $purchaseRequest->approver->name ?? 'Unknown' }}</p>
+  
 
     <a href="{{ route('dashboard.purchase_requests.index') }}" class="btn btn-secondary mt-3">← Back to List</a>
 </div>

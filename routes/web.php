@@ -35,6 +35,7 @@ use App\Http\Controllers\SalaryCalculationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Auth\PatientVerifyEmailController;
 use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\StockCardController;
 use App\Models\PurchaseRequest;
 
 /*
@@ -193,7 +194,7 @@ Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class
 
 // isi dashboarrrddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -237,14 +238,39 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
     });
 
+    Route::resource('/stock_cards', StockCardController::class);
+
     Route::resource('/purchase_requests', PurchaseRequestController::class);
     Route::post('/purchase_requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase_requests.approve');
     Route::post('/purchFase_requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase_requests.reject');
     // Route::get('purchase_requests/{purchaseRequest}/generate-invoice', [PurchaseController::class, 'createFromRequest'])->name('dashboard.purchases.create-from-request');
+
+    Route::get('/purchases', [PurchaseController::class, 'create'])->name('purchases.create');
+
     Route::get('/purchases/from-request/{purchaseRequest}', [PurchaseController::class, 'createFromRequest'])->name('purchases.createFromRequest');
     Route::post('/purchases/from-request/{purchaseRequest}', [PurchaseController::class, 'store'])
-    ->name('purchases.storeFromRequest');
+        ->name('purchases.storeFromRequest');
     Route::get('/purchase_requests/{purchaseRequest}/duplicate', [PurchaseRequestController::class, 'duplicate'])->name('purchase_requests.duplicate');
+
+    Route::post('/transactions/storeWithPayment', [TransactionController::class, 'storeWithPayment'])->name('transactions.storeWithPayment');
+
+    Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
+        ->name('transactions.selectMedicalRecord');
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::post('/transactions/{transactionId}/pay-remaining', [TransactionController::class, 'payRemaining'])->name('transactions.payRemaining');
+
+    // Route untuk transaksi dengan rekam medis
+    Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])
+        ->name('transactions.create');
+    // Route untuk transaksi tanpa rekam medis
+    Route::get('/transactions/create', [TransactionController::class, 'createWithoutMedicalRecord'])
+        ->name('transactions.createWithoutMedicalRecord');
+
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::post('/transactions/store-without-medical-record', [TransactionController::class, 'storeWithoutMedicalRecord'])->name('transactions.storeWithoutMedicalRecord');
+
+    Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
 
@@ -284,40 +310,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])
         ->name('medical_records.saveMaterials');
 
-    Route::resource('/dental-materials', DentalMaterialController::class);
-
-    Route::resource('procedure_materials', ProcedureMaterialController::class);
-
-    Route::post('/transactions/storeWithPayment', [TransactionController::class, 'storeWithPayment'])->name('transactions.storeWithPayment');
-
-    Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
-        ->name('transactions.selectMedicalRecord');
-    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::post('/transactions/{transactionId}/pay-remaining', [TransactionController::class, 'payRemaining'])->name('transactions.payRemaining');
-
-
-    // Route untuk transaksi dengan rekam medis
-    Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])
-        ->name('transactions.create');
-    // Route untuk transaksi tanpa rekam medis
-    Route::get('/transactions/create', [TransactionController::class, 'createWithoutMedicalRecord'])
-        ->name('transactions.createWithoutMedicalRecord');
-
-    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::post('/transactions/store-without-medical-record', [TransactionController::class, 'storeWithoutMedicalRecord'])->name('transactions.storeWithoutMedicalRecord');
-
-    Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
-
-    Route::resource('expenses', ExpenseController::class);
-    Route::get('/expenses/{expense}/duplicate', [ExpenseController::class, 'duplicate'])->name('expenses.duplicate');
-
-    Route::resource('expense_requests', ExpenseRequestController::class);
-    Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
-    Route::patch('expense_requests/{id}/reject', [ExpenseRequestController::class, 'reject'])->name('expense_requests.reject');
-    Route::patch('expense_requests/{id}/done', [ExpenseRequestController::class, 'markDone'])->name('expense_requests.done');
-
-    // Route::resource('attendances', AttendanceController::class);
-
     Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
     Route::get('attendances/create', [AttendanceController::class, 'create'])->name('attendances.create');
     Route::post('attendances/store', [AttendanceController::class, 'store'])->name('attendances.store');
@@ -326,17 +318,30 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::put('attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
     Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
 
-    Route::resource('holidays', HolidayController::class);
+    Route::resource('/dental-materials', DentalMaterialController::class);
+
+    Route::resource('procedure_materials', ProcedureMaterialController::class);
+
+    Route::get('/journals', [JournalController::class, 'index'])->name('journals.index');
+    Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
+
+    Route::resource('/coa', ChartOfAccountController::class);
+    Route::resource('/holidays', HolidayController::class);
+
+    Route::resource('expenses', ExpenseController::class);
+    Route::get('/expenses/{expense}/duplicate', [ExpenseController::class, 'duplicate'])->name('expenses.duplicate');
+    Route::get('/{expense}', [ExpenseController::class, 'show'])->name('dashboard.expenses.show');
+
+    Route::resource('expense_requests', ExpenseRequestController::class);
+    Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
+    Route::patch('expense_requests/{id}/reject', [ExpenseRequestController::class, 'reject'])->name('expense_requests.reject');
+    Route::patch('expense_requests/{id}/done', [ExpenseRequestController::class, 'markDone'])->name('expense_requests.done');
 
     Route::prefix('odontograms')->name('odontograms.')->group(function () {
         Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index');
         Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store');
     });
 
-    Route::resource('coa', ChartOfAccountController::class);
-
-    Route::get('/journals', [JournalController::class, 'index'])->name('journals.index');
-    Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
 
     Route::resource('salary_calculations', SalaryCalculationController::class);
 
@@ -356,5 +361,3 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/reports/income_statement', [FinancialReportController::class, 'incomeStatement'])->name('reports.income_statement');
     Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow');
 });
-
-Route::prefix('dashboard/schedules/overrides')->name('dashboard.schedules.overrides.')->group(function () {});

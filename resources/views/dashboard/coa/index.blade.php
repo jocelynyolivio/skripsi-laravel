@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Chart Of Accounts'],
 
+]
+])
+@endsection
 @section('container')
 <div class="container">
 
@@ -9,7 +16,7 @@
 
     </div>
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success">{{ session('success') }}</div>
     @endif
     <table id="coaTable" class="table table-striped table-bordered">
         <thead>
@@ -17,6 +24,7 @@
                 <th>Code</th>
                 <th>Name</th>
                 <th>Type</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +33,14 @@
                 <td>{{ $account->code }}</td>
                 <td>{{ $account->name }}</td>
                 <td>{{ $account->type }}</td>
+                <td>
+                    <a href="{{ route('dashboard.coa.edit', $account->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="{{ route('dashboard.coa.destroy', $account->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger delete-button">Delete</button>
+                    </form>
+                </td>
             </tr>
             @endforeach
         </tbody>

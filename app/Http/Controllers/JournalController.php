@@ -12,6 +12,7 @@ class JournalController extends Controller
      */
     public function index()
     {
+        // dd('jhai');
         $journals = JournalEntry::with('details.account')->get();
 
         return view('dashboard.journals.index', [

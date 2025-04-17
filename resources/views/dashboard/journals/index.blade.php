@@ -1,5 +1,11 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Journal Entries']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5">
     <h3 class="text-center">Journal Entries</h3>

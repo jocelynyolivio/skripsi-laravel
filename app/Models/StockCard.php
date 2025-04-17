@@ -30,4 +30,6 @@ class StockCard extends Model
     {
         return $this->belongsTo(DentalMaterial::class);
     }
+
+    
 }

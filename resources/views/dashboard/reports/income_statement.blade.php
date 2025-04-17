@@ -1,5 +1,11 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Income Statement']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container-fluid py-4">
     <div class="card">

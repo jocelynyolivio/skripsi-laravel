@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Schedule Overrides', 'url' => route('dashboard.schedules.overrides.index')],
+            ['text' => 'Create Schedule Overrides']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
     <h3 class="mb-4">Add New Schedule Override</h3>

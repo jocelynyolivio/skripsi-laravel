@@ -1,5 +1,13 @@
 @extends('dashboard.layouts.main')
 
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Expenses']
+        ]
+    ])
+@endsection
+
 @section('container')
 <div class="container mt-5">
 
@@ -36,6 +44,8 @@
                 <td>{{ $expense->created_at }}</td>
                 <td>{{ $expense->admin?->name ?? 'N/A' }}</td>
                 <td>
+                    <a href="{{ route('dashboard.expenses.show', $expense->id) }}" class="btn btn-sm btn-info me-1" title="View">
+                    </a>
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <a href="{{ route('dashboard.expenses.duplicate', $expense->id) }}" class="btn btn-sm btn-secondary">Duplicate</a>
                     <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">

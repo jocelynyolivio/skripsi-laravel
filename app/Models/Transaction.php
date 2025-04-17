@@ -15,6 +15,10 @@ class Transaction extends Model
         'medical_record_id',
         'admin_id',
         'total_amount',
+        'doctor_id',
+        'revenue_percentage',
+        'revenue_amount',
+        'updated_by'
     ];
 
     // Relasi ke User (yang melakukan transaksi)
@@ -61,5 +65,10 @@ class Transaction extends Model
     public function receivable()
     {
         return $this->hasOne(Receivable::class, 'transaction_id');
+    }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

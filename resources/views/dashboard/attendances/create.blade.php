@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['url' => route('dashboard.attendances.index'), 'text' => 'Attendances'],
+            ['text' => 'Create Attendances']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
     <h3 class="text-center">Add Attendances</h3>

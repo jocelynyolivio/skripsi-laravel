@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Master Patients', 'url' => route('dashboard.masters.patients')],
+            ['text' => 'Medical Record for '. $patientName]
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5">
     <h3 class="text-center">Medical Records for Patient: {{ $patientName }}</h3>
@@ -63,6 +70,8 @@
                     @else
                         <span class="text-muted">No procedures</span>
                     @endif
+                    <span><p>Last edited by: {{ $record->editor->name ?? 'Unknown' }}</p>
+                    <p>Last edited at: {{ $record->updated_at->format('d M Y H:i') }}</p></span>
                 </td>
                 <td>{{ $record->doctor->name }}</td>
                 <td>

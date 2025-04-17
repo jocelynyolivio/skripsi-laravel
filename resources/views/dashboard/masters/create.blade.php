@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Master Users', 'url' => route('dashboard.masters.index')],
+            ['text' => 'Add New User']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
     <h3 class="my-4">Add New User</h3>

@@ -7,62 +7,51 @@ use Illuminate\Http\Request;
 
 class ChartOfAccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
         $coa = ChartOfAccount::all();
-
         return view('dashboard.coa.index', compact('coa'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('dashboard.coa.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'code' => 'required|unique:chart_of_accounts,code',
+            'name' => 'required',
+            'type' => 'required'
+        ]);
+
+        ChartOfAccount::create($request->all());
+
+        return redirect()->route('dashboard.coa.index')->with('success', 'Account created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ChartOfAccount $chartOfAccount)
+    public function edit(ChartOfAccount $coa)
     {
-        //
+        return view('dashboard.coa.edit', compact('coa'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ChartOfAccount $chartOfAccount)
+    public function update(Request $request, ChartOfAccount $coa)
     {
-        //
+        $request->validate([
+            'code' => 'required|unique:chart_of_accounts,code,' . $coa->id,
+            'name' => 'required',
+            'type' => 'required'
+        ]);
+
+        $coa->update($request->all());
+
+        return redirect()->route('dashboard.coa.index')->with('success', 'Account updated successfully!');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ChartOfAccount $chartOfAccount)
+    public function destroy(ChartOfAccount $coa)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ChartOfAccount $chartOfAccount)
-    {
-        //
+        $coa->delete();
+        return redirect()->route('dashboard.coa.index')->with('success', 'Account deleted successfully!');
     }
 }

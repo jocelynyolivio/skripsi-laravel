@@ -11,15 +11,12 @@ class TransactionItem extends Model
 
     protected $fillable = [
         'transaction_id',
-        'doctor_id',
         'procedure_id',
         'quantity',
         'unit_price',
         'total_price',
         'discount',
         'final_price',
-        'revenue_percentage',
-        'revenue_amount'
     ];
     
 

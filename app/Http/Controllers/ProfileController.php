@@ -9,7 +9,7 @@ use App\Models\User;
 class ProfileController extends Controller
 {
     // Menampilkan profil pengguna
-    public function show()
+    public function index()
     {
         $user = Auth::user(); // Ambil data pengguna yang sedang login
         return view('dashboard.profile.index', compact('user'));

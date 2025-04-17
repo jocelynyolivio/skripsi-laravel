@@ -167,6 +167,7 @@ class ReservationController extends Controller
 
     public function store(Request $request)
     {
+        
         // Validasi input
         $request->validate([
             'doctor_id' => 'required|integer',
@@ -177,7 +178,7 @@ class ReservationController extends Controller
 
         // Mengambil ID pasien yang sedang login
         $patientId = auth()->guard('patient')->user()->id;
-        $patientName = auth()->guard('patient')->user()->name;
+        // $patientName = auth()->guard('patient')->user()->name;
 
         // Simpan data reservasi ke database
         MedicalRecord::create([

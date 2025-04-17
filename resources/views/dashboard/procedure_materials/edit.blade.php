@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Procedure Materials', 'url' => route('dashboard.procedure_materials.index')],
+            ['text' => 'Edit Procedure Materials']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
     <h1>Edit Procedure Material</h1>

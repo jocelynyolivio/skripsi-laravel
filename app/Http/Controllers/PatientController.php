@@ -39,6 +39,8 @@ class PatientController extends Controller
     {
         // dd($request->all());
         // dd('hai');
+        $updated_by = auth()->id();
+        // dd($updated_by);
         // Validasi input
         try{
             $validatedData = $request->validate([
@@ -118,6 +120,9 @@ class PatientController extends Controller
             } else {
                 $validatedData['password'] = bcrypt($request->password);
             }
+
+            $validatedData['updated_by'] = $updated_by;
+            // dd($validatedData['updated_by']);
     
             // Simpan data ke database
             Patient::create($validatedData);
@@ -158,6 +163,7 @@ class PatientController extends Controller
     public function update(Request $request, $id)
     {
         $patient = Patient::findOrFail($id);
+        $patient->updated_by = auth()->id();
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',

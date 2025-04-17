@@ -1,8 +1,13 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Holidays']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container">
-
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Holidays</h3>
         <a href="{{ route('dashboard.holidays.create') }}" class="btn btn-primary">Add Holiday</a>

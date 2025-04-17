@@ -16,7 +16,8 @@ class MedicalRecord extends Model
         'jam_mulai',
         'jam_selesai',
         'status_konfirmasi',
-        'teeth_condition'
+        'teeth_condition',
+        'updated_by'
     ];
 
     public function procedures()
@@ -45,5 +46,10 @@ class MedicalRecord extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id');
+    }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

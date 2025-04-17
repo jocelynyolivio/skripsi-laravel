@@ -132,4 +132,11 @@ class ExpenseController extends Controller
             'expense' => $expense,
         ]);
     }
+
+    public function show(Expense $expense)
+    {
+        $expense->load(['coaOut', 'coaIn', 'admin']);
+        
+        return view('dashboard.expenses.show', compact('expense'));
+    }
 }

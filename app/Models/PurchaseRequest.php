@@ -16,9 +16,14 @@ class PurchaseRequest extends Model
         'status',
         'notes',
         'approved_by',
-        'approved_at',
         'approval_notes',
+        'updated_by'
     ];
+
+    protected $casts = [
+        'approved_at' => 'datetime',
+    ];
+    
 
     public function details()
     {
@@ -33,5 +38,10 @@ class PurchaseRequest extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

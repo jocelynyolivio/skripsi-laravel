@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id')->nullable();
             $table->date('purchase_date');
             $table->decimal('total_amount', 15, 2);
-            $table->decimal('discount', 15, 2)->default(0);
+            $table->decimal('discount', 15, 2)->nullable();
+            $table->decimal('ongkos_kirim', 15, 2)->nullable();
             $table->decimal('grand_total', 15, 2);
             $table->enum('status', ['pending', 'received'])->default('pending');
             $table->foreignId('purchase_request_id')->nullable()->constrained('purchase_requests');

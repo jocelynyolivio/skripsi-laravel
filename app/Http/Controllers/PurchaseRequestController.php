@@ -33,36 +33,41 @@ class PurchaseRequestController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'request_date' => 'required|date',
-            'dental_material_id.*' => 'required|exists:dental_materials,id',
-            'quantity.*' => 'required|integer|min:1',
+{
+    $updated_by = auth()->id();
+    $request->validate([
+        'request_date' => 'required|date',
+        'materials' => 'required|array|min:1',
+        'materials.*.dental_material_id' => 'required|exists:dental_materials,id',
+        'materials.*.quantity' => 'required|integer|min:1',
+        'materials.*.notes' => 'nullable|string',
+    ]);
+
+    // Generate nomor unik
+    $requestNumber = 'PR-' . now()->format('Ymd') . '-' . strtoupper(Str::random(5));
+
+    // Simpan header
+    $purchaseRequest = PurchaseRequest::create([
+        'request_number' => $requestNumber,
+        'request_date' => $request->request_date,
+        'requested_by' => Auth::id(),
+        'notes' => $request->notes,
+        'updated_by' => $updated_by
+    ]);
+
+    // Simpan detail
+    foreach ($request->materials as $material) {
+        PurchaseRequestDetail::create([
+            'purchase_request_id' => $purchaseRequest->id,
+            'dental_material_id' => $material['dental_material_id'],
+            'quantity' => $material['quantity'],
+            'notes' => $material['notes'] ?? null,
         ]);
-
-        // Generate nomor request unik
-        $requestNumber = 'PR-' . now()->format('Ymd') . '-' . strtoupper(Str::random(5));
-
-        // Simpan header
-        $purchaseRequest = PurchaseRequest::create([
-            'request_number' => $requestNumber,
-            'request_date' => $request->request_date,
-            'requested_by' => Auth::id(),
-            'notes' => $request->notes,
-        ]);
-
-        // Simpan detail
-        foreach ($request->dental_material_id as $index => $materialId) {
-            PurchaseRequestDetail::create([
-                'purchase_request_id' => $purchaseRequest->id,
-                'dental_material_id' => $materialId,
-                'quantity' => $request->quantity[$index],
-                'notes' => $request->detail_notes[$index] ?? null,
-            ]);
-        }
-
-        return redirect()->route('dashboard.purchase_requests.index')->with('success', 'Purchase Request created!');
     }
+
+    return redirect()->route('dashboard.purchase_requests.index')->with('success', 'Purchase Request created!');
+}
+
 
     /**
      * Display the specified resource.

@@ -1,23 +1,33 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Master Patients', 'url' => route('dashboard.masters.patients')],
+            ['text' => 'Kondisi Gigi untuk '. $patient->name]
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0 text-center">ODONTOGRAM - {{ $patient->name }}</h4>
+            <h4 class="mb-0 text-center">KONDISI GIGI - {{ $patient->name }}</h4>
         </div>
         
         <div class="card-body">
             <!-- Odontogram Visual Layout -->
             <div class="odontogram-wrapper">
                 <!-- Upper Jaw -->
-                <div class="jaw upper-jaw">
-                    <div class="quadrant right-upper">
+                <div class="jaw upper-jaw d-flex justify-content-center">
+                    <!-- Right Upper (18-11) -->
+                    <div class="quadrant me-4">
                         @foreach([18,17,16,15,14,13,12,11] as $toothNumber)
                             @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
                         @endforeach
                     </div>
-                    <div class="quadrant left-upper">
+                    
+                    <!-- Left Upper (21-28) -->
+                    <div class="quadrant">
                         @foreach([21,22,23,24,25,26,27,28] as $toothNumber)
                             @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
                         @endforeach
@@ -25,13 +35,16 @@
                 </div>
                 
                 <!-- Lower Jaw -->
-                <div class="jaw lower-jaw">
-                    <div class="quadrant left-lower">
+                <div class="jaw lower-jaw d-flex justify-content-center">
+                    <!-- Left Lower (38-31) -->
+                    <div class="quadrant me-4">
                         @foreach([38,37,36,35,34,33,32,31] as $toothNumber)
                             @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
                         @endforeach
                     </div>
-                    <div class="quadrant right-lower">
+                    
+                    <!-- Right Lower (48-41) -->
+                    <div class="quadrant">
                         @foreach([48,47,46,45,44,43,42,41] as $toothNumber)
                             @include('dashboard.odontograms.tooth-button', ['toothNumber' => $toothNumber])
                         @endforeach
@@ -41,7 +54,7 @@
             
             <!-- Tooth Symbols Legend -->
             <div class="legend-container mt-4 p-3 border rounded">
-                <h5 class="text-center mb-3">SIMBOL DAN KETERANGAN ODONTOGRAM</h5>
+                <h5 class="text-center mb-3">SIMBOL DAN KETERANGAN KONDISI GIGI</h5>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="d-flex align-items-center mb-2">
@@ -118,15 +131,13 @@
 
 <style>
     .odontogram-wrapper {
-        max-width: 800px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
     }
     
     .jaw {
-        display: flex;
-        justify-content: center;
-        margin: 10px 0;
+        margin: 20px 0;
     }
     
     .upper-jaw {
@@ -141,8 +152,6 @@
     
     .quadrant {
         display: flex;
-        flex-wrap: wrap;
-        width: 45%;
         gap: 5px;
     }
     

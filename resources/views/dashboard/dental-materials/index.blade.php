@@ -1,10 +1,15 @@
-{{-- resources/views/dashboard/dental_materials/index.blade.php --}}
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Dental Materials']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
-        <h3 class="text-center">Dental Materials with Stock Card</h3>
+        <h3 class="text-center">Dental Materials</h3>
         <a href="{{ route('dashboard.dental-materials.create') }}" class="btn btn-primary mb-3">
             Add New Material
         </a>

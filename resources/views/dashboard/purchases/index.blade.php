@@ -1,5 +1,10 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')]        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5">
 
@@ -28,7 +33,7 @@
             <tr>
                 <td>{{ $purchase->supplier->nama ?? '-' }}</td>
                 <td>{{ $purchase->purchase_date }}</td>
-                <td>Rp. {{ number_format($purchase->total_amount, 2, ',', '.') }}</td>
+                <td>Rp. {{ number_format($purchase->grand_total, 2, ',', '.') }}</td>
                 <td>Rp. {{ number_format($purchase->latestPayment->total_debt ?? 0, 2, ',', '.') }}</td>
 
                 <td>{{ ucfirst($purchase->status) }}</td>

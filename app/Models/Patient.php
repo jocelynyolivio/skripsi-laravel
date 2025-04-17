@@ -12,31 +12,52 @@ class Patient extends Authenticatable implements MustVerifyEmail
 
     protected $fillable = [
         // Informasi Pasien
-        'patient_id', 'name', 'gender', 'nik', 'blood_type',
-        'place_of_birth', 'date_of_birth', 'religion', 
-        'marital_status', 'family_status', 'occupation', 'nationality',
-    
-        // Alamat Rumah
-        'home_address', 'home_city', 'home_zip_code', 'home_country',
-        'home_phone', 'home_mobile', 'home_email',
-    
-        // Alamat Kantor (Opsional)
-        'office_address', 'office_city', 'office_zip_code', 
-        'office_country', 'office_phone', 'office_mobile', 'office_email',
-    
-        // Kontak Darurat
-        'emergency_contact_name', 'emergency_contact_phone',
-    
-        // Upload Dokumen (Opsional)
-        'form_data_awal', 'informed_consent',
-    
-        // Akun & Keamanan
-        'email', 'password',
+        'patient_id',
+        'name',
+        'gender',
+        'nik',
+        'blood_type',
+        'place_of_birth',
+        'date_of_birth',
+        'religion',
+        'marital_status',
+        'family_status',
+        'occupation',
+        'nationality',
 
-        'email_verified_at'
+        // Alamat Rumah
+        'home_address',
+        'home_city',
+        'home_zip_code',
+        'home_country',
+        'home_phone',
+        'home_mobile',
+        'home_email',
+
+        // Alamat Kantor (Opsional)
+        'office_address',
+        'office_city',
+        'office_zip_code',
+        'office_country',
+        'office_phone',
+        'office_mobile',
+        'office_email',
+
+        // Kontak Darurat
+        'emergency_contact_name',
+        'emergency_contact_phone',
+
+        // Upload Dokumen (Opsional)
+        'form_data_awal',
+        'informed_consent',
+
+        // Akun & Keamanan
+        'email',
+        'password',
+
+        'email_verified_at',
+        'updated_by'
     ];
-    
-    
 
     protected $hidden = [
         'password',
@@ -50,5 +71,10 @@ class Patient extends Authenticatable implements MustVerifyEmail
     public function odontograms()
     {
         return $this->hasMany(Odontogram::class);
+    }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

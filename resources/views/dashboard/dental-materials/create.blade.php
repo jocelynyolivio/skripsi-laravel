@@ -1,6 +1,12 @@
-{{-- resources/views/dashboard/dental_materials/create.blade.php --}}
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Dental Materials', 'url' => route('dashboard.dental-materials.index')],
+            ['text' => 'Add Dental Materials']
+        ]
+    ])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
     <h3 class="text-center">Add New Dental Material</h3>
