@@ -32,134 +32,79 @@
         <a href="{{ route('dashboard.purchase_requests.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Unapproved Purchase Request</h5> 
-                    <p class="card-text display-5 fw-bold" id='purchaseRequestBelumApprove'>{{ $purchaseRequestBelumApprove }}</p> 
+                    <h5 class="card-title">Unapproved Purchase Request</h5>
+                    <p class="card-text display-5 fw-bold" id='purchaseRequestBelumApprove'>{{ $purchaseRequestBelumApprove }}</p>
                 </div>
             </div>
         </a>
     </div>
 </div>
 
-<!-- Patient Data Filter -->
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="card-title">Filter Patient Data</h5>
-                <form method="GET" action="{{ route('dashboard') }}">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <input type="number" name="usia_min" class="form-control" placeholder="Minimum Age">
-                        </div>
-                        <div class="col-md-3">
-                            <input type="number" name="usia_max" class="form-control" placeholder="Maximum Age">
-                        </div>
-                        <div class="col-md-3">
-                            <select name="jenis_kelamin" class="form-control">
-                                <option value="">Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="text" name="domisili" class="form-control" placeholder="Residence">
-                        </div>
-                        <div class="col-md-3 mt-2">
-                            <input type="text" name="jasa" class="form-control" placeholder="Service">
-                        </div>
-                        <div class="col-md-3 mt-2">
-                            <button type="submit" class="btn btn-primary">Filter</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Filter Results Table -->
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="card-title">Filtered Patient Results</h5>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Age</th>
-                            <th>Gender</th>
-                            <th>Residence</th>
-                            <th>Service</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($filteredPatients as $pasien)
-                        <tr>
-                            <td>{{ $pasien->name }}</td>
-                            <td>{{ \Carbon\Carbon::parse($pasien->date_of_birth)->age }} Years</td>
-                            <td>{{ $pasien->gender }}</td>
-                            <td>{{ $pasien->home_city }}</td>
-                            <td>{{ $pasien->service ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Average Patient Visits Chart (1 Month) -->
+<!-- Charts: Patient Visit (left) & Doctor Performance (right) -->
 <div class="row">
-    <div class="col-md-12">
+    <!-- Kunjungan Pasien -->
+    <div class="col-md-6">
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title">Patient Visit Trends (1 Month)</h5>
-                <canvas id="chartKunjungan"></canvas>
+                <canvas id="chartKunjungan" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performa Dokter -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Doctor Performance (Omzet)</h5>
+                <canvas id="performaDokterChart" height="250"></canvas>
             </div>
         </div>
     </div>
 </div>
-
 @endif
+
 
 @if ($role === 'admin')
 <!-- Admin Data -->
 <div class="row">
-    <div class="col-md-3 mb-4">
+    <!-- Patients Coming This Week -->
+    <div class="col-md-4 mb-4">
         <a href="{{ route('dashboard.reservations.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Patients Coming This Week</h5>
-                    <p class="card-text display-5 fw-bold" id='pasienAkanDatang'>{{ $pasienAkanDatang }}</p>
+                    <p class="card-text display-5 fw-bold" id="pasienAkanDatang">{{ $pasienAkanDatang }}</p>
+                    <p class="text-muted">
+                        {{ $pasienAkanDatang < 1 ? 'Don't forget to remind' : 'See data below' }}
+                    </p>
                 </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3 mb-4">
+
+    <!-- Patients Needing Reminder -->
+    <div class="col-md-4 mb-4">
         <a href="{{ route('dashboard.reservations.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Patients Needing Reminder</h5>
                     <p class="card-text display-5 fw-bold" id="pasienPerluReminder">{{ $pasienPerluReminder }}</p>
-                    @if($pasienPerluReminder < 1)
-                    <p class="text-muted">No patients need reminders</p>
-                    @else
-                    <p class="text-muted">See data below</p>
-                    @endif
+                    <p class="text-muted">
+                        {{ $pasienPerluReminder < 1 ? 'No patients need reminders' : 'See data below' }}
+                    </p>
                 </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3 mb-4">
+
+    <!-- Low Stock Materials -->
+    <div class="col-md-4 mb-4">
         <a href="{{ route('dashboard.stock_cards.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Low Stock Materials</h5>
-                    <p class="card-text display-5 fw-bold">
-                        {{ $lowStockItems->count() }} items
-                    </p>
+                    <p class="card-text display-5 fw-bold">{{ $lowStockItems->count() }} items</p>
                     @if($lowStockItems->count() > 0)
                         <ul class="mb-0">
                             @foreach($lowStockItems as $item)
@@ -175,8 +120,9 @@
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
+<!-- Unconfirmed Patient List -->
+<div class="row mb-4">
+    <div class="col-12">
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title">Unconfirmed Patient List</h5>
@@ -187,6 +133,19 @@
         </div>
     </div>
 </div>
+
+<!-- Doctor Performance Chart -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Doctor Performance (Omzet)</h5>
+                <canvas id="performaDokterChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endif
 
 @if ($role === 'dokter tetap')
@@ -221,18 +180,32 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+    <!-- Performa Dokter -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title">Doctor Performance (Omzet)</h5>
+                <canvas id="performaDokterChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 @endif
 
 <style>
     /* Consistent hover effect for all clickable cards */
     .card-hover-effect:hover .card {
         transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
         border-color: #0d6efd !important;
     }
+
     .card-hover-effect .card {
         transition: all 0.3s ease;
     }
+
     .card-hover-effect {
         display: block;
     }
@@ -407,6 +380,60 @@
                             },
                             plugins: [ChartDataLabels]
                         });
+
+                        // === CHART PERFORMA DOKTER ===
+                        const dokterLabels = response.performaDokter.map(item => item.doctor_name);
+                        const dokterData = response.performaDokter.map(item => item.total_amount);
+
+                        const ctxDokter = document.getElementById('performaDokterChart').getContext('2d');
+                        const chartDokter = new Chart(ctxDokter, {
+                            type: 'bar',
+                            data: {
+                                labels: dokterLabels,
+                                datasets: [{
+                                    label: 'Total Pendapatan (Rp)',
+                                    data: dokterData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return 'Rp ' + value.toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        anchor: 'end',
+                                        align: 'top',
+                                        formatter: function(value) {
+                                            return 'Rp ' + value.toLocaleString('id-ID');
+                                        },
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: [ChartDataLabels]
+                        });
+
+
                     },
                     error: function(xhr, status, error) {
                         console.log("Error fetching data: " + error);
@@ -420,6 +447,58 @@
                         $('#pasienAkanDatang').text(response.pasienAkanDatang);
                         $('#pasienPerluReminder').text(response.pasienPerluReminder);
                         renderPasienBelumKonfirmasi(response.pasienReminderList);
+
+                        // === CHART PERFORMA DOKTER ===
+                        const dokterLabels = response.performaDokter.map(item => item.doctor_name);
+                        const dokterData = response.performaDokter.map(item => item.total_amount);
+
+                        const ctxDokter = document.getElementById('performaDokterChart').getContext('2d');
+                        const chartDokter = new Chart(ctxDokter, {
+                            type: 'bar',
+                            data: {
+                                labels: dokterLabels,
+                                datasets: [{
+                                    label: 'Total Pendapatan (Rp)',
+                                    data: dokterData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return 'Rp ' + value.toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        anchor: 'end',
+                                        align: 'top',
+                                        formatter: function(value) {
+                                            return 'Rp ' + value.toLocaleString('id-ID');
+                                        },
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: [ChartDataLabels]
+                        });
                     },
                     error: function(xhr, status, error) {
                         console.log("Error fetching data: " + error);
@@ -433,6 +512,58 @@
                         $('#pasienAkanDatangDokter').text(response.pasienAkanDatang);
                         $('#rekamMedisBelumDiisi').text(response.rekamMedisBelumDiisi);
                         renderRekamMedisBelumDiisi(response.listRekamMedisBelumDiisi);
+
+                        // === CHART PERFORMA DOKTER ===
+                        const dokterLabels = response.performaDokter.map(item => item.doctor_name);
+                        const dokterData = response.performaDokter.map(item => item.total_amount);
+
+                        const ctxDokter = document.getElementById('performaDokterChart').getContext('2d');
+                        const chartDokter = new Chart(ctxDokter, {
+                            type: 'bar',
+                            data: {
+                                labels: dokterLabels,
+                                datasets: [{
+                                    label: 'Total Pendapatan (Rp)',
+                                    data: dokterData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return 'Rp ' + value.toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        anchor: 'end',
+                                        align: 'top',
+                                        formatter: function(value) {
+                                            return 'Rp ' + value.toLocaleString('id-ID');
+                                        },
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: [ChartDataLabels]
+                        });
                     },
                     error: function(xhr, status, error) {
                         console.log("Error fetching data: " + error);

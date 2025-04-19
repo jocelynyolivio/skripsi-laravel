@@ -46,35 +46,14 @@ class DashboardController extends Controller
 
             $data['purchaseRequestBelumApprove'] = PurchaseRequest::whereNull('approved_at')->count();;
 
-            // **Filter Data Pasien Berdasarkan Request**
-            $query = Patient::query();
-
-            // **Filter Berdasarkan Usia**
-            if ($request->filled('usia_min') && $request->filled('usia_max')) {
-                $minDate = Carbon::today()->subYears($request->usia_max)->format('Y-m-d');
-                $maxDate = Carbon::today()->subYears($request->usia_min)->format('Y-m-d');
-
-                $query->whereBetween('date_of_birth', [$minDate, $maxDate]);
-            }
-
-            // **Filter Berdasarkan Jenis Kelamin**
-            if ($request->filled('jenis_kelamin')) {
-                $query->where('gender', $request->jenis_kelamin);
-            }
-
-            // **Filter Berdasarkan Domisili (Kota)**
-            if ($request->filled('domisili')) {
-                $query->where('home_city', 'LIKE', "%{$request->domisili}%");
-            }
-
-            // **Filter Berdasarkan Jasa (Jika ada relasi dengan `procedures`)**
-            if ($request->filled('jasa')) {
-                $query->whereHas('procedures', function ($q) use ($request) {
-                    $q->where('nama', 'LIKE', "%{$request->jasa}%");
-                });
-            }
-
-            $data['filteredPatients'] = $query->get();
+            $data['performaDokter'] = Transaction::selectRaw('
+            transactions.doctor_id,
+            users.name as doctor_name,
+            SUM(transactions.total_amount) as total_amount
+        ')
+                ->join('users', 'transactions.doctor_id', '=', 'users.id')
+                ->groupBy('transactions.doctor_id', 'users.name')
+                ->get();
         } elseif ($role === 'admin') {
             $data['pasienAkanDatang'] = MedicalRecord::whereBetween('tanggal_reservasi', [$today, $today->copy()->endOfWeek()])->count();
 
@@ -98,6 +77,15 @@ class DashboardController extends Controller
                 ->map(function ($item) {
                     return StockCard::with('dentalMaterial')->find($item->id);
                 });
+
+                $data['performaDokter'] = Transaction::selectRaw('
+            transactions.doctor_id,
+            users.name as doctor_name,
+            SUM(transactions.total_amount) as total_amount
+        ')
+                ->join('users', 'transactions.doctor_id', '=', 'users.id')
+                ->groupBy('transactions.doctor_id', 'users.name')
+                ->get();
         } elseif ($role === 'dokter tetap') {
             $data['pasienAkanDatang'] = MedicalRecord::whereDate('tanggal_reservasi', $today)->count();
             $data['rekamMedisBelumDiisi'] = MedicalRecord::with('patient')
@@ -108,6 +96,15 @@ class DashboardController extends Controller
                 ->whereNull('teeth_condition')
                 ->orDoesntHave('procedures')
                 ->orderBy('tanggal_reservasi', 'asc')
+                ->get();
+
+                $data['performaDokter'] = Transaction::selectRaw('
+            transactions.doctor_id,
+            users.name as doctor_name,
+            SUM(transactions.total_amount) as total_amount
+        ')
+                ->join('users', 'transactions.doctor_id', '=', 'users.id')
+                ->groupBy('transactions.doctor_id', 'users.name')
                 ->get();
         }
 
