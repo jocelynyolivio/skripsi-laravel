@@ -45,9 +45,7 @@
                             <div class="info-item">
                                 <strong>Medical Record:</strong> 
                                 @if ($transaction->medicalRecord)
-                                    <a href="{{ route('dashboard.medical_records.show', $transaction->medicalRecord->id) }}" class="text-primary">
-                                        <i class="fas fa-file-medical me-1"></i> View Medical Record
-                                    </a>
+          
                                 @else
                                     Not associated
                                 @endif

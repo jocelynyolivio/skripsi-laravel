@@ -39,7 +39,7 @@
                     <option value="{{ $procedure->id }}"
                         data-requires-tooth="{{ $procedure->requires_tooth ? '1' : '0' }}"
                         data-default-condition="{{ $procedure->default_condition }}">
-                        {{ $procedure->name }}
+                        {{ $procedure->item_code }} - {{ $procedure->name }}
                     </option>
                     @endforeach
                 </select>

@@ -25,6 +25,7 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Quantity</th>
+                <th>Unit</th>
                 <th>Latest Avg Price</th>
                 <th>Action</th>
             </tr>
@@ -40,6 +41,7 @@
                     @endphp
                     {{ $stock ? $stock->remaining_stock : 0 }}
                 </td>
+                <td>{{$material->unit_type}}</td>
                 <td>
                     @php
                     $stock = $stockCards->firstWhere('dental_material_id', $material->id);

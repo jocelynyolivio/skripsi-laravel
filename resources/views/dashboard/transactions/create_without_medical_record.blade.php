@@ -32,7 +32,7 @@
                     <option value="{{ $item['procedure']->id }}"
                         data-base-price="{{ $item['basePrice'] }}"
                         data-promo-price="{{ $item['promoPrice'] }}">
-                        {{ $item['procedure']->name }}
+                        {{ $item['procedure']->item_code }} - {{ $item['procedure']->name }}
                     </option>
                     @endforeach
                 </select>

@@ -267,7 +267,7 @@ class SalaryController extends Controller
 
         $doctorSalaries = [];
 
-        $bagi_hasil_data = DB::table('transaction_items')
+        $bagi_hasil_data = DB::table('transactions')
             ->whereMonth('created_at', $month) // Filter bulan
             ->whereYear('created_at', $year) // Filter tahun
             ->groupBy('doctor_id')

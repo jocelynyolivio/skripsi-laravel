@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('procedures', function (Blueprint $table) {
             $table->id();
+            $table->string('item_code')->nullable();
             $table->string('name'); // Nama prosedur, misalnya Tambal Gigi
+            $table->string('type')->nullable();
             $table->text('description')->nullable(); // Deskripsi tentang prosedur
             $table->boolean('requires_tooth')->default(true); // Default: prosedur butuh nomor gigi
             $table->timestamps();
