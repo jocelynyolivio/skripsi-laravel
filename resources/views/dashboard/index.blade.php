@@ -69,14 +69,28 @@
 <!-- Admin Data -->
 <div class="row">
     <!-- Patients Coming This Week -->
-    <div class="col-md-4 mb-4">
+    <div class="col-md-3 mb-4">
+        <a href="{{ route('dashboard.masters.patients.birthday') }}" class="text-decoration-none card-hover-effect">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Patients Birthday Today</h5>
+                    <p class="card-text display-5 fw-bold" id="pasienUltah">{{ $pasienUltah }}</p>
+                    <p class="text-muted">
+                        {{ $pasienUltah < 1 ? 'No patients birthday today' : 'Click to see data' }}
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3 mb-4">
         <a href="{{ route('dashboard.reservations.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Patients Coming This Week</h5>
                     <p class="card-text display-5 fw-bold" id="pasienAkanDatang">{{ $pasienAkanDatang }}</p>
                     <p class="text-muted">
-                        {{ $pasienAkanDatang < 1 ? 'Don't forget to remind' : 'See data below' }}
+                        {{ $pasienAkanDatang < 1 ? 'No patients coming this week' : 'Click to see data' }}
                     </p>
                 </div>
             </div>
@@ -84,7 +98,7 @@
     </div>
 
     <!-- Patients Needing Reminder -->
-    <div class="col-md-4 mb-4">
+    <div class="col-md-3 mb-4">
         <a href="{{ route('dashboard.reservations.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
@@ -99,7 +113,7 @@
     </div>
 
     <!-- Low Stock Materials -->
-    <div class="col-md-4 mb-4">
+    <div class="col-md-3 mb-4">
         <a href="{{ route('dashboard.stock_cards.index') }}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
@@ -445,6 +459,7 @@
                     method: 'GET',
                     success: function(response) {
                         $('#pasienAkanDatang').text(response.pasienAkanDatang);
+                        $('#pasienUltah').text(response.pasienUltah);
                         $('#pasienPerluReminder').text(response.pasienPerluReminder);
                         renderPasienBelumKonfirmasi(response.pasienReminderList);
 

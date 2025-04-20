@@ -17,7 +17,7 @@
     <h3>Services Text:</h3>
     <p>{{ $contents->first()->services_text ?? 'No services text available' }}</p>
 </div>
-<a href="{{ route('dashboard.home_content.create') }}" class="btn btn-primary mb-3">Add New Content</a>
+<a href="{{ route('dashboard.home_content.create') }}" class="btn btn-primary mb-3">Create New Content</a>
 <table class="table table-bordered">
     <thead>
         <tr>

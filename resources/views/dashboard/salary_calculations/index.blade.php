@@ -3,7 +3,7 @@
 @section('container')
 <div class="container">
     <h1>Daftar Gaji</h1>
-    <a href="{{ route('dashboard.salary_calculations.create') }}" class="btn btn-primary mb-3">Add Salaries</a>
+    <a href="{{ route('dashboard.salary_calculations.create') }}" class="btn btn-primary mb-3">Create Salaries</a>
     @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}

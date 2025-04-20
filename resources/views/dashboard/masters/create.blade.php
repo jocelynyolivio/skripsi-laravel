@@ -3,7 +3,7 @@
     @include('dashboard.layouts.breadcrumbs', [
         'customBreadcrumbs' => [
             ['text' => 'Master Users', 'url' => route('dashboard.masters.index')],
-            ['text' => 'Add New User']
+            ['text' => 'Create New User']
         ]
     ])
 @endsection

@@ -10,7 +10,7 @@
 <div class="container">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Data Presensi</h3>
-        <a href="{{ route('dashboard.attendances.create') }}" class="btn btn-primary">Add Attendances</a>
+        <a href="{{ route('dashboard.attendances.create') }}" class="btn btn-primary">Create Attendances</a>
     </div>
 
     <!-- Filter Per Bulan -->

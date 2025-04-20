@@ -13,7 +13,7 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Expenses List</h3>
-        <a href="{{ route('dashboard.expenses.create') }}" class="btn btn-primary">Add Expense</a>
+        <a href="{{ route('dashboard.expenses.create') }}" class="btn btn-primary">Create Expense</a>
     </div>
 
     <table id="expensesTable" class="table table-striped table-bordered">

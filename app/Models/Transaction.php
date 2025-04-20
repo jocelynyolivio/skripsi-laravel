@@ -18,7 +18,8 @@ class Transaction extends Model
         'doctor_id',
         'revenue_percentage',
         'revenue_amount',
-        'updated_by'
+        'updated_by',
+        'birthday_voucher'
     ];
 
     // Relasi ke User (yang melakukan transaksi)

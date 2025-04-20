@@ -11,7 +11,7 @@
 
     <div class="d-flex justify-content-between mb-3">
     <h3 class="mb-4">Schedule Templates</h3>
-    <a href="{{ route('dashboard.schedules.templates.create') }}" class="btn btn-primary mb-3">Add New Template</a>
+    <a href="{{ route('dashboard.schedules.templates.create') }}" class="btn btn-primary mb-3">Create New Template</a>
     </div>
 
     @if($templates->isEmpty())

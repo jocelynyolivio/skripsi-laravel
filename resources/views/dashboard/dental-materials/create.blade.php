@@ -3,13 +3,13 @@
     @include('dashboard.layouts.breadcrumbs', [
         'customBreadcrumbs' => [
             ['text' => 'Dental Materials', 'url' => route('dashboard.dental-materials.index')],
-            ['text' => 'Add Dental Materials']
+            ['text' => 'Create Dental Materials']
         ]
     ])
 @endsection
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h3 class="text-center">Add New Dental Material</h3>
+    <h3 class="text-center">Create New Dental Material</h3>
 
     <form action="{{ route('dashboard.dental-materials.store') }}" method="POST">
         @csrf

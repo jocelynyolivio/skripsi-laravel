@@ -10,7 +10,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Master Patients</h3>
-        <a href="{{ route('dashboard.masters.patients.create') }}" class="btn btn-primary mb-3">Add New Patient</a>
+        <a href="{{ route('dashboard.masters.patients.create') }}" class="btn btn-primary mb-3">Create New Patient</a>
     </div>
 
     @if(session('success'))
@@ -28,9 +28,11 @@
     <table id="patientTable" class="table table-striped table-bordered">
         <thead>
             <tr>
+                <th>#</th>
                 <th>Patient ID</th>
                 <th>Name</th>
                 <th>Gender</th>
+                <th>Date of Birth</th>
                 <th>Mobile Number</th>
                 <th>Actions</th>
             </tr>
@@ -38,12 +40,14 @@
         <tbody>
             @foreach($patients as $patient)
             <tr>
+                <td>{{ $patient->id }}</td>
                 <td>{{ $patient->patient_id }}</td>
-                <td>{{ $patient->name }}</td>
+                <td>{{ $patient->fname }} {{ $patient->mname }} {{ $patient->lname }}</td>
                 <td>{{ $patient->gender }}</td>
+                <td>{{ $patient->date_of_birth}}</td>
                 <td>{{ $patient->home_mobile }}</td>
                 <td>
-                    <a href="{{ route('dashboard.masters.patients.edit', $patient->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ route('dashboard.masters.patients.edit', $patient->id) }}" class="btn btn-sm btn-warning">Show/Edit</a>
                     <form action="{{ route('dashboard.masters.patients.destroy', $patient->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')

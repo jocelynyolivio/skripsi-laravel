@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h1>Add Expense</h1>
+    <h1>Create Expense</h1>
     @if(isset($expense))
     <div class="alert alert-info">
         You are duplicating expense #{{ $expense->id }}. Feel free to adjust the values below.

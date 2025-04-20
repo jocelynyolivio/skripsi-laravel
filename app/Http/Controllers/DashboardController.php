@@ -57,6 +57,9 @@ class DashboardController extends Controller
         } elseif ($role === 'admin') {
             $data['pasienAkanDatang'] = MedicalRecord::whereBetween('tanggal_reservasi', [$today, $today->copy()->endOfWeek()])->count();
 
+            $data['pasienUltah'] = Patient::where('date_of_birth', $today)->count(); // Hanya hitung jumlah
+
+
             $data['pasienPerluReminder'] = MedicalRecord::whereNull('status_konfirmasi')->count(); // Hanya hitung jumlah
 
             $data['pasienReminderList'] = MedicalRecord::with(['patient', 'doctor']) // Ambil data pasien yang perlu diingatkan

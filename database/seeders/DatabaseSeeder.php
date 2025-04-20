@@ -107,25 +107,33 @@ class DatabaseSeeder extends Seeder
 
         $patients = [
             [
-                'name' => 'Yoli',
+                'fname' => 'Jocelyn',
+                // 'mname' => 'Yoli',
+                'lname' => 'Yolivio',
                 'email' => 'emailnyayoli@gmail.com',
                 'password' => Hash::make('12345'),
                 'home_mobile' => '081230333587',
             ],
             [
-                'name' => 'Pasien1',
+                'fname' => 'Pasien',
+                // 'mname' => '',
+                'lname' => '1',
                 'email' => 'pasien1@gmail.com',
                 'password' => Hash::make('pasien'),
                 'home_mobile' => '1479575675367',
             ],
             [
-                'name' => 'Pasien2',
+                'fname' => 'Pasien',
+                'mname' => '2',
+                // 'lname' => 'Yolivio',
                 'email' => 'pasien2@gmail.com',
                 'password' => Hash::make('pasien'),
                 'home_mobile' => '89786785',
             ],
             [
-                'name' => 'Pasien3',
+                'fname' => 'Pasien',
+                'mname' => '3',
+                'lname' => 'Ya 3',
                 'email' => 'pasien3@gmail.com',
                 'password' => Hash::make('pasien'),
                 'home_mobile' => '0000000',
@@ -134,7 +142,7 @@ class DatabaseSeeder extends Seeder
 
         foreach ($patients as $data) {
             // Generate Patient ID
-            $initialLetter = strtoupper(substr($data['name'], 0, 1));
+            $initialLetter = strtoupper(substr($data['fname'], 0, 1));
             $lastPatient = Patient::where('patient_id', 'like', "$initialLetter%")->latest('id')->first();
 
             if ($lastPatient) {

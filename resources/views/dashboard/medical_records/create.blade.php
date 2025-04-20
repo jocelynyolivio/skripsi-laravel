@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Add Medical Record for Patient: {{ $patientName }}</h3>
+    <h3 class="text-center">Create Medical Record for Patient: {{ $patientName }}</h3>
 
     <form action="{{ route('dashboard.medical_records.store', ['patientId' => $patientId]) }}" method="POST">
         @csrf

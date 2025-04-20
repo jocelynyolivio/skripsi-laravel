@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Patient;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
@@ -32,6 +34,71 @@ class PatientController extends Controller
         ]);
     }
 
+    public function birthday()
+    {
+        // dd('bday');
+        $today = Carbon::now();
+        $patientBirthday = Patient::whereRaw('MONTH(date_of_birth) = ? AND DAY(date_of_birth) = ?', [
+            $today->month,
+            $today->day
+        ])->get();
+
+        return view('dashboard.masters.patient-birthday', [
+            'title' => 'Patients Birthday',
+            'patients' => $patientBirthday,
+        ]);
+    }
+
+    public function sendVoucherBirthday($id)
+    {
+        $today = Carbon::now();
+
+        $patientBirthday = Patient::whereRaw('MONTH(date_of_birth) = ? AND DAY(date_of_birth) = ?', [
+            $today->month,
+            $today->day
+        ])
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Nomor telepon pasien
+        $phoneNumber = $patientBirthday->home_mobile ?? '8120000000'; // fallback biar gak error
+
+        // Pesan template
+        $message = "Halo {$patientBirthday->fname}, selamat ulang tahun! Anda mendapatkan voucher spesial dari kami. Terima kasih telah menjadi pasien kami. Berikut kode voucher anda : {$patientBirthday->birthday_voucher_code} dapat digunakan sampai {$patientBirthday->birthday_voucher_expired_at}";
+
+        // Redirect ke wa.me dengan pesan template
+        return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
+    }
+
+    public function generateVoucherBirthday($id)
+    {
+
+        $today = Carbon::now();
+
+        $patientBirthday = Patient::whereRaw('MONTH(date_of_birth) = ? AND DAY(date_of_birth) = ?', [
+            $today->month,
+            $today->day
+        ])
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Generate voucher jika belum ada
+        if (!$patientBirthday->birthday_voucher_code & !$patientBirthday->birthday_voucher_expired_at) {
+            $voucherCode = 'BDAY-' . strtoupper(Str::random(6));
+            $expiredAt = $today->copy()->addDays(7); // Misal voucher berlaku 7 hari
+
+            $patientBirthday->update([
+                'birthday_voucher_code' => $voucherCode,
+                'birthday_voucher_expired_at' => $expiredAt,
+            ]);
+        } else {
+            $voucherCode = $patientBirthday->birthday_voucher_code;
+            $expiredAt = $patientBirthday->birthday_voucher_expired_at;
+        }
+
+        return redirect()->back()->with('success', 'Voucher Generated!');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -42,12 +109,15 @@ class PatientController extends Controller
         $updated_by = auth()->id();
         // dd($updated_by);
         // Validasi input
-        try{
+        try {
             $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'gender' => 'required|in:Male,Female',
-                'nik' => 'required|string|max:20|unique:patients,nik',
+                'fname' => 'required|string|max:255',
+                'mname' => 'nullable|string|max:255',
+                'lname' => 'nullable|string|max:255',
+                'gender' => 'required|in:Male,Female,Other',
+                'nik' => 'required|string|max:20',
                 'blood_type' => 'required|string|max:5',
+                'parent_name' => 'nullable|string|max:255',
                 'place_of_birth' => 'required|string|max:255',
                 'date_of_birth' => 'required|date',
                 'religion' => 'nullable|string|max:100',
@@ -55,17 +125,18 @@ class PatientController extends Controller
                 'family_status' => 'nullable|string|max:100',
                 'occupation' => 'nullable|string|max:255',
                 'nationality' => 'nullable|string|max:100',
-    
-                // Alamat Rumah
                 'home_address' => 'required|string',
+                'home_address_domisili' => 'nullable|string',
+                'home_RT' => 'nullable|string|max:10',
+                'home_RW' => 'nullable|string|max:10',
+                'home_kelurahan' => 'nullable|string|max:100',
+                'home_kecamatan' => 'nullable|string|max:100',
                 'home_city' => 'nullable|string|max:255',
                 'home_zip_code' => 'nullable|string|max:10',
                 'home_country' => 'nullable|string|max:255',
                 'home_phone' => 'nullable|string|max:20',
                 'home_mobile' => 'required|string|max:20',
                 'home_email' => 'nullable|email|max:255',
-    
-                // Alamat Kantor (Opsional)
                 'office_address' => 'nullable|string',
                 'office_city' => 'nullable|string|max:255',
                 'office_zip_code' => 'nullable|string|max:10',
@@ -73,47 +144,42 @@ class PatientController extends Controller
                 'office_phone' => 'nullable|string|max:20',
                 'office_mobile' => 'nullable|string|max:20',
                 'office_email' => 'nullable|email|max:255',
-    
-                // Kontak Darurat
                 'emergency_contact_name' => 'required|string|max:255',
+                'emergency_contact_relation' => 'required|string|max:100',
                 'emergency_contact_phone' => 'required|string|max:20',
-    
-                // Upload Dokumen (Opsional)
                 'form_data_awal' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
                 'informed_consent' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-    
-                // Email & Password
-                'email' => 'nullable|email|unique:patients,email',
+                'email' => 'nullable|email',
                 'password' => 'nullable|string|min:6',
             ]);
-    
+
             // dd($validatedData);
-    
+
             // Generate Patient ID
-            $initialLetter = strtoupper(substr($request->name, 0, 1)); // Ambil huruf pertama dari nama
+            $initialLetter = strtoupper(substr($request->fname, 0, 1)); // Ambil huruf pertama dari nama
             $lastPatient = Patient::where('patient_id', 'like', "$initialLetter%")->orderBy('id', 'desc')->first();
-    
+
             if ($lastPatient) {
                 $lastNumber = (int) substr($lastPatient->patient_id, 1); // Ambil angka setelah huruf
                 $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT); // Format angka jadi 3 digit
             } else {
                 $newNumber = '001';
             }
-    
+
             $validatedData['patient_id'] = $initialLetter . $newNumber; // Contoh: Y001, A002
-    
+
             // dd($validatedData['patient_id']);
-    
+
             // Handle file upload untuk Form Data Awal
             if ($request->hasFile('form_data_awal')) {
                 $validatedData['form_data_awal'] = $request->file('form_data_awal')->store('patients/forms', 'public');
             }
-    
+
             // Handle file upload untuk Informed Consent
             if ($request->hasFile('informed_consent')) {
                 $validatedData['informed_consent'] = $request->file('informed_consent')->store('patients/consent', 'public');
             }
-    
+
             // Jika password kosong, set default password
             if (!$request->filled('password')) {
                 $validatedData['password'] = bcrypt('123456');
@@ -123,15 +189,14 @@ class PatientController extends Controller
 
             $validatedData['updated_by'] = $updated_by;
             // dd($validatedData['updated_by']);
-    
+
             // Simpan data ke database
             Patient::create($validatedData);
             return redirect()->route('dashboard.masters.patients')->with('success', 'Patient added successfully!');
-    
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             // dd($e);
             return redirect()->back()->with('error', 'Gagal karena ' . $e->getMessage());
-        }  
+        }
     }
 
 
@@ -143,6 +208,9 @@ class PatientController extends Controller
     {
         //
     }
+
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -165,78 +233,84 @@ class PatientController extends Controller
         $patient = Patient::findOrFail($id);
         $patient->updated_by = auth()->id();
 
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'gender' => 'required|in:Male,Female,Other',
-            'nik' => 'required|string|max:20' . $id,
-            'blood_type' => 'required|string|max:5',
-            'place_of_birth' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
-            'religion' => 'nullable|string|max:100',
-            'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
-            'family_status' => 'nullable|string|max:100',
-            'occupation' => 'nullable|string|max:255',
-            'nationality' => 'nullable|string|max:100',
+        // dd('msk');
 
-            // Alamat Rumah
-            'home_address' => 'required|string',
-            'home_city' => 'nullable|string|max:255',
-            'home_zip_code' => 'nullable|string|max:10',
-            'home_country' => 'nullable|string|max:255',
-            'home_phone' => 'nullable|string|max:20',
-            'home_mobile' => 'required|string|max:20',
-            'home_email' => 'nullable|email|max:255',
+        try {
+            $validatedData = $request->validate([
+                'fname' => 'required|string|max:255',
+                'mname' => 'nullable|string|max:255',
+                'lname' => 'nullable|string|max:255',
+                'gender' => 'required|in:Male,Female,Other',
+                'nik' => 'required|string|max:20',
+                'blood_type' => 'required|string|max:5',
+                'parent_name' => 'nullable|string|max:255',
+                'place_of_birth' => 'required|string|max:255',
+                'date_of_birth' => 'required|date',
+                'religion' => 'nullable|string|max:100',
+                'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
+                'family_status' => 'nullable|string|max:100',
+                'occupation' => 'nullable|string|max:255',
+                'nationality' => 'nullable|string|max:100',
+                'home_address' => 'required|string',
+                'home_address_domisili' => 'nullable|string',
+                'home_RT' => 'nullable|string|max:10',
+                'home_RW' => 'nullable|string|max:10',
+                'home_kelurahan' => 'nullable|string|max:100',
+                'home_kecamatan' => 'nullable|string|max:100',
+                'home_city' => 'nullable|string|max:255',
+                'home_zip_code' => 'nullable|string|max:10',
+                'home_country' => 'nullable|string|max:255',
+                'home_phone' => 'nullable|string|max:20',
+                'home_mobile' => 'required|string|max:20',
+                'home_email' => 'nullable|email|max:255',
+                'office_address' => 'nullable|string',
+                'office_city' => 'nullable|string|max:255',
+                'office_zip_code' => 'nullable|string|max:10',
+                'office_country' => 'nullable|string|max:255',
+                'office_phone' => 'nullable|string|max:20',
+                'office_mobile' => 'nullable|string|max:20',
+                'office_email' => 'nullable|email|max:255',
+                'emergency_contact_name' => 'required|string|max:255',
+                'emergency_contact_relation' => 'required|string|max:100',
+                'emergency_contact_phone' => 'required|string|max:20',
+                'form_data_awal' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'informed_consent' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'email' => 'nullable|email',
+                'password' => 'nullable|string|min:6',
+            ]);
 
-            // Alamat Kantor
-            'office_address' => 'nullable|string',
-            'office_city' => 'nullable|string|max:255',
-            'office_zip_code' => 'nullable|string|max:10',
-            'office_country' => 'nullable|string|max:255',
-            'office_phone' => 'nullable|string|max:20',
-            'office_mobile' => 'nullable|string|max:20',
-            'office_email' => 'nullable|email|max:255',
+            // Jika password tidak diisi, gunakan password lama
+            if (!$request->filled('password')) {
+                $validatedData['password'] = $patient->password;
+            } else {
+                $validatedData['password'] = bcrypt($request->password);
+            }
 
-            // Kontak Darurat
-            'emergency_contact_name' => 'required|string|max:255',
-            'emergency_contact_phone' => 'required|string|max:20',
+            // Handle file upload untuk Form Data Awal
+            if ($request->hasFile('form_data_awal')) {
+                $validatedData['form_data_awal'] = $request->file('form_data_awal')->store('patients/forms', 'public');
+            } else {
+                $validatedData['form_data_awal'] = $patient->form_data_awal;
+            }
 
-            // Upload Dokumen
-            'form_data_awal' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'informed_consent' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            // Handle file upload untuk Informed Consent
+            if ($request->hasFile('informed_consent')) {
+                $validatedData['informed_consent'] = $request->file('informed_consent')->store('patients/consent', 'public');
+            } else {
+                $validatedData['informed_consent'] = $patient->informed_consent;
+            }
 
-            // Email & Password
-            'email' => 'nullable|email' . $id,
-            'password' => 'nullable|string|min:6',
-        ]);
+            // Pastikan `patient_id` tidak berubah
+            $validatedData['patient_id'] = $patient->patient_id;
 
-        // Jika password tidak diisi, gunakan password lama
-        if (!$request->filled('password')) {
-            $validatedData['password'] = $patient->password;
-        } else {
-            $validatedData['password'] = bcrypt($request->password);
+            // Update data pasien
+            $patient->update($validatedData);
+
+            return redirect()->route('dashboard.masters.patients')->with('success', 'Patient updated successfully!');
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()->with('error', 'Gagal karena ' . $e->getMessage());
         }
-
-        // Handle file upload untuk Form Data Awal
-        if ($request->hasFile('form_data_awal')) {
-            $validatedData['form_data_awal'] = $request->file('form_data_awal')->store('patients/forms', 'public');
-        } else {
-            $validatedData['form_data_awal'] = $patient->form_data_awal;
-        }
-
-        // Handle file upload untuk Informed Consent
-        if ($request->hasFile('informed_consent')) {
-            $validatedData['informed_consent'] = $request->file('informed_consent')->store('patients/consent', 'public');
-        } else {
-            $validatedData['informed_consent'] = $patient->informed_consent;
-        }
-
-        // Pastikan `patient_id` tidak berubah
-        $validatedData['patient_id'] = $patient->patient_id;
-
-        // Update data pasien
-        $patient->update($validatedData);
-
-        return redirect()->route('dashboard.masters.patients')->with('success', 'Patient updated successfully!');
     }
 
 

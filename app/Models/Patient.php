@@ -13,7 +13,9 @@ class Patient extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         // Informasi Pasien
         'patient_id',
-        'name',
+        'fname',
+        'mname',
+        'lname',
         'gender',
         'nik',
         'blood_type',
@@ -27,6 +29,11 @@ class Patient extends Authenticatable implements MustVerifyEmail
 
         // Alamat Rumah
         'home_address',
+        'home_address_domisili',
+        'home_RT',
+        'home_RW',
+        'home_kelurahan',
+        'home_kecamatan',
         'home_city',
         'home_zip_code',
         'home_country',
@@ -45,6 +52,7 @@ class Patient extends Authenticatable implements MustVerifyEmail
 
         // Kontak Darurat
         'emergency_contact_name',
+        'emergency_contact_relation',
         'emergency_contact_phone',
 
         // Upload Dokumen (Opsional)
@@ -54,6 +62,10 @@ class Patient extends Authenticatable implements MustVerifyEmail
         // Akun & Keamanan
         'email',
         'password',
+
+        'birthday_voucher_code',
+        'birthday_voucher_used',
+        'birthday_voucher_expired_at',
 
         'email_verified_at',
         'updated_by'

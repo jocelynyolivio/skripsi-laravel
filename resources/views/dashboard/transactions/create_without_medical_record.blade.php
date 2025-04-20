@@ -42,6 +42,16 @@
 
         <div id="selected-items" class="mb-3"></div>
 
+        <div class="form-group">
+                <label for="voucher">Vouchers :</label>
+                <select class="form-control" id="voucher" name="voucher" required>
+                    <option value="">-- Pilih Voucher --</option>
+                    @foreach ($vouchers as $voucher)
+                    <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
+                    @endforeach
+                </select>
+            </div>
+
         <!-- Total Amount Section -->
         <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
             <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>

@@ -10,7 +10,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Reservations List</h3>
-        <a href="{{ route('dashboard.schedules.index') }}" class="btn btn-primary mb-3">Add New Reservation</a>
+        <a href="{{ route('dashboard.schedules.index') }}" class="btn btn-primary mb-3">Create New Reservation</a>
     </div>
 
     <table id="reservationTable" class="table table-striped table-bordered">

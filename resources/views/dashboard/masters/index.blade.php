@@ -10,7 +10,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Master Users</h3>
-        <a href="{{ route('dashboard.masters.create') }}" class="btn btn-primary mb-3">Add New Users</a>
+        <a href="{{ route('dashboard.masters.create') }}" class="btn btn-primary mb-3">Create New Users</a>
     </div>
 
     @if(session('success'))

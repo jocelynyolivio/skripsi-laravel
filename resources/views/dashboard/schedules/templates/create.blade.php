@@ -9,7 +9,7 @@
 @endsection
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h3 class="mb-4">Add New Schedule Template</h3>
+    <h3 class="mb-4">Create New Schedule Template</h3>
 
     <form id="template-form" action="{{ route('dashboard.schedules.templates.store') }}" method="POST">
     @csrf

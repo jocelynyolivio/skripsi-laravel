@@ -214,6 +214,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
 
     Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
+
     Route::resource('/home_content', HomeContentController::class);
 
     Route::get('/masters/patients/{id}/edit', [PatientController::class, 'edit'])->name('masters.patients.edit');
@@ -222,6 +223,12 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/masters/patients', [PatientController::class, 'index'])->name('masters.patients');
     Route::get('/masters/patients/create', [PatientController::class, 'create'])->name('masters.patients.create');
     Route::post('/masters/patients', [PatientController::class, 'store'])->name('masters.patients.store');
+    Route::get('/masters/patients/patient-birthday', [PatientController::class, 'birthday'])->name('masters.patients.birthday');
+
+    Route::get('/masters/patients/patient-birthday/{id}', [PatientController::class, 'sendVoucherBirthday'])->name('masters.patients.birthday.sendVoucherBirthday');
+
+    Route::get('/masters/patients/patient-birthday-generate/{id}', [PatientController::class, 'generateVoucherBirthday'])->name('masters.patients.birthday.generateVoucherBirthday');
+
 
     Route::get('/masters', [UserController::class, 'index'])->name('masters.index');
     Route::get('/masters/create', [UserController::class, 'create'])->name('masters.create');

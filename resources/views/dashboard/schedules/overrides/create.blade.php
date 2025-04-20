@@ -9,7 +9,7 @@
 @endsection
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h3 class="mb-4">Add New Schedule Override</h3>
+    <h3 class="mb-4">Create New Schedule Override</h3>
 
     <form id="override-form" action="{{ route('dashboard.schedules.overrides.store') }}" method="POST">
     @csrf

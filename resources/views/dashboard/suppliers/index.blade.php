@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <h3 class="text-center">Daftar Supplier</h3>
 
-    <a href="{{ route('dashboard.suppliers.create') }}" class="btn btn-success mb-3">Add New Suppliers</a>
+    <a href="{{ route('dashboard.suppliers.create') }}" class="btn btn-success mb-3">Create New Suppliers</a>
 
     <table class="table table-bordered">
         <thead>

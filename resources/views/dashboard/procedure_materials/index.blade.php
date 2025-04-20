@@ -10,7 +10,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Procedure Materials</h3>
-        <a href="{{ route('dashboard.procedure_materials.create') }}" class="btn btn-primary mb-3">Add New Procedure Materials</a>
+        <a href="{{ route('dashboard.procedure_materials.create') }}" class="btn btn-primary mb-3">Create New Procedure Materials</a>
     </div>
 
     <div class="accordion" id="procedureAccordion">

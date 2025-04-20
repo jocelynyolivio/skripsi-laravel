@@ -41,6 +41,13 @@ class TransactionController extends Controller
                 'procedures'
             ])->findOrFail(($medicalRecordId));
 
+            $medicalRecord = MedicalRecord::with(['procedures'])
+                ->findOrFail($medicalRecordId);
+
+            $vouchers = Patient::where('id', $medicalRecord->patient->id)
+                ->where('birthday_voucher_used', 0)
+                ->select('birthday_voucher_code')
+                ->get();
 
             $procedureCounts = [];
 
@@ -83,12 +90,17 @@ class TransactionController extends Controller
             'proceduresWithPrices' => $proceduresWithPrices,
             'totalAmount' => $totalAmount,
             'users' => $users,
-            'cashAccounts' => $cashAccounts
+            'cashAccounts' => $cashAccounts,
+            'vouchers' => $vouchers,
         ]);
     }
 
     public function createWithoutMedicalRecord()
     {
+        $vouchers = Patient::where('birthday_voucher_used', 0)
+            ->select('birthday_voucher_code')
+            ->get();
+
         $proceduresWithPrices = Procedure::all()->map(function ($procedure) {
             return [
                 'procedure' => $procedure,
@@ -115,7 +127,8 @@ class TransactionController extends Controller
             'title' => 'Create Transaction Without Medical Record',
             'proceduresWithPrices' => $proceduresWithPrices,
             'patients' => $patients,
-            'cashAccounts' => $cashAccounts
+            'cashAccounts' => $cashAccounts,
+            'vouchers' => $vouchers
         ]);
     }
     public function store(Request $request)
@@ -134,7 +147,8 @@ class TransactionController extends Controller
             'payments' => 'nullable|array',
             'payments.*.method' => 'required',
             'payments.*.amount' => 'required|numeric|min:0',
-            'payments.*.notes' => 'nullable|string'
+            'payments.*.notes' => 'nullable|string',
+            'voucher' => 'nullable|string'
         ]);
 
         $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
@@ -188,6 +202,7 @@ class TransactionController extends Controller
             'revenue_percentage' => $revenuePercentage,
             'revenue_amount' => $totalRevenueAmount,
             'updated_by' => $updated_by,
+            'birthday_voucher' => $validated['voucher']
         ]);
 
         // Simpan Item Transaksi
@@ -214,6 +229,9 @@ class TransactionController extends Controller
         // Update Status Transaksi
         $transaction->status = ($remainingAmount > 0) ? 'belum lunas' : 'lunas';
         $transaction->save();
+
+        Patient::where('id', $validated['medical_record_id']->patients->id)
+            ->update(['birthday_voucher_used' => 1]);
 
         // Simpan Receivable
         Receivable::create([
@@ -418,6 +436,8 @@ class TransactionController extends Controller
     public function storeWithoutMedicalRecord(Request $request)
     {
         $updated_by = auth()->id();
+        // dd($request->voucher);
+
         // Validasi Input
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
@@ -433,6 +453,7 @@ class TransactionController extends Controller
             'payments.*.method' => 'required',
             'payments.*.amount' => 'required|numeric|min:0',
             'payments.*.notes' => 'nullable|string',
+            'voucher' => 'nullable|string'
         ]);
 
         // dd($validated);
@@ -469,7 +490,8 @@ class TransactionController extends Controller
             'admin_id' => $validated['admin_id'],
             'total_amount' => $totalAmount,
             'status' => 'belum lunas', // Default status
-            'updated_by' => $updated_by
+            'updated_by' => $updated_by,
+            'birthday_voucher' => $validated['voucher']
         ]);
 
         // Simpan Item Transaksi
@@ -498,6 +520,9 @@ class TransactionController extends Controller
         // **Update Status Transaksi Secara Dinamis**
         $transaction->status = ($remainingAmount > 0) ? 'belum lunas' : 'lunas';
         $transaction->save();
+
+        Patient::where('id', $validated['patient_id'])
+            ->update(['birthday_voucher_used' => 1]);
 
         Receivable::create([
             'transaction_id' => $transaction->id,
@@ -903,8 +928,7 @@ class TransactionController extends Controller
     public function show(Transaction $transaction)
     {
         $transaction->load(['patient', 'admin', 'editor', 'items.procedure', 'payments', 'medicalRecord']);
-    
+
         return view('dashboard.transactions.show', compact('transaction'));
     }
-    
 }

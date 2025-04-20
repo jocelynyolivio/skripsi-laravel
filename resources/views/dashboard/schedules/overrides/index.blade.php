@@ -12,7 +12,7 @@
 
     <div class="d-flex justify-content-between mb-3">
     <h3 class="mb-4">Schedule Overrides</h3>
-    <a href="{{ route('dashboard.schedules.overrides.create') }}" class="btn btn-primary mb-3">Add New Override</a>
+    <a href="{{ route('dashboard.schedules.overrides.create') }}" class="btn btn-primary mb-3">Create New Override</a>
     </div>
 
     <table class="table table-striped" id="overrideTable">

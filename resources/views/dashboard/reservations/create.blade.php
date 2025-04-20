@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5">
-    <h3 class="text-center">Add Reservation</h3>
+    <h3 class="text-center">Create Reservation</h3>
     <form action="{{ route('dashboard.reservations.store') }}" method="POST">
         @csrf
 
@@ -32,7 +32,7 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Add Reservation</button>
+        <button type="submit" class="btn btn-primary w-100">Create Reservation</button>
     </form>
 </div>
 @endsection

@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container col-md-6">
-    <h1>Add Salaries</h1>
+    <h1>Create Salaries</h1>
     <form action="{{ route('dashboard.salary_calculations.store') }}" method="POST">
         @csrf
         

@@ -11,7 +11,7 @@
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Dental Materials</h3>
         <a href="{{ route('dashboard.dental-materials.create') }}" class="btn btn-primary mb-3">
-            Add New Material
+            Create New Material
         </a>
     </div>
 

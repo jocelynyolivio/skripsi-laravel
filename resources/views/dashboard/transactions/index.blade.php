@@ -14,7 +14,7 @@
         <h3 class="text-center">Transaction List</h3>
         <div class="dropdown">
             <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                Add Transaction
+            Create Transaction
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{{ route('dashboard.transactions.createWithoutMedicalRecord') }}">Without Medical Record</a></li>

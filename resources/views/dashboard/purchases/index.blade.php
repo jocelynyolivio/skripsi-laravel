@@ -10,7 +10,7 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Purchase Invoices List</h3>
-        <a href="{{ route('dashboard.purchases.create') }}" class="btn btn-primary">Add Purchase</a>
+        <a href="{{ route('dashboard.purchases.create') }}" class="btn btn-primary">Create Purchase</a>
     </div>
 
     @if(session('success'))
@@ -55,7 +55,7 @@
 
                     @if ($purchase->latestPayment && $purchase->latestPayment->total_debt > 0)
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#payDebtModal-{{ $purchase->id }}">
-                        Add Purchase Payment
+                    Create Purchase Payment
                     </button>
 
                     <!-- Modal untuk Pembayaran Hutang -->
@@ -66,7 +66,7 @@
                                     @csrf
                                     <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Add Purchase Payment</h5>
+                                        <h5 class="modal-title">Create Purchase Payment</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">

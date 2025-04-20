@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('patient_id')->unique();
 
             // informasi pribadi
-            $table->string('name')->nullable();
+            $table->string('fname')->nullable();
+            $table->string('mname')->nullable();
+            $table->string('lname')->nullable();
+
             $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
             $table->string('nik')->nullable();
             $table->string('blood_type')->nullable();
@@ -31,6 +34,13 @@ return new class extends Migration
 
             // Alamat Rumah
             $table->text('home_address')->nullable();
+            
+            $table->text('home_address_domisili')->nullable();
+            $table->text('home_RT')->nullable();
+            $table->text('home_RW')->nullable();
+            $table->text('home_kelurahan')->nullable();
+            $table->text('home_kecamatan')->nullable();
+
             $table->string('home_city')->nullable();
             $table->string('home_zip_code')->nullable();
             $table->string('home_country')->nullable();
@@ -49,6 +59,7 @@ return new class extends Migration
 
             // Kontak Darurat
             $table->string('emergency_contact_name')->nullable();
+            $table->string('emergency_contact_relation')->nullable();
             $table->string('emergency_contact_phone')->nullable();
 
             // Upload Dokumen
@@ -58,6 +69,10 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
+
+            $table->string('birthday_voucher_code')->nullable();
+            $table->boolean('birthday_voucher_used')->default(false)->nullable();
+            $table->date('birthday_voucher_expired_at')->nullable();
 
             $table->rememberToken();
             $table->timestamps();
