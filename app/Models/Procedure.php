@@ -9,7 +9,18 @@ class Procedure extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'requires_tooth'];
+    protected $fillable = [
+        'item_code',
+        'name',
+        'description',
+        'requires_tooth',
+        'procedure_type_id' // Tambahkan ini
+    ];
+
+    public function procedureType()
+    {
+        return $this->belongsTo(ProcedureType::class, 'procedure_type_id');
+    }
 
     // Relasi ke Dental Materials (Many to Many)
     public function dentalMaterials()
@@ -18,22 +29,22 @@ class Procedure extends Model
             ->withPivot('quantity');
     }
 
-     // Relasi ke Medical Records (Many to Many)
-     public function medicalRecords()
-     {
-         return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure')->withPivot('tooth_number','notes');
-     }
+    // Relasi ke Medical Records (Many to Many)
+    public function medicalRecords()
+    {
+        return $this->belongsToMany(MedicalRecord::class, 'medical_record_procedure')->withPivot('tooth_number', 'notes');
+    }
 
-     public function pricelists()
-     {
-         return $this->hasMany(Pricelist::class, 'procedure_id');
-     }
- 
-     // Mengambil harga terbaru berdasarkan `effective_date`
-     public function latestPrice()
-     {
-         return $this->hasOne(Pricelist::class, 'procedure_id')->latest('effective_date');
-     }
+    public function pricelists()
+    {
+        return $this->hasMany(Pricelist::class, 'procedure_id');
+    }
+
+    // Mengambil harga terbaru berdasarkan `effective_date`
+    public function latestPrice()
+    {
+        return $this->hasOne(Pricelist::class, 'procedure_id')->latest('effective_date');
+    }
 
     // Mengambil harga dasar (non-promosi)
     public function basePrice()

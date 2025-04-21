@@ -3,6 +3,7 @@
 use App\Models\Patient;
 use App\Models\HomeContent;
 use Illuminate\Http\Request;
+use App\Models\PurchaseRequest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
@@ -17,6 +18,8 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProcedureController;
+use App\Http\Controllers\StockCardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\HomeContentController;
@@ -24,19 +27,18 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\ProcedureTypeController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\FinancialReportController;
+use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Auth\PatientVerifyEmailController;
-use App\Http\Controllers\PurchaseRequestController;
-use App\Http\Controllers\StockCardController;
-use App\Models\PurchaseRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -216,6 +218,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
 
     Route::resource('/home_content', HomeContentController::class);
+    Route::resource('/procedures', ProcedureController::class)->names('procedures');
+    Route::resource('/procedure_types', ProcedureTypeController::class);
 
     Route::get('/masters/patients/{id}/edit', [PatientController::class, 'edit'])->name('masters.patients.edit');
     Route::put('/masters/patients/{id}', [PatientController::class, 'update'])->name('masters.patients.update');

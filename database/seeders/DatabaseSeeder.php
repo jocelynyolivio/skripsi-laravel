@@ -14,6 +14,7 @@ use App\Models\DentalMaterial;
 use Illuminate\Database\Seeder;
 use App\Models\ScheduleTemplate;
 use App\Models\ProcedureMaterial;
+use App\Models\ProcedureType;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -207,92 +208,256 @@ class DatabaseSeeder extends Seeder
         DentalMaterial::create(['name' => 'Gigi Tiruan', 'description' => 'Gigi palsu', 'unit_type' => 'pcs']);
         DentalMaterial::create(['name' => 'Bubuk Gips', 'description' => 'Bahan cetakan', 'unit_type' => 'g']);
 
-        Procedure::create([
-            'name' => 'Tambal Gigi',
-            'description' => 'Prosedur untuk menambal gigi yang berlubang menggunakan bahan tambalan seperti resin komposit.',
-        ]);
-
-        Procedure::create([
-            'name' => 'Pembersihan Karang Gigi',
-            'description' => 'Prosedur untuk membersihkan karang gigi dan plak dengan scaler.',
-        ]);
-
-        Procedure::create([
-            'name' => 'Pencabutan Gigi',
-            'description' => 'Prosedur untuk mencabut gigi yang tidak bisa diselamatkan.',
-        ]);
-
-        $procedureMaterials = [
-            // Tambal Gigi
-            ['procedure_id' => 1, 'dental_material_id' => 1, 'quantity' => 2], // Resin Komposit
-            ['procedure_id' => 1, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
-            ['procedure_id' => 1, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
-            ['procedure_id' => 1, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (optional)
-
-            // Pencabutan Gigi
-            ['procedure_id' => 3, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
-            ['procedure_id' => 3, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
-            ['procedure_id' => 3, 'dental_material_id' => 1, 'quantity' => 1], // Resin Komposit (pelindung pasca pencabutan)
-
-            // Pembersihan Karang Gigi
-            ['procedure_id' => 2, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
-            ['procedure_id' => 2, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi (opsional)
-            ['procedure_id' => 2, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (kasus tertentu)
+        $types = [
+            ['name' => 'Diagnosa', 'description' => 'Pemeriksaan dan diagnosis kondisi gigi'],
+            ['name' => 'Penambalan Gigi', 'description' => 'Perawatan untuk gigi berlubang atau rusak ringan'],
+            ['name' => 'Perawatan Saluran Akar (PSA)', 'description' => 'Perawatan akar gigi yang terinfeksi atau rusak'],
+            ['name' => 'Gigi Palsu Cekat', 'description' => 'Pemasangan gigi tiruan yang permanen'],
+            ['name' => 'Bedah Mulut', 'description' => 'Prosedur pembedahan dalam rongga mulut'],
+            ['name' => 'Gigi Anak - Anak', 'description' => 'Perawatan gigi khusus anak-anak'],
+            ['name' => 'Gigi Tiruan Sebagian', 'description' => 'Pemasangan gigi palsu sebagian'],
+            ['name' => 'Perawatan Gusi', 'description' => 'Perawatan penyakit gusi dan jaringan penyangga'],
+            ['name' => 'Estetika', 'description' => 'Perawatan estetika dan kosmetik gigi'],
+            ['name' => 'Orthodonti', 'description' => 'Perawatan merapikan posisi gigi'],
+            ['name' => 'Post - Orthodonti', 'description' => 'Perawatan lanjutan setelah orthodonti'],
+            ['name' => 'Orthodonti dari DRG LUAR', 'description' => 'Perawatan orthodonti dari dokter luar'],
         ];
+        
+        foreach ($types as $type) {
+            ProcedureType::create($type);
+        }        
 
-        // Loop dan buat satu per satu dengan create()
-        foreach ($procedureMaterials as $data) {
-            ProcedureMaterial::create($data);
-        }
+        // Procedure::create([
+        //     'name' => 'Tambal Gigi',
+        //     'description' => 'Prosedur untuk menambal gigi yang berlubang menggunakan bahan tambalan seperti resin komposit.',
+        // ]);
+
+        // Procedure::create([
+        //     'name' => 'Pembersihan Karang Gigi',
+        //     'description' => 'Prosedur untuk membersihkan karang gigi dan plak dengan scaler.',
+        // ]);
+
+        // Procedure::create([
+        //     'name' => 'Pencabutan Gigi',
+        //     'description' => 'Prosedur untuk mencabut gigi yang tidak bisa diselamatkan.',
+        // ]);
+
+        // $procedureMaterials = [
+        //     // Tambal Gigi
+        //     ['procedure_id' => 1, 'dental_material_id' => 1, 'quantity' => 2], // Resin Komposit
+        //     ['procedure_id' => 1, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
+        //     ['procedure_id' => 1, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
+        //     ['procedure_id' => 1, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (optional)
+
+        //     // Pencabutan Gigi
+        //     ['procedure_id' => 3, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
+        //     ['procedure_id' => 3, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
+        //     ['procedure_id' => 3, 'dental_material_id' => 1, 'quantity' => 1], // Resin Komposit (pelindung pasca pencabutan)
+
+        //     // Pembersihan Karang Gigi
+        //     ['procedure_id' => 2, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
+        //     ['procedure_id' => 2, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi (opsional)
+        //     ['procedure_id' => 2, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (kasus tertentu)
+        // ];
+
+        // // Loop dan buat satu per satu dengan create()
+        // foreach ($procedureMaterials as $data) {
+        //     ProcedureMaterial::create($data);
+        // }
 
 
         // Tambal Gigi - Base Price
-        Pricelist::create([
-            'procedure_id' => 1,
-            'price' => 300000, // Harga dasar: 300.000
-            'is_promo' => false,
-            'effective_date' => Carbon::now()->subDays(5),
-        ]);
+        // Pricelist::create([
+        //     'procedure_id' => 1,
+        //     'price' => 300000, // Harga dasar: 300.000
+        //     'is_promo' => false,
+        //     'effective_date' => Carbon::now()->subDays(5),
+        // ]);
 
-        // Tambal Gigi - Promo Price
-        Pricelist::create([
-            'procedure_id' => 1,
-            'price' => 200000, // Harga promosi: 200.000
-            'is_promo' => true,
-            'effective_date' => Carbon::now()->subDays(2),
-        ]);
+        // // Tambal Gigi - Promo Price
+        // Pricelist::create([
+        //     'procedure_id' => 1,
+        //     'price' => 200000, // Harga promosi: 200.000
+        //     'is_promo' => true,
+        //     'effective_date' => Carbon::now()->subDays(2),
+        // ]);
 
-        // Pembersihan Karang Gigi - Base Price
-        Pricelist::create([
-            'procedure_id' => 2,
-            'price' => 400000, // Harga dasar: 400.000
-            'is_promo' => false,
-            'effective_date' => Carbon::now()->subDays(10),
-        ]);
+        // // Pembersihan Karang Gigi - Base Price
+        // Pricelist::create([
+        //     'procedure_id' => 2,
+        //     'price' => 400000, // Harga dasar: 400.000
+        //     'is_promo' => false,
+        //     'effective_date' => Carbon::now()->subDays(10),
+        // ]);
 
-        // Pembersihan Karang Gigi - Promo Price
-        Pricelist::create([
-            'procedure_id' => 2,
-            'price' => 300000, // Harga promosi: 300.000
-            'is_promo' => true,
-            'effective_date' => Carbon::now()->subDays(3),
-        ]);
+        // // Pembersihan Karang Gigi - Promo Price
+        // Pricelist::create([
+        //     'procedure_id' => 2,
+        //     'price' => 300000, // Harga promosi: 300.000
+        //     'is_promo' => true,
+        //     'effective_date' => Carbon::now()->subDays(3),
+        // ]);
 
-        // Pencabutan Gigi - Base Price
-        Pricelist::create([
-            'procedure_id' => 3,
-            'price' => 500000, // Harga dasar: 500.000
-            'is_promo' => false,
-            'effective_date' => Carbon::now()->subDays(7),
-        ]);
+        // // Pencabutan Gigi - Base Price
+        // Pricelist::create([
+        //     'procedure_id' => 3,
+        //     'price' => 500000, // Harga dasar: 500.000
+        //     'is_promo' => false,
+        //     'effective_date' => Carbon::now()->subDays(7),
+        // ]);
 
-        // Pencabutan Gigi - Promo Price
-        Pricelist::create([
-            'procedure_id' => 3,
-            'price' => 350000, // Harga promosi: 350.000
-            'is_promo' => true,
-            'effective_date' => Carbon::now()->subDays(1),
-        ]);
+        // // Pencabutan Gigi - Promo Price
+        // Pricelist::create([
+        //     'procedure_id' => 3,
+        //     'price' => 350000, // Harga promosi: 350.000
+        //     'is_promo' => true,
+        //     'effective_date' => Carbon::now()->subDays(1),
+        // ]);
+
+        $procedures = [
+            ['item_code' => '01A', 'name' => 'Janji Temu', 'procedure_type_id' => 1],
+            ['item_code' => '01B', 'name' => 'Konsultasi', 'procedure_type_id' => 1],
+            ['item_code' => '01C', 'name' => 'Tambahan Kategori 1', 'procedure_type_id' => 1],
+            ['item_code' => '01D', 'name' => 'Tambahan Kategori 2', 'procedure_type_id' => 1],
+            ['item_code' => '01E', 'name' => 'Tambahan Kategori 3', 'procedure_type_id' => 1],
+            
+            ['item_code' => '02A', 'name' => 'Tambal Estetis gigi depan (kecil)', 'procedure_type_id' => 2],
+            ['item_code' => '02B', 'name' => 'Tambal Estetis gigi depan (besar)', 'procedure_type_id' => 2],
+            ['item_code' => '02C', 'name' => 'Tambal Estetis gigi belakang (class I)', 'procedure_type_id' => 2],
+            ['item_code' => '02D', 'name' => 'Tambal Estetis gigi belakang (class II)', 'procedure_type_id' => 2],
+            ['item_code' => '02E', 'name' => 'Aplikasi base liner', 'procedure_type_id' => 2],
+            ['item_code' => '02F', 'name' => 'Pulp capping', 'procedure_type_id' => 2],
+            ['item_code' => '02G', 'name' => 'Fisure sealant', 'procedure_type_id' => 2],
+            ['item_code' => '02H', 'name' => 'Tambalan sementara', 'procedure_type_id' => 2],
+            ['item_code' => '02I', 'name' => 'Bongkar tambalan', 'procedure_type_id' => 2],
+            ['item_code' => '02J', 'name' => 'Occlusal Adjustment', 'procedure_type_id' => 2],
+            ['item_code' => '02K', 'name' => 'Inlay/Onlay Porcelain', 'procedure_type_id' => 2],
+            
+            ['item_code' => '03A', 'name' => 'Devitalisasi', 'procedure_type_id' => 3],
+            ['item_code' => '03B', 'name' => 'Medikasi', 'procedure_type_id' => 3],
+            ['item_code' => '03C', 'name' => '1 saluran akar (sampai dengan pengisian)', 'procedure_type_id' => 3],
+            ['item_code' => '03D', 'name' => '2 saluran akar (sampai dengan pengisian)', 'procedure_type_id' => 3],
+            ['item_code' => '03E', 'name' => '3 saluran akar (sampai dengan pengisian)', 'procedure_type_id' => 3],
+            ['item_code' => '03F', 'name' => '4 atau lebih saluran akar', 'procedure_type_id' => 3],
+            ['item_code' => '03G', 'name' => 'Metal alloy Post and core', 'procedure_type_id' => 3],
+            ['item_code' => '03H', 'name' => 'Fiber Post and core', 'procedure_type_id' => 3],
+            ['item_code' => '03I', 'name' => 'Bongkar pengisian', 'procedure_type_id' => 3],
+            ['item_code' => '03J', 'name' => 'Mumifikasi', 'procedure_type_id' => 3 ],
+            
+            ['item_code' => '04A', 'name' => 'Bongkar crown','procedure_type_id' => 4],
+            ['item_code' => '04B', 'name' => 'Full metal Crown','procedure_type_id' => 4],
+            ['item_code' => '04C', 'name' => 'PFM Crown','procedure_type_id' => 4],
+            ['item_code' => '04D', 'name' => 'Premium lab composite Crown','procedure_type_id' => 4],
+            ['item_code' => '04E', 'name' => 'E-max / Zirconia Crown','procedure_type_id' => 4],
+            ['item_code' => '04F', 'name' => 'Provisoris','procedure_type_id' => 4],
+            ['item_code' => '04G', 'name' => 'Cetak alginat','procedure_type_id' => 4],
+            ['item_code' => '04H', 'name' => 'Cetak PVS','procedure_type_id' => 4],
+            ['item_code' => '04I', 'name' => 'Re-sementasi','procedure_type_id' => 4],
+            ['item_code' => '04J', 'name' => 'Wax up per gigi','procedure_type_id' => 4],
+            
+            ['item_code' => '05A', 'name' => 'Cabut gigi depan','procedure_type_id' => 5],
+            ['item_code' => '05B', 'name' => 'Cabut gigi belakang','procedure_type_id' => 5],
+            ['item_code' => '05C', 'name' => 'Cabut komplikasi depan atau belakang','procedure_type_id' => 5],
+            ['item_code' => '05D', 'name' => 'Penjahitan','procedure_type_id' => 5],
+            ['item_code' => '05E', 'name' => 'Impaksi simple','procedure_type_id' => 5],
+            ['item_code' => '05F', 'name' => 'Impaksi kompleks','procedure_type_id' => 5],
+            ['item_code' => '05G', 'name' => 'Kuretase per gigi','procedure_type_id' => 5],
+            ['item_code' => '05H', 'name' => 'Spongostan','procedure_type_id' => 5],
+            ['item_code' => '05I', 'name' => 'Eksisi','procedure_type_id' => 5],
+            ['item_code' => '05J', 'name' => 'Lepas Jahitan','procedure_type_id' => 5],
+            
+            ['item_code' => '06A', 'name' => 'Cabut non injeksi','procedure_type_id' => 6],
+            ['item_code' => '06B', 'name' => 'Cabut dengan injeksi','procedure_type_id' => 6],
+            ['item_code' => '06C', 'name' => 'Penambalan dengan GIC','procedure_type_id' => 6],
+            ['item_code' => '06D', 'name' => 'Topikal aplikasi fluor 1 mulut','procedure_type_id' => 6],
+            ['item_code' => '06E', 'name' => 'Perawatan saraf anak, hingga selesai','procedure_type_id' => 6],
+            
+            ['item_code' => '07A', 'name' => 'Acrylic (Frame saja)','procedure_type_id' => 7],
+            ['item_code' => '07B', 'name' => 'Flexible with Valplast/ Thermosens (Frame saja)','procedure_type_id' => 7],
+            ['item_code' => '07C', 'name' => 'Metal Alloy frame kombinasi Acrylic (Frame saja)','procedure_type_id' => 7],
+            ['item_code' => '07D', 'name' => 'Rebasing recountour/repair','procedure_type_id' => 7],
+            ['item_code' => '07E', 'name' => 'Tambahan per gigi acrylic','procedure_type_id' => 7],
+            ['item_code' => '07F', 'name' => 'Gigi tiruan lengkap per rahang komplit','procedure_type_id' => 7],
+            ['item_code' => '07G', 'name' => 'Tambahan per gigi valplast','procedure_type_id' => 7],
+            ['item_code' => '07H', 'name' => 'Tambahan per gigi metal frame','procedure_type_id' => 7],
+            
+            ['item_code' => '08A', 'name' => 'Scaling Grade 1','procedure_type_id' => 8],
+            ['item_code' => '08B', 'name' => 'Scaling Grade 2','procedure_type_id' => 8],
+            ['item_code' => '08C', 'name' => 'Scaling Grade 3','procedure_type_id' => 8],
+            ['item_code' => '08D', 'name' => 'Stain removal dan oral profilaksis','procedure_type_id' => 8],
+            ['item_code' => '08E', 'name' => 'Root planning/curetage (1 regio)','procedure_type_id' => 8],
+            ['item_code' => '08F', 'name' => 'Splinting fiber (3-6 unit)','procedure_type_id' => 8],
+            ['item_code' => '08G', 'name' => 'Medikasi periodontal per gigi','procedure_type_id' => 8],
+            ['item_code' => '08H', 'name' => 'Medikasi 1 regio','procedure_type_id' => 8],
+            
+            ['item_code' => '09A', 'name' => 'Whitening in office (2x aplikasi)','procedure_type_id' => 9],
+            ['item_code' => '09B', 'name' => 'Whitening in office (4x aplikasi)','procedure_type_id' => 9],
+            ['item_code' => '09C', 'name' => 'Home whitening per rahang','procedure_type_id' => 9],
+            ['item_code' => '09D', 'name' => 'Diamond','procedure_type_id' => 9],
+            ['item_code' => '09E', 'name' => 'Veneer komposit per gigi','procedure_type_id' => 9],
+            ['item_code' => '09F', 'name' => 'Veneer porcelain per gigi','procedure_type_id' => 9],
+            ['item_code' => '09G', 'name' => 'Sementasi dengan resin semen','procedure_type_id' => 9],
+            ['item_code' => '09H', 'name' => 'Internal Bleaching per gigi','procedure_type_id' => 9],
+            
+            ['item_code' => '10A', 'name' => 'Pemasangan Metal Bracket komplit','procedure_type_id' => 10],
+            ['item_code' => '10B', 'name' => 'Metal 1 rahang','procedure_type_id' => 10],
+            ['item_code' => '10C', 'name' => 'Pemasangan Metal Bracket premium komplit','procedure_type_id' => 10],
+            ['item_code' => '10D', 'name' => 'Ceramic','procedure_type_id' => 10],
+            ['item_code' => '10E', 'name' => 'Ceramic 1 rahang','procedure_type_id' => 10],
+            ['item_code' => '10F', 'name' => 'Ceramic premium','procedure_type_id' => 10],
+            ['item_code' => '10G', 'name' => 'Ceramic premium 1 rahang','procedure_type_id' => 10],
+            ['item_code' => '10H', 'name' => 'Self ligating','procedure_type_id' => 10],
+            ['item_code' => '10I', 'name' => 'Self ligating 1 rahang','procedure_type_id' => 10],
+            ['item_code' => '10J', 'name' => 'Piranti ortho lepasan per rahang','procedure_type_id' => 10],
+            ['item_code' => '10K', 'name' => 'Slicing / rahang','procedure_type_id' => 10],
+            ['item_code' => '10L', 'name' => 'Kontrol (RA, RB)','procedure_type_id' => 10],
+            ['item_code' => '10M', 'name' => 'Ganti Kawat NiTi (per rahang)','procedure_type_id' => 10],
+            ['item_code' => '10N', 'name' => 'Ganti Kawat Thermal (per rahang)','procedure_type_id' => 10],
+            ['item_code' => '10O', 'name' => 'Reverse wire per rahang','procedure_type_id' => 10],
+            ['item_code' => '10P', 'name' => 'Pasang button, crimpable hook, ocs','procedure_type_id' => 10],
+            ['item_code' => '10Q', 'name' => 'Peninggian gigit per gigi','procedure_type_id' => 10],
+            ['item_code' => '10R', 'name' => 'Pasang molar band per gigi','procedure_type_id' => 10],
+            ['item_code' => '10S', 'name' => 'Pasang attachment per gigi','procedure_type_id' => 10],
+            ['item_code' => '10T', 'name' => 'Perekatan kembali bracket lepas','procedure_type_id' => 10],
+            ['item_code' => '10U', 'name' => 'Penggantian braket hilang (Metal)','procedure_type_id' => 10],
+            ['item_code' => '10V', 'name' => 'Penggantian braket hilang (Ceramic)','procedure_type_id' => 10],
+            ['item_code' => '10W', 'name' => 'Penggantian braket hilang (Self Ligating)','procedure_type_id' => 10],
+            ['item_code' => '10X', 'name' => 'Night Guard','procedure_type_id' => 10],
+            ['item_code' => '10Y', 'name' => 'LMA','procedure_type_id' => 10],
+            ['item_code' => '10Y 01', 'name' => 'Myobrace','procedure_type_id' => 10],
+            ['item_code' => '10Z', 'name' => 'LMA (BR)','procedure_type_id' => 10],
+            
+            ['item_code' => '11A', 'name' => 'Retainer hawley (per rahang)','procedure_type_id' => 11],
+            ['item_code' => '11B', 'name' => 'Retainer invisible (per rahang)','procedure_type_id' => 11],
+            ['item_code' => '11C', 'name' => 'Fixed Retainer','procedure_type_id' => 11],
+            ['item_code' => '11D', 'name' => 'Lepas Behel dan scaling','procedure_type_id' => 11],
+            ['item_code' => '11E', 'name' => 'Orthokit','procedure_type_id' => 11],
+            
+            ['item_code' => '12A', 'name' => 'Kontrol (RA, RB)','procedure_type_id' => 12],
+            ['item_code' => '12B', 'name' => 'Ganti Kawat NiTi (per rahang)','procedure_type_id' => 12],
+            ['item_code' => '12C', 'name' => 'Ganti Kawat Thermal (per rahang)','procedure_type_id' => 12],
+            ['item_code' => '12D', 'name' => 'Reverse wire per rahang','procedure_type_id' => 12],
+            ['item_code' => '12E', 'name' => 'Pasang button, crimpable hook, ocs','procedure_type_id' => 12],
+            ['item_code' => '12F', 'name' => 'Peninggian gigit per gigi','procedure_type_id' => 12],
+            ['item_code' => '12G', 'name' => 'Pasang molar band per gigi','procedure_type_id' => 12],
+            ['item_code' => '12H', 'name' => 'Pasang attachment per gigi','procedure_type_id' => 12],
+            ['item_code' => '12I', 'name' => 'Perekatan kembali bracket lepas','procedure_type_id' => 12],
+            ['item_code' => '12J', 'name' => 'Penggantian braket hilang (Metal)','procedure_type_id' => 12],
+            ['item_code' => '12K', 'name' => 'Penggantian braket hilang (Ceramic)','procedure_type_id' => 12],
+            ['item_code' => '12L', 'name' => 'Penggantian braket hilang (Self Ligating)','procedure_type_id' => 12],
+            ['item_code' => '12M', 'name' => 'Lepas Behel dan scaling','procedure_type_id' => 12],
+            ['item_code' => '12N', 'name' => 'Analisa Kasus (sederhana)','procedure_type_id' => 12],
+            ['item_code' => '12O', 'name' => 'Analisa Kasus (kompleks)','procedure_type_id' => 12],
+        ];
+
+        foreach ($procedures as $procedure) {
+            Procedure::create([
+                'item_code' => $procedure['item_code'],
+                'name' => $procedure['name'],
+                'procedure_type_id' => $procedure['procedure_type_id'],
+                'description' => '', // You can add descriptions if needed
+            ]);
+        }
 
         // Bahan Baku
         Category::create([
