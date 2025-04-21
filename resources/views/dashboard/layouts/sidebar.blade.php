@@ -73,6 +73,12 @@
                         <span class="fs-6">Master Procedures</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/attendances') ? 'active' : '' }}" href="{{ route('dashboard.procedure_types.index') }}">
+                        <i class="bi bi-person-badge me-3 fs-5"></i>
+                        <span class="fs-6">Master Procedures Types</span>
+                    </a>
+                </li>
             </ul>
 
             <!-- Divider -->
