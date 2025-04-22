@@ -18,7 +18,7 @@
             <strong>Medical Record Details</strong>
         </div>
         <div class="card-body">
-            <p><strong>Patient:</strong> {{ $medicalRecord->patient->name }}</p>
+            <p><strong>Patient:</strong> {{ $medicalRecord->patient->fname }} {{ $medicalRecord->patient->mname }} {{ $medicalRecord->patient->lname }}</p>
             <p><strong>Doctor:</strong> {{ $medicalRecord->doctor->name }}</p>
             <p><strong>Reservation Date:</strong> {{ $medicalRecord->tanggal_reservasi }}</p>
         </div>

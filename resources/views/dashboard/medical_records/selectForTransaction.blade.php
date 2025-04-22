@@ -18,7 +18,7 @@
             @foreach($medicalRecords as $medicalRecord)
             <tr>
                 <td>{{ $medicalRecord->id }}</td>
-                <td>{{ $medicalRecord->patient->name }}</td>
+                <td>{{ $medicalRecord->patient->fname }} {{ $medicalRecord->patient->mname }} {{ $medicalRecord->patient->lname }}</td>
                 <td>{{ $medicalRecord->doctor->name }}</td>
                 <td>{{ $medicalRecord->tanggal_reservasi }}</td>
                 <td>

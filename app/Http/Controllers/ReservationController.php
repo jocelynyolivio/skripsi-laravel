@@ -49,7 +49,7 @@ class ReservationController extends Controller
         $phoneNumber = $reservation->patient->nomor_telepon;
 
         // Pesan template
-        $message = "Halo {$reservation->patient->name}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
+        $message = "Halo {$reservation->patient->fname} {$reservation->patient->mname} {$reservation->patient->lname}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
 
         // Redirect ke wa.me dengan pesan template
         return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));

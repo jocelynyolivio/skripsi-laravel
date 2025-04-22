@@ -27,7 +27,7 @@
             <select name="patient_id" id="patient_id" class="form-select" required>
                 <option value="" disabled selected>Select Patient</option>
                 @foreach($patients as $patient)
-                    <option value="{{ $patient->id }}">{{ $patient->name }} ({{ $patient->email }})</option>
+                    <option value="{{ $patient->id }}">{{ $patient->fname }} {{ $patient->mname }} {{ $patient->lname }} ({{ $patient->email }})</option>
                 @endforeach
             </select>
         </div>

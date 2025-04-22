@@ -23,7 +23,7 @@
         <tbody>
             @foreach($patients as $patient)
             <tr>
-                <td>{{ $patient->name }}</td>
+                <td>{{ $patient->fname }} {{ $patient->mname }} {{ $patient->lname }}</td>
                 <td>
                     <a href="{{ route('dashboard.masters.patients.birthday.generateVoucherBirthday', $patient->id) }}" class="btn btn-warning btn-sm">Generate Voucher Birthday</a>
                     <a href="{{ route('dashboard.masters.patients.birthday.sendVoucherBirthday', $patient->id) }}" class="btn btn-success btn-sm">Send Voucher Birthday via Whatsapp</a>

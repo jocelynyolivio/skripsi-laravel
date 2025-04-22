@@ -1,11 +1,11 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Reservations', 'url' => route('dashboard.reservations.index')],
-            ['text' => 'Make Reservation']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Reservations', 'url' => route('dashboard.reservations.index')],
+['text' => 'Make Reservation']
+]
+])
 @endsection
 @section('container')
 <div class="container mt-5">
@@ -13,7 +13,7 @@
         <div class="card-header bg-primary text-white">
             <h3 class="mb-0">Make Reservations</h3>
         </div>
-        
+
         <div class="card-body">
             @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show">
@@ -29,15 +29,16 @@
                         <label for="patient" class="form-label">Select Patient</label>
                         <select id="patient" name="patient" class="form-select" required>
                             <option value="">-- Select a Patient --</option>
+                            
                         </select>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <label for="date" class="form-label">Select Date</label>
-                        <input type="date" id="date" name="date" class="form-control" 
-                               value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
+                        <input type="date" id="date" name="date" class="form-control"
+                            value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
                     </div>
-                    
+
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-search me-2"></i> Search Available Schedule
@@ -64,7 +65,7 @@
                 <input type="hidden" name="tanggal_reservasi" id="reservation_date">
                 <input type="hidden" name="jam_mulai" id="time_start">
                 <input type="hidden" name="jam_selesai" id="time_end">
-                
+
                 <div class="d-grid">
                     <button type="submit" class="btn btn-success btn-lg">
                         <i class="bi bi-calendar-check me-2"></i> Confirm Reservation
@@ -83,16 +84,16 @@
         padding: 8px 12px;
         font-size: 0.9rem;
     }
-    
+
     .schedule-badge:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    
+
     .doctor-row:hover {
         background-color: #f8f9fa;
     }
-    
+
     .selected-schedule {
         border-left: 4px solid #0d6efd;
         background-color: #f8f9fa;
@@ -100,55 +101,55 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
-    const patientSelect = document.getElementById('patient');
-    const reservationForm = document.getElementById('reservationForm');
-    const resultsDiv = document.getElementById('results');
-    const resultsClickedDiv = document.getElementById('resultsClicked');
-    let selectedSchedule = null;
+    document.addEventListener('DOMContentLoaded', async function() {
+        const patientSelect = document.getElementById('patient');
+        const reservationForm = document.getElementById('reservationForm');
+        const resultsDiv = document.getElementById('results');
+        const resultsClickedDiv = document.getElementById('resultsClicked');
+        let selectedSchedule = null;
 
-    // Fetch patients data
-    try {
-        const response = await fetch('/dashboard/schedules/get-patients');
-        const patients = await response.json();
+        // Fetch patients data
+        try {
+            const response = await fetch('/dashboard/schedules/get-patients');
+            const patients = await response.json();
 
-        patients.forEach(patient => {
-            const option = document.createElement('option');
-            option.value = patient.id;
-            option.textContent = patient.name;
-            patientSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error fetching patients:', error);
-        patientSelect.innerHTML = '<option value="">Error loading patients</option>';
-    }
-
-    // Handle form submission
-    document.getElementById('filterForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const date = document.getElementById('date').value;
-        const patientId = document.getElementById('patient').value;
-
-        if (!patientId) {
-            alert('Please select a patient first.');
-            return;
+            patients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = (patient.fname || '') + ' ' + (patient.mname || '') + ' ' + (patient.lname || '');
+                patientSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error fetching patients:', error);
+            patientSelect.innerHTML = '<option value="">Error loading patients</option>';
         }
 
-        try {
-            const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
-            const data = await response.json();
+        // Handle form submission
+        document.getElementById('filterForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-            if (data.doctors.length === 0) {
-                resultsDiv.innerHTML = `
+            const date = document.getElementById('date').value;
+            const patientId = document.getElementById('patient').value;
+
+            if (!patientId) {
+                alert('Please select a patient first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
+                const data = await response.json();
+
+                if (data.doctors.length === 0) {
+                    resultsDiv.innerHTML = `
                     <div class="alert alert-warning">
                         No available schedules found for ${data.date} (${data.day_of_week}).
                     </div>
                 `;
-                return;
-            }
+                    return;
+                }
 
-            resultsDiv.innerHTML = ` 
+                resultsDiv.innerHTML = ` 
                 <div class="card">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">Available Schedules for ${data.date} (${data.day_of_week})</h5>
@@ -192,47 +193,47 @@ document.addEventListener('DOMContentLoaded', async function() {
                 </div>
             `;
 
-        } catch (error) {
-            console.error('Error:', error);
-            resultsDiv.innerHTML = `
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = `
                 <div class="alert alert-danger">
                     Error loading schedule data. Please try again later.
                 </div>
             `;
-        }
-    });
+            }
+        });
 
-    // Handle schedule selection
-    resultsDiv.addEventListener('click', function(event) {
-        if (event.target.classList.contains('schedule-badge')) {
-            // Remove previous selection highlights
-            document.querySelectorAll('.schedule-badge').forEach(badge => {
-                badge.classList.remove('bg-success');
-                badge.classList.add('bg-primary');
-            });
-            
-            // Highlight selected badge
-            event.target.classList.remove('bg-primary');
-            event.target.classList.add('bg-success');
-            
-            // Get selected schedule data
-            selectedSchedule = {
-                time_start: event.target.dataset.timeStart,
-                time_end: event.target.dataset.timeEnd,
-                doctor_id: event.target.dataset.doctorId,
-                doctor_name: event.target.dataset.doctorName,
-                date: document.getElementById('date').value
-            };
+        // Handle schedule selection
+        resultsDiv.addEventListener('click', function(event) {
+            if (event.target.classList.contains('schedule-badge')) {
+                // Remove previous selection highlights
+                document.querySelectorAll('.schedule-badge').forEach(badge => {
+                    badge.classList.remove('bg-success');
+                    badge.classList.add('bg-primary');
+                });
 
-            // Set hidden form values
-            document.getElementById('patient_id').value = document.getElementById('patient').value;
-            document.getElementById('doctor_id').value = selectedSchedule.doctor_id;
-            document.getElementById('reservation_date').value = selectedSchedule.date;
-            document.getElementById('time_start').value = selectedSchedule.time_start;
-            document.getElementById('time_end').value = selectedSchedule.time_end;
+                // Highlight selected badge
+                event.target.classList.remove('bg-primary');
+                event.target.classList.add('bg-success');
 
-            // Show confirmation
-            resultsClickedDiv.innerHTML = `
+                // Get selected schedule data
+                selectedSchedule = {
+                    time_start: event.target.dataset.timeStart,
+                    time_end: event.target.dataset.timeEnd,
+                    doctor_id: event.target.dataset.doctorId,
+                    doctor_name: event.target.dataset.doctorName,
+                    date: document.getElementById('date').value
+                };
+
+                // Set hidden form values
+                document.getElementById('patient_id').value = document.getElementById('patient').value;
+                document.getElementById('doctor_id').value = selectedSchedule.doctor_id;
+                document.getElementById('reservation_date').value = selectedSchedule.date;
+                document.getElementById('time_start').value = selectedSchedule.time_start;
+                document.getElementById('time_end').value = selectedSchedule.time_end;
+
+                // Show confirmation
+                resultsClickedDiv.innerHTML = `
                 <div class="card border-success">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">Selected Appointment</h5>
@@ -252,13 +253,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                 </div>
             `;
 
-            // Show reservation form
-            reservationForm.style.display = 'block';
-            
-            // Scroll to confirmation
-            resultsClickedDiv.scrollIntoView({ behavior: 'smooth' });
-        }
+                // Show reservation form
+                reservationForm.style.display = 'block';
+
+                // Scroll to confirmation
+                resultsClickedDiv.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
     });
-});
 </script>
 @endsection

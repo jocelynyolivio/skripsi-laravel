@@ -14,12 +14,14 @@ class ScheduleController extends Controller
     {
         $templates = ScheduleTemplate::where('is_active', true)->get();
         $overrides = ScheduleOverride::all();
+        $patients = Patient::all();
 
         $schedules = $this->generateSchedules($templates, $overrides);
 
         return view('dashboard.schedules.index', [
             'title' => 'Schedule List',
             'schedules' => $schedules,
+            'patients' => $patients
         ]);
     }
 

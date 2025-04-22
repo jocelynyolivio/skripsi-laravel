@@ -29,7 +29,7 @@
                 <!-- Patient Info (readonly) -->
                 <div class="mb-3">
                     <label class="form-label">Patient</label>
-                    <input type="text" class="form-control" value="{{ $reservation->patient->name }}" readonly>
+                    <input type="text" class="form-control" value="{{ $reservation->patient->fname }} {{ $reservation->patient->mname }} {{ $reservation->patient->lname }}" readonly>
                 </div>
 
                 <!-- Doctor Info (readonly) -->
@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Doctor:</strong> {{ $reservation->doctor->name }}</p>
-                                    <p><strong>Patient:</strong> {{ $reservation->patient->name }}</p>
+                                    <p><strong>Patient:</strong> {{ $reservation->patient->fname }}</p>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Doctor:</strong> ${selectedSchedule.doctor_name}</p>
-                                <p><strong>Patient:</strong> {{ $reservation->patient->name }}</p>
+                                <p><strong>Patient:</strong> {{ $reservation->patient->fname }}</p>
                             </div>
                         </div>
                     </div>

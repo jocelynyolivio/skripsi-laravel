@@ -29,7 +29,7 @@
         <tbody>
             @foreach ($reservations as $index => $reservation)
             <tr>
-                <td>{{ $reservation->patient->name }}</td>
+                <td>{{ $reservation->patient->fname }} {{ $reservation->patient->mname }} {{ $reservation->patient->lname }}</td>
                 <td>{{ $reservation->doctor->name }}</td>
                 <td>{{ $reservation->tanggal_reservasi }}</td>
                 <td>{{ $reservation->jam_mulai }}</td>

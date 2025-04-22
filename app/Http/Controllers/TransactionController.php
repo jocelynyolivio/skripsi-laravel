@@ -98,8 +98,10 @@ class TransactionController extends Controller
     public function createWithoutMedicalRecord()
     {
         $vouchers = Patient::where('birthday_voucher_used', 0)
+            ->whereNotNull('birthday_voucher_code')
             ->select('birthday_voucher_code')
             ->get();
+
 
         $proceduresWithPrices = Procedure::all()->map(function ($procedure) {
             return [

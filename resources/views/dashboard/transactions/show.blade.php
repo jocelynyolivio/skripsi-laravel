@@ -23,7 +23,7 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="info-item">
-                                <strong>Patient:</strong> {{ $transaction->patient->name ?? '-' }}
+                                <strong>Patient:</strong> {{ $transaction->patient->fname}} {{ $transaction->patient->mname}} {{ $transaction->patient->lname}}
                             </div>
                             <div class="info-item">
                                 <strong>Admin:</strong> {{ $transaction->admin->name ?? '-' }}

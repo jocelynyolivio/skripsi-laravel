@@ -3,7 +3,7 @@
     @include('dashboard.layouts.breadcrumbs', [
         'customBreadcrumbs' => [
             ['text' => 'Master Patients', 'url' => route('dashboard.masters.patients')],
-            ['text' => 'Kondisi Gigi untuk '. $patient->name]
+            ['text' => 'Kondisi Gigi untuk '. $patient->fname]
         ]
     ])
 @endsection
@@ -11,7 +11,7 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0 text-center">KONDISI GIGI - {{ $patient->name }}</h4>
+            <h4 class="mb-0 text-center">KONDISI GIGI - {{ $patient->fname }} {{ $patient->mname }} {{ $patient->lname }}</h4>
         </div>
         
         <div class="card-body">

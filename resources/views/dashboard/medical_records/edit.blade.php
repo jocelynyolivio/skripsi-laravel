@@ -2,7 +2,7 @@
 
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h3 class="text-center">Medical Record for Patient: {{ $medicalRecord->patient->name }}</h3>
+    <h3 class="text-center">Medical Record for Patient: {{ $medicalRecord->patient->fname }} {{ $medicalRecord->patient->mname }} {{ $medicalRecord->patient->lname }}</h3>
     <h6 class="text-center">{{ $medicalRecord->tanggal_reservasi }}</h6>
 
     <form action="{{ route('dashboard.medical_records.update', ['patientId' => $patientId, 'recordId' => $medicalRecord->id]) }}" method="POST">
