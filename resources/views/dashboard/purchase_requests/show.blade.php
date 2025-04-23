@@ -1,11 +1,11 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Purchase Requests', 'url' => route('dashboard.purchase_requests.index')],
-            ['text' => 'Detail Purchase Request ' . $purchaseRequest->request_number]
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchase Requests', 'url' => route('dashboard.purchase_requests.index')],
+['text' => 'Detail Purchase Request ' . $purchaseRequest->request_number]
+]
+])
 @endsection
 @section('container')
 <div class="container mt-5">
@@ -25,6 +25,8 @@
                 <th>#</th>
                 <th>Material</th>
                 <th>Quantity</th>
+                <th>Average Usage</th>
+                <th>Last stock</th>
                 <th>Notes</th>
             </tr>
         </thead>
@@ -34,10 +36,17 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $detail->material->name }} ({{ $detail->material->unit_type }})</td>
                 <td>{{ $detail->quantity }}</td>
+                <td>
+                    {{ number_format($detail->material->averageUsage(), 2) }}
+                </td>
+                <td>
+                    {{ $detail->material->lastStock() }}
+                </td>
                 <td>{{ $detail->notes ?? '-' }}</td>
             </tr>
             @endforeach
         </tbody>
+
     </table>
     @if($purchaseRequest->status === 'approved')
     <a href="{{ route('dashboard.purchases.createFromRequest', $purchaseRequest->id) }}" class="btn btn-primary mt-3">
@@ -52,7 +61,7 @@
     <p>Last edited at: {{ $purchaseRequest->updated_at->format('d M Y H:i') }}</p>
 
     <p>Approved by: {{ $purchaseRequest->approver->name ?? 'Unknown' }}</p>
-  
+
 
     <a href="{{ route('dashboard.purchase_requests.index') }}" class="btn btn-secondary mt-3">← Back to List</a>
 </div>

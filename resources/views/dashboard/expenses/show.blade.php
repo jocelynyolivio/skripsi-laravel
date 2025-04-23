@@ -36,6 +36,9 @@
                             <div class="info-item">
                                 <strong>COA Out:</strong> {{ $expense->coaOut->name ?? '-' }}
                             </div>
+                            <div class="info-item">
+                                <strong>Payment Method:</strong> {{ $expense->payment_method ?? '-' }}
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-item">

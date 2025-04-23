@@ -74,7 +74,7 @@ class PurchaseRequestController extends Controller
      */
     public function show(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load('details.material', 'requester');
+        $purchaseRequest->load('details.material', 'requester', 'approver', 'editor');
         return view('dashboard.purchase_requests.show', compact('purchaseRequest'));
     }
 
@@ -115,6 +115,7 @@ class PurchaseRequestController extends Controller
         ]);
         
     }
+    
     
 
 

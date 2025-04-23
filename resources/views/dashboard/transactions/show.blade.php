@@ -17,6 +17,7 @@
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Transaction Details #{{ $transaction->id }}</h5>
+                        <h5 class="mb-0">{{ \Carbon\Carbon::parse($transaction->created_at)->format('d M Y') }}</h5>
                     </div>
                 </div>
                 <div class="card-body">
@@ -27,6 +28,9 @@
                             </div>
                             <div class="info-item">
                                 <strong>Admin:</strong> {{ $transaction->admin->name ?? '-' }}
+                            </div>
+                            <div class="info-item">
+                                <strong>Doctor:</strong> {{ $transaction->doctor->name ?? '-' }}
                             </div>
                             <div class="info-item">
                                 <strong>Payment Status:</strong> 
@@ -110,6 +114,7 @@
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-end">Amount</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Method</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Account</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Notes</th>
                                     </tr>
                                 </thead>
@@ -124,6 +129,9 @@
                                             </td>
                                             <td>
                                                 <p class="text-xs font-weight-bold mb-0">{{ ucfirst($payment->payment_method ?? '-') }}</p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">{{ ucfirst($payment->coa->name ?? '-') }}</p>
                                             </td>
                                             <td>
                                                 <p class="text-xs font-weight-bold mb-0">{{ $payment->notes ?? '-' }}</p>

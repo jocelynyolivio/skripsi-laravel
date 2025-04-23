@@ -349,6 +349,31 @@ class PurchaseController extends Controller
         'credit'           => 0,
     ]);
 
+    // Jika ada diskon, catat sebagai kredit ke akun diskon
+if ($request->discount > 0) {
+    $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
+
+    JournalDetail::create([
+        'journal_entry_id' => $journalEntry->id,
+        'coa_id'           => $purchaseDiscountAccount,
+        'debit'            => 0,
+        'credit'           => $request->discount,
+    ]);
+}
+
+// Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
+if ($request->ongkos_kirim > 0) {
+    $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
+
+    JournalDetail::create([
+        'journal_entry_id' => $journalEntry->id,
+        'coa_id'           => $shippingCostAccount,
+        'debit'            => $request->ongkos_kirim,
+        'credit'           => 0,
+    ]);
+}
+
+
     // Credit: Kas (jika ada pembayaran)
     if ($purchaseAmount > 0) {
         JournalDetail::create([
@@ -434,6 +459,7 @@ class PurchaseController extends Controller
                 'quantity_out' => $quantity,
                 'remaining_stock' => max(0, $oldStock - $quantity), // Kurangi stok
                 'average_price' => $oldAveragePrice, // Harga tetap
+                'type' => 'usage'
             ]);
         } else {
             // **Barang Masuk: Hitung Harga Rata-rata Baru**
@@ -449,6 +475,7 @@ class PurchaseController extends Controller
                 'quantity_in' => $quantity,
                 'remaining_stock' => $newStock,
                 'average_price' => $newAveragePrice, // Harga rata-rata baru
+                'type' => 'purchase'
             ]);
         }
     }

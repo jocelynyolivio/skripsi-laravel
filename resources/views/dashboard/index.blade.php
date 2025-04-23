@@ -62,6 +62,27 @@
         </div>
     </div>
 </div>
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Rekap Pasien per Procedure Type ({{ now()->format('F Y') }})</h5>
+    </div>
+    <div class="card-body">
+        <table id="tableTipeProsedur" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Procedure Type</th>
+                    <th>Jumlah Pasien</th>
+                    <th>Jumlah Prosedur</th>
+                    <th>Nomor Medical Record</th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+
 @endif
 
 
@@ -120,13 +141,13 @@
                     <h5 class="card-title">Low Stock Materials</h5>
                     <p class="card-text display-5 fw-bold">{{ $lowStockItems->count() }} items</p>
                     @if($lowStockItems->count() > 0)
-                        <ul class="mb-0">
-                            @foreach($lowStockItems as $item)
-                                <li>{{ $item->dentalMaterial->name ?? 'Unknown Material' }}</li>
-                            @endforeach
-                        </ul>
+                    <ul class="mb-0">
+                        @foreach($lowStockItems as $item)
+                        <li>{{ $item->dentalMaterial->name ?? 'Unknown Material' }}</li>
+                        @endforeach
+                    </ul>
                     @else
-                        <p class="text-muted">All stock is safe</p>
+                    <p class="text-muted">All stock is safe</p>
                     @endif
                 </div>
             </div>
@@ -327,6 +348,21 @@
                     success: function(response) {
                         $('#jumlahPasienHariIni').text(response.jumlahPasienHariIni);
                         $('#pendapatanHariIni').text('Rp ' + response.pendapatanHariIni);
+
+                        // === TABEL TIPE PROSEDUR ===
+                        let table = $('#tableTipeProsedur').DataTable();
+                        table.clear().draw();
+
+                        response.tipeProsedur.forEach(function(item) {
+                            table.row.add([
+                                item.procedure_type,
+                                item.total_patients,
+                                item.total_procedures, // ✅ Tambahan
+                                item.medical_record_refs
+                            ]).draw(false);
+                        });
+
+
 
                         const labels = response.kunjunganBulanan.map(item => item.date);
                         const data = response.kunjunganBulanan.map(item => item.jumlah);
@@ -610,6 +646,16 @@
                 window.location.href = url;
             }
         });
+    });
+
+    $('#tableTipeProsedur').DataTable({
+        paging: true,
+        searching: false,
+        info: false,
+        ordering: false,
+        language: {
+            emptyTable: "Tidak ada data untuk bulan ini"
+        }
     });
 </script>
 

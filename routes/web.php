@@ -249,7 +249,12 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
     });
 
+    // Route::get('/stock_cards', [StockCardController::class, 'index'])->name('stock_cards.index');
+
+    Route::get('/stock_cards/adjust', [StockCardController::class, 'adjustForm'])->name('stock_cards.adjust');
+    Route::post('/stock_cards/adjust', [StockCardController::class, 'storeAdjustment'])->name('stock_cards.adjust.store');
     Route::resource('/stock_cards', StockCardController::class);
+
 
     Route::resource('/purchase_requests', PurchaseRequestController::class);
     Route::post('/purchase_requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase_requests.approve');
@@ -279,6 +284,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::post('/transactions/store-without-medical-record', [TransactionController::class, 'storeWithoutMedicalRecord'])->name('transactions.storeWithoutMedicalRecord');
+
+    Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
 
     Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
     Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');

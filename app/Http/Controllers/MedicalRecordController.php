@@ -225,6 +225,7 @@ class MedicalRecordController extends Controller
                     // Menambahkan bahan hanya sekali, jika belum ada dalam array $materials
                     $materials[$material->id] = [
                         'name' => $material->name,
+                        'unit_type' => $material->unit_type,
                         'stock_quantity' => $stock ? $stock->remaining_stock : 0, // Pakai stok terbaru
                         'average_price' => $stock ? $stock->average_price : 0, // Pakai harga rata-rata terbaru
                         'quantity' => $material->pivot->quantity, // Jumlah bahan yang diperlukan
@@ -362,6 +363,7 @@ class MedicalRecordController extends Controller
                     'quantity_out' => $quantity,
                     'remaining_stock' => $newStock,
                     'average_price' => $latestStock->average_price, // Harga tetap sama
+                    'type' => 'usage'
                 ]);
 
                 // dd('saved');

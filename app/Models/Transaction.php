@@ -34,6 +34,11 @@ class Transaction extends Model
         return $this->belongsTo(User::class, 'admin_id');
     }
 
+    public function doctor()
+    {
+        return $this->belongsTo(User::class, 'doctor_id');
+    }
+
     // Relasi ke Rekam Medis (jika transaksi terkait rekam medis)
     public function medicalRecord()
     {

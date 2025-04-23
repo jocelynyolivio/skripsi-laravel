@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Dina', 'email' => 'dina@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
             ['name' => 'Radin', 'email' => 'radin@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
             ['name' => 'Sergio', 'email' => 'sergio@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'Ayu', 'email' => 'ayu@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
 
         ];
         foreach ($users as $user) {
@@ -170,15 +171,54 @@ class DatabaseSeeder extends Seeder
             Patient::create($data);
         }
 
-        ScheduleTemplate::create([
-            'doctor_id' => 23,
-            'day_of_week' => 'Monday',
-            'start_time' => '10:00:00',
-            'end_time' => '17:00:00',
-            'is_active' => true,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+        // ScheduleTemplate::create([
+        //     'doctor_id' => 23,
+        //     'day_of_week' => 'Monday',
+        //     'start_time' => '10:00:00',
+        //     'end_time' => '17:00:00',
+        //     'is_active' => true,
+        //     'created_at' => Carbon::now(),
+        //     'updated_at' => Carbon::now(),
+        // ]);
+
+        $schedules = [
+            // SENIN
+            ['doctor_id' => 10, 'day' => 'Monday', 'start' => '08:00:00', 'end' => '14:00:00'],
+            ['doctor_id' => 9, 'day' => 'Monday', 'start' => '14:00:00', 'end' => '20:00:00'],
+        
+            // SELASA
+            ['doctor_id' => 22, 'day' => 'Tuesday', 'start' => '08:00:00', 'end' => '14:00:00'],
+            ['doctor_id' => 7,  'day' => 'Tuesday', 'start' => '14:00:00', 'end' => '20:00:00'],
+        
+            // RABU
+            ['doctor_id' => 10, 'day' => 'Wednesday', 'start' => '08:00:00', 'end' => '14:00:00'],
+            ['doctor_id' => 9,  'day' => 'Wednesday', 'start' => '14:00:00', 'end' => '20:00:00'],
+        
+            // KAMIS
+            ['doctor_id' => 8,  'day' => 'Thursday', 'start' => '08:00:00', 'end' => '14:00:00'],
+            ['doctor_id' => 10, 'day' => 'Thursday', 'start' => '14:00:00', 'end' => '20:00:00'],
+        
+            // JUMAT
+            ['doctor_id' => 9,  'day' => 'Friday', 'start' => '08:00:00', 'end' => '14:00:00'],
+            ['doctor_id' => 10, 'day' => 'Friday', 'start' => '14:00:00', 'end' => '20:00:00'],
+        
+            // SABTU
+            ['doctor_id' => 8,  'day' => 'Saturday', 'start' => '08:00:00', 'end' => '13:00:00'],
+            ['doctor_id' => 22, 'day' => 'Saturday', 'start' => '14:00:00', 'end' => '20:00:00'],
+        
+            // MINGGU
+            ['doctor_id' => 22, 'day' => 'Sunday', 'start' => '11:00:00', 'end' => '17:00:00'],
+        ];
+        
+        foreach ($schedules as $s) {
+            ScheduleTemplate::create([
+                'doctor_id' => $s['doctor_id'],
+                'day_of_week' => $s['day'],
+                'start_time' => $s['start'],
+                'end_time' => $s['end'],
+                'is_active' => true,
+            ]);
+        }
 
         DentalMaterial::create([
             'name' => 'Resin Komposit',
@@ -611,6 +651,8 @@ class DatabaseSeeder extends Seeder
             ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
             ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
             ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense'],
+            ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'expense'], // Nilainya negatif, contra expenses
+            ['code' => '5-10013', 'name' => 'Beban Pengiriman Pembelian', 'type' => 'expense'],
             // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
         ];
 

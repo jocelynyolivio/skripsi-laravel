@@ -44,7 +44,7 @@
 
         <div class="form-group">
                 <label for="voucher">Vouchers :</label>
-                <select class="form-control" id="voucher" name="voucher" required>
+                <select class="form-control" id="voucher" name="voucher">
                     <option value="">-- Pilih Voucher --</option>
                     @foreach ($vouchers as $voucher)
                     <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
@@ -68,7 +68,7 @@
 
             <div class="form-group">
                 <label for="coa_id">Setor Ke (Akun Kas/Bank)</label>
-                <select class="form-control" id="coa_id" name="coa_id" required>
+                <select class="form-control" id="coa_id" name="payments[0][coa_id]" required>
                     <option value="">-- Pilih Akun Kas/Bank --</option>
                     @foreach ($cashAccounts as $account)
                     <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>

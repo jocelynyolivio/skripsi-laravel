@@ -28,6 +28,7 @@
                                 <tr>
                                     <th>Material Name</th>
                                     <th>Quantity</th>
+                                    <th>Unit</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -36,6 +37,7 @@
                                     <tr>
                                         <td>{{ $material->dentalMaterial->name }}</td>
                                         <td>{{ $material->quantity }}</td>
+                                        <td>{{ $material->dentalMaterial->unit_type }}</td>
                                         <td>
                                             <a href="{{ route('dashboard.procedure_materials.edit', $material->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                             <form action="{{ route('dashboard.procedure_materials.destroy', $material->id) }}" method="POST" style="display:inline;" class="delete-form">

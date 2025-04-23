@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
 use App\Models\PurchaseRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -54,6 +55,23 @@ class DashboardController extends Controller
                 ->join('users', 'transactions.doctor_id', '=', 'users.id')
                 ->groupBy('transactions.doctor_id', 'users.name')
                 ->get();
+
+            $today = now();
+            $bulanIni = $today->format('Y-m');
+
+            $data['tipeProsedur'] = DB::table('medical_record_procedure as mrp')
+                ->join('medical_records as mr', 'mr.id', '=', 'mrp.medical_record_id')
+                ->join('procedures as p', 'p.id', '=', 'mrp.procedure_id')
+                ->join('procedure_types as pt', 'pt.id', '=', 'p.procedure_type_id')
+                ->whereRaw("DATE_FORMAT(mr.tanggal_reservasi, '%Y-%m') = ?", [$bulanIni])
+                ->select(
+                    'pt.name as procedure_type',
+                    DB::raw('COUNT(DISTINCT mr.patient_id) as total_patients'),
+                    DB::raw('COUNT(mrp.id) as total_procedures'), // ✅ Tambahan
+                    DB::raw('GROUP_CONCAT(DISTINCT mr.id ORDER BY mr.id ASC SEPARATOR ", ") as medical_record_refs')
+                )
+                ->groupBy('pt.id', 'pt.name')
+                ->get();
         } elseif ($role === 'admin') {
             $data['pasienAkanDatang'] = MedicalRecord::whereBetween('tanggal_reservasi', [$today, $today->copy()->endOfWeek()])->count();
 
@@ -81,7 +99,7 @@ class DashboardController extends Controller
                     return StockCard::with('dentalMaterial')->find($item->id);
                 });
 
-                $data['performaDokter'] = Transaction::selectRaw('
+            $data['performaDokter'] = Transaction::selectRaw('
             transactions.doctor_id,
             users.name as doctor_name,
             SUM(transactions.total_amount) as total_amount
@@ -101,7 +119,7 @@ class DashboardController extends Controller
                 ->orderBy('tanggal_reservasi', 'asc')
                 ->get();
 
-                $data['performaDokter'] = Transaction::selectRaw('
+            $data['performaDokter'] = Transaction::selectRaw('
             transactions.doctor_id,
             users.name as doctor_name,
             SUM(transactions.total_amount) as total_amount

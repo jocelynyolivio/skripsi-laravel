@@ -7,6 +7,7 @@ use App\Models\JournalEntry;
 use Illuminate\Http\Request;
 use App\Models\JournalDetail;
 use App\Models\ChartOfAccount;
+use App\Models\Supplier;
 use Illuminate\Support\Facades\Auth;
 
 class ExpenseController extends Controller
@@ -15,17 +16,22 @@ class ExpenseController extends Controller
     {
         $expenses = Expense::with(['coaIn', 'coaOut', 'admin'])->latest()->get();
 
+
         return view('dashboard.expenses.index', compact('expenses'));
     }
 
     public function create()
     {
         $coa = ChartOfAccount::all();
-        return view('dashboard.expenses.create', compact('coa'));
+        $suppliers = Supplier::all();
+
+        return view('dashboard.expenses.create', compact('coa','suppliers'));
     }
 
     public function store(Request $request)
     {
+
+        try{
         $request->validate([
             'expense_date' => 'required|date',
             'description' => 'required|string|max:255',
@@ -33,7 +39,12 @@ class ExpenseController extends Controller
             'coa_out' => 'required|exists:chart_of_accounts,id',
             'coa_in' => 'required|exists:chart_of_accounts,id',
             'reference_number' => 'nullable|string|max:50',
+            'supplier_id' => 'required|numeric',
+            'payment_method' => 'required'
         ]);
+
+        // dd($request);
+
         $referenceNumber = 'EXP-' . strtoupper(uniqid());
 
 
@@ -46,6 +57,8 @@ class ExpenseController extends Controller
             'coa_in' => $request->coa_in,
             'reference_number' => $referenceNumber,
             $request->reference_number,
+            'supplier_id' => $request->supplier_id,
+            'payment_method' => $request->payment_method
         ]);
 
         // Simpan Journal Entry
@@ -72,29 +85,46 @@ class ExpenseController extends Controller
         ]);
 
         return redirect()->route('dashboard.expenses.index')->with('success', 'Expense recorded successfully!');
+    } catch (\Exception $e) {
+        dd($e);
+        return redirect()->back()->with('error', 'Gagal memuat laporan: ' . $e->getMessage());
     }
+}
 
-    public function edit(Expense $expense)
-    {
-        $coa = ChartOfAccount::all();
-        return view('dashboard.expenses.edit', compact('expense', 'coa'));
-    }
+public function edit(Expense $expense)
+{
+    $coa = ChartOfAccount::all();
+    $suppliers = Supplier::all();
 
-    public function update(Request $request, Expense $expense)
-    {
-        $request->validate([
-            'expense_date' => 'required|date',
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'coa_out' => 'required|exists:chart_of_accounts,id',
-            'coa_in' => 'required|exists:chart_of_accounts,id',
-            'reference_number' => 'nullable|string|max:50',
-        ]);
+    return view('dashboard.expenses.edit', compact('expense', 'coa', 'suppliers'));
+}
 
-        $expense->update($request->all());
+public function update(Request $request, Expense $expense)
+{
+    $request->validate([
+        'expense_date' => 'required|date',
+        'description' => 'required|string|max:255',
+        'amount' => 'required|numeric|min:0',
+        'coa_out' => 'required|exists:chart_of_accounts,id',
+        'coa_in' => 'required|exists:chart_of_accounts,id',
+        'supplier_id' => 'nullable|exists:suppliers,id',
+        'payment_method' => 'required|string|max:100',
+        'reference_number' => 'nullable|string|max:50',
+    ]);
 
-        return redirect()->route('dashboard.expenses.index')->with('success', 'Expense updated successfully!');
-    }
+    $expense->update([
+        'expense_date' => $request->expense_date,
+        'description' => $request->description,
+        'amount' => $request->amount,
+        'coa_out' => $request->coa_out,
+        'coa_in' => $request->coa_in,
+        'supplier_id' => $request->supplier_id,
+        'payment_method' => $request->payment_method,
+        'reference_number' => $request->reference_number,
+    ]);
+
+    return redirect()->route('dashboard.expenses.index')->with('success', 'Expense updated successfully!');
+}
 
     // public function destroy(Expense $expense)
     // {
@@ -126,12 +156,13 @@ class ExpenseController extends Controller
     }
 
     public function duplicate(Expense $expense)
-    {
-        return view('dashboard.expenses.create', [
-            'coa' => ChartOfAccount::all(),
-            'expense' => $expense,
-        ]);
-    }
+{
+    return view('dashboard.expenses.create', [
+        'coa' => ChartOfAccount::all(),
+        'suppliers' => Supplier::all(),
+        'expense' => $expense,
+    ]);
+}
 
     public function show(Expense $expense)
     {

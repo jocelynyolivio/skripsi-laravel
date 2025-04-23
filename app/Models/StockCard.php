@@ -19,6 +19,9 @@ class StockCard extends Model
         'quantity_out',
         'remaining_stock',
         'average_price',
+        'type',
+        'note',
+        'updated_by',
     ];
 
     protected $dates = ['date'];
@@ -31,5 +34,8 @@ class StockCard extends Model
         return $this->belongsTo(DentalMaterial::class);
     }
 
-    
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

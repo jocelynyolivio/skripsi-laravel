@@ -22,6 +22,7 @@
                     <tr>
                         <th>Material Name</th>
                         <th>Required Quantity</th>
+                        <th>Unit</th>
                         <th>Available Stock</th>
                         <th>Selected Quantity</th>
                     </tr>
@@ -31,10 +32,10 @@
                         <tr>
                             <td>{{ $material['name'] }}</td>
                             <td>{{ $material['quantity'] }} (Required)</td>
+                            <td>{{ $material['unit_type'] }}</td>
                             <td>{{ $material['stock_quantity'] }}</td>
                             <td>
                                 <input type="number" name="quantities[{{ $materialId }}]" 
-                                       value="{{ old('quantities.' . $materialId, $material['quantity']) }}" 
                                        min="0" max="{{ $material['stock_quantity'] }}">
                             </td>
                         </tr>

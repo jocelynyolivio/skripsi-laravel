@@ -1,11 +1,11 @@
 @extends('dashboard.layouts.main')
 
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Transactions']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Transactions']
+]
+])
 @endsection
 
 @section('container')
@@ -14,7 +14,7 @@
         <h3 class="text-center">Transaction List</h3>
         <div class="dropdown">
             <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            Create Transaction
+                Create Transaction
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{{ route('dashboard.transactions.createWithoutMedicalRecord') }}">Without Medical Record</a></li>
@@ -34,6 +34,7 @@
         <thead>
             <tr>
                 <th>Transaction ID</th>
+                <th>Date</th>
                 <th>Pasien</th>
                 <th>Admin</th>
                 <th>Amount</th>
@@ -47,10 +48,14 @@
             @foreach($transactions as $transaction)
             <tr>
                 <td>{{ $transaction->id }}</td>
+                <td>{{ $transaction->created_at->translatedFormat('d F Y H:i') }}</td>
                 <td>
-                    {{ optional($transaction->medicalRecord?->patient)->name 
-                    ?? optional($transaction->patient)->name 
-                    ?? 'N/A' }}
+                    @php
+                    $patient = $transaction->medicalRecord?->patient ?? $transaction->patient;
+                    $fullName = trim("{$patient->fname} {$patient->mname} {$patient->lname}");
+                    @endphp
+
+                    {{ $fullName ?: 'N/A' }}
                 </td>
                 <td>{{ $transaction->admin->name }}</td>
                 <td>Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
@@ -59,8 +64,8 @@
                 </td>
                 <td>
 
-                <p>Last edited by: {{ $transaction->editor->name ?? 'Unknown' }}</p>
-    <p>Last edited at: {{ $transaction->created_at->format('d M Y H:i') }}</p>
+                    <p>Last edited by: {{ $transaction->editor->name ?? 'Unknown' }}</p>
+                    <p>Last edited at: {{ $transaction->created_at->format('d M Y H:i') }}</p>
                 </td>
                 <td>
                     <span class="badge bg-{{ $transaction->payment_status == 'belum lunas' ? 'danger' : 'success' }}">
@@ -70,6 +75,10 @@
                 <td>
                     <a href="{{ route('dashboard.transactions.showStruk', $transaction->id) }}" class="btn btn-info btn-sm">
                         Show Struk
+                    </a>
+
+                    <a href="{{ route('dashboard.transactions.show', $transaction->id) }}" class="btn btn-info btn-sm">
+                        Show
                     </a>
                     @if($transaction->payment_status == 'belum lunas')
                     <!-- Button Add Payments -->

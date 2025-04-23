@@ -11,6 +11,7 @@ class Payment extends Model
 
     protected $fillable = [
         'transaction_id',
+        'coa_id',
         'payment_date',
         'amount',
         'payment_method',
@@ -20,5 +21,10 @@ class Payment extends Model
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
+    }
+
+    public function coa()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'coa_id');
     }
 }

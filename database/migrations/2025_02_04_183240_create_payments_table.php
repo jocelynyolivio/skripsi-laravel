@@ -18,13 +18,16 @@ return new class extends Migration
             $table->date('payment_date')->default(DB::raw('CURRENT_DATE'));
             $table->decimal('amount', 10, 2);
             $table->text('payment_method');
+            $table->unsignedBigInteger('coa_id'); // Akun yang digunakan untuk membayar
             $table->text('notes')->nullable();
             $table->timestamps();
 
             // Foreign Key Constraint
             $table->foreign('transaction_id')
-                  ->references('id')->on('transactions')
-                  ->cascadeOnDelete();
+                ->references('id')->on('transactions')
+                ->onDelete('cascade');
+
+            $table->foreign('coa_id')->references('id')->on('chart_of_accounts')->onDelete('cascade');
         });
     }
 

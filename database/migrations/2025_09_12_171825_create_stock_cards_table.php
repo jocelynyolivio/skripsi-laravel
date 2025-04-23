@@ -22,8 +22,13 @@ return new class extends Migration
             $table->integer('quantity_out')->default(0);
             $table->integer('remaining_stock');
             $table->decimal('average_price', 10, 2);
+
+            $table->enum('type', ['purchase', 'usage', 'adjustment'])->default('purchase');
+            $table->string('note')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+
             $table->timestamps();
-            
+
             $table->foreign('dental_material_id')->references('id')->on('dental_materials')->onDelete('cascade');
         });
     }

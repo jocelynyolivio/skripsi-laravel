@@ -21,11 +21,8 @@
             <tr>
                 <th>ID</th>
                 <th>Expense Date</th>
-                <th>COA Out</th>
-                <th>COA In</th>
                 <th>Amount</th>
                 <th>Description</th>
-                <th>Reference Number</th>
                 <th>Created At</th>
                 <th>Created By</th>
                 <th>Actions</th>
@@ -36,18 +33,14 @@
             <tr>
                 <td>{{ $expense->id }}</td>
                 <td>{{ $expense->expense_date }}</td>
-                <td>{{ $expense->coaOut->name ?? '-' }}</td>
-                <td>{{ $expense->coaIn->name ?? '-' }}</td>
                 <td>Rp. {{ number_format($expense->amount, 2, ',', '.') }}</td>
                 <td>{{ $expense->description }}</td>
-                <td>{{ $expense->reference_number ?? '-' }}</td>
                 <td>{{ $expense->created_at }}</td>
                 <td>{{ $expense->admin?->name ?? 'N/A' }}</td>
                 <td>
-                    <a href="{{ route('dashboard.expenses.show', $expense->id) }}" class="btn btn-sm btn-info me-1" title="View">
+                    <a href="{{ route('dashboard.expenses.show', $expense->id) }}" class="btn btn-sm btn-info me-1" title="View">Show
                     </a>
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="{{ route('dashboard.expenses.duplicate', $expense->id) }}" class="btn btn-sm btn-secondary">Duplicate</a>
                     <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
