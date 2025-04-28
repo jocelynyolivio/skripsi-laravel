@@ -7,6 +7,7 @@ use App\Models\StockCard;
 use App\Models\JournalEntry;
 use Illuminate\Http\Request;
 use App\Models\JournalDetail;
+use App\Models\PurchaseOrder;
 use App\Models\ChartOfAccount;
 use App\Models\DentalMaterial;
 use App\Models\PurchaseDetail;
@@ -35,20 +36,18 @@ class PurchaseController extends Controller
     //     $cashAccounts = ChartOfAccount::all();
     //     return view('dashboard.purchases.create', compact('suppliers', 'materials', 'cashAccounts'));
     // }
-    public function create(PurchaseRequest $purchaseRequest = null)
+    public function create(PurchaseOrder $purchaseOrder = null)
     {
         $data = [
             'suppliers' => Supplier::all(),
             'materials' => DentalMaterial::all(),
             'cashAccounts' => ChartOfAccount::all(),
+            'purchaseOrder' => $purchaseOrder,
         ];
-
-        if ($purchaseRequest) {
-            $data['purchaseRequest'] = $purchaseRequest;
-        }
 
         return view('dashboard.purchases.create', $data);
     }
+
     // awal tanpa request
     // public function store(Request $request)
     // {
@@ -264,138 +263,176 @@ class PurchaseController extends Controller
     //     return redirect()->route('dashboard.purchases.index')->with('success',$successMessage);
     // }
 
-    private function saveInvoice(Request $request, ?PurchaseRequest $purchaseRequest = null)
+    public function createFromOrder(PurchaseOrder $purchaseOrder)
 {
-    $request->validate([
-        'supplier_id'        => 'required|exists:suppliers,id',
-        'purchase_date'      => 'required|date',
-        'total_amount'       => 'required|numeric',
-        'discount'           => 'nullable|numeric',
-        'ongkos_kirim'       => 'nullable|numeric',
-        'payment_amount'     => 'required|numeric|min:0',
-        'coa_id'             => 'required|exists:chart_of_accounts,id',
-        'dental_material_id' => 'required|array',
-        'quantity'           => 'required|array',
-        'total_price'        => 'required|array',
-        'grand_total'        => 'required|numeric',
-    ]);
-
-    // dd($request->discount);
-
-    // Generate invoice number
-    $lastInvoice = PurchaseInvoice::orderByDesc('id')->first();
-    $nextNumber = $lastInvoice ? ((int) substr($lastInvoice->invoice_number, 4)) + 1 : 1;
-    $invoiceNumber = 'INV-' . $nextNumber;
-
-    // Buat invoice
-    $invoice = PurchaseInvoice::create([
-        'invoice_number'       => $invoiceNumber,
-        'supplier_id'          => $request->supplier_id,
-        'purchase_date'        => $request->purchase_date,
-        'discount'             => $request->discount,
-        'ongkos_kirim'         => $request->ongkos_kirim ?? 0,
-        'total_amount'         => $request->total_amount,
-        'grand_total'          => $request->grand_total,
-        'purchase_request_id'  => $purchaseRequest?->id,
-    ]);
-
-    // Simpan detail pembelian
-    foreach ($request->dental_material_id as $index => $material_id) {
-        $material = DentalMaterial::findOrFail($material_id);
-        $quantity = $request->quantity[$index];
-        $totalPrice = $request->total_price[$index];
-        $unitPrice = ($quantity > 0) ? $totalPrice / $quantity : 0;
-
-        PurchaseDetail::create([
-            'purchase_invoice_id' => $invoice->id,
-            'dental_material_id'  => $material->id,
-            'quantity'            => $quantity,
-            'unit_price'          => $unitPrice,
-            'subtotal'            => $totalPrice,
-        ]);
+    // Pastikan order belum memiliki invoice
+    if ($purchaseOrder->purchaseInvoice) {
+        return redirect()->back()->with('error', 'Invoice sudah dibuat untuk purchase order ini');
     }
 
-    // Simpan pembayaran
-    $purchaseAmount = $request->payment_amount;
-    $grandTotal = $request->grand_total;
-    $totalDebt = $grandTotal - $purchaseAmount;
-    $paymentStatus = ($totalDebt > 0) ? 'partial' : 'paid';
+    $suppliers = Supplier::all();
+    $materials = DentalMaterial::all();
+    $cashAccounts = ChartOfAccount::all();
 
-    if ($purchaseAmount > 0) {
-        PurchasePayment::create([
-            'purchase_invoice_id' => $invoice->id,
-            'coa_id'              => $request->coa_id,
-            'purchase_amount'     => $purchaseAmount,
-            'total_debt'          => $totalDebt,
-            'payment_status'      => $paymentStatus,
-            'notes'               => $request->payment_notes ?? null,
-        ]);
-    }
+    // dd($purchaseOrder);
 
-    // Buat entri jurnal
-    $journalEntry = JournalEntry::create([
-        'entry_date'  => $request->purchase_date,
-        'description' => 'Purchase Payment for Invoice ' . $invoice->invoice_number,
-    ]);
-
-    $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
-    $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
-
-    // Debit: Persediaan
-    JournalDetail::create([
-        'journal_entry_id' => $journalEntry->id,
-        'coa_id'           => $inventoryAccount,
-        'debit'            => $request->total_amount,
-        'credit'           => 0,
-    ]);
-
-    // Jika ada diskon, catat sebagai kredit ke akun diskon
-if ($request->discount > 0) {
-    $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
-
-    JournalDetail::create([
-        'journal_entry_id' => $journalEntry->id,
-        'coa_id'           => $purchaseDiscountAccount,
-        'debit'            => 0,
-        'credit'           => $request->discount,
-    ]);
-}
-
-// Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
-if ($request->ongkos_kirim > 0) {
-    $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
-
-    JournalDetail::create([
-        'journal_entry_id' => $journalEntry->id,
-        'coa_id'           => $shippingCostAccount,
-        'debit'            => $request->ongkos_kirim,
-        'credit'           => 0,
+    return view('dashboard.purchases.create-from-order', [
+        'purchaseOrder' => $purchaseOrder,
+        'suppliers' => $suppliers,
+        'materials' => $materials,
+        'cashAccounts' => $cashAccounts
     ]);
 }
 
 
-    // Credit: Kas (jika ada pembayaran)
-    if ($purchaseAmount > 0) {
-        JournalDetail::create([
-            'journal_entry_id' => $journalEntry->id,
-            'coa_id'           => $request->coa_id,
-            'debit'            => 0,
-            'credit'           => $purchaseAmount,
-        ]);
+    public function storeFromOrder(Request $request, PurchaseOrder $purchaseOrder)
+    {
+        $this->saveInvoice($request, $purchaseOrder);
+        return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from order!');
     }
 
-    // Credit: Utang Usaha (jika masih ada sisa pembayaran)
-    if ($totalDebt > 0) {
-        JournalDetail::create([
-            'journal_entry_id' => $journalEntry->id,
-            'coa_id'           => $accountsPayable,
-            'debit'            => 0,
-            'credit'           => $totalDebt,
-        ]);
-    }
 
-    return $invoice;
-}
+
+    private function saveInvoice(Request $request, ?PurchaseOrder $purchaseOrder = null)
+    {
+
+        // dd('masuk function save invoice');
+        $request->validate([
+            'purchase_order_id'  => 'nullable|exists:purchase_orders,id',
+            'invoice_date' => 'required|date',
+            'received_date' => 'nullable|date',
+            'purchase_date'      => 'required|date',
+            'supplier_id'        => 'required|exists:suppliers,id',
+            'payment_requirement' => 'required|string',
+            'due_date' => 'required|date',
+            'discount' => 'required',
+            'ongkos_kirim' => 'required',
+            'total_amount' => 'required',
+            'grand_total' => 'required',
+            'dental_material_id' => 'required|array',
+        ]);
+
+        // dd($request);
+
+        // Generate invoice number
+        $lastInvoice = PurchaseInvoice::orderByDesc('id')->first();
+        $nextNumber = $lastInvoice ? ((int) substr($lastInvoice->invoice_number, 4)) + 1 : 1;
+        $invoiceNumber = 'INV-' . $nextNumber;
+
+        // Buat invoice
+        $invoice = PurchaseInvoice::create([
+            'invoice_number'       => $invoiceNumber,
+            'invoice_date'         => $request->invoice_date,
+            'purchase_order_id' => $request->purchase_order_id,
+            'supplier_id'          => $request->supplier_id,
+            'payment_requirement' => $request->payment_requirement,
+            'receive_date' => $request->receive_date,
+            'due_date' => $request->due_date,
+            'purchase_date'        => $request->purchase_date,
+            'discount'             => $request->discount,
+            'ongkos_kirim'         => $request->ongkos_kirim,
+            'grand_total'          => $request->grand_total,
+        ]);
+        // dd('dah buat invoice');
+
+        // Simpan detail pembelian
+        foreach ($request->dental_material_id as $index => $material_id) {
+            $material = DentalMaterial::findOrFail($material_id);
+            $quantity = $request->quantity[$index];
+            $totalPrice = $request->total_price[$index];
+            $unitPrice = ($quantity > 0) ? $totalPrice / $quantity : 0;
+
+            PurchaseDetail::create([
+                'purchase_invoice_id' => $invoice->id,
+                'dental_material_id'  => $material->id,
+                'quantity'            => $quantity,
+                'unit_price'          => $unitPrice,
+                'subtotal'            => $totalPrice,
+            ]);
+        }
+        // dd('dah detail invoice');
+
+        // Simpan pembayaran
+        // $purchaseAmount = $request->payment_amount;
+        // $grandTotal = $request->grand_total;
+        // $totalDebt = $grandTotal - $purchaseAmount;
+        // $paymentStatus = ($totalDebt > 0) ? 'partial' : 'paid';
+
+        // if ($purchaseAmount > 0) {
+        //     PurchasePayment::create([
+        //         'purchase_invoice_id' => $invoice->id,
+        //         'coa_id'              => $request->coa_id,
+        //         'purchase_amount'     => $purchaseAmount,
+        //         'total_debt'          => $totalDebt,
+        //         'payment_status'      => $paymentStatus,
+        //         'notes'               => $request->payment_notes ?? null,
+        //     ]);
+        // }
+
+        // // Buat entri jurnal
+        // $journalEntry = JournalEntry::create([
+        //     'entry_date'  => $request->purchase_date,
+        //     'description' => 'Purchase Payment for Invoice ' . $invoice->invoice_number,
+        // ]);
+
+        // $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
+        // $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+
+        // Debit: Persediaan
+        // JournalDetail::create([
+        //     'journal_entry_id' => $journalEntry->id,
+        //     'coa_id'           => $inventoryAccount,
+        //     'debit'            => $request->total_amount,
+        //     'credit'           => 0,
+        // ]);
+
+        // Jika ada diskon, catat sebagai kredit ke akun diskon
+        // if ($request->discount > 0) {
+        //     $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
+
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $purchaseDiscountAccount,
+        //         'debit'            => 0,
+        //         'credit'           => $request->discount,
+        //     ]);
+        // }
+
+        // Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
+        // if ($request->ongkos_kirim > 0) {
+        //     $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
+
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $shippingCostAccount,
+        //         'debit'            => $request->ongkos_kirim,
+        //         'credit'           => 0,
+        //     ]);
+        // }
+
+
+        // Credit: Kas (jika ada pembayaran)
+        // if ($purchaseAmount > 0) {
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $request->coa_id,
+        //         'debit'            => 0,
+        //         'credit'           => $purchaseAmount,
+        //     ]);
+        // }
+
+        // Credit: Utang Usaha (jika masih ada sisa pembayaran)
+        // if ($totalDebt > 0) {
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $accountsPayable,
+        //         'debit'            => 0,
+        //         'credit'           => $totalDebt,
+        //     ]);
+        // }
+
+        return $invoice;
+    }
 
     public function store(Request $request)
     {
@@ -403,11 +440,12 @@ if ($request->ongkos_kirim > 0) {
         return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created successfully.');
     }
 
-    public function storeFromRequest(Request $request, PurchaseRequest $purchaseRequest)
-    {
-        $this->saveInvoice($request, $purchaseRequest);
-        return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from request!');
-    }
+    // public function storeFromRequest(Request $request, PurchaseRequest $purchaseRequest)
+    // {
+    //     $this->saveInvoice($request, $purchaseRequest);
+    //     return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from request!');
+    // }
+
 
 
     public function edit(PurchaseInvoice $purchase)
@@ -516,11 +554,13 @@ if ($request->ongkos_kirim > 0) {
 
     public function payDebt(Request $request)
     {
+        // dd('masuk paydebt');
         $request->validate([
             'purchase_id' => 'required|exists:purchase_invoices,id',
             'amount' => 'required|numeric|min:1',
             'payment_date' => 'required|date',
             'coa_id' => 'required|exists:chart_of_accounts,id',
+            'payment_method' => 'required|string',
             'notes' => 'nullable|string',
         ]);
 
@@ -543,6 +583,8 @@ if ($request->ongkos_kirim > 0) {
             'notes' => $request->notes,
             'created_at' => now(),
             'updated_at' => now(),
+            'payment_date' => $request->payment_date,
+            'payment_method' => $request->payment_method
         ]);
 
         // Jurnal untuk Pembayaran Hutang
@@ -572,10 +614,10 @@ if ($request->ongkos_kirim > 0) {
         return redirect()->route('dashboard.purchases.index')->with('success', 'Payment added successfully.');
     }
 
-    public function createFromRequest(PurchaseRequest $purchaseRequest)
-    {
-        return $this->create($purchaseRequest);
-    }
+    // public function createFromRequest(PurchaseRequest $purchaseRequest)
+    // {
+    //     return $this->create($purchaseRequest);
+    // }
 
     // public function createFromRequest(PurchaseRequest $purchaseRequest)
     // {

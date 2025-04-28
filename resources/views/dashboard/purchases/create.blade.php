@@ -141,10 +141,6 @@
             <h5 class="text-center mb-0">Sisa Tagihan: Rp <span id="remaining-amount-display">0</span></h5>
         </div>
         <input type="hidden" id="remaining_amount" name="remaining_amount" value="0">
-
-
-
-
         <br>
         <button type="submit" class="btn btn-success w-100 d-block mx-auto">
             Create Purchase Invoice

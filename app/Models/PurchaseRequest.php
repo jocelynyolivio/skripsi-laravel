@@ -16,6 +16,7 @@ class PurchaseRequest extends Model
         'status',
         'notes',
         'approved_by',
+        'approved_at',
         'approval_notes',
         'updated_by'
     ];

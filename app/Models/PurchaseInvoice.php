@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseInvoice extends Model
 {
     use HasFactory;
-    protected $fillable = ['invoice_number', 'supplier_id', 'invoice_date', 'total_amount', 'status', 'purchase_date', 'grand_total','discount','ongkos_kirim'];
+    protected $fillable = ['invoice_number',  'invoice_date', 'purchase_order_id', 'supplier_id', 'purchase_date', 'payment_requirement', 'received_date', 'due_date', 'status',  'grand_total', 'discount', 'ongkos_kirim'];
 
     public function supplier()
     {
@@ -28,5 +28,10 @@ class PurchaseInvoice extends Model
     public function latestPayment()
     {
         return $this->hasOne(PurchasePayment::class, 'purchase_invoice_id')->latest();
+    }
+
+    public function purchaseOrder()
+    {
+        return $this->belongsTo(PurchaseOrder::class);
     }
 }

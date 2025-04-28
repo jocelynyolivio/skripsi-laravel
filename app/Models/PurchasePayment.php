@@ -12,6 +12,8 @@ class PurchasePayment extends Model
     protected $fillable = [
         'purchase_invoice_id',
         'coa_id',
+        'payment_date',
+        'payment_method',
         'purchase_amount',
         'total_debt',
         'payment_status',

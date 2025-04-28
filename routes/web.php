@@ -3,7 +3,6 @@
 use App\Models\Patient;
 use App\Models\HomeContent;
 use Illuminate\Http\Request;
-use App\Models\PurchaseRequest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
@@ -28,18 +27,17 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PatientLoginController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\ProcedureTypeController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
 use App\Http\Controllers\FinancialReportController;
+use App\Http\Controllers\PurchasePaymentController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\Auth\PatientVerifyEmailController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -158,8 +156,6 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
     return redirect('/patient/login')->with('success', 'Email verified successfully. Please log in.');
 })->name('verification.verify');
 
-
-
 // Route::get('/email/verify/{id}/{hash}', PatientVerifyEmailController::class)
 //     ->middleware(['auth:patient', 'signed'])
 //     ->name('verification.verify');
@@ -170,6 +166,7 @@ Route::post('/email/resend', function (Request $request) {
 })->middleware(['auth:patient', 'throttle:6,1'])->name('verification.resend');
 
 Route::get('/patient/register', [RegisterController::class, 'index'])->name('patient.register')->middleware('guest');
+
 // kalo ada req ke halaman register tapi method post maka nanti akan panggil yg store
 Route::post('/patient/register', [RegisterController::class, 'store']);
 
@@ -177,7 +174,6 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('internal')
     ->name('dashboard');
 
-// If you have a separate route for fetching data via AJAX, you can define it as follows:
 Route::get('/dashboard/data', [DashboardController::class, 'fetchData'])->name('dashboard.data');
 
 Route::get('/reservation', [ReservationController::class, 'index'])
@@ -190,12 +186,13 @@ Route::post('/reservation', [ReservationController::class, 'store'])
     ->name('reservation.store')
     ->middleware(['auth:patient', 'verified']);
 
-
 Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
     ->name('dashboard.schedules.get-doctors-by-date');
 
-// isi dashboarrrddddd
+// isi dashboarddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::resource('purchase_orders', PurchaseOrderController::class);
+
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
@@ -214,9 +211,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data');
     Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store');
 
-
     Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
-
     Route::resource('/home_content', HomeContentController::class);
     Route::resource('/procedures', ProcedureController::class)->names('procedures');
     Route::resource('/procedure_types', ProcedureTypeController::class);
@@ -232,8 +227,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/masters/patients/patient-birthday/{id}', [PatientController::class, 'sendVoucherBirthday'])->name('masters.patients.birthday.sendVoucherBirthday');
 
     Route::get('/masters/patients/patient-birthday-generate/{id}', [PatientController::class, 'generateVoucherBirthday'])->name('masters.patients.birthday.generateVoucherBirthday');
-
-
     Route::get('/masters', [UserController::class, 'index'])->name('masters.index');
     Route::get('/masters/create', [UserController::class, 'create'])->name('masters.create');
     Route::post('/masters', [UserController::class, 'store'])->name('masters.store');
@@ -241,32 +234,32 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::put('/masters/{id}', [UserController::class, 'update'])->name('masters.update');
     Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('masters.destroy');
 
-    // Route::resource('/schedules/templates', ScheduleTemplateController::class);
-    // Route::resource('/schedules/overrides', ScheduleOverrideController::class)->except(['show']);
-
     Route::prefix('schedules')->name('schedules.')->group(function () {
         Route::resource('templates', ScheduleTemplateController::class);
         Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
     });
 
-    // Route::get('/stock_cards', [StockCardController::class, 'index'])->name('stock_cards.index');
-
     Route::get('/stock_cards/adjust', [StockCardController::class, 'adjustForm'])->name('stock_cards.adjust');
     Route::post('/stock_cards/adjust', [StockCardController::class, 'storeAdjustment'])->name('stock_cards.adjust.store');
     Route::resource('/stock_cards', StockCardController::class);
 
+    Route::get('/purchases/create-from-order/{purchaseOrder}', [PurchaseController::class, 'createFromOrder'])->name('purchases.createFromOrder');
+
+    Route::post('/purchases/store-from-order/{purchaseOrder}', [PurchaseController::class, 'storeFromOrder'])->name('purchases.storeFromOrder');
 
     Route::resource('/purchase_requests', PurchaseRequestController::class);
     Route::post('/purchase_requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase_requests.approve');
-    Route::post('/purchFase_requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase_requests.reject');
-    // Route::get('purchase_requests/{purchaseRequest}/generate-invoice', [PurchaseController::class, 'createFromRequest'])->name('dashboard.purchases.create-from-request');
+    Route::post('/purchase_requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase_requests.reject');
 
     Route::get('/purchases', [PurchaseController::class, 'create'])->name('purchases.create');
 
-    Route::get('/purchases/from-request/{purchaseRequest}', [PurchaseController::class, 'createFromRequest'])->name('purchases.createFromRequest');
-    Route::post('/purchases/from-request/{purchaseRequest}', [PurchaseController::class, 'store'])
-        ->name('purchases.storeFromRequest');
     Route::get('/purchase_requests/{purchaseRequest}/duplicate', [PurchaseRequestController::class, 'duplicate'])->name('purchase_requests.duplicate');
+
+    Route::prefix('purchase_payments')->group(function () {
+        Route::get('create/{purchaseInvoiceId}', [PurchasePaymentController::class, 'create'])->name('purchase_payments.create');
+        Route::post('store', [PurchasePaymentController::class, 'store'])->name('purchase_payments.store');
+    });
+    
 
     Route::post('/transactions/storeWithPayment', [TransactionController::class, 'storeWithPayment'])->name('transactions.storeWithPayment');
 
@@ -296,8 +289,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
 
     Route::post('/reservations', [ScheduleController::class, 'storeReservation'])->name('reservations.store');
-
-    // pppppppp
+    
     Route::get('/reservations', [MedicalRecordController::class, 'list'])->name('reservations.index');
 
     Route::get('/reservations/{reservation}/edit', [ScheduleController::class, 'editReservation'])->name('reservations.edit');
@@ -305,7 +297,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::delete('/reservations/{reservation}', [MedicalRecordController::class, 'destroyReservation'])->name('reservations.destroy');
     Route::get('/reservations/get-available-times', [ScheduleController::class, 'getAvailableTimes'])->name('reservations.getAvailableTimes');
 
-    // ppppp
     Route::get('/reservations/whatsapp/{id}', [MedicalRecordController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
     Route::get('/reservations/whatsappConfirm/{id}', [MedicalRecordController::class, 'waConfirmation'])->name('reservations.whatsappConfirm');
 
@@ -323,6 +314,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         // Route to delete a medical record
         Route::delete('/medical_records/{recordId}', [MedicalRecordController::class, 'destroy'])->name('medical_records.destroy');
     });
+
     Route::get('/medical_records/{medicalRecordId}/selectMaterials', [MedicalRecordController::class, 'selectMaterials'])
         ->name('medical_records.selectMaterials');
     Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])
@@ -359,8 +351,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index');
         Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store');
     });
-
-
     Route::resource('salary_calculations', SalaryCalculationController::class);
 
     Route::resource('suppliers', SupplierController::class);

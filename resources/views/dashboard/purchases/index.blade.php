@@ -1,9 +1,9 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')]        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')] ]
+])
 @endsection
 @section('container')
 <div class="container mt-5">
@@ -51,11 +51,9 @@
                     </a>
                     @endif
 
-
-
                     @if ($purchase->latestPayment && $purchase->latestPayment->total_debt > 0)
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#payDebtModal-{{ $purchase->id }}">
-                    Create Purchase Payment
+                        Create Purchase Payment
                     </button>
 
                     <!-- Modal untuk Pembayaran Hutang -->
@@ -87,6 +85,40 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        <div class="mb-3">
+                                            <label for="payment_method" class="form-label">Cara Bayar</label>
+                                            <select class="form-control" id="payment_method" name="payment_method" required>
+                                                <option value="">-- Pilih Metode Pembayaran --</option>
+
+                                                <!-- QRIS -->
+                                                <optgroup label="QRIS">
+                                                    @foreach(['QRIS BCA', 'QRIS CIMB Niaga', 'QRIS Mandiri', 'QRIS BRI', 'QRIS BNI', 'QRIS Permata', 'QRIS Maybank', 'QRIS Danamon', 'QRIS Bank Mega'] as $method)
+                                                    <option value="{{ $method }}" {{ old('payment_method', $purchase->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>
+                                                    @endforeach
+                                                </optgroup>
+
+                                                <!-- Kartu Kredit/Debit -->
+                                                <optgroup label="Kartu Kredit/Debit">
+                                                    @foreach(['Visa', 'Mastercard', 'JCB', 'American Express', 'GPN', 'Kartu Kredit BCA', 'Kartu Kredit Mandiri', 'Kartu Kredit BRI', 'Kartu Kredit BNI', 'Kartu Kredit CIMB Niaga'] as $method)
+                                                    <option value="{{ $method }}" {{ old('payment_method', $purchase->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>
+                                                    @endforeach
+                                                </optgroup>
+
+                                                <!-- Transfer Bank -->
+                                                <optgroup label="Transfer Bank">
+                                                    @foreach(['Transfer Bank BCA', 'Transfer Bank Mandiri', 'Transfer Bank BRI', 'Transfer Bank BNI', 'Transfer Bank CIMB Niaga', 'Transfer Bank Permata', 'Transfer Bank Maybank'] as $method)
+                                                    <option value="{{ $method }}" {{ old('payment_method', $purchase->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>
+                                                    @endforeach
+                                                </optgroup>
+
+                                                <!-- E-Wallet -->
+                                                <optgroup label="E-Wallet">
+                                                    @foreach(['GoPay', 'OVO', 'Dana', 'LinkAja', 'ShopeePay', 'Doku Wallet', 'PayPal'] as $method)
+                                                    <option value="{{ $method }}" {{ old('payment_method', $purchase->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            </select>
+                                        </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Notes</label>
@@ -101,6 +133,10 @@
                             </div>
                         </div>
                     </div>
+                    @elseif(is_null($purchase->latestPayment))
+                    <a href="{{ route('dashboard.purchase_payments.create', $purchase->id) }}" class="btn btn-success">
+                        Tambah Pembayaran
+                    </a>
                     @endif
                 </td>
             </tr>
