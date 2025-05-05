@@ -1,16 +1,18 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Master Users']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Master Users']
+]
+])
 @endsection
 @section('container')
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Master Users</h3>
+        @if(auth()->user()?->role?->role_name === 'manager')
         <a href="{{ route('dashboard.masters.create') }}" class="btn btn-primary mb-3">Create New Users</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -38,8 +40,11 @@
                 <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Mobile Number</th>
                 <th>Role</th>
+                @if(auth()->user()?->role?->role_name === 'manager')
                 <th>Action</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -48,6 +53,7 @@
                 <td>{{ $user->id }}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->email }}</td>
+                <td>{{ $user->nomor_telepon}}</td>
                 <td>
                     @if ($user->role_id == 1)
                     Admin
@@ -57,6 +63,7 @@
                     Manager
                     @endif
                 </td>
+                @if(auth()->user()?->role?->role_name === 'manager')
                 <td>
                     <!-- Tombol Edit -->
                     <a href="{{ route('dashboard.masters.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
@@ -68,6 +75,7 @@
                         <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
                 </td>
+                @endif
             </tr>
             @endforeach
         </tbody>

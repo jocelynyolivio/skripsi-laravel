@@ -10,7 +10,9 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Purchase Invoices List</h3>
+        @if(auth()->user()?->role?->role_name === 'manager')        
         <a href="{{ route('dashboard.purchases.create') }}" class="btn btn-primary">Create Purchase</a>
+        @endif
     </div>
 
     @if(session('success'))
@@ -32,7 +34,7 @@
             @foreach ($purchases as $purchase)
             <tr>
                 <td>{{ $purchase->supplier->nama ?? '-' }}</td>
-                <td>{{ $purchase->purchase_date }}</td>
+                <td>{{ $purchase->invoice_date }}</td>
                 <td>Rp. {{ number_format($purchase->grand_total, 2, ',', '.') }}</td>
                 <td>Rp. {{ number_format($purchase->latestPayment->total_debt ?? 0, 2, ',', '.') }}</td>
 

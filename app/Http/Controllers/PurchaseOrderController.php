@@ -108,7 +108,6 @@ class PurchaseOrderController extends Controller
                     'material_id' => $material['material_id'],
                     'quantity' => $material['quantity'],
                     'price' => $material['price'],
-                    'unit' => 'haha',
                     'notes' => $material['notes'] ?? null
                 ]);
             }

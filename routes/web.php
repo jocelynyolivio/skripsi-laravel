@@ -197,22 +197,25 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/salaries/upload-salary', [SalaryController::class, 'uploadForm'])->name('salaries.upload');
-    Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel']);
-    Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
+    Route::get('/salaries/upload-salary', [SalaryController::class, 'uploadForm'])->name('salaries.upload')->middleware('role:manager');
+    Route::post('/salaries/process-salary', [SalaryController::class, 'processExcel'])->middleware('role:manager');
+    Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index')->middleware('role:manager');
+    Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process')->middleware('role:manager');
+    Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate')->middleware('role:manager');
+    Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor')->middleware('role:manager');
+    Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store')->middleware('role:manager');
+    Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor')->middleware('role:manager');
+    Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index')->middleware('role:manager');
+    Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data')->middleware('role:manager');
+    Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store')->middleware('role:manager');
+
+    // slip gaji masing"
     Route::get('/salaries/slips', [SalaryController::class, 'slips'])->name('salaries.slips');
     Route::get('/salaries/slip', [SalaryController::class, 'userSalarySlip'])->name('salaries.slip');
-    Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process');
-    Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate');
-    Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor');
-    Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store');
-    Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor');
-    Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index');
-    Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data');
-    Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store');
 
     Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
     Route::resource('/home_content', HomeContentController::class);
+
     Route::resource('/procedures', ProcedureController::class)->names('procedures');
     Route::resource('/procedure_types', ProcedureTypeController::class);
 
@@ -223,149 +226,114 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/masters/patients/create', [PatientController::class, 'create'])->name('masters.patients.create');
     Route::post('/masters/patients', [PatientController::class, 'store'])->name('masters.patients.store');
     Route::get('/masters/patients/patient-birthday', [PatientController::class, 'birthday'])->name('masters.patients.birthday');
-
     Route::get('/masters/patients/patient-birthday/{id}', [PatientController::class, 'sendVoucherBirthday'])->name('masters.patients.birthday.sendVoucherBirthday');
-
     Route::get('/masters/patients/patient-birthday-generate/{id}', [PatientController::class, 'generateVoucherBirthday'])->name('masters.patients.birthday.generateVoucherBirthday');
-    Route::get('/masters', [UserController::class, 'index'])->name('masters.index');
-    Route::get('/masters/create', [UserController::class, 'create'])->name('masters.create');
-    Route::post('/masters', [UserController::class, 'store'])->name('masters.store');
-    Route::get('/masters/{id}/edit', [UserController::class, 'edit'])->name('masters.edit');
-    Route::put('/masters/{id}', [UserController::class, 'update'])->name('masters.update');
-    Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('masters.destroy');
 
-    Route::prefix('schedules')->name('schedules.')->group(function () {
-        Route::resource('templates', ScheduleTemplateController::class);
-        Route::resource('overrides', ScheduleOverrideController::class)->except(['show']);
-    });
+    Route::get('/masters', [UserController::class, 'index'])->name('masters.index');
+    Route::get('/masters/create', [UserController::class, 'create'])->name('masters.create')->middleware('role:manager');
+    Route::post('/masters', [UserController::class, 'store'])->name('masters.store')->middleware('role:manager');
+    Route::get('/masters/{id}/edit', [UserController::class, 'edit'])->name('masters.edit')->middleware('role:manager');
+    Route::put('/masters/{id}', [UserController::class, 'update'])->name('masters.update')->middleware('role:manager');
+    Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('masters.destroy')->middleware('role:manager');
+
+    Route::resource('/schedules/templates', ScheduleTemplateController::class)->names('schedules.templates');
+    Route::resource('/schedules/overrides', ScheduleOverrideController::class)->names('schedules.overrides');
 
     Route::get('/stock_cards/adjust', [StockCardController::class, 'adjustForm'])->name('stock_cards.adjust');
     Route::post('/stock_cards/adjust', [StockCardController::class, 'storeAdjustment'])->name('stock_cards.adjust.store');
     Route::resource('/stock_cards', StockCardController::class);
 
-    Route::get('/purchases/create-from-order/{purchaseOrder}', [PurchaseController::class, 'createFromOrder'])->name('purchases.createFromOrder');
-
-    Route::post('/purchases/store-from-order/{purchaseOrder}', [PurchaseController::class, 'storeFromOrder'])->name('purchases.storeFromOrder');
+    Route::get('/purchases/create-from-order/{purchaseOrder}', [PurchaseController::class, 'createFromOrder'])->name('purchases.createFromOrder')->middleware('role:manager');
+    Route::post('/purchases/store-from-order/{purchaseOrder}', [PurchaseController::class, 'storeFromOrder'])->name('purchases.storeFromOrder')->middleware('role:manager');
+    Route::get('/purchases', [PurchaseController::class, 'create'])->name('purchases.create')->middleware('role:manager');
 
     Route::resource('/purchase_requests', PurchaseRequestController::class);
-    Route::post('/purchase_requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase_requests.approve');
-    Route::post('/purchase_requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase_requests.reject');
-
-    Route::get('/purchases', [PurchaseController::class, 'create'])->name('purchases.create');
-
     Route::get('/purchase_requests/{purchaseRequest}/duplicate', [PurchaseRequestController::class, 'duplicate'])->name('purchase_requests.duplicate');
+    Route::post('/purchase_requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase_requests.approve')->middleware('role:manager');
+    Route::post('/purchase_requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase_requests.reject')->middleware('role:manager');
 
-    Route::prefix('purchase_payments')->group(function () {
-        Route::get('create/{purchaseInvoiceId}', [PurchasePaymentController::class, 'create'])->name('purchase_payments.create');
-        Route::post('store', [PurchasePaymentController::class, 'store'])->name('purchase_payments.store');
-    });
-    
+    Route::get('/purchase_payments/create/{purchaseInvoiceId}', [PurchasePaymentController::class, 'create'])->name('purchase_payments.create')->middleware('role:manager');
+    Route::post('/purchase_payments/store', [PurchasePaymentController::class, 'store'])->name('purchase_payments.store')->middleware('role:manager');
 
     Route::post('/transactions/storeWithPayment', [TransactionController::class, 'storeWithPayment'])->name('transactions.storeWithPayment');
-
     Route::get('/transactions/select-medical-record', [MedicalRecordController::class, 'selectForTransaction'])
         ->name('transactions.selectMedicalRecord');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions/{transactionId}/pay-remaining', [TransactionController::class, 'payRemaining'])->name('transactions.payRemaining');
-
-    // Route untuk transaksi dengan rekam medis
     Route::get('/transactions/create/{medicalRecordId}', [TransactionController::class, 'create'])
         ->name('transactions.create');
-    // Route untuk transaksi tanpa rekam medis
     Route::get('/transactions/create', [TransactionController::class, 'createWithoutMedicalRecord'])
         ->name('transactions.createWithoutMedicalRecord');
-
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
     Route::post('/transactions/store-without-medical-record', [TransactionController::class, 'storeWithoutMedicalRecord'])->name('transactions.storeWithoutMedicalRecord');
-
-    Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
-
     Route::get('/transactions/{id}/struk', [TransactionController::class, 'showStruk'])->name('transactions.showStruk');
     Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
-
     Route::get('/schedules/get-patients', [ScheduleController::class, 'getPatients'])->name('schedules.get-patients');
     Route::post('/schedules/store-reservation', [ScheduleController::class, 'storeReservation'])->name('schedules.store-reservation');
 
     Route::post('/reservations', [ScheduleController::class, 'storeReservation'])->name('reservations.store');
-    
     Route::get('/reservations', [MedicalRecordController::class, 'list'])->name('reservations.index');
-
     Route::get('/reservations/{reservation}/edit', [ScheduleController::class, 'editReservation'])->name('reservations.edit');
     Route::put('/reservations/{reservation}', [ScheduleController::class, 'updateReservation'])->name('reservations.update');
     Route::delete('/reservations/{reservation}', [MedicalRecordController::class, 'destroyReservation'])->name('reservations.destroy');
     Route::get('/reservations/get-available-times', [ScheduleController::class, 'getAvailableTimes'])->name('reservations.getAvailableTimes');
-
     Route::get('/reservations/whatsapp/{id}', [MedicalRecordController::class, 'sendWhatsApp'])->name('reservations.whatsapp');
     Route::get('/reservations/whatsappConfirm/{id}', [MedicalRecordController::class, 'waConfirmation'])->name('reservations.whatsappConfirm');
 
     Route::prefix('patients/{patientId}')->group(function () {
-        // Route to list all medical records for a patient
         Route::get('/medical_records', [MedicalRecordController::class, 'index'])->name('medical_records.index');
-        // Route to display the form for creating a new medical record
-        Route::get('/medical_records/create', [MedicalRecordController::class, 'create'])->name('medical_records.create');
-        // Route to store a new medical record
-        Route::post('/medical_records', [MedicalRecordController::class, 'store'])->name('medical_records.store');
-        // Route to show the edit form for an existing medical record
-        Route::get('/medical_records/{recordId}/edit', [MedicalRecordController::class, 'edit'])->name('medical_records.edit');
-        // Route to update an existing medical record
-        Route::put('/medical_records/{recordId}', [MedicalRecordController::class, 'update'])->name('medical_records.update');
-        // Route to delete a medical record
-        Route::delete('/medical_records/{recordId}', [MedicalRecordController::class, 'destroy'])->name('medical_records.destroy');
+        Route::get('/medical_records/create', [MedicalRecordController::class, 'create'])->name('medical_records.create')->middleware('role:dokter_tetap,dokter_luar');
+        Route::post('/medical_records', [MedicalRecordController::class, 'store'])->name('medical_records.store')->middleware('role:dokter_tetap,dokter_luar');
+        Route::get('/medical_records/{recordId}/edit', [MedicalRecordController::class, 'edit'])->name('medical_records.edit')->middleware('role:dokter_tetap,dokter_luar');
+        Route::put('/medical_records/{recordId}', [MedicalRecordController::class, 'update'])->name('medical_records.update')->middleware('role:dokter_tetap,dokter_luar');
     });
 
-    Route::get('/medical_records/{medicalRecordId}/selectMaterials', [MedicalRecordController::class, 'selectMaterials'])
-        ->name('medical_records.selectMaterials');
-    Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])
-        ->name('medical_records.saveMaterials');
+    Route::get('/medical_records/{medicalRecordId}/selectMaterials', [MedicalRecordController::class, 'selectMaterials'])->name('medical_records.selectMaterials');
+    Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])->name('medical_records.saveMaterials');
 
-    Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
-    Route::get('attendances/create', [AttendanceController::class, 'create'])->name('attendances.create');
-    Route::post('attendances/store', [AttendanceController::class, 'store'])->name('attendances.store');
-    Route::get('attendances/{attendance}', [AttendanceController::class, 'show'])->name('attendances.show');
-    Route::get('attendances/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit');
-    Route::put('attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
-    Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+    Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index')->middleware('role:manager');
+    Route::get('attendances/create', [AttendanceController::class, 'create'])->name('attendances.create')->middleware('role:manager');
+    Route::post('attendances/store', [AttendanceController::class, 'store'])->name('attendances.store')->middleware('role:manager');
+    Route::get('attendances/{attendance}', [AttendanceController::class, 'show'])->name('attendances.show')->middleware('role:manager');
+    Route::get('attendances/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit')->middleware('role:manager');
+    Route::put('attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update')->middleware('role:manager');
+    Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy')->middleware('role:manager');
 
     Route::resource('/dental-materials', DentalMaterialController::class);
-
     Route::resource('procedure_materials', ProcedureMaterialController::class);
 
-    Route::get('/journals', [JournalController::class, 'index'])->name('journals.index');
-    Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show');
+    Route::get('/journals', [JournalController::class, 'index'])->name('journals.index')->middleware('role:manager');
+    Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show')->middleware('role:manager');
 
-    Route::resource('/coa', ChartOfAccountController::class);
-    Route::resource('/holidays', HolidayController::class);
+    Route::resource('/coa', ChartOfAccountController::class)->middleware('role:manager');
+    Route::resource('/holidays', HolidayController::class)->middleware('role:manager');
 
     Route::resource('expenses', ExpenseController::class);
     Route::get('/expenses/{expense}/duplicate', [ExpenseController::class, 'duplicate'])->name('expenses.duplicate');
     Route::get('/{expense}', [ExpenseController::class, 'show'])->name('dashboard.expenses.show');
 
-    Route::resource('expense_requests', ExpenseRequestController::class);
-    Route::patch('expense_requests/{id}/approve', [ExpenseRequestController::class, 'approve'])->name('expense_requests.approve');
-    Route::patch('expense_requests/{id}/reject', [ExpenseRequestController::class, 'reject'])->name('expense_requests.reject');
-    Route::patch('expense_requests/{id}/done', [ExpenseRequestController::class, 'markDone'])->name('expense_requests.done');
-
     Route::prefix('odontograms')->name('odontograms.')->group(function () {
-        Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index');
-        Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store');
+        Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index')->middleware('role:dokter_tetap,dokter_luar');
+        Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store')->middleware('role:dokter_tetap,dokter_luar');
     });
-    Route::resource('salary_calculations', SalaryCalculationController::class);
+
+    Route::resource('salary_calculations', SalaryCalculationController::class)->middleware('role:manager');
 
     Route::resource('suppliers', SupplierController::class);
 
-    Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('purchases.pay');
+    Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('purchases.pay')->middleware('role:manager');
 
-    Route::resource('purchases', PurchaseController::class);
+    Route::resource('purchases', PurchaseController::class)->middleware('role:manager');
 
     Route::get('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
     Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
 
-    Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay');
-    Route::post('/purchases/pay', [PurchaseController::class, 'payDebt'])->name('purchases.payDebt');
+    Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay')->middleware('role:manager');
+    Route::post('/purchases/pay', [PurchaseController::class, 'payDebt'])->name('purchases.payDebt')->middleware('role:manager');
 
-    Route::get('/reports/balance_sheet', [FinancialReportController::class, 'balanceSheet'])->name('reports.balance_sheet');
-    Route::get('/reports/income_statement', [FinancialReportController::class, 'incomeStatement'])->name('reports.income_statement');
-    Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow');
+    Route::get('/reports/balance_sheet', [FinancialReportController::class, 'balanceSheet'])->name('reports.balance_sheet')->middleware('role:manager');
+    Route::get('/reports/income_statement', [FinancialReportController::class, 'incomeStatement'])->name('reports.income_statement')->middleware('role:manager');
+    Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow')->middleware('role:manager');
 });

@@ -10,7 +10,6 @@ class PurchaseOrderDetail extends Model
         'material_id',
         'quantity',
         'price',
-        'unit',
         'notes'
     ];
 

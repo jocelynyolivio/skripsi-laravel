@@ -48,11 +48,13 @@
                 <td>{{ $patient->home_mobile }}</td>
                 <td>
                     <a href="{{ route('dashboard.masters.patients.edit', $patient->id) }}" class="btn btn-sm btn-warning">Show/Edit</a>
+                    @if(auth()->user()?->role?->role_name === 'manager')
                     <form action="{{ route('dashboard.masters.patients.destroy', $patient->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
+                    @endif
                     <!-- Tombol baru untuk melihat rekam medis pasien -->
                     <a href="{{ route('dashboard.medical_records.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-info">View Medical Records</a>
                     <a href="{{ route('dashboard.odontograms.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-primary">View Odontogram</a>

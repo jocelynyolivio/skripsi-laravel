@@ -82,18 +82,22 @@
                     @endif
                 </td>
                 <td>
+                @if(auth()->user()?->role?->role_name === 'dokter tetap' || auth()->user()?->role?->role_name === 'dokter luar')
                     @if($record->procedures->isEmpty())
                         <!-- Tampilkan tombol Edit hanya jika belum ada prosedur -->
                         <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning">Tambahkan Medical Record</a>
                     @endif
+                @endif
 
                     <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-info">Select Materials</a>
 
+                    @if(auth()->user()?->role?->role_name === 'manager')
                     <form action="{{ route('dashboard.medical_records.destroy', ['patientId' => $patientId, 'recordId' => $record->id]) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
+                    @endif
                 </td>
             </tr>
             @endforeach

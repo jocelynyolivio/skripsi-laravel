@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
         
+
             $table->foreign('purchase_invoice_id')->references('id')->on('purchase_invoices')->onDelete('cascade');
             $table->foreign('coa_id')->references('id')->on('chart_of_accounts')->onDelete('cascade');
         });

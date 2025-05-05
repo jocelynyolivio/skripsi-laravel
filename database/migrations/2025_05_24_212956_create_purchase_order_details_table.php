@@ -17,7 +17,6 @@ return new class extends Migration
             $table->unsignedBigInteger('material_id')->nullable();
             $table->integer('quantity');
             $table->decimal('price', 12, 2);
-            $table->string('unit');
             $table->text('notes')->nullable();
             $table->timestamps();
 

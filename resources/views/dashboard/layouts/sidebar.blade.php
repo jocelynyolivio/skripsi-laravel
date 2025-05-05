@@ -1,5 +1,5 @@
-<div class="sidebar bg-dark col-md-3 col-lg-2 p-0 text-white d-flex flex-column"> <!-- Tambahkan d-flex flex-column -->
-    <div class="offcanvas-md offcanvas-end bg-dark flex-grow-1" tabindex="-1" id="sidebarMenu"> <!-- Tambahkan flex-grow-1 -->
+<div class="sidebar bg-dark col-md-3 col-lg-2 p-0 text-white d-flex flex-column"> 
+    <div class="offcanvas-md offcanvas-end bg-dark flex-grow-1" tabindex="-1" id="sidebarMenu"> 
         <div class="offcanvas-header border-bottom border-secondary">
             <h5 class="offcanvas-title fw-bold text-white" id="sidebarMenuLabel">SenyumQu Dental</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
@@ -12,18 +12,21 @@
                         <span class="fs-6">Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/profile*') ? 'active' : '' }}" href="/dashboard/profile">
-                        <i class="bi bi-person-circle me-3 fs-5"></i>
-                        <span class="fs-6">My Profile</span>
-                    </a>
-                </li>
+                @if(auth()->user()?->role?->role_name === 'manager')
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/salaries*') ? 'active' : '' }}" href="/dashboard/salaries">
                         <i class="bi bi-cash-stack me-3 fs-5"></i>
                         <span class="fs-6">Attendances & Slips</span>
                     </a>
                 </li>
+                @else
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/salaries/slips') ? 'active' : '' }}" href="/dashboard/salaries/slips">
+                        <i class="bi bi-cash-stack me-3 fs-5"></i>
+                        <span class="fs-6">Attendances & Slips</span>
+                    </a>
+                </li>
+                @endif
                 <!-- <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/home_content/') ? 'active' : '' }}" href="/dashboard/home_content/">
                         <i class="bi bi-house-door me-3 fs-5"></i>
@@ -49,6 +52,7 @@
                         <span class="fs-6">Master Patients</span>
                     </a>
                 </li>
+                @if(auth()->user()?->role?->role_name === 'manager')
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/coa') ? 'active' : '' }}" href="{{ route('dashboard.coa.index') }}">
                         <i class="bi bi-person-badge me-3 fs-5"></i>
@@ -68,15 +72,28 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/attendances') ? 'active' : '' }}" href="{{ route('dashboard.procedure_types.index') }}">
+                        <i class="bi bi-person-badge me-3 fs-5"></i>
+                        <span class="fs-6">Master Procedures Types</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/dental-materials*') ? 'active' : '' }}" href="{{ route('dashboard.dental-materials.index') }}">
+                        <i class="bi bi-box-seam me-3 fs-5"></i>
+                        <span class="fs-6">Master Dental Materials</span>
+                    </a>
+                </li>
+                @endif
+                <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/attendances') ? 'active' : '' }}" href="{{ route('dashboard.procedures.index') }}">
                         <i class="bi bi-person-badge me-3 fs-5"></i>
                         <span class="fs-6">Master Procedures</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/attendances') ? 'active' : '' }}" href="{{ route('dashboard.procedure_types.index') }}">
-                        <i class="bi bi-person-badge me-3 fs-5"></i>
-                        <span class="fs-6">Master Procedures Types</span>
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/procedure_materials*') ? 'active' : '' }}" href="{{ route('dashboard.procedure_materials.index') }}">
+                        <i class="bi bi-clipboard2-pulse me-3 fs-5"></i>
+                        <span class="fs-6"> Master Procedure Material</span>
                     </a>
                 </li>
             </ul>
@@ -104,18 +121,7 @@
             <hr class="border-secondary my-2 mx-3">
             <h6 class="sidebar-section-title px-3 mt-3">MATERIALS</h6>
             <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/dental-materials*') ? 'active' : '' }}" href="{{ route('dashboard.dental-materials.index') }}">
-                        <i class="bi bi-box-seam me-3 fs-5"></i>
-                        <span class="fs-6">Dental Materials</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/procedure_materials*') ? 'active' : '' }}" href="{{ route('dashboard.procedure_materials.index') }}">
-                        <i class="bi bi-clipboard2-pulse me-3 fs-5"></i>
-                        <span class="fs-6">Procedure</span>
-                    </a>
-                </li>
+                
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/stock_cards*') ? 'active' : '' }}" href="{{ route('dashboard.stock_cards.index') }}">
                         <i class="bi bi-clipboard2-pulse me-3 fs-5"></i>
@@ -154,6 +160,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.purchase_orders.index') }}">
+                        <i class="bi bi-receipt me-3 fs-5"></i>
+                        <span class="fs-6">Purchase Orders</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.purchases.index') }}">
                         <i class="bi bi-receipt me-3 fs-5"></i>
                         <span class="fs-6">Purchase Invoice</span>
@@ -161,9 +173,9 @@
                 </li>
             </ul>
 
+            @if(auth()->user()?->role?->role_name === 'manager')
             <!-- Divider -->
             <hr class="border-secondary my-2 mx-3">
-
             <h6 class="sidebar-section-title px-3 mt-3">REPORTS</h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
@@ -197,6 +209,7 @@
                     </a>
                 </li>
             </ul>
+            @endif
 
             <!-- Divider -->
             <hr class="border-secondary my-2 mx-3">

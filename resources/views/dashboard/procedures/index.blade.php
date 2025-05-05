@@ -36,11 +36,13 @@
                 <td>{{ $procedure->requires_tooth ? 'Yes' : 'No' }}</td>
                 <td>
                     <a href="{{ route('dashboard.procedures.edit', $procedure->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    @if(auth()->user()?->role?->role_name === 'manager')
                     <form action="{{ route('dashboard.procedures.destroy', $procedure->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-danger btn-sm delete-button">Delete</button>
                     </form>
+                    @endif
                 </td>
             </tr>
             @endforeach

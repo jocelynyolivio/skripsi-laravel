@@ -3,12 +3,12 @@
 @section('container')
 <div class="container mt-4">
 
-    <h3>User Logged: {{ $userLogged->name }}</h3>
+    <h3>Hi, {{ $userLogged->name }}</h3>
 
     <form method="GET" action="{{ route('dashboard.salaries.slips') }}" class="mb-4">
         <div class="row">
             <div class="col-md-4">
-                <label for="month" class="form-label">Pilih Bulan:</label>
+                <label for="month" class="form-label">Select Month:</label>
                 <select name="month" id="month" class="form-select">
                     @for ($m = 1; $m <= 12; $m++)
                         <option value="{{ str_pad($m, 2, '0', STR_PAD_LEFT) }}" 
@@ -20,7 +20,7 @@
             </div>
 
             <div class="col-md-4">
-                <label for="year" class="form-label">Pilih Tahun:</label>
+                <label for="year" class="form-label">Select Year:</label>
                 <select name="year" id="year" class="form-select">
                     @for ($y = now()->year - 5; $y <= now()->year + 1; $y++)
                         <option value="{{ $y }}" {{ request('year', now()->format('Y')) == $y ? 'selected' : '' }}>
@@ -49,9 +49,10 @@
             <tr><th><strong>Grand Total</strong></th><td><strong>Rp {{ number_format($gaji->grand_total, 0, ',', '.') }}</strong></td></tr>
         </table>
     @else
-        <p class="text-danger">Data gaji untuk bulan ini tidak ditemukan.</p>
+        <p class="text-danger">No salaries data found.</p>
     @endif
 
+    @if(auth()->user()?->role?->role_name === 'dokter luar' || auth()->user()?->role?->role_name === 'dokter tetap' )
     @if ($bagi_hasil->isNotEmpty())
         <h4>Detail Bagi Hasil - Bulan {{ date('F', mktime(0, 0, 0, $month, 1)) }} {{ $year }}</h4>
         <table class="table table-bordered">
@@ -83,7 +84,8 @@
             </tbody>
         </table>
     @else
-        <p class="text-danger">Tidak ada data bagi hasil untuk bulan ini.</p>
+        <p class="text-danger">No revenue percentage data found.</p>
+    @endif
     @endif
 
 </div>

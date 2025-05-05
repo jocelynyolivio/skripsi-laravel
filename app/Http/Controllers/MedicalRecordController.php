@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Patient;
 use App\Models\Procedure;
 use App\Models\StockCard;
-
 use App\Models\Transaction;
 use App\Models\JournalEntry;
 use Illuminate\Http\Request;
@@ -14,7 +12,6 @@ use App\Models\JournalDetail;
 use App\Models\MedicalRecord;
 use App\Models\ChartOfAccount;
 use App\Models\DentalMaterial;
-use PHPUnit\Framework\Attributes\Medium;
 
 class MedicalRecordController extends Controller
 {
@@ -53,26 +50,26 @@ class MedicalRecordController extends Controller
         return redirect()->back()->with('success', 'Reservation confirmed successfully!');
     }
 
-//     public function updateConfirmation($id)
-// {
-//     $reservation = MedicalRecord::findOrFail($id);
-    
-//     $action = request('action');
-    
-//     if ($action === 'confirm') {
-//         $reservation->confirmation_status = 'confirmed';
-//         $reservation->confirmed_at = now();
-//         $message = 'Reservation confirmed successfully!';
-//     } elseif ($action === 'cancel') {
-//         $reservation->confirmation_status = 'cancelled';
-//         $message = 'Reservation cancelled successfully!';
-//     }
-    
-//     $reservation->save();
-    
-//     return back()->with('success', $message);
-// }
-    
+    //     public function updateConfirmation($id)
+    // {
+    //     $reservation = MedicalRecord::findOrFail($id);
+
+    //     $action = request('action');
+
+    //     if ($action === 'confirm') {
+    //         $reservation->confirmation_status = 'confirmed';
+    //         $reservation->confirmed_at = now();
+    //         $message = 'Reservation confirmed successfully!';
+    //     } elseif ($action === 'cancel') {
+    //         $reservation->confirmation_status = 'cancelled';
+    //         $message = 'Reservation cancelled successfully!';
+    //     }
+
+    //     $reservation->save();
+
+    //     return back()->with('success', $message);
+    // }
+
     public function index($patientId)
     {
         // Mengambil rekam medis langsung berdasarkan patient_id
@@ -81,7 +78,8 @@ class MedicalRecordController extends Controller
             ->latest()
             ->get();
 
-        $patientName = Patient::findOrFail($patientId)->name;
+        $patient = Patient::findOrFail($patientId);
+        $patientName = trim("{$patient->fname} {$patient->mname} {$patient->lname}");
         $proceduress = Procedure::all();
 
         return view('dashboard.medical_records.index', compact('medicalRecords', 'patientId', 'patientName', 'proceduress'));

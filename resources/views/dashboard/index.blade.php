@@ -3,6 +3,9 @@
 @section('container')
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Welcome Back, {{ $user->name }} as {{ $role }}</h1>
+    <a class="{{ Request::is('dashboard/profile*') ? 'active' : '' }}" href="/dashboard/profile">
+    <i class="bi bi-person-circle me-3 fs-5" style="color: black; font-weight: bold;"></i>
+    </a>
 </div>
 
 @if ($role === 'manager')

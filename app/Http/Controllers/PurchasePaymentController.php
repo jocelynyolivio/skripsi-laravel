@@ -44,26 +44,42 @@ class PurchasePaymentController extends Controller
             'notes'               => 'nullable|string',
             'payment_method'      => 'nullable|string',
         ]);
+        // dd($request);
 
         $invoice = PurchaseInvoice::findOrFail($request->purchase_invoice_id);
-
-        $latestPayment = $invoice->payments()->latest()->first();
+        // dd($invoice);
+        $latestPayment = $invoice->latestPayment()->first();
+        // dd($latestPayment);
         $totalDebt = $latestPayment ? $latestPayment->total_debt : $invoice->grand_total;
+        // dd($totalDebt);
 
         if ($request->purchase_amount > $totalDebt) {
             return back()->with('error', 'Payment amount exceeds the remaining debt.');
         }
+        // dd('dor');
 
-        // Create Payment
-        $payment = PurchasePayment::create([
-            'purchase_invoice_id' => $invoice->id,
-            'coa_id'              => $request->coa_id,
-            'purchase_amount'     => $request->purchase_amount,
-            'total_debt'          => max(0, $totalDebt - $request->purchase_amount),
-            'payment_status'      => (max(0, $totalDebt - $request->purchase_amount) > 0) ? 'partial' : 'paid',
-            'notes'               => $request->notes,
-            'payment_date'        => $request->payment_date,
-        ]);
+        $purchaseAmount = $request->purchase_amount;
+        // dd($purchaseAmount);
+        $grandTotal = $invoice->grand_total;
+        // dd($grandTotal);
+        $totalDebt = $grandTotal - $purchaseAmount;
+        // dd($totalDebt);
+        $paymentStatus = ($totalDebt > 0) ? 'partial' : 'paid';
+
+        // dd($purchaseAmount);
+
+        if ($purchaseAmount > 0) {
+            PurchasePayment::create([
+                'purchase_invoice_id' => $invoice->id,
+                'coa_id'              => $request->coa_id,
+                'purchase_amount'     => $request->purchase_amount,
+                'total_debt'          => max(0, $totalDebt),
+                'payment_status'      => (max(0, $totalDebt - $request->purchase_amount) > 0) ? 'partial' : 'paid',
+                'notes'               => $request->notes,
+                'payment_date'        => $request->payment_date,
+                'payment_method' => $request->payment_method
+            ]);
+        }
 
         // Create Journal Entry
         $journalEntry = JournalEntry::create([
@@ -71,21 +87,73 @@ class PurchasePaymentController extends Controller
             'description' => 'Payment for Purchase Invoice: ' . $invoice->invoice_number,
         ]);
 
-        $accountsPayable = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+        $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
+        $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
 
+        // Debit: Persediaan
         JournalDetail::create([
             'journal_entry_id' => $journalEntry->id,
-            'coa_id'           => $accountsPayable,
-            'debit'            => $request->purchase_amount,
+            'coa_id'           => $inventoryAccount,
+            'debit'            => $invoice->grand_total,
             'credit'           => 0,
         ]);
 
-        JournalDetail::create([
-            'journal_entry_id' => $journalEntry->id,
-            'coa_id'           => $request->coa_id,
-            'debit'            => 0,
-            'credit'           => $request->purchase_amount,
-        ]);
+        // Jika ada diskon, catat sebagai kredit ke akun diskon
+        if ($request->discount > 0) {
+            $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
+                JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id'           => $purchaseDiscountAccount,
+                'debit'            => 0,
+                'credit'           => $request->discount,
+            ]);
+        }
+
+        // Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
+        if ($request->ongkos_kirim > 0) {
+            $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
+
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id'           => $shippingCostAccount,
+                'debit'            => $request->ongkos_kirim,
+                'credit'           => 0,
+            ]);
+        }
+
+        // Credit: Kas (jika ada pembayaran)
+        if ($purchaseAmount > 0) {
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id'           => $request->coa_id,
+                'debit'            => 0,
+                'credit'           => $purchaseAmount,
+            ]);
+        }
+
+        // Credit: Utang Usaha (jika masih ada sisa pembayaran)
+        if ($totalDebt > 0) {
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id'           => $accountsPayable,
+                'debit'            => 0,
+                'credit'           => $totalDebt,
+            ]);
+        }
+
+        // JournalDetail::create([
+        //     'journal_entry_id' => $journalEntry->id,
+        //     'coa_id'           => $accountsPayable,
+        //     'debit'            => $request->purchase_amount,
+        //     'credit'           => 0,
+        // ]);
+
+        // JournalDetail::create([
+        //     'journal_entry_id' => $journalEntry->id,
+        //     'coa_id'           => $request->coa_id,
+        //     'debit'            => 0,
+        //     'credit'           => $request->purchase_amount,
+        // ]);
 
         return redirect()->route('dashboard.purchases.index')->with('success', 'Payment added successfully.');
     }

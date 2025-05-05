@@ -40,13 +40,14 @@
                 <td>
                     <a href="{{ route('dashboard.expenses.show', $expense->id) }}" class="btn btn-sm btn-info me-1" title="View">Show
                     </a>
+                    @if(auth()->user()?->role?->role_name === 'manager')
                     <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                     </form>
-
+                    @endif
                 </td>
             </tr>
             @endforeach

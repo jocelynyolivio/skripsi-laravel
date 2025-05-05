@@ -7,6 +7,7 @@
         ]
     ])
 @endsection
+@section('container')
 <div class="container">
     <h1>Edit Purchase Order</h1>
     <form action="{{ route('dashboard.purchase_orders.update', $purchaseOrder) }}" method="POST">
@@ -34,7 +35,7 @@
             <label for="purchase_request_id" class="form-label">Purchase Request</label>
             <select name="purchase_request_id" id="purchase_request_id" class="form-control">
                 <option value="">-- Select Purchase Request --</option>
-                @foreach($purchaseRequests as $request)
+                @foreach($requests as $request)
                     <option value="{{ $request->id }}" {{ old('purchase_request_id', $purchaseOrder->purchase_request_id) == $request->id ? 'selected' : '' }}>
                         {{ $request->request_number }}
                     </option>

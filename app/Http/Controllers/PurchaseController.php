@@ -287,8 +287,13 @@ class PurchaseController extends Controller
 
     public function storeFromOrder(Request $request, PurchaseOrder $purchaseOrder)
     {
+        try{
         $this->saveInvoice($request, $purchaseOrder);
         return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from order!');
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
+        }
     }
 
 
@@ -301,10 +306,10 @@ class PurchaseController extends Controller
             'purchase_order_id'  => 'nullable|exists:purchase_orders,id',
             'invoice_date' => 'required|date',
             'received_date' => 'nullable|date',
-            'purchase_date'      => 'required|date',
+            // 'purchase_date'      => 'required|date',
             'supplier_id'        => 'required|exists:suppliers,id',
             'payment_requirement' => 'required|string',
-            'due_date' => 'required|date',
+            'due_date' => 'nullable|date',
             'discount' => 'required',
             'ongkos_kirim' => 'required',
             'total_amount' => 'required',
@@ -328,7 +333,7 @@ class PurchaseController extends Controller
             'payment_requirement' => $request->payment_requirement,
             'receive_date' => $request->receive_date,
             'due_date' => $request->due_date,
-            'purchase_date'        => $request->purchase_date,
+            // 'purchase_date'        => $request->purchase_date,
             'discount'             => $request->discount,
             'ongkos_kirim'         => $request->ongkos_kirim,
             'grand_total'          => $request->grand_total,
@@ -436,8 +441,13 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
+        try{
         $this->saveInvoice($request);
         return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created successfully.');
+    } catch (\Exception $e) {
+        dd($e);
+        return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
+    }
     }
 
     // public function storeFromRequest(Request $request, PurchaseRequest $purchaseRequest)
