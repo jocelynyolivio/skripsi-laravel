@@ -121,7 +121,7 @@ class DashboardController extends Controller
 
             return view('dashboard.index', $data);
         } catch (\Exception $e) {
-
+            // dd($e);
             // Redirect ke halaman 500 custom
             abort(500, 'Something went wrong');
         }

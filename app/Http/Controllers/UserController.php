@@ -5,146 +5,157 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $role = $request->input('role'); // Ambil parameter 'role' dari request
+        $role = $request->input('role');
+        $search = $request->input('search');
 
-        // Query untuk mengambil data sesuai filter
         $query = User::query();
+
         if ($role) {
             $query->where('role_id', $role);
         }
 
-        $users = $query->get();
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('nik', 'like', "%$search%");
+            });
+        }
 
-        return view('dashboard.masters.index', compact('users', 'role'));
+        $users = $query->latest()->paginate(10);
+
+        return view('dashboard.masters.index', compact('users', 'role', 'search'));
     }
 
     public function edit($id)
     {
-        $user = User::findOrFail($id); // Temukan pengguna berdasarkan ID
+        $user = User::findOrFail($id);
         return view('dashboard.masters.edit', compact('user'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'tanggal_bergabung' => 'nullable|date',
-            'nomor_sip' => 'nullable|string|max:255',
-            'nik' => 'nullable|string|max:255|unique:users',
-            'nomor_telepon' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string',
-            'nomor_rekening' => 'nullable|string|max:255|unique:users',
-            'deskripsi' => 'nullable|string',
-            'role_id' => 'required|exists:roles,id',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'role_id' => 'required|exists:roles,id',
+                'tempat_lahir' => 'nullable|string|max:255',
+                'tanggal_lahir' => 'nullable|date',
+                'tanggal_bergabung' => 'required|date',
+                'nomor_sip' => 'nullable|string|max:255',
+                'nik' => 'required|string|max:255|unique:users',
+                'nomor_telepon' => 'required|string|max:20',
+                'alamat' => 'required|string',
+                'nomor_rekening' => 'required|string|max:255|unique:users',
+                'deskripsi' => 'nullable|string',
+                'is_active' => 'boolean'
+            ]);
 
-        // dd($validated);
+            // dd($validated);
 
-        $validated['password'] = Hash::make($validated['password']);
+            if ($request->hasFile('photo')) {
+                $validated['photo'] = $request->file('photo')->store('profile-photos', 'public');
+            }
 
-        User::create($validated);
-        return redirect()->route('dashboard.masters.index')->with('success', 'User Created');
+            $validated['password'] = Hash::make($validated['password']);
+            $validated['is_active'] = $request->has('is_active');
+
+            User::create($validated);
+
+            return redirect()->route('dashboard.masters.index')
+                ->with('success', 'User created successfully.');
+        } catch (\Exception $e) {
+            // dd($e);
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**
      * Update the specified user in storage.
      */
-    public function update(Request $request, $id = null)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|string|email|max:255',
-            'password' => 'nullable|string|min:8',
-            'tanggal_bergabung' => 'nullable|date',
-            'nomor_sip' => 'nullable|string|max:255',
-            'nik' => 'nullable|string|max:255|unique:users,nik,' . ($id ?? 'NULL'),
-            'nomor_telepon' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string',
-            'nomor_rekening' => 'nullable|string|max:255|unique:users,nomor_rekening,' . ($id ?? 'NULL'),
-            'deskripsi' => 'nullable|string',
-            'role_id' => 'nullable|exists:roles,id',
-        ]);
+        try {
+            $user = User::findOrFail($id);
 
-        // Cek apakah user ada di database
-        $user = User::find($id);
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+                'password' => 'nullable|string|min:8|confirmed',
+                'role_id' => 'required|exists:roles,id',
+                'tempat_lahir' => 'nullable|string|max:255',
+                'tanggal_lahir' => 'nullable|date',
+                'tanggal_bergabung' => 'required|date',
+                'nomor_sip' => 'nullable|string|max:255',
+                'nik' => 'required|string|max:255|unique:users,nik,' . $user->id,
+                'nomor_telepon' => 'required|string|max:20',
+                'alamat' => 'required|string',
+                'nomor_rekening' => 'required|string|max:255|unique:users,nomor_rekening,' . $user->id,
+                'deskripsi' => 'nullable|string',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'is_active' => 'boolean'
+            ]);
 
-        if (!$user) {
-            // Jika user tidak ditemukan, buat user baru (wajib ada password)
-            $validated['password'] = Hash::make($request->password ?? 'defaultpassword123');
-            $user = User::create($validated);
-        } else {
-            // Jika password tidak diisi, gunakan password lama
-            if (!$request->filled('password')) {
-                $validated['password'] = $user->password;
-            } else {
-                $validated['password'] = Hash::make($request->password);
+            if ($request->hasFile('photo')) {
+                // Delete old photo if exists
+                if ($user->photo) {
+                    Storage::disk('public')->delete($user->photo);
+                }
+                $validated['photo'] = $request->file('photo')->store('profile-photos', 'public');
             }
 
-            // Update data
-            $user->update($validated);
-        }
+            if ($request->filled('password')) {
+                $validated['password'] = Hash::make($validated['password']);
+            } else {
+                unset($validated['password']);
+            }
 
-        return redirect()->route('dashboard.masters.index')->with('success', 'User created or updated successfully.');
+            $validated['is_active'] = $request->has('is_active');
+
+            $user->update($validated);
+
+            return redirect()->route('dashboard.masters.index')
+                ->with('success', 'User updated successfully.');
+        } catch (\Exception $e) {
+            // dd($e);
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
 
     public function destroy($id)
     {
-        // dd('hai');
         $user = User::findOrFail($id);
+
+        // Delete photo if exists
+        if ($user->photo) {
+            Storage::disk('public')->delete($user->photo);
+        }
+
         $user->delete();
-        return redirect()->route('dashboard.masters.index')->with('success', 'User deleted successfully!');
+
+        return redirect()->route('dashboard.masters.index')
+            ->with('success', 'User deleted successfully.');
     }
 
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->update(['is_active' => !$user->is_active]);
+
+        return back()->with('success', 'User status updated successfully.');
+    }
 
     public function create()
     {
         return view('dashboard.masters.create');
     }
-
-    // Menampilkan user berdasarkan role
-    // public function showByRole($role_id)
-    // {
-    //     $users = User::where('role_id', $role_id)->get();
-    //     return view('dashboard.masters.index', compact('users', 'role_id'));
-    // }
-
-    // Menampilkan form edit user
-    // public function edit($role_id, $id)
-    // {
-    //     $user = User::findOrFail($id); // Mencari user berdasarkan ID
-    //     return view('dashboard.masters.edit', compact('user', 'role_id'));
-    // }
-
-    // Menyimpan perubahan user
-    // public function update(Request $request, $role_id, $id)
-    // {
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|email|max:255',
-    //         'role_id' => 'required|integer',
-    //     ]);
-
-    //     $user = User::findOrFail($id); // Mencari user berdasarkan ID
-    //     $user->update($request->all()); // Update data user
-
-    //     return redirect()->route('dashboard.masters.role', $role_id)->with('success', 'User updated successfully!');
-    // }
-
-    // Menghapus user
-    // public function destroy($role_id, $id)
-    // {
-    //     $user = User::findOrFail($id); // Mencari user berdasarkan ID
-    //     $user->delete(); // Menghapus user
-
-    //     return redirect()->route('dashboard.masters.role', $role_id)->with('success', 'User deleted successfully!');
-    // }
-
 }

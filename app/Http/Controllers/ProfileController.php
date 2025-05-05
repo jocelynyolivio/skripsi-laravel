@@ -8,38 +8,47 @@ use App\Models\User;
 
 class ProfileController extends Controller
 {
-    // Menampilkan profil pengguna
     public function index()
     {
-        $user = Auth::user(); // Ambil data pengguna yang sedang login
+        $user = Auth::user();
         return view('dashboard.profile.index', compact('user'));
     }
 
-    // Menampilkan form edit profil
     public function edit()
     {
-        $user = Auth::user(); // Ambil data pengguna yang sedang login
+        $user = Auth::user();
         return view('dashboard.profile.edit', compact('user'));
     }
 
-    // Mengupdate profil pengguna
     public function update(Request $request, User $user)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|confirmed|min:6',
-        ]);
-
-        $user->name = $request->name;
-        $user->email = $request->email;
-
-        if ($request->filled('password')) {
-            $user->password = bcrypt($request->password);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+                'password' => 'nullable|min:8|confirmed',
+                'tempat_lahir' => 'nullable|string|max:255',
+                'tanggal_lahir' => 'nullable|date',
+                'nik' => 'nullable|string|max:255|unique:users,nik,' . $user->id,
+                'nomor_telepon' => 'nullable|string|max:20',
+                'alamat' => 'nullable|string',
+                'nomor_rekening' => 'nullable|string|max:255|unique:users,nomor_rekening,' . $user->id,
+            ]);
+    
+            // Masukkan semua data kecuali password
+            $user->fill(collect($validated)->except('password')->toArray());
+    
+            // Kalau password diisi, baru set password baru
+            if ($request->filled('password')) {
+                $user->password = bcrypt($request->password);
+            }
+    
+            $user->save();
+    
+            return redirect()->route('dashboard.profile.index')->with('success', 'Profile successfully updated.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        $user->save();
-
-        return redirect()->route('dashboard.profile.show')->with('success', 'Profile successfully updated.');
     }
+    
 }

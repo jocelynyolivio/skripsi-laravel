@@ -17,6 +17,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'tempat_lahir',
+        'tanggal_lahir',
         'tanggal_bergabung',
         'nomor_sip',
         'nik',
@@ -24,6 +26,7 @@ class User extends Authenticatable
         'alamat',
         'nomor_rekening',
         'deskripsi',
+        'is_active'
     ];
 
     protected $hidden = [
@@ -32,8 +35,15 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'tanggal_lahir' => 'date',
+        'tanggal_bergabung' => 'date',
+        'is_active' => 'boolean'
     ];
+
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo ? asset('storage/' . $this->photo) : asset('images/default-profile.png');
+    }
 
     public function role()
     {
