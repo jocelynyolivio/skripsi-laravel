@@ -24,19 +24,19 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="fname" class="form-label">First Name*</label>
-                            <input type="text" name="fname" id="fname" class="form-control" required>
+                            <input type="text" name="fname" id="fname" class="form-control" placeholder="John" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="mname" class="form-label">Middle Name</label>
-                            <input type="text" name="mname" id="mname" class="form-control">
+                            <input type="text" name="mname" id="mname" class="form-control" placeholder="William">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="lname" class="form-label">Last Name</label>
-                            <input type="text" name="lname" id="lname" class="form-control">
+                            <input type="text" name="lname" id="lname" class="form-control" placeholder="Doe">
                         </div>
                     </div>
                 </div>
@@ -56,13 +56,13 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="nik" class="form-label">NIK*</label>
-                            <input type="text" name="nik" id="nik" class="form-control" required>
+                            <input type="text" name="nik" id="nik" class="form-control" placeholder="3171234567890123" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="blood_type" class="form-label">Blood Type*</label>
-                            <input type="text" name="blood_type" id="blood_type" class="form-control" required>
+                            <input type="text" name="blood_type" id="blood_type" class="form-control" placeholder="A" required>
                         </div>
                     </div>
                 </div>
@@ -71,13 +71,13 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="parent_name" class="form-label">Parent Name</label>
-                            <input type="text" name="parent_name" id="parent_name" class="form-control">
+                            <input type="text" name="parent_name" id="parent_name" class="form-control" placeholder="Robert Doe">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="occupation" class="form-label">Occupation</label>
-                            <input type="text" name="occupation" id="occupation" class="form-control">
+                            <input type="text" name="occupation" id="occupation" class="form-control" placeholder="Doctor">
                         </div>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="place_of_birth" class="form-label">Place of Birth*</label>
-                            <input type="text" name="place_of_birth" id="place_of_birth" class="form-control" required>
+                            <input type="text" name="place_of_birth" id="place_of_birth" class="form-control" placeholder="Jakarta" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -101,7 +101,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="religion" class="form-label">Religion</label>
-                            <input type="text" name="religion" id="religion" class="form-control">
+                            <input type="text" name="religion" id="religion" class="form-control" placeholder="Islam">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -119,7 +119,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="family_status" class="form-label">Family Status</label>
-                            <input type="text" name="family_status" id="family_status" class="form-control">
+                            <input type="text" name="family_status" id="family_status" class="form-control" placeholder="Head of Family">
                         </div>
                     </div>
                 </div>
@@ -128,7 +128,7 @@
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label for="nationality" class="form-label">Nationality*</label>
-                            <input type="text" name="nationality" id="nationality" class="form-control" required>
+                            <input type="text" name="nationality" id="nationality" class="form-control" placeholder="Indonesian" required>
                         </div>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label for="home_address" class="form-label">Address*</label>
-                    <textarea name="home_address" id="home_address" class="form-control" required>{{ old('home_address') }}</textarea>
+                    <textarea name="home_address" id="home_address" class="form-control" placeholder="Jl. Sudirman No. 123" required>{{ old('home_address') }}</textarea>
                 </div>
 
                 <div class="mb-3 form-check">
@@ -154,7 +154,7 @@
 
                 <div class="mb-3" id="domicile_address_container">
                     <label for="home_address_domisili" class="form-label">Domicile Address (if different)</label>
-                    <textarea name="home_address_domisili" id="home_address_domisili" class="form-control"
+                    <textarea name="home_address_domisili" id="home_address_domisili" class="form-control" placeholder="Jl. Thamrin No. 456"
                         {{ old('same_as_home_address', false) ? 'readonly' : '' }}>{{ old('home_address_domisili') }}</textarea>
                 </div>
 
@@ -162,25 +162,25 @@
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label for="home_RT" class="form-label">RT</label>
-                            <input type="text" name="home_RT" id="home_RT" class="form-control">
+                            <input type="text" name="home_RT" id="home_RT" class="form-control" placeholder="001" maxlength="3" pattern="[0-9]{1,3}">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label for="home_RW" class="form-label">RW</label>
-                            <input type="text" name="home_RW" id="home_RW" class="form-control">
+                            <input type="text" name="home_RW" id="home_RW" class="form-control" placeholder="002" maxlength="3" pattern="[0-9]{1,3}">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label for="home_kelurahan" class="form-label">Kelurahan</label>
-                            <input type="text" name="home_kelurahan" id="home_kelurahan" class="form-control">
+                            <input type="text" name="home_kelurahan" id="home_kelurahan" class="form-control" placeholder="Menteng">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label for="home_kecamatan" class="form-label">Kecamatan</label>
-                            <input type="text" name="home_kecamatan" id="home_kecamatan" class="form-control">
+                            <input type="text" name="home_kecamatan" id="home_kecamatan" class="form-control" placeholder="Jakarta Pusat">
                         </div>
                     </div>
                 </div>
@@ -189,19 +189,19 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="home_city" class="form-label">City</label>
-                            <input type="text" name="home_city" id="home_city" class="form-control">
+                            <input type="text" name="home_city" id="home_city" class="form-control" placeholder="Jakarta">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="home_zip_code" class="form-label">Zip Code</label>
-                            <input type="text" name="home_zip_code" id="home_zip_code" class="form-control">
+                            <input type="text" name="home_zip_code" id="home_zip_code" class="form-control" placeholder="10310">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="home_country" class="form-label">Country</label>
-                            <input type="text" name="home_country" id="home_country" class="form-control">
+                            <input type="text" name="home_country" id="home_country" class="form-control" placeholder="Indonesia">
                         </div>
                     </div>
                 </div>
@@ -210,7 +210,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="home_phone" class="form-label">Phone</label>
-                            <input type="text" name="home_phone" id="home_phone" class="form-control">
+                            <input type="text" name="home_phone" id="home_phone" class="form-control" placeholder="0211234567">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -225,7 +225,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="home_email" class="form-label">Email</label>
-                            <input type="email" name="home_email" id="home_email" class="form-control">
+                            <input type="email" name="home_email" id="home_email" class="form-control" placeholder="john.doe@example.com">
                         </div>
                     </div>
                 </div>
@@ -240,26 +240,26 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label for="office_address" class="form-label">Address</label>
-                    <textarea name="office_address" id="office_address" class="form-control"></textarea>
+                    <textarea name="office_address" id="office_address" class="form-control" placeholder="Jl. Gatot Subroto No. 789"></textarea>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_city" class="form-label">City</label>
-                            <input type="text" name="office_city" id="office_city" class="form-control">
+                            <input type="text" name="office_city" id="office_city" class="form-control" placeholder="Jakarta">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_zip_code" class="form-label">Zip Code</label>
-                            <input type="text" name="office_zip_code" id="office_zip_code" class="form-control">
+                            <input type="text" name="office_zip_code" id="office_zip_code" class="form-control" placeholder="12950">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_country" class="form-label">Country</label>
-                            <input type="text" name="office_country" id="office_country" class="form-control">
+                            <input type="text" name="office_country" id="office_country" class="form-control" placeholder="Indonesia">
                         </div>
                     </div>
                 </div>
@@ -268,19 +268,19 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_phone" class="form-label">Phone</label>
-                            <input type="text" name="office_phone" id="office_phone" class="form-control">
+                            <input type="text" name="office_phone" id="office_phone" class="form-control" placeholder="0219876543">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_mobile" class="form-label">Mobile</label>
-                            <input type="text" name="office_mobile" id="office_mobile" class="form-control">
+                            <input type="text" name="office_mobile" id="office_mobile" class="form-control" placeholder="8123456789">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_email" class="form-label">Email</label>
-                            <input type="email" name="office_email" id="office_email" class="form-control">
+                            <input type="email" name="office_email" id="office_email" class="form-control" placeholder="office@example.com">
                         </div>
                     </div>
                 </div>
@@ -297,19 +297,19 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="emergency_contact_name" class="form-label">Contact Name*</label>
-                            <input type="text" name="emergency_contact_name" id="emergency_contact_name" class="form-control" required>
+                            <input type="text" name="emergency_contact_name" id="emergency_contact_name" class="form-control" placeholder="Jane Doe" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="emergency_contact_relation" class="form-label">Relation*</label>
-                            <input type="text" name="emergency_contact_relation" id="emergency_contact_relation" class="form-control" required>
+                            <input type="text" name="emergency_contact_relation" id="emergency_contact_relation" class="form-control" placeholder="Spouse" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="emergency_contact_phone" class="form-label">Contact Phone*</label>
-                            <input type="text" name="emergency_contact_phone" id="emergency_contact_phone" class="form-control" required>
+                            <input type="text" name="emergency_contact_phone" id="emergency_contact_phone" class="form-control" placeholder="8123456789" required>
                         </div>
                     </div>
                 </div>
@@ -349,13 +349,13 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" id="email" class="form-control">
+                            <input type="email" name="email" id="email" class="form-control" placeholder="john.doe@example.com">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" id="password" class="form-control">
+                            <input type="password" name="password" id="password" class="form-control" placeholder="Minimum 8 characters">
                         </div>
                     </div>
                 </div>
@@ -384,9 +384,27 @@
             }
         });
 
+        // Validate RT/RW fields
+        const rtField = document.getElementById('home_RT');
+        const rwField = document.getElementById('home_RW');
+        
+        if (rtField.value && !/^\d{1,3}$/.test(rtField.value)) {
+            rtField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            rtField.classList.remove('is-invalid');
+        }
+        
+        if (rwField.value && !/^\d{1,3}$/.test(rwField.value)) {
+            rwField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            rwField.classList.remove('is-invalid');
+        }
+
         if (!isValid) {
             e.preventDefault();
-            alert('Please fill all required fields.');
+            alert('Please fill all required fields and ensure RT/RW are 1-3 digits only.');
         }
     });
 </script>
@@ -430,6 +448,19 @@
         homeAddressField.addEventListener('input', function() {
             if (sameAddressCheckbox.checked) {
                 domisiliAddressField.value = this.value;
+            }
+        });
+
+        // Limit RT/RW fields to 3 digits
+        document.getElementById('home_RT').addEventListener('input', function() {
+            if (this.value.length > 3) {
+                this.value = this.value.slice(0, 3);
+            }
+        });
+        
+        document.getElementById('home_RW').addEventListener('input', function() {
+            if (this.value.length > 3) {
+                this.value = this.value.slice(0, 3);
             }
         });
     });

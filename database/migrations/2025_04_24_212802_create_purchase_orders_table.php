@@ -26,6 +26,7 @@ return new class extends Migration
             $table->decimal('ongkos_kirim', 15, 2)->nullable();
             $table->decimal('harga_total', 15, 2)->nullable();
             $table->text('notes')->nullable();
+            $table->string('attachment')->nullable();
             $table->timestamps();
 
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');

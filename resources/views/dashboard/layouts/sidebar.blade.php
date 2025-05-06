@@ -19,13 +19,13 @@
                         <span class="fs-6">Attendances & Slips</span>
                     </a>
                 </li>
-                @else
-                <li class="nav-item">
+         
+                <!-- <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/salaries/slips') ? 'active' : '' }}" href="/dashboard/salaries/slips">
                         <i class="bi bi-cash-stack me-3 fs-5"></i>
                         <span class="fs-6">Attendances & Slips</span>
                     </a>
-                </li>
+                </li> -->
                 @endif
                 <!-- <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/home_content/') ? 'active' : '' }}" href="/dashboard/home_content/">

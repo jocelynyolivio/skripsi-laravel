@@ -17,6 +17,7 @@ class LoginController extends Controller
 
     public function authenticate(Request $request)
     {
+        try{
         // Validasi input
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -57,6 +58,11 @@ class LoginController extends Controller
 
         // Jika login gagal
         return back()->with('loginError', 'The provided credentials do not match our records.');
+    } catch (\Exception $e) {
+        // dd($e);
+        // Redirect ke halaman 500 custom
+        abort(500, 'Something went wrong');
+    }
     }
 
     public function logout(Request $request)

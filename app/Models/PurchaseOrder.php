@@ -20,6 +20,7 @@ class PurchaseOrder extends Model
         'ongkos_kirim',
         'notes',
         'harga_total',
+        'attachment'
     ];
 
     public function supplier()

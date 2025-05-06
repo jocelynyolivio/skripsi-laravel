@@ -1,20 +1,22 @@
 @extends('dashboard.layouts.main')
 
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Profile']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Profile']
+]
+])
 @endsection
 
 @section('container')
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-12 mb-3">
-            <h3>{{ $user->name }}</h3>
-            <p class="text-muted">{{ $user->role->name ?? 'No Role' }}</p>
-        </div>
+        
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="text-center">{{ $user->name }} - {{ $user->role->name ?? 'No Role' }}</h3>
+        <a href="{{ route('dashboard.salaries.slips') }}" class="btn btn-success">Attendances & Slips</a>
+
+    </div>
 
         <div class="col-md-12">
             <div class="card shadow-sm">
@@ -24,10 +26,10 @@
 
                 <div class="card-body">
                     @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
                     @endif
 
                     {{-- Profile fields --}}

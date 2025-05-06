@@ -77,7 +77,12 @@ class PurchaseOrderController extends Controller
 
         // dd($validated['harga_total']);
         // Generate nomor unik
-        $orderNumber = 'PO-' . now()->format('Ymd') . '-' . $validated['purchase_request_id'];
+        $orderNumber = 'PO-' . now()->format('Ymd') . '-' . ($validated['purchase_request_id'] ?? uniqid());
+
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('attachments/purchase_orders', 'public');
+            // $validated['attachment_path'] = $path;
+        }        
 
         DB::beginTransaction();
         try {
@@ -87,14 +92,15 @@ class PurchaseOrderController extends Controller
                 'supplier_id' => $validated['supplier_id'],
                 'order_date' => $validated['order_date'],
                 'due_date' => $validated['due_date'],
-                'ship_date' => $validated['due_date'],
+                'ship_date' => $validated['ship_date'],
                 'shipping_address' => $validated['shipping_address'],
                 'payment_requirement' => $validated['payment_requirement'],
                 'discount' => $validated['discount'],
                 'ongkos_kirim' => $validated['ongkos_kirim'],
                 'harga_total' => $validated['harga_total'],
                 'notes' => $validated['notes'],
-                'purchase_request_id' => $validated['purchase_request_id'] ?? null
+                'purchase_request_id' => $validated['purchase_request_id'] ?? null,
+                'attachment' => $path,
             ]);
 
             // dd('udh create po');
@@ -119,7 +125,7 @@ class PurchaseOrderController extends Controller
             return redirect()->route('dashboard.purchase_orders.show', $purchaseOrder)
                 ->with('success', 'Purchase Order created successfully!');
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             DB::rollBack();
             return back()->withInput()
                 ->with('error', 'Failed to create Purchase Order: ' . $e->getMessage());

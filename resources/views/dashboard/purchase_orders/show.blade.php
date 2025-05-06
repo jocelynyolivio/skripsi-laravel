@@ -1,12 +1,12 @@
 @extends('dashboard.layouts.main')
 
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')],
-            ['text' => 'Purchase Order Details']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')],
+['text' => 'Purchase Order Details']
+]
+])
 @endsection
 
 @section('container')
@@ -44,6 +44,19 @@
                         <label class="form-label text-muted">Notes</label>
                         <p class="form-control-static">{{ $purchaseOrder->notes ?: '-' }}</p>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Attachment</label>
+                        @if($purchaseOrder->attachment)
+                        <p>
+                            <a href="{{ asset('storage/' . $purchaseOrder->attachment) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-paperclip me-1"></i> View Attachment
+                            </a>
+                        </p>
+                        @else
+                        <p class="form-control-static">-</p>
+                        @endif
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -102,15 +115,15 @@
                 <a href="{{ route('dashboard.purchase_orders.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i> Back to List
                 </a>
-                
+
                 @if($purchaseOrder->purchaseInvoices->isEmpty())
-                    <a href="{{ route('dashboard.purchases.createFromOrder', $purchaseOrder) }}" class="btn btn-primary">
-                        <i class="fas fa-file-invoice me-2"></i> Create Invoice
-                    </a>
+                <a href="{{ route('dashboard.purchases.createFromOrder', $purchaseOrder) }}" class="btn btn-primary">
+                    <i class="fas fa-file-invoice me-2"></i> Create Invoice
+                </a>
                 @else
-                    <button class="btn btn-success" disabled>
-                        <i class="fas fa-check-circle me-2"></i> Invoice Already Created
-                    </button>
+                <button class="btn btn-success" disabled>
+                    <i class="fas fa-check-circle me-2"></i> Invoice Already Created
+                </button>
                 @endif
             </div>
         </div>
