@@ -264,32 +264,32 @@ class PurchaseController extends Controller
     // }
 
     public function createFromOrder(PurchaseOrder $purchaseOrder)
-{
-    // Pastikan order belum memiliki invoice
-    if ($purchaseOrder->purchaseInvoice) {
-        return redirect()->back()->with('error', 'Invoice sudah dibuat untuk purchase order ini');
+    {
+        // Pastikan order belum memiliki invoice
+        if ($purchaseOrder->purchaseInvoice) {
+            return redirect()->back()->with('error', 'Invoice sudah dibuat untuk purchase order ini');
+        }
+
+        $suppliers = Supplier::all();
+        $materials = DentalMaterial::all();
+        $cashAccounts = ChartOfAccount::all();
+
+        // dd($purchaseOrder);
+
+        return view('dashboard.purchases.create-from-order', [
+            'purchaseOrder' => $purchaseOrder,
+            'suppliers' => $suppliers,
+            'materials' => $materials,
+            'cashAccounts' => $cashAccounts
+        ]);
     }
-
-    $suppliers = Supplier::all();
-    $materials = DentalMaterial::all();
-    $cashAccounts = ChartOfAccount::all();
-
-    // dd($purchaseOrder);
-
-    return view('dashboard.purchases.create-from-order', [
-        'purchaseOrder' => $purchaseOrder,
-        'suppliers' => $suppliers,
-        'materials' => $materials,
-        'cashAccounts' => $cashAccounts
-    ]);
-}
 
 
     public function storeFromOrder(Request $request, PurchaseOrder $purchaseOrder)
     {
-        try{
-        $this->saveInvoice($request, $purchaseOrder);
-        return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from order!');
+        try {
+            $this->saveInvoice($request, $purchaseOrder);
+            return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from order!');
         } catch (\Exception $e) {
             dd($e);
             return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
@@ -357,64 +357,61 @@ class PurchaseController extends Controller
         }
         // dd('dah detail invoice');
 
-        // Simpan pembayaran
-        // $purchaseAmount = $request->payment_amount;
-        // $grandTotal = $request->grand_total;
-        // $totalDebt = $grandTotal - $purchaseAmount;
-        // $paymentStatus = ($totalDebt > 0) ? 'partial' : 'paid';
+        // Buat jurnal entry
+        $journal = JournalEntry::create([
+            'transaction_id' => $invoice->id,
+            'entry_date' => $request->invoice_date,
+            'description' => 'Pembelian dari ' . $invoice->supplier->name . ' - Invoice #' . $invoice->invoice_number,
+        ]);
 
-        // if ($purchaseAmount > 0) {
-        //     PurchasePayment::create([
-        //         'purchase_invoice_id' => $invoice->id,
-        //         'coa_id'              => $request->coa_id,
-        //         'purchase_amount'     => $purchaseAmount,
-        //         'total_debt'          => $totalDebt,
-        //         'payment_status'      => $paymentStatus,
-        //         'notes'               => $request->payment_notes ?? null,
-        //     ]);
-        // }
+        // Buat entri jurnal
+        $journalEntry = JournalEntry::create([
+            'entry_date'  => $request->invoice_date,
+            'description' => 'Purchase Payment for Invoice ' . $invoice->invoice_number,
+        ]);
 
-        // // Buat entri jurnal
-        // $journalEntry = JournalEntry::create([
-        //     'entry_date'  => $request->purchase_date,
-        //     'description' => 'Purchase Payment for Invoice ' . $invoice->invoice_number,
-        // ]);
-
-        // $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
-        // $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+        $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
+        $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
 
         // Debit: Persediaan
-        // JournalDetail::create([
-        //     'journal_entry_id' => $journalEntry->id,
-        //     'coa_id'           => $inventoryAccount,
-        //     'debit'            => $request->total_amount,
-        //     'credit'           => 0,
-        // ]);
+        JournalDetail::create([
+            'journal_entry_id' => $journalEntry->id,
+            'coa_id'           => $inventoryAccount,
+            'debit'            => $request->total_amount,
+            'credit'           => 0,
+        ]);
 
         // Jika ada diskon, catat sebagai kredit ke akun diskon
-        // if ($request->discount > 0) {
-        //     $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
+        if ($request->discount > 0) {
+            $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
 
-        //     JournalDetail::create([
-        //         'journal_entry_id' => $journalEntry->id,
-        //         'coa_id'           => $purchaseDiscountAccount,
-        //         'debit'            => 0,
-        //         'credit'           => $request->discount,
-        //     ]);
-        // }
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id'           => $purchaseDiscountAccount,
+                'debit'            => 0,
+                'credit'           => $request->discount,
+            ]);
+        }
 
         // Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
-        // if ($request->ongkos_kirim > 0) {
-        //     $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
+        if ($request->ongkos_kirim > 0) {
+            $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
 
-        //     JournalDetail::create([
-        //         'journal_entry_id' => $journalEntry->id,
-        //         'coa_id'           => $shippingCostAccount,
-        //         'debit'            => $request->ongkos_kirim,
-        //         'credit'           => 0,
-        //     ]);
-        // }
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id'           => $shippingCostAccount,
+                'debit'            => $request->ongkos_kirim,
+                'credit'           => 0,
+            ]);
+        }
 
+        // Kredit: Utang Usaha (total bersih)
+        JournalDetail::create([
+            'journal_entry_id' => $journalEntry->id,
+            'coa_id'           => $accountsPayable,
+            'debit'            => 0,
+            'credit'           => $request->grand_total,
+        ]);
 
         // Credit: Kas (jika ada pembayaran)
         // if ($purchaseAmount > 0) {
@@ -441,13 +438,13 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
-        try{
-        $this->saveInvoice($request);
-        return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created successfully.');
-    } catch (\Exception $e) {
-        dd($e);
-        return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
-    }
+        try {
+            $this->saveInvoice($request);
+            return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created successfully.');
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
+        }
     }
 
     // public function storeFromRequest(Request $request, PurchaseRequest $purchaseRequest)
@@ -604,6 +601,7 @@ class PurchaseController extends Controller
         ]);
 
         $idUtangUsaha = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+        
 
         // Debit: Utang Usaha
         JournalDetail::create([

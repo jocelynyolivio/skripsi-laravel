@@ -42,7 +42,7 @@ class MedicalRecord extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
-    
+
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id');
@@ -51,5 +51,10 @@ class MedicalRecord extends Model
     public function editor()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function adjustments()
+    {
+        return $this->hasMany(MedicalRecordAdjustment::class);
     }
 }

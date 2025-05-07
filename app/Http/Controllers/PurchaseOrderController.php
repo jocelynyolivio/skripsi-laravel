@@ -77,15 +77,15 @@ class PurchaseOrderController extends Controller
 
         // dd($validated['harga_total']);
         // Generate nomor unik
-        $orderNumber = 'PO-' . now()->format('Ymd') . '-' . ($validated['purchase_request_id'] ?? uniqid());
-
-        if ($request->hasFile('attachment')) {
-            $path = $request->file('attachment')->store('attachments/purchase_orders', 'public');
-            // $validated['attachment_path'] = $path;
-        }        
+        $orderNumber = 'PO-' . now()->format('Ymd') . '-' . ($validated['purchase_request_id'] ?? uniqid());       
 
         DB::beginTransaction();
         try {
+
+            if ($request->hasFile('attachment')) {
+                $path = $request->file('attachment')->store('attachments/purchase_orders', 'public');
+                // $validated['attachment_path'] = $path;
+            } 
             // Create Purchase Order
             $purchaseOrder = PurchaseOrder::create([
                 'order_number' => $orderNumber,
@@ -100,7 +100,7 @@ class PurchaseOrderController extends Controller
                 'harga_total' => $validated['harga_total'],
                 'notes' => $validated['notes'],
                 'purchase_request_id' => $validated['purchase_request_id'] ?? null,
-                'attachment' => $path,
+                'attachment' => $path ?? null,
             ]);
 
             // dd('udh create po');
@@ -118,15 +118,13 @@ class PurchaseOrderController extends Controller
                 ]);
             }
             // dd('udh create pod');
-
-
             DB::commit();
 
             return redirect()->route('dashboard.purchase_orders.show', $purchaseOrder)
                 ->with('success', 'Purchase Order created successfully!');
         } catch (\Exception $e) {
-            // dd($e);
-            DB::rollBack();
+            dd($e);
+            // DB::rollBack();
             return back()->withInput()
                 ->with('error', 'Failed to create Purchase Order: ' . $e->getMessage());
         }

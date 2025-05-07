@@ -80,67 +80,92 @@ class PurchasePaymentController extends Controller
                 'payment_method' => $request->payment_method
             ]);
         }
-
         // Create Journal Entry
-        $journalEntry = JournalEntry::create([
-            'entry_date'  => $request->payment_date,
-            'description' => 'Payment for Purchase Invoice: ' . $invoice->invoice_number,
-        ]);
+$journalEntry = JournalEntry::create([
+    'entry_date'  => $request->payment_date,
+    'description' => 'Pembayaran atas Invoice Pembelian: ' . $invoice->invoice_number,
+]);
 
-        $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
-        $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+$accountsPayable = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
+$cashOrBank      = $request->coa_id; // sudah dipilih user di form (Kas atau Bank)
 
-        // Debit: Persediaan
-        JournalDetail::create([
-            'journal_entry_id' => $journalEntry->id,
-            'coa_id'           => $inventoryAccount,
-            'debit'            => $invoice->grand_total,
-            'credit'           => 0,
-        ]);
+// Debit: Utang Usaha (mengurangi hutang)
+JournalDetail::create([
+    'journal_entry_id' => $journalEntry->id,
+    'coa_id'           => $accountsPayable,
+    'debit'            => $purchaseAmount,
+    'credit'           => 0,
+]);
 
-        // Jika ada diskon, catat sebagai kredit ke akun diskon
-        if ($request->discount > 0) {
-            $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
-                JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                'coa_id'           => $purchaseDiscountAccount,
-                'debit'            => 0,
-                'credit'           => $request->discount,
-            ]);
-        }
+// Credit: Kas/Bank (mengurangi uang kas/bank)
+JournalDetail::create([
+    'journal_entry_id' => $journalEntry->id,
+    'coa_id'           => $cashOrBank,
+    'debit'            => 0,
+    'credit'           => $purchaseAmount,
+]);
 
-        // Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
-        if ($request->ongkos_kirim > 0) {
-            $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
 
-            JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                'coa_id'           => $shippingCostAccount,
-                'debit'            => $request->ongkos_kirim,
-                'credit'           => 0,
-            ]);
-        }
+        // // Create Journal Entry
+        // $journalEntry = JournalEntry::create([
+        //     'entry_date'  => $request->payment_date,
+        //     'description' => 'Payment for Purchase Invoice: ' . $invoice->invoice_number,
+        // ]);
 
-        // Credit: Kas (jika ada pembayaran)
-        if ($purchaseAmount > 0) {
-            JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                'coa_id'           => $request->coa_id,
-                'debit'            => 0,
-                'credit'           => $purchaseAmount,
-            ]);
-        }
+        // $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
+        // $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
 
-        // Credit: Utang Usaha (jika masih ada sisa pembayaran)
-        if ($totalDebt > 0) {
-            JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                'coa_id'           => $accountsPayable,
-                'debit'            => 0,
-                'credit'           => $totalDebt,
-            ]);
-        }
+        // // Debit: Persediaan
+        // JournalDetail::create([
+        //     'journal_entry_id' => $journalEntry->id,
+        //     'coa_id'           => $inventoryAccount,
+        //     'debit'            => $invoice->grand_total,
+        //     'credit'           => 0,
+        // ]);
 
+        // // Jika ada diskon, catat sebagai kredit ke akun diskon
+        // if ($request->discount > 0) {
+        //     $purchaseDiscountAccount = ChartOfAccount::where('name', 'Diskon Pembelian')->value('id');
+        //         JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $purchaseDiscountAccount,
+        //         'debit'            => 0,
+        //         'credit'           => $request->discount,
+        //     ]);
+        // }
+
+        // // Jika ada ongkos kirim, catat sebagai debit ke akun ongkos kirim
+        // if ($request->ongkos_kirim > 0) {
+        //     $shippingCostAccount = ChartOfAccount::where('name', 'Beban Pengiriman Pembelian')->value('id');
+
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $shippingCostAccount,
+        //         'debit'            => $request->ongkos_kirim,
+        //         'credit'           => 0,
+        //     ]);
+        // }
+
+        // // Credit: Kas (jika ada pembayaran)
+        // if ($purchaseAmount > 0) {
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $request->coa_id,
+        //         'debit'            => 0,
+        //         'credit'           => $purchaseAmount,
+        //     ]);
+        // }
+
+        // // Credit: Utang Usaha (jika masih ada sisa pembayaran)
+        // if ($totalDebt > 0) {
+        //     JournalDetail::create([
+        //         'journal_entry_id' => $journalEntry->id,
+        //         'coa_id'           => $accountsPayable,
+        //         'debit'            => 0,
+        //         'credit'           => $totalDebt,
+        //     ]);
+        // }
+// AAAAA
         // JournalDetail::create([
         //     'journal_entry_id' => $journalEntry->id,
         //     'coa_id'           => $accountsPayable,

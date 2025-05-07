@@ -38,6 +38,7 @@ use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
+use App\Http\Controllers\MedicalRecordAdjustmentController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -336,4 +337,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/reports/balance_sheet', [FinancialReportController::class, 'balanceSheet'])->name('reports.balance_sheet')->middleware('role:manager');
     Route::get('/reports/income_statement', [FinancialReportController::class, 'incomeStatement'])->name('reports.income_statement')->middleware('role:manager');
     Route::get('/reports/cash_flow', [FinancialReportController::class, 'cashFlow'])->name('reports.cash_flow')->middleware('role:manager');
+
+    Route::post('/medical_records/{recordId}/adjustments', [MedicalRecordAdjustmentController::class, 'store'])
+        ->name('medical_records.adjustments.store');
 });

@@ -70,7 +70,7 @@
         <h5 class="mb-0">Rekap Pasien per Procedure Type ({{ now()->format('F Y') }})</h5>
     </div>
     <div class="card-body">
-        <table id="tableTipeProsedur" class="table table-striped table-bordered">
+        <!-- <table id="tableTipeProsedur" class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th>Procedure Type</th>
@@ -79,9 +79,23 @@
                     <th>Nomor Medical Record</th>
                 </tr>
             </thead>
-
             <tbody></tbody>
-        </table>
+        </table> -->
+        <table id="tableStatistik" class="table table-striped table-bordered w-100">
+    <thead>
+        <tr>
+            <th>Procedure Type</th>
+            <th>Total Patients</th>
+            <th>Male Patients</th>
+            <th>Female Patients</th>
+            <th>Total Revenue</th>
+            <th>Male Revenue</th>
+            <th>Female Revenue</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
     </div>
 </div>
 
@@ -252,6 +266,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
+    function formatRupiah(value) {
+    if (!value) return 'Rp 0';
+    return 'Rp ' + parseInt(value).toLocaleString('id-ID');
+}
+
     $(document).ready(function() {
         const renderPasienBelumKonfirmasi = (reservasiList) => {
             if (reservasiList.length === 0) {
@@ -353,17 +372,42 @@
                         $('#pendapatanHariIni').text('Rp ' + response.pendapatanHariIni);
 
                         // === TABEL TIPE PROSEDUR ===
-                        let table = $('#tableTipeProsedur').DataTable();
-                        table.clear().draw();
+                        // let table = $('#tableTipeProsedur').DataTable();
+                        // table.clear().draw();
 
-                        response.tipeProsedur.forEach(function(item) {
-                            table.row.add([
-                                item.procedure_type,
-                                item.total_patients,
-                                item.total_procedures, // ✅ Tambahan
-                                item.medical_record_refs
-                            ]).draw(false);
-                        });
+                        // response.tipeProsedur.forEach(function(item) {
+                        //     table.row.add([
+                        //         item.procedure_type,
+                        //         item.total_patients,
+                        //         item.total_procedures, // ✅ Tambahan
+                        //         item.medical_record_refs
+                        //     ]).draw(false);
+                        // });
+
+                        let table = $('#tableStatistik').DataTable({
+    destroy: true,
+    searching: false,
+    paging: false,
+    info: false,
+    ordering: false
+});
+
+table.clear();
+
+response.statistik.forEach(function(item) {
+    table.row.add([
+        item.procedure_type,
+        item.total_patients,
+        item.male_patients,
+        item.female_patients,
+        formatRupiah(item.total_revenue),
+        formatRupiah(item.male_revenue),
+        formatRupiah(item.female_revenue)
+    ]);
+});
+
+table.draw();
+
 
 
 
