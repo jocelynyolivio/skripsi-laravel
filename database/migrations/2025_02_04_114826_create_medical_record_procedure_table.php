@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('medical_record_procedure', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('medical_record_id'); // Foreign key ke medical_records
+            $table->unsignedBigInteger('medical_record_id')->nullable(); // Foreign key ke medical_records
 
             $table->timestamps();
 
+            $table->string('surface')->nullable();
             // Menambahkan foreign key constraints
             $table->foreign('medical_record_id')
                 ->references('id')

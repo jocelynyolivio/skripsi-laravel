@@ -1,21 +1,35 @@
 @php
-    $toothProcedures = $procedureOdontograms->get($toothNumber, collect());
-    $hasMedicalRecord = $toothProcedures->isNotEmpty();
-    $toothManual = $odontograms->get($toothNumber);
-    $manualCondition = $toothManual->condition ?? null;
+    // Ambil data odontogram untuk gigi ini
+    $toothData = $odontograms[$toothNumber] ?? null;
 
-    $toothClass = '';
-    if ($hasMedicalRecord) {
-        $toothClass = 'has-procedure';
-    } elseif ($manualCondition) {
-        $toothClass = match($manualCondition) {
+    // Default class
+    $toothClass = 'healthy';
+
+    if ($toothData) {
+        $conditionClassMap = [
+            'healthy' => 'healthy',
             'cavity' => 'cavity',
             'filled' => 'filled',
+            'temporary_filling' => 'temporary-filling',
             'extracted' => 'extracted',
-            default => 'healthy',
-        };
-    } else {
-        $toothClass = 'healthy';
+            'extraction_needed' => 'extraction-needed',
+            'missing' => 'missing',
+            'impacted' => 'impacted',
+            'root_remnants' => 'root-remnants',
+            'fractured' => 'fractured',
+            'sealant' => 'sealant',
+            'un-erupted' => 'unerupted',
+            'crown' => 'crown',
+            'bridge' => 'bridge',
+            'prosthesis' => 'prosthesis',
+        ];
+
+        $toothClass = $conditionClassMap[$toothData['condition']] ?? 'healthy';
+
+        // Tambahkan class jika ada prosedur
+        if (!empty($toothData['procedures'])) {
+            $toothClass .= ' has-procedure';
+        }
     }
 @endphp
 

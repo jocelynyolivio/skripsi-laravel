@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('tooth_number');
             $table->string('condition', 255)->default('Healthy');
             $table->text('notes')->nullable();
+            $table->string('surface')->nullable();
             $table->timestamps();
 
             // Foreign key constraints

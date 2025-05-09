@@ -316,8 +316,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/{expense}', [ExpenseController::class, 'show'])->name('dashboard.expenses.show');
 
     Route::prefix('odontograms')->name('odontograms.')->group(function () {
-        Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index')->middleware('role:dokter_tetap,dokter_luar');
-        Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store')->middleware('role:dokter_tetap,dokter_luar');
+        Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index')->middleware('role:dokter_tetap,dokter_luar,manager');
+        Route::post('/{patientId}', [OdontogramController::class, 'store'])->name('store')->middleware('role:dokter_tetap,dokter_luar,manager');
     });
 
     Route::resource('salary_calculations', SalaryCalculationController::class)->middleware('role:manager');

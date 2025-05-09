@@ -9,12 +9,7 @@ class Odontogram extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['patient_id', 'medical_record_id', 'tooth_number', 'condition', 'notes'];
-
-    public function procedures()
-    {
-        return $this->belongsToMany(Procedure::class, 'medical_record_procedure')->withTimestamps();
-    }
+    protected $fillable = ['patient_id', 'medical_record_id', 'tooth_number', 'condition', 'notes', 'surface'];
 
     public function patient()
     {
@@ -24,5 +19,11 @@ class Odontogram extends Model
     public function medicalRecord()
     {
         return $this->belongsTo(MedicalRecord::class);
+    }
+    
+    public function procedures()
+    {
+        return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'tooth_number', 'procedure_id')
+            ->withPivot('surface');
     }
 }
