@@ -17,7 +17,11 @@ class MedicalRecord extends Model
         'jam_selesai',
         'status_konfirmasi',
         'teeth_condition',
-        'updated_by'
+        'updated_by',
+        'subjective',
+        'objective',
+        'assessment',
+        'plan'
     ];
 
     public function procedures()

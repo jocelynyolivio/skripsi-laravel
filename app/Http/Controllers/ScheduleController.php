@@ -27,6 +27,7 @@ class ScheduleController extends Controller
 
     public function getDoctorsByDate(Request $request)
     {
+        // $who = auth()->id();
         $request->validate([
             'date' => 'required|date',
         ]);
@@ -307,6 +308,12 @@ public function saveReservation(Request $request, $id = null)
     $reservation = $id ? MedicalRecord::findOrFail($id) : new MedicalRecord();
 
     // dd('masuk save');
+    $admin = auth()->id();
+    if($admin){
+        $reservation->fill([
+            'status_konfirmasi' => 1,
+        ]);    
+    }
 
     $reservation->fill([
         'patient_id' => $request->patient_id,

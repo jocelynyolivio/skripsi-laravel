@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->string('surface')->nullable();
-            // Menambahkan foreign key constraints
+
             $table->foreign('medical_record_id')
                 ->references('id')
                 ->on('medical_records')

@@ -15,6 +15,29 @@
                 value="{{ old('teeth_condition', $medicalRecord->teeth_condition) }}" required>
         </div>
 
+        <div class="mb-3">
+            <label for="subjective" class="form-label">Subjective</label>
+            <input type="text" class="form-control" id="subjective" name="subjective"
+                value="{{ old('subjective', $medicalRecord->subjective) }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="objective" class="form-label">Objective</label>
+            <input type="text" class="form-control" id="objective" name="objective"
+                value="{{ old('objective', $medicalRecord->objective) }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="assessment" class="form-label">Assessment</label>
+            <input type="text" class="form-control" id="assessment" name="assessment"
+                value="{{ old('assessment', $medicalRecord->assessment) }}">
+        </div>
+        <div class="mb-3">
+            <label for="plan" class="form-label">Plan</label>
+            <input type="text" class="form-control" id="plan" name="plan"
+                value="{{ old('plan', $medicalRecord->plan) }}">
+        </div>
+
         <!-- Prosedur dan Odontogram Integration -->
         <div class="mb-4">
             <h4>Select Procedure and Teeth</h4>

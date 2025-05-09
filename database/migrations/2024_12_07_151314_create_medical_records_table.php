@@ -19,6 +19,12 @@ return new class extends Migration
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->string('status_konfirmasi')->nullable();
+            
+            $table->text('subjective')->nullable();
+            $table->text('objective')->nullable();
+            $table->text('assessment')->nullable();
+            $table->text('plan')->nullable();
+
             $table->string('teeth_condition')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('updated_by')->nullable();

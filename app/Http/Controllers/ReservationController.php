@@ -167,7 +167,7 @@ class ReservationController extends Controller
 
     public function store(Request $request)
     {
-        
+        // dd('ha');
         // Validasi input
         $request->validate([
             'doctor_id' => 'required|integer',

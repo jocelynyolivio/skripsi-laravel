@@ -60,7 +60,7 @@
                     </span>
                 </td>
                 <td>
-                    @if(!$reservation->teeth_condition && !$reservation->procedures()->exists())
+                    @if(!$reservation->teeth_condition && !$reservation->subjective && !$reservation->objective &&!$reservation->assessment && !$reservation->plan && !$reservation->procedures()->exists())
                     <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;" class="delete-form">
                         @csrf

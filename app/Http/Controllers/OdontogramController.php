@@ -82,23 +82,23 @@ class OdontogramController extends Controller
                 ]
             );
 
-            // Handle prosedur terkait
-            if (!empty($validated['procedure_id'])) {
-                // Untuk many-to-many dengan pivot table medical_record_procedure
-                $syncData = [];
-                foreach ($validated['procedure_id'] as $procedureId) {
-                    $syncData[$procedureId] = [
-                        'surface' => !empty($validated['surface']) ? implode(',', $validated['surface']) : null,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ];
-                }
+            // // Handle prosedur terkait
+            // if (!empty($validated['procedure_id'])) {
+            //     // Untuk many-to-many dengan pivot table medical_record_procedure
+            //     $syncData = [];
+            //     foreach ($validated['procedure_id'] as $procedureId) {
+            //         $syncData[$procedureId] = [
+            //             'surface' => !empty($validated['surface']) ? implode(',', $validated['surface']) : null,
+            //             'created_at' => now(),
+            //             'updated_at' => now()
+            //         ];
+            //     }
 
-                $odontogram->procedures()->sync($syncData);
-            } else {
-                // Jika tidak ada prosedur, hapus semua relasi
-                $odontogram->procedures()->detach();
-            }
+            //     $odontogram->procedures()->sync($syncData);
+            // } else {
+            //     // Jika tidak ada prosedur, hapus semua relasi
+            //     $odontogram->procedures()->detach();
+            // }
 
             DB::commit();
 

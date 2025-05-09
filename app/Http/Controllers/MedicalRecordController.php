@@ -497,6 +497,10 @@ class MedicalRecordController extends Controller
         $updated_by = auth()->id();
         $validatedData = $request->validate([
             'teeth_condition' => 'required|string',
+            'subjective' => 'required|string',
+            'objective' => 'required|string',
+            'assessment' => 'required|string',
+            'plan' => 'required|string',
             'procedure_id' => 'required|array',
             'procedure_id.*' => 'exists:procedures,id',
             'teeth_condition' => 'required|string',
@@ -504,11 +508,18 @@ class MedicalRecordController extends Controller
             'procedure_notes' => 'nullable|array',
         ]);
 
+        // dd($validatedData);
+
         // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($recordId);
 
         // Update kondisi gigi pada rekam medis
         $medicalRecord->update(['teeth_condition' => $validatedData['teeth_condition']]);
+
+        $medicalRecord->update(['subjective' => $validatedData['subjective']]);
+        $medicalRecord->update(['objective' => $validatedData['objective']]);
+        $medicalRecord->update(['assessment' => $validatedData['assessment']]);
+        $medicalRecord->update(['plan' => $validatedData['plan']]);
 
         // Ambil daftar prosedur yang memerlukan nomor gigi
         $proceduresRequiringTeeth = Procedure::where('requires_tooth', 1)->pluck('id')->toArray();
@@ -579,6 +590,19 @@ class MedicalRecordController extends Controller
     {
         // harus melakukan pengecekan, tidak bisa asal delete rekam medis
         $reservation = MedicalRecord::findOrFail($id);
+
+        // Pengecekan apakah rekam medis masih kosong
+        $hasTeethCondition = !empty($reservation->teeth_condition);
+        $hasSubjective = !empty($reservation->subjective);
+        $hasObjective = !empty($reservation->objective);
+        $hasAssessment = !empty($reservation->assessment);
+        $hasPlan = !empty($reservation->plan);
+        $hasProcedures = $reservation->procedures()->exists();
+
+        if ($hasTeethCondition || $hasSubjective || $hasObjective || $hasAssessment || $hasPlan || $hasProcedures) {
+            return redirect()->route('dashboard.reservations.index')->with('error', 'Cannot delete reservation with existing medical record data.');
+        }
+
         $reservation->delete();
         return redirect()->route('dashboard.reservations.index')->with('success', 'Reservation deleted successfully!');
     }
