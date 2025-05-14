@@ -13,11 +13,11 @@ class ProcedureMaterialController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    $procedureMaterials = ProcedureMaterial::with(['procedure', 'dentalMaterial'])->get(); // Eager load relationships
+    {
+        $procedureMaterials = ProcedureMaterial::with(['procedure', 'dentalMaterial'])->get(); // Eager load relationships
 
-    return view('dashboard.procedure_materials.index', compact('procedureMaterials'));
-}
+        return view('dashboard.procedure_materials.index', compact('procedureMaterials'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -26,10 +26,10 @@ class ProcedureMaterialController extends Controller
     {
         $procedures = Procedure::all();
         $dentalMaterials = DentalMaterial::all();
-    
+
         return view('dashboard.procedure_materials.create', compact('procedures', 'dentalMaterials'));
     }
-    
+
 
     /**
      * Store a newly created resource in storage.
@@ -41,13 +41,22 @@ class ProcedureMaterialController extends Controller
             'dental_material_id' => 'required|exists:dental_materials,id',
             'quantity' => 'required|integer|min:1',
         ]);
-    
-        ProcedureMaterial::create($validatedData);
-    
+
+        ProcedureMaterial::updateOrCreate(
+            [
+                'procedure_id' => $validatedData['procedure_id'],
+                'dental_material_id' => $validatedData['dental_material_id'],
+            ],
+            [
+                'quantity' => $validatedData['quantity']
+            ]
+        );
+
         return redirect()->route('dashboard.procedure_materials.index')
-                         ->with('success', 'Procedure material relationship added successfully.');
+            ->with('success', 'Procedure material relationship saved successfully.');
     }
-    
+
+
 
     /**
      * Display the specified resource.
@@ -65,10 +74,10 @@ class ProcedureMaterialController extends Controller
         $procedureMaterial = ProcedureMaterial::findOrFail($id);
         $procedures = Procedure::all();
         $dentalMaterials = DentalMaterial::all();
-    
+
         return view('dashboard.procedure_materials.edit', compact('procedureMaterial', 'procedures', 'dentalMaterials'));
     }
-    
+
 
     /**
      * Update the specified resource in storage.
@@ -80,14 +89,14 @@ class ProcedureMaterialController extends Controller
             'dental_material_id' => 'required|exists:dental_materials,id',
             'quantity' => 'required|integer|min:1',
         ]);
-    
+
         $procedureMaterial = ProcedureMaterial::findOrFail($id);
         $procedureMaterial->update($validatedData);
-    
+
         return redirect()->route('dashboard.procedure_materials.index')
-                         ->with('success', 'Procedure material relationship updated successfully.');
+            ->with('success', 'Procedure material relationship updated successfully.');
     }
-    
+
 
     /**
      * Remove the specified resource from storage.
@@ -96,9 +105,8 @@ class ProcedureMaterialController extends Controller
     {
         $procedureMaterial = ProcedureMaterial::findOrFail($id);
         $procedureMaterial->delete();
-    
+
         return redirect()->route('dashboard.procedure_materials.index')
-                         ->with('success', 'Procedure material relationship deleted successfully.');
+            ->with('success', 'Procedure material relationship deleted successfully.');
     }
-    
 }

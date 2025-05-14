@@ -52,6 +52,9 @@
                                 @if($procedureRecord->pivot->notes)
                                 - <small class="text-muted">{{ $procedureRecord->pivot->notes }}</small>
                                 @endif
+                                @if($procedureRecord->pivot->surface)
+                                - <small class="text-muted">{{ $procedureRecord->pivot->surface }}</small>
+                                @endif
                             </li>
                             @endforeach
                         </ul>

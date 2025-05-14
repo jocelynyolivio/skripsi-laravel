@@ -10,7 +10,7 @@
 @section('container')
 <div class="container mt-5 col-md-8">
     <h3 class="text-center">Create Purchase Request</h3>
-    <form action="{{ route('dashboard.purchase_requests.store') }}" method="POST">
+    <form id="createRequestForm" action="{{ route('dashboard.purchase_requests.store') }}" method="POST">
         @csrf
 
         <div class="mb-3">
@@ -111,6 +111,24 @@
                 const row = e.target.closest('tr');
                 const rows = document.querySelectorAll('#materialsTable tbody tr');
                 if (rows.length > 1) row.remove();
+            }
+        });
+    });
+
+    document.getElementById('createRequestForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Confirm Purchase Request',
+            text: "Are you sure you want to create this purchase request?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, sure!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
             }
         });
     });

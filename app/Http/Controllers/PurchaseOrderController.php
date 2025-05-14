@@ -77,7 +77,25 @@ class PurchaseOrderController extends Controller
 
         // dd($validated['harga_total']);
         // Generate nomor unik
-        $orderNumber = 'PO-' . now()->format('Ymd') . '-' . ($validated['purchase_request_id'] ?? uniqid());       
+        $datePrefix = 'PO-' . now()->format('Ymd');
+
+        // Hitung jumlah PO yang sudah dibuat hari ini
+        $latestPoToday = \App\Models\PurchaseOrder::where('order_number', 'like', $datePrefix . '-%')
+            ->orderByDesc('order_number')
+            ->first();
+
+        if ($latestPoToday) {
+            // Ambil angka urutan terakhir, lalu tambahkan 1
+            $lastNumber = (int) str_replace($datePrefix . '-', '', $latestPoToday->order_number);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            // Belum ada, mulai dari 1
+            $nextNumber = 1;
+        }
+
+        // Buat nomor baru
+        $orderNumber = $datePrefix . '-' . $nextNumber;
+
 
         DB::beginTransaction();
         try {
@@ -85,7 +103,7 @@ class PurchaseOrderController extends Controller
             if ($request->hasFile('attachment')) {
                 $path = $request->file('attachment')->store('attachments/purchase_orders', 'public');
                 // $validated['attachment_path'] = $path;
-            } 
+            }
             // Create Purchase Order
             $purchaseOrder = PurchaseOrder::create([
                 'order_number' => $orderNumber,

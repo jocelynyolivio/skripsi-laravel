@@ -27,7 +27,7 @@ class MedicalRecord extends Model
     public function procedures()
     {
         return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id')
-            ->withPivot('tooth_number', 'notes');
+            ->withPivot('tooth_number', 'notes','surface');
     }
 
 

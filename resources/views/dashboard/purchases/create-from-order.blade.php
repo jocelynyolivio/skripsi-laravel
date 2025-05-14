@@ -4,7 +4,7 @@
     @include('dashboard.layouts.breadcrumbs', [
         'customBreadcrumbs' => [
             ['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')],
-            ['text' => 'Create From Order']
+            ['text' => 'Create Purchase Invoice From Order']
         ]
     ])
 @endsection
@@ -13,7 +13,7 @@
 <div class="container mt-5 col-md-10">
     <h3 class="text-center">Create Purchase Invoice from Order #{{ $purchaseOrder->order_number }}</h3>
 
-    <form action="{{ route('dashboard.purchases.storeFromOrder', $purchaseOrder) }}" method="POST">
+    <form id="createInvoiceForm" action="{{ route('dashboard.purchases.storeFromOrder', $purchaseOrder) }}" method="POST">
         @csrf
         <input type="hidden" name="purchase_order_id" value="{{ $purchaseOrder->id }}">
 
@@ -184,8 +184,24 @@
     </form>
 </div>
 
-{{-- SCRIPT --}}
 <script>
+    document.getElementById('createInvoiceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Confirm Purchase Invoice',
+            text: "Are you sure you want to create this purchase invoice?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, sure!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
     document.addEventListener('DOMContentLoaded', function() {
         function calculateTotalAmount() {
             let total = 0;

@@ -9,12 +9,12 @@
     </div>
     @endif
 
-    <!-- Form Tambah Expense -->
-    <form action="{{ route('dashboard.expenses.store') }}" method="POST">
+    <form id="createExpenseForm" action="{{ route('dashboard.expenses.store') }}" method="POST">
         @csrf
         <div class="mb-3">
             <label for="expense_date" class="form-label">Date</label>
-            <input type="date" name="expense_date" class="form-control" value="{{ old('expense_date', isset($expense) ? now()->toDateString() : '') }}" required>
+            <input type="date" name="expense_date" class="form-control" value="{{ old('expense_date', isset($expense) ? $expense->expense_date->toDateString() : now()->toDateString()) }}"
+            required>
         </div>
 
         <div class="mb-3">
@@ -113,4 +113,23 @@
         <button type="submit" class="btn btn-success">Save</button>
     </form>
 </div>
+<script>
+    document.getElementById('createExpenseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Confirm Expense',
+            text: "Are you sure you want to create this expense?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, sure!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+</script>
 @endsection

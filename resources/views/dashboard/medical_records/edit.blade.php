@@ -1,5 +1,13 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Master Patients', 'url' => route('dashboard.masters.patients')],
+['text' => 'Medical Record for '. $medicalRecord->patient->fname, 'url' => route('dashboard.medical_records.index', ['patientId' => $medicalRecord->patient_id])],
+['text' =>$medicalRecord->tanggal_reservasi,]
+]
+])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-6">
     <h3 class="text-center">Medical Record for Patient: {{ $medicalRecord->patient->fname }} {{ $medicalRecord->patient->mname }} {{ $medicalRecord->patient->lname }}</h3>
@@ -106,6 +114,19 @@
                         <label for="toothNotes" class="form-label">Notes</label>
                         <textarea id="toothNotes" class="form-control" placeholder="Enter notes for the selected tooth"></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label for="surface" class="form-label">Tooth Surface</label>
+                        <select id="surface" class="form-select" multiple>
+                            <option value="M">Mesial (M)</option>
+                            <option value="O">Occlusal (O)</option>
+                            <option value="L">Lingual (L)</option>
+                            <option value="D">Distal (D)</option>
+                            <option value="B">Buccal (B)</option>
+                            <option value="I">Incisal (I)</option>
+                            <option value="C">Cervical (C)</option>
+                        </select>
+                    </div>
+
                     <button type="button" class="btn btn-primary" onclick="saveToothNotes()">Save Notes</button>
                 </form>
             </div>
@@ -165,6 +186,8 @@
         window.saveToothNotes = function() {
             const toothNumber = document.getElementById('selectedToothNumber').value;
             const notes = document.getElementById('toothNotes').value;
+            const surfaceSelect = document.getElementById('surface');
+            const selectedSurfaces = Array.from(surfaceSelect.selectedOptions).map(opt => opt.value);
 
             const procedureSelect = document.getElementById('currentProcedure');
             const procedureId = procedureSelect.value;
@@ -177,6 +200,10 @@
             // Save notes
             procedureData.notes = procedureData.notes || {};
             procedureData.notes[toothNumber] = notes;
+
+            // Simpan surface
+            procedureData.surfaces = procedureData.surfaces || {};
+            procedureData.surfaces[toothNumber] = selectedSurfaces;
 
             updateSelectedProceduresDisplay();
             highlightSelectedTooth(toothNumber);
@@ -206,7 +233,15 @@
                         <input type="hidden" name="tooth_numbers[${procedureId}][]" value="${tooth}">
                         <textarea name="procedure_notes[${procedureId}][${tooth}]" class="form-control" 
                                 placeholder="Notes for tooth ${tooth}">${data.notes[tooth] || ''}</textarea>
+                                <select name="procedure_surface[${procedureId}][${tooth}][]" class="form-select mt-1" multiple>
+    ${['M','O','L','D','B','I','C'].map(s => `
+        <option value="${s}" ${(data.surfaces && data.surfaces[tooth] && data.surfaces[tooth].includes(s)) ? 'selected' : ''}>
+            ${s}
+        </option>
+    `).join('')}
+</select>
                     </div>
+                    
                 `).join('') : `
                     <p class="text-muted">This procedure does not require a specific tooth.</p>
                     <input type="hidden" name="tooth_numbers[${procedureId}][]" value="">

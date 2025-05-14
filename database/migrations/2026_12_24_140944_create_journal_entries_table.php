@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('transaction_id')->nullable();
+            $table->unsignedBigInteger('purchase_id')->nullable();
             $table->date('entry_date');
             $table->string('description');
             $table->timestamps();
@@ -21,7 +22,12 @@ return new class extends Migration
             $table->foreign('transaction_id')
                 ->references('id')
                 ->on('transactions')
-                ->onDelete('cascade');
+                ->onDelete('set null');
+
+                $table->foreign('purchase_id')
+                ->references('id')
+                ->on('purchase_invoices')
+                ->onDelete('set null');    
         });
     }
 

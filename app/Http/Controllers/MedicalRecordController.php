@@ -196,6 +196,22 @@ class MedicalRecordController extends Controller
 
     public function selectMaterials($medicalRecordId)
     {
+        $allMaterials = DentalMaterial::select('id', 'name', 'unit_type')->get();
+
+        // Ambil stok terbaru
+        $latestStocks = StockCard::select('dental_material_id', 'remaining_stock')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('dental_material_id');
+        
+        // Tambahkan info stok ke daftar bahan
+        $allMaterials->map(function ($material) use ($latestStocks) {
+            $stock = $latestStocks->firstWhere('dental_material_id', $material->id);
+            $material->stock_quantity = $stock ? $stock->remaining_stock : 0;
+            return $material;
+        });
+        
+
         // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
@@ -240,6 +256,7 @@ class MedicalRecordController extends Controller
             'medicalRecordId' => $medicalRecordId,
             'procedures' => $procedures,
             'materials' => $materials,
+            'allMaterials' => $allMaterials
         ]);
     }
 
@@ -317,14 +334,19 @@ class MedicalRecordController extends Controller
     // }
 
     public function saveMaterials(Request $request, $medicalRecordId)
-    {
+    {   
         // dd('a');
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
         // Validasi input bahan dan kuantitas
         $validatedData = $request->validate([
             'quantities' => 'required|array',
+            'extra_materials' => 'array',
+            'extra_materials.*.material_id' => 'nullable|exists:dental_materials,id',
+            'extra_materials.*.selected_quantity' => 'nullable|numeric|min:0',
         ]);
+
+        // dd($validatedData);
 
         $totalHPP = 0;
 
@@ -377,6 +399,55 @@ class MedicalRecordController extends Controller
         }
         // dd('saved');
         // dd($totalHPP);
+
+        if (!empty($validatedData['extra_materials'])) {
+            // Gabungkan material_id dan selected_quantity dalam pasangan yang benar
+            $extraMaterials = $validatedData['extra_materials'];
+            $combinedExtras = [];
+        
+            for ($i = 0; $i < count($extraMaterials); $i += 2) {
+                if (isset($extraMaterials[$i]['material_id']) && isset($extraMaterials[$i + 1]['selected_quantity'])) {
+                    $combinedExtras[] = [
+                        'material_id' => $extraMaterials[$i]['material_id'],
+                        'selected_quantity' => $extraMaterials[$i + 1]['selected_quantity'],
+                    ];
+                }
+            }
+        
+            foreach ($combinedExtras as $extra) {
+                $materialId = $extra['material_id'];
+                $quantity = (float) $extra['selected_quantity'];
+        
+                if ($materialId && $quantity > 0) {
+                    $material = DentalMaterial::findOrFail($materialId);
+        
+                    $latestStock = StockCard::where('dental_material_id', $materialId)
+                        ->latest('created_at')
+                        ->first();
+        
+                    if (!$latestStock || $latestStock->remaining_stock < $quantity) {
+                        return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                    }
+        
+                    $newStock = $latestStock->remaining_stock - $quantity;
+                    $hppPrice = $latestStock->average_price;
+        
+                    StockCard::create([
+                        'dental_material_id' => $materialId,
+                        'date' => now(),
+                        'reference_number' => 'MR-' . $medicalRecordId,
+                        'price_out' => $hppPrice,
+                        'quantity_out' => $quantity,
+                        'remaining_stock' => $newStock,
+                        'average_price' => $hppPrice,
+                        'type' => 'usage'
+                    ]);
+        
+                    $totalHPP += $quantity * $hppPrice;
+                }
+            }
+        }
+        
 
         $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
 
@@ -506,6 +577,7 @@ class MedicalRecordController extends Controller
             'teeth_condition' => 'required|string',
             'tooth_numbers' => 'nullable|array',
             'procedure_notes' => 'nullable|array',
+            'procedure_surface' => 'nullable|array',
         ]);
 
         // dd($validatedData);
@@ -527,21 +599,26 @@ class MedicalRecordController extends Controller
 
         foreach ($validatedData['procedure_id'] as $procedureId) {
             if (in_array($procedureId, $proceduresRequiringTeeth)) {
-                // Jika prosedur memerlukan nomor gigi, pastikan ada data
+                // Validasi bahwa ada nomor gigi
                 if (!isset($validatedData['tooth_numbers'][$procedureId]) || !is_array($validatedData['tooth_numbers'][$procedureId])) {
                     return redirect()->back()->with('error', "Tooth number is required for procedure ID: $procedureId");
                 }
-
+        
                 foreach ($validatedData['tooth_numbers'][$procedureId] as $toothNumber) {
                     $procedureNotes = $validatedData['procedure_notes'][$procedureId][$toothNumber] ?? null;
-
+                    $procedureSurfaceArray = $validatedData['procedure_surface'][$procedureId][$toothNumber] ?? [];
+        
+                    // Gabungkan array permukaan menjadi string, jika ada
+                    $procedureSurface = is_array($procedureSurfaceArray) ? implode(',', $procedureSurfaceArray) : null;
+        
                     $combinationKey = $procedureId . '-' . $toothNumber;
                     if (!in_array($combinationKey, $uniqueCombinations)) {
                         $uniqueCombinations[] = $combinationKey;
-
+        
                         $medicalRecord->procedures()->attach($procedureId, [
                             'tooth_number' => $toothNumber,
                             'notes' => $procedureNotes,
+                            'surface' => $procedureSurface,
                         ]);
                     }
                 }
