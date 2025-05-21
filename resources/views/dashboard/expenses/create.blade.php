@@ -13,8 +13,8 @@
         @csrf
         <div class="mb-3">
             <label for="expense_date" class="form-label">Date</label>
-            <input type="date" name="expense_date" class="form-control"
-                required>
+            <input type="date" name="expense_date" class="form-control" value="{{ old('expense_date', isset($expense) ? $expense->expense_date->toDateString() : now()->toDateString()) }}"
+            required>
         </div>
 
         <div class="mb-3">

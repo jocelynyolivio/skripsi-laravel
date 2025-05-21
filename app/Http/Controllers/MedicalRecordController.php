@@ -196,24 +196,6 @@ class MedicalRecordController extends Controller
 
     public function selectMaterials($medicalRecordId)
     {
- $medicalRecord = MedicalRecord::with('patient')->findOrFail($medicalRecordId);
-    $patientName = $medicalRecord->patient->fname;
-    $patientId = $medicalRecord->patient->id;        $allMaterials = DentalMaterial::select('id', 'name', 'unit_type')->get();
-
-        // Ambil stok terbaru
-        $latestStocks = StockCard::select('dental_material_id', 'remaining_stock')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->unique('dental_material_id');
-        
-        // Tambahkan info stok ke daftar bahan
-        $allMaterials->map(function ($material) use ($latestStocks) {
-            $stock = $latestStocks->firstWhere('dental_material_id', $material->id);
-            $material->stock_quantity = $stock ? $stock->remaining_stock : 0;
-            return $material;
-        });
-        
-
         // Ambil rekam medis berdasarkan ID
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
@@ -258,9 +240,6 @@ class MedicalRecordController extends Controller
             'medicalRecordId' => $medicalRecordId,
             'procedures' => $procedures,
             'materials' => $materials,
-            'allMaterials' => $allMaterials,
-            'patientName' => $patientName,
-            'patientId' => $patientId
         ]);
     }
 
