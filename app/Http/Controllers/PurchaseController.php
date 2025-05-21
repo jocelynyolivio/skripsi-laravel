@@ -310,8 +310,8 @@ class PurchaseController extends Controller
             'supplier_id'        => 'required|exists:suppliers,id',
             'payment_requirement' => 'required|string',
             'due_date' => 'nullable|date',
-            'discount' => 'required',
-            'ongkos_kirim' => 'required',
+            'discount' => 'nullable',
+            'ongkos_kirim' => 'nullable',
             'total_amount' => 'required',
             'grand_total' => 'required',
             'dental_material_id' => 'required|array',
@@ -356,13 +356,16 @@ class PurchaseController extends Controller
             ]);
         }
         // dd('dah detail invoice');
+        // dd($invoice->id);
 
         // Buat jurnal entry
-        $journal = JournalEntry::create([
-            'transaction_id' => $invoice->id,
+        JournalEntry::create([
+            'purchase_id' => $invoice->id,
             'entry_date' => $request->invoice_date,
             'description' => 'Pembelian dari ' . $invoice->supplier->name . ' - Invoice #' . $invoice->invoice_number,
         ]);
+
+        // dd('buat jurnal');
 
         // Buat entri jurnal
         $journalEntry = JournalEntry::create([

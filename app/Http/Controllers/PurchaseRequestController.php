@@ -82,7 +82,7 @@ class PurchaseRequestController extends Controller
         // dd($purchaseRequest);
 
         return redirect()->route('dashboard.purchase_requests.show', $purchaseRequest->id)
-        ->with('success', 'Purchase request approved.');
+            ->with('success', 'Purchase request approved.');
     }
 
     public function reject(Request $request, PurchaseRequest $purchaseRequest)
@@ -99,7 +99,7 @@ class PurchaseRequestController extends Controller
         ]);
 
         return redirect()->route('dashboard.purchase_requests.show', $purchaseRequest->id)
-        ->with('success', 'Purchase request rejected.');
+            ->with('success', 'Purchase request rejected.');
     }
 
     public function duplicate(PurchaseRequest $purchaseRequest)
@@ -124,4 +124,19 @@ class PurchaseRequestController extends Controller
     {
         //
     }
+
+    // public function isFullyOrdered()
+    // {
+    //     // Ambil semua ID material dalam request ini
+    //     $requestedMaterialIds = $this->details->pluck('material_id')->unique()->sort()->values();
+
+    //     // Ambil semua ID material yang sudah dibuatkan PO dari relasi purchase_orders
+    //     $orderedMaterialIds = $this->purchaseOrders
+    //         ->flatMap(function ($order) {
+    //             return $order->details->pluck('material_id');
+    //         })->unique()->sort()->values();
+
+    //     // Bandingkan apakah semua requested materials sudah dipesan
+    //     return $requestedMaterialIds->diff($orderedMaterialIds)->isEmpty();
+    // }
 }

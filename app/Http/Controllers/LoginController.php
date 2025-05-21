@@ -24,6 +24,8 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
+        // dd('hai');
+
         // Login untuk pasien
         if (Auth::guard('patient')->attempt($credentials)) {
             $patient = Auth::guard('patient')->user();

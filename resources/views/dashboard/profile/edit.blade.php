@@ -131,7 +131,7 @@
 
                                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                     <button type="submit" class="btn btn-primary px-4">
-                                        <i class="bi bi-save"></i> Save Changes
+                                         Save Changes
                                     </button>
                                     <a href="{{ route('dashboard.profile.index') }}" class="btn btn-secondary px-4">
                                         Cancel

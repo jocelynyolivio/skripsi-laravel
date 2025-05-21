@@ -11,6 +11,7 @@ class JournalEntry extends Model
 
     protected $fillable = [
         'transaction_id',
+        'purchase_id',
         'entry_date',
         'description'
     ];
@@ -23,6 +24,11 @@ class JournalEntry extends Model
     public function transaction()
     {
         return $this->belongsTo(Transaction::class, 'transaction_id');
+    }
+
+    public function purchaseinvoice()
+    {
+        return $this->belongsTo(PurchaseInvoice::class, 'purchase_id');
     }
 
     

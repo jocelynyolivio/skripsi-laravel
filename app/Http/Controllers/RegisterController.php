@@ -17,17 +17,22 @@ class RegisterController extends Controller
     }
 
     public function store(Request $request){
+        // dd('hai');
         $validatedData = $request->validate([
-            'name' => 'required|max:255',
+            'fname' => 'required|max:255',
+            'mname' => 'nullable|max:255',
+            'lname' => 'nullable|max:255',
             'email' => 'required|email:dns|unique:patients',
             'password' => 'required|min:5|max:255',
-            'nomor_telepon' => 'required|max:255'
+            'home_mobile' => 'required|max:255'
         ]);
+
+        // dd($validatedData);
 
         $validatedData['password'] = bcrypt($validatedData['password']);
 
         // Generate Patient ID
-        $initialLetter = strtoupper(substr($request->name, 0, 1)); // Ambil huruf pertama dari nama
+        $initialLetter = strtoupper(substr($request->fname, 0, 1)); // Ambil huruf pertama dari nama
         $lastPatient = Patient::where('patient_id', 'like', "$initialLetter%")->orderBy('id', 'desc')->first();
 
         if ($lastPatient) {
@@ -41,9 +46,10 @@ class RegisterController extends Controller
 
         $patient = Patient::create($validatedData);
 
+        // dd('masuk database');
         // Kirim email verifikasi
         $patient->sendEmailVerificationNotification();
-
+        // dd('verif');
         return redirect('/patient/register')->with('success', 'Registration successful. Please check your email to verify your account.');
     }
 }

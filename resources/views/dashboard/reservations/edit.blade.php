@@ -1,4 +1,12 @@
 @extends('dashboard.layouts.main')
+@section('breadcrumbs')
+    @include('dashboard.layouts.breadcrumbs', [
+        'customBreadcrumbs' => [
+            ['text' => 'Reservations', 'url' => route('dashboard.reservations.index')],
+            ['text' => 'Edit Reservation']
+        ]
+    ])
+@endsection
 
 @section('container')
 <div class="container mt-5">

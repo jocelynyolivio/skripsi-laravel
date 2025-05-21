@@ -1,12 +1,56 @@
 @extends('layouts.main')
 
 @section('container')
-<div class="container mt-5 col-md-6 justify-content-center">
-    
+<style>
+    :root {
+        --primary-color: #8c8d5e;
+        --primary-color-light: #a3a47a;
+        --primary-color-dark: #75764d;
+        --secondary-color: #f8f9fa;
+        --text-color: #333;
+        --light-text: #f8f9fa;
+    }
+
+    .reservation-container {
+        background-color: var(--secondary-color);
+        border: 1px solid #ddd;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        color: var(--text-color);
+    }
+
+    .reservation-container h3 {
+        color: var(--primary-color-dark);
+        font-weight: bold;
+    }
+
+    .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: #f5f5f5;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #333;
+    }
+
+    .badge.bg-success {
+        background-color: var(--primary-color) !important;
+        color: var(--light-text);
+    }
+
+    .alert-info {
+        background-color: var(--primary-color-light);
+        border: none;
+        color: var(--light-text);
+    }
+</style>
+
+<div class="container mt-5 col-md-6 justify-content-center reservation-container">
     <h3 class="mb-4 text-center">Upcoming Reservations</h3>
 
     @if($reservations->isEmpty())
-        <div class="alert alert-info">No upcoming reservations.</div>
+        <div class="alert alert-info text-center">No upcoming reservations.</div>
     @else
         <table class="table table-striped">
             <thead>

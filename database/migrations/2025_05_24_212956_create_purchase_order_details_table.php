@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('purchase_order_id')->nullable();
             $table->unsignedBigInteger('material_id')->nullable();
+            $table->unsignedBigInteger('purchase_request_detail_id')->nullable();
             $table->integer('quantity');
             $table->decimal('price', 12, 2);
             $table->text('notes')->nullable();

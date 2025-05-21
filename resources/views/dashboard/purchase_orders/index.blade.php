@@ -13,7 +13,8 @@
     <div class="d-flex justify-content-between mb-3">
         <h3>Purchase Orders</h3>
         @if(auth()->user()?->role?->role_name === 'manager')
-        <a href="{{ route('dashboard.purchase_orders.create') }}" class="btn btn-primary mb-3">Create New</a>
+        <!-- <a href="{{ route('dashboard.purchase_orders.create') }}" class="btn btn-primary mb-3">Create New</a> -->
+         <a href="{{ route('dashboard.purchase_orders.select_request') }}" class="btn btn-primary mb-3">Create New</a>
         @endif
     </div>
     <table id="purchaseOrderTable" class="table table-striped table-bordered">

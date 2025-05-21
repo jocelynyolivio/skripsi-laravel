@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Profile', 'url' => route('dashboard.profile.index')],
+['text' => 'Attendance and Slips']
+]
+])
+@endsection
 @section('container')
 <div class="container mt-4">
 

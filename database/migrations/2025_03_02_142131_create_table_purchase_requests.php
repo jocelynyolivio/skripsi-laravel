@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('requested_by');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('notes')->nullable();
+            // $table->text('status')->nullable();
 
             $table->text('approval_notes')->nullable(); // Optional: untuk keterangan ditolak
             $table->foreignId('approved_by')->nullable()->constrained('users'); // User yang menyetujui

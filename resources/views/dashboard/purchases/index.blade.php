@@ -10,7 +10,7 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Purchase Invoices List</h3>
-        @if(auth()->user()?->role?->role_name === 'manager')        
+        @if(auth()->user()?->role?->role_name === 'manager')
         <a href="{{ route('dashboard.purchases.create') }}" class="btn btn-primary">Create Purchase</a>
         @endif
     </div>
@@ -41,11 +41,6 @@
                 <td>{{ ucfirst($purchase->status) }}</td>
                 <td>
                     <a href="{{ route('dashboard.purchases.edit', $purchase->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="{{ route('dashboard.purchases.destroy', $purchase->id) }}" method="POST" class="d-inline delete-form">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm delete-button">Delete</button>
-                    </form>
 
                     @if ($purchase->status !== 'received')
                     <a href="{{ route('dashboard.purchases.receive', $purchase->id) }}" class="btn btn-primary">
@@ -91,7 +86,9 @@
                                             <label for="payment_method" class="form-label">Cara Bayar</label>
                                             <select class="form-control" id="payment_method" name="payment_method" required>
                                                 <option value="">-- Pilih Metode Pembayaran --</option>
-
+                                                <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                                                    Tunai
+                                                </option>
                                                 <!-- QRIS -->
                                                 <optgroup label="QRIS">
                                                     @foreach(['QRIS BCA', 'QRIS CIMB Niaga', 'QRIS Mandiri', 'QRIS BRI', 'QRIS BNI', 'QRIS Permata', 'QRIS Maybank', 'QRIS Danamon', 'QRIS Bank Mega'] as $method)
@@ -156,24 +153,6 @@
             "ordering": true,
             "info": true,
             "responsive": true,
-        });
-    });
-
-    $('#purchasesTable').on('click', '.delete-button', function(e) {
-        e.preventDefault();
-        var form = $(this).closest('form');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
         });
     });
 </script>

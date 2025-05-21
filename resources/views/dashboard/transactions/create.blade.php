@@ -1,12 +1,12 @@
 @extends('dashboard.layouts.main')
 
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['url' => route('dashboard.transactions.index'), 'text' => 'Transactions'],
-            ['text' => 'Create']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['url' => route('dashboard.transactions.index'), 'text' => 'Transactions'],
+['text' => 'Create']
+]
+])
 @endsection
 
 @section('container')
@@ -61,16 +61,16 @@
             <input type="hidden" class="discount-hidden" name="discount_final[{{ $item['procedure']->id }}]" value="0">
         </div>
         @endforeach
-        
+
         <div class="form-group">
-                <label for="voucher">Vouchers :</label>
-                <select class="form-control" id="voucher" name="voucher">
-                    <option value="">-- Pilih Voucher --</option>
-                    @foreach ($vouchers as $voucher)
-                    <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <label for="voucher">Vouchers :</label>
+            <select class="form-control" id="voucher" name="voucher">
+                <option value="">-- Pilih Voucher --</option>
+                @foreach ($vouchers as $voucher)
+                <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
+                @endforeach
+            </select>
+        </div>
 
         <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
             <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
@@ -99,6 +99,9 @@
                 <select class="form-control" id="payment_method" name="payments[0][method]" required>
 
                     <option value="">-- Pilih Metode Pembayaran --</option>
+                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                        Tunai
+                    </option>
 
                     <!-- QRIS -->
                     <optgroup label="QRIS">
@@ -167,91 +170,91 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    console.log('Script loaded');
-    
-    // Get all procedure items containers
-    const procedureItems = document.querySelectorAll('.mb-3');
-    const totalAmountField = document.getElementById('total_amount');
-    const totalAmountDisplay = document.getElementById('total-amount-display');
-    const paymentInput = document.getElementById('payment');
-    const remainingAmountField = document.getElementById('remaining_amount');
-    const remainingAmountDisplay = document.getElementById('remaining-amount-display');
+        console.log('Script loaded');
 
-    function calculateTotal() {
-        let total = 0;
-        
-        procedureItems.forEach((item, index) => {
-            // Skip if not a procedure item (there might be other mb-3 elements)
-            if (!item.querySelector('.amount-input')) return;
+        // Get all procedure items containers
+        const procedureItems = document.querySelectorAll('.mb-3');
+        const totalAmountField = document.getElementById('total_amount');
+        const totalAmountDisplay = document.getElementById('total-amount-display');
+        const paymentInput = document.getElementById('payment');
+        const remainingAmountField = document.getElementById('remaining_amount');
+        const remainingAmountDisplay = document.getElementById('remaining-amount-display');
 
-            const quantity = parseInt(item.querySelector('.quantity-input').value) || 1;
-            const selectedPriceInput = item.querySelector('.amount-input:checked');
+        function calculateTotal() {
+            let total = 0;
+
+            procedureItems.forEach((item, index) => {
+                // Skip if not a procedure item (there might be other mb-3 elements)
+                if (!item.querySelector('.amount-input')) return;
+
+                const quantity = parseInt(item.querySelector('.quantity-input').value) || 1;
+                const selectedPriceInput = item.querySelector('.amount-input:checked');
+                const discountInput = item.querySelector('.discount-input');
+                const discountType = item.querySelector('.discount-type').value;
+                const discountDisplay = item.querySelector('.discount-amount-display');
+                const discountHidden = item.querySelector('.discount-hidden');
+
+                if (selectedPriceInput) {
+                    let unitPrice = parseFloat(selectedPriceInput.value);
+                    let discount = parseFloat(discountInput.value) || 0;
+                    let finalDiscount = discountType === 'percent' ?
+                        ((unitPrice * quantity) * (discount / 100)) :
+                        discount;
+
+                    // Ensure discount doesn't make price negative
+                    finalDiscount = Math.min(finalDiscount, unitPrice * quantity);
+
+                    discountDisplay.textContent = finalDiscount.toLocaleString();
+                    discountHidden.value = finalDiscount;
+                    total += Math.max((unitPrice * quantity) - finalDiscount, 0);
+                }
+            });
+
+            totalAmountField.value = total;
+            totalAmountDisplay.textContent = total.toLocaleString();
+            calculateRemainingPayment();
+        }
+
+        function calculateRemainingPayment() {
+            let total = parseFloat(totalAmountField.value) || 0;
+            let payment = parseFloat(paymentInput.value) || 0;
+
+            // Prevent overpayment
+            if (payment > total) {
+                payment = total;
+                paymentInput.value = total;
+            }
+
+            let remaining = Math.max(total - payment, 0);
+            remainingAmountField.value = remaining;
+            remainingAmountDisplay.textContent = remaining.toLocaleString();
+        }
+
+        // Add event listeners to all relevant elements
+        procedureItems.forEach(item => {
+            const amountInputs = item.querySelectorAll('.amount-input');
             const discountInput = item.querySelector('.discount-input');
-            const discountType = item.querySelector('.discount-type').value;
-            const discountDisplay = item.querySelector('.discount-amount-display');
-            const discountHidden = item.querySelector('.discount-hidden');
+            const discountType = item.querySelector('.discount-type');
 
-            if (selectedPriceInput) {
-                let unitPrice = parseFloat(selectedPriceInput.value);
-                let discount = parseFloat(discountInput.value) || 0;
-                let finalDiscount = discountType === 'percent' 
-                    ? ((unitPrice * quantity) * (discount / 100)) 
-                    : discount;
-                
-                // Ensure discount doesn't make price negative
-                finalDiscount = Math.min(finalDiscount, unitPrice * quantity);
-                
-                discountDisplay.textContent = finalDiscount.toLocaleString();
-                discountHidden.value = finalDiscount;
-                total += Math.max((unitPrice * quantity) - finalDiscount, 0);
+            if (amountInputs) {
+                amountInputs.forEach(input => {
+                    input.addEventListener('change', calculateTotal);
+                });
+            }
+
+            if (discountInput) {
+                discountInput.addEventListener('input', calculateTotal);
+            }
+
+            if (discountType) {
+                discountType.addEventListener('change', calculateTotal);
             }
         });
-        
-        totalAmountField.value = total;
-        totalAmountDisplay.textContent = total.toLocaleString();
-        calculateRemainingPayment();
-    }
 
-    function calculateRemainingPayment() {
-        let total = parseFloat(totalAmountField.value) || 0;
-        let payment = parseFloat(paymentInput.value) || 0;
-        
-        // Prevent overpayment
-        if (payment > total) {
-            payment = total;
-            paymentInput.value = total;
-        }
-        
-        let remaining = Math.max(total - payment, 0);
-        remainingAmountField.value = remaining;
-        remainingAmountDisplay.textContent = remaining.toLocaleString();
-    }
+        paymentInput.addEventListener('input', calculateRemainingPayment);
 
-    // Add event listeners to all relevant elements
-    procedureItems.forEach(item => {
-        const amountInputs = item.querySelectorAll('.amount-input');
-        const discountInput = item.querySelector('.discount-input');
-        const discountType = item.querySelector('.discount-type');
-        
-        if (amountInputs) {
-            amountInputs.forEach(input => {
-                input.addEventListener('change', calculateTotal);
-            });
-        }
-        
-        if (discountInput) {
-            discountInput.addEventListener('input', calculateTotal);
-        }
-        
-        if (discountType) {
-            discountType.addEventListener('change', calculateTotal);
-        }
+        // Initial calculation
+        calculateTotal();
     });
-
-    paymentInput.addEventListener('input', calculateRemainingPayment);
-
-    // Initial calculation
-    calculateTotal();
-});
 </script>
 @endsection

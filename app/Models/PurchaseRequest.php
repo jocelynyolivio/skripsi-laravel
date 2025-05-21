@@ -24,7 +24,7 @@ class PurchaseRequest extends Model
     protected $casts = [
         'approved_at' => 'datetime',
     ];
-    
+
 
     public function details()
     {
@@ -44,5 +44,27 @@ class PurchaseRequest extends Model
     public function editor()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function purchaseOrders()
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
+    public function isFullyOrdered()
+    {
+        // Semua material dari request
+        $requestedMaterials = $this->details->pluck('material_id')->unique()->sort()->values();
+
+        // Semua material dari purchase_order_details yang relasinya ke detail dalam request ini
+        $orderedMaterials = \App\Models\PurchaseOrderDetail::whereIn('purchase_request_detail_id', $this->details->pluck('id'))
+            ->with('requestDetail')
+            ->get()
+            ->pluck('requestDetail.material_id')
+            ->unique()
+            ->sort()
+            ->values();
+
+        return $requestedMaterials == $orderedMaterials;
     }
 }

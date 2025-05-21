@@ -59,6 +59,7 @@ Route::get('/', function () {
     ]);
 })->name('index');
 
+
 Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
@@ -171,6 +172,16 @@ Route::get('/patient/register', [RegisterController::class, 'index'])->name('pat
 // kalo ada req ke halaman register tapi method post maka nanti akan panggil yg store
 Route::post('/patient/register', [RegisterController::class, 'store']);
 
+// Route::get('dashboard/test-odontogram', function () {
+//     return view('dashboard.test-odontogram.index');
+// });
+
+Route::get('dashboard/test-odontogram', function () {
+    return view('dashboard.test-odontogram.full-view');
+});
+
+
+
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('internal')
     ->name('dashboard');
@@ -190,9 +201,15 @@ Route::post('/reservation', [ReservationController::class, 'store'])
 Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class, 'getDoctorsByDate'])
     ->name('dashboard.schedules.get-doctors-by-date');
 
+// web.php
+Route::get('/dashboard/purchase_orders/select_request', [PurchaseOrderController::class, 'selectRequest'])
+    ->name('dashboard.purchase_orders.select_request');
+
 // isi dashboarddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::resource('purchase_orders', PurchaseOrderController::class);
+    Route::resource('suppliers', SupplierController::class)->names('supplie
+    rs');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -208,13 +225,13 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor')->middleware('role:manager');
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index')->middleware('role:manager');
     Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data')->middleware('role:manager');
-    Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store')->middleware('role:manager');
+    // Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store')->middleware('role:manager');
 
     // slip gaji masing"
     Route::get('/salaries/slips', [SalaryController::class, 'slips'])->name('salaries.slips');
     Route::get('/salaries/slip', [SalaryController::class, 'userSalarySlip'])->name('salaries.slip');
 
-    Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
+    // Route::get('/home_content/{homeContent}/edit', [HomeContentController::class, 'edit'])->name('home_content.edit');
     Route::resource('/home_content', HomeContentController::class);
 
     Route::resource('/procedures', ProcedureController::class)->names('procedures');
@@ -322,9 +339,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('salary_calculations', SalaryCalculationController::class)->middleware('role:manager');
 
-    Route::resource('suppliers', SupplierController::class);
-
-    Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('purchases.pay')->middleware('role:manager');
 
     Route::resource('purchases', PurchaseController::class)->middleware('role:manager');
 
@@ -332,6 +346,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
 
     Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay')->middleware('role:manager');
+    Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('expenses.pay')->middleware('role:manager');
     Route::post('/purchases/pay', [PurchaseController::class, 'payDebt'])->name('purchases.payDebt')->middleware('role:manager');
 
     Route::get('/reports/balance_sheet', [FinancialReportController::class, 'balanceSheet'])->name('reports.balance_sheet')->middleware('role:manager');

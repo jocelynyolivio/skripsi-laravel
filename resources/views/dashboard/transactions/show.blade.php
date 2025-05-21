@@ -24,7 +24,12 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="info-item">
-                                <strong>Patient:</strong> {{ $transaction->patient->fname}} {{ $transaction->patient->mname}} {{ $transaction->patient->lname}}
+                                <strong>Patient:</strong>@php
+                    $patient = $transaction->medicalRecord?->patient ?? $transaction->patient;
+                    $fullName = trim("{$patient->fname} {$patient->mname} {$patient->lname}");
+                    @endphp
+
+                    {{ $fullName ?: 'N/A' }}
                             </div>
                             <div class="info-item">
                                 <strong>Admin:</strong> {{ $transaction->admin->name ?? '-' }}

@@ -12,6 +12,7 @@ class SupplierController extends Controller
      */
     public function index()
     {
+        // dd('a'); 
         // Ambil Semua Data Supplier
         $suppliers = Supplier::all();
         return view('dashboard.suppliers.index', compact('suppliers'));
@@ -63,28 +64,21 @@ class SupplierController extends Controller
      */
     public function edit(Supplier $supplier)
     {
-        // Tampilkan Form Edit Supplier
         return view('dashboard.suppliers.edit', compact('supplier'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Supplier $supplier)
     {
-        // Validasi Input
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'alamat' => 'required|string|max:255',
-            'nomor_telepon' => 'required|string|max:20',
+            'nama' => 'required|string|max:255',
+            'alamat' => 'nullable|string',
+            'nomor_telepon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
         ]);
 
-        // Update Data Supplier
         $supplier->update($validated);
 
-        // Redirect ke Index Supplier dengan Pesan Sukses
-        return redirect()->route('dashboard.suppliers.index')->with('success', 'Supplier Updated');
+        return redirect()->route('dashboard.suppliers.index')->with('success', 'Supplier berhasil diperbarui.');
     }
 
     /**

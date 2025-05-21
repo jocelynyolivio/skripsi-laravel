@@ -46,7 +46,7 @@ class ReservationController extends Controller
         $reservation = Reservation::with('patient')->findOrFail($id);
 
         // Nomor telepon pasien
-        $phoneNumber = $reservation->patient->nomor_telepon;
+        $phoneNumber = $reservation->patient->home_mobile;
 
         // Pesan template
         $message = "Halo {$reservation->patient->fname} {$reservation->patient->mname} {$reservation->patient->lname}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
@@ -203,7 +203,7 @@ class ReservationController extends Controller
         //     }
         // );
         // Menyimpan flash message ke session
-        session()->flash('success', 'Reservation created. Please check to My Reservations');
+        session()->flash('success', 'Reservation created. Please wait to be contacted by Admin');
 
         return redirect()->route('reservation.index'); // Redirect ke halaman reservasi setelah sukses
     }

@@ -1,11 +1,11 @@
 @extends('dashboard.layouts.main')
 
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Purchases Payment']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchases Payment']
+]
+])
 @endsection
 
 @section('container')
@@ -19,10 +19,10 @@
         </div>
         <div class="card-body">
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+            <div class="alert alert-danger alert-dismissible fade show">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             @endif
 
             <form action="{{ route('dashboard.purchase_payments.store') }}" method="POST">
@@ -56,8 +56,8 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="payment_date" class="form-label">Payment Date</label>
-                                <input type="date" class="form-control" id="payment_date" name="payment_date" 
-                                       value="{{ old('payment_date', date('Y-m-d')) }}" required>
+                                <input type="date" class="form-control" id="payment_date" name="payment_date"
+                                    value="{{ old('payment_date', date('Y-m-d')) }}" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="purchase_amount" class="form-label">Payment Amount</label>
@@ -74,7 +74,7 @@
                                 <select name="coa_id" class="form-control" required>
                                     <option value="">-- Select Account --</option>
                                     @foreach($coas as $coa)
-                                        <option value="{{ $coa->id }}">{{ $coa->code }} - {{ $coa->name }}</option>
+                                    <option value="{{ $coa->id }}">{{ $coa->code }} - {{ $coa->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -82,6 +82,9 @@
                                 <label for="payment_method" class="form-label">Payment Method</label>
                                 <select class="form-control" id="payment_method" name="payment_method" required>
                                     <option value="">-- Select Payment Method --</option>
+                                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                                        Tunai
+                                    </option>
                                     <optgroup label="QRIS">
                                         @foreach(['QRIS BCA', 'QRIS CIMB Niaga', 'QRIS Mandiri', 'QRIS BRI', 'QRIS BNI', 'QRIS Permata', 'QRIS Maybank', 'QRIS Danamon', 'QRIS Bank Mega'] as $method)
                                         <option value="{{ $method }}" {{ old('payment_method', $invoice->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>

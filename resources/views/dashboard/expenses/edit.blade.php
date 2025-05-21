@@ -36,6 +36,10 @@
             <select class="form-control" id="payment_method" name="payment_method" required>
                 <option value="">-- Pilih Metode Pembayaran --</option>
 
+                <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                    Tunai
+                </option>
+
                 <!-- QRIS -->
                 <optgroup label="QRIS">
                     @foreach(['QRIS BCA', 'QRIS CIMB Niaga', 'QRIS Mandiri', 'QRIS BRI', 'QRIS BNI', 'QRIS Permata', 'QRIS Maybank', 'QRIS Danamon', 'QRIS Bank Mega'] as $method)

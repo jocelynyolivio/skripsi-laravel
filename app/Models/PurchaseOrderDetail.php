@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,11 +11,18 @@ class PurchaseOrderDetail extends Model
         'material_id',
         'quantity',
         'price',
-        'notes'
+        'notes',
+        'purchase_request_detail_id',
     ];
 
     public function material()
     {
         return $this->belongsTo(DentalMaterial::class);
+    }
+
+    // Di PurchaseOrderDetail.php
+    public function requestDetail()
+    {
+        return $this->belongsTo(PurchaseRequestDetail::class, 'purchase_request_detail_id');
     }
 }

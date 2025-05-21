@@ -86,7 +86,7 @@ class ExpenseController extends Controller
 
         return redirect()->route('dashboard.expenses.index')->with('success', 'Expense recorded successfully!');
     } catch (\Exception $e) {
-        dd($e);
+        // dd($e);
         return redirect()->back()->with('error', 'Gagal memuat laporan: ' . $e->getMessage());
     }
 }

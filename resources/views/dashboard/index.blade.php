@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Welcome Back, {{ $user->name }} as {{ $role }}</h1>
     <a class="{{ Request::is('dashboard/profile*') ? 'active' : '' }}" href="/dashboard/profile">
-    <i class="bi bi-person-circle me-3 fs-5" style="color: black; font-weight: bold;"></i>
+        <i class="bi bi-person-circle me-3 fs-5" style="color: black; font-weight: bold;"></i>
     </a>
 </div>
 
@@ -82,19 +82,19 @@
             <tbody></tbody>
         </table> -->
         <table id="tableStatistik" class="table table-striped table-bordered w-100">
-    <thead>
-        <tr>
-            <th>Procedure Type</th>
-            <th>Total Patients</th>
-            <th>Male Patients</th>
-            <th>Female Patients</th>
-            <th>Total Revenue</th>
-            <th>Male Revenue</th>
-            <th>Female Revenue</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+            <thead>
+                <tr>
+                    <th>Procedure Type</th>
+                    <th>Total Patients</th>
+                    <th>Male Patients</th>
+                    <th>Female Patients</th>
+                    <th>Total Revenue</th>
+                    <th>Male Revenue</th>
+                    <th>Female Revenue</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
     </div>
 </div>
@@ -267,9 +267,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
     function formatRupiah(value) {
-    if (!value) return 'Rp 0';
-    return 'Rp ' + parseInt(value).toLocaleString('id-ID');
-}
+        if (!value) return 'Rp 0';
+        return 'Rp ' + parseInt(value).toLocaleString('id-ID');
+    }
 
     $(document).ready(function() {
         const renderPasienBelumKonfirmasi = (reservasiList) => {
@@ -320,45 +320,60 @@
             });
         };
 
-        const renderRekamMedisBelumDiisi = (records) => {
-            if (records.length === 0) {
-                $('#rekamMedisBelumDiisiContainer').html('<p class="text-success">All medical records are complete 🎉</p>');
-                return;
-            }
+const renderRekamMedisBelumDiisi = (records) => {
+    if (records.length === 0) {
+        $('#rekamMedisBelumDiisiContainer').html('<p class="text-success">All medical records are complete 🎉</p>');
+        return;
+    }
 
-            let html = `
-        <div class="table-responsive">
-            <table class="table table-sm table-bordered mb-0">
-                <thead>
-                    <tr>
-                        <th>Reservation Date</th>
-                        <th>Patient Name</th>
-                        <th>Doctor</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
+    let html = `
+    <div class="table-responsive">
+        <table id="unfilledRecordsTable" class="table table-sm table-bordered mb-0">
+            <thead>
+                <tr>
+                    <th>Reservation Date</th>
+                    <th>Patient Name</th>
+                    <th>Doctor</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
-            records.forEach(record => {
-                const tanggal = record.tanggal_reservasi || '-';
-                const pasien = record.patient?.name || '-';
-                const dokter = record.doctor?.name || '-';
-                const editUrl = `/dashboard/patients/${record.patient_id}/medical_records/${record.id}/edit`;
+    records.forEach(record => {
+        const tanggal = record.tanggal_reservasi || '-';
+        const p = record.patient;
+        const pasien = p && (p.fname || p.mname || p.lname) ?
+            [p.fname, p.mname, p.lname].filter(Boolean).join(' ') :
+            '-';
 
-                html += `
-            <tr>
-                <td>${tanggal}</td>
-                <td>${pasien}</td>
-                <td>${dokter}</td>
-                <td><a href="${editUrl}" class="btn btn-sm btn-warning">Fill Medical Record</a></td>
-            </tr>
-        `;
-            });
+        const dokter = record.doctor?.name || '-';
+        const editUrl = `/dashboard/patients/${record.patient_id}/medical_records/${record.id}/edit`;
 
-            html += `</tbody></table></div>`;
-            $('#rekamMedisBelumDiisiContainer').html(html);
-        };
+        html += `
+        <tr>
+            <td>${tanggal}</td>
+            <td>${pasien}</td>
+            <td>${dokter}</td>
+            <td><a href="${editUrl}" class="btn btn-sm btn-warning">Fill Medical Record</a></td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    
+    $('#rekamMedisBelumDiisiContainer').html(html);
+    
+    // Initialize DataTable after the table is rendered
+    $('#unfilledRecordsTable').DataTable({
+        responsive: true,
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Search records...",
+        },
+        dom: '<"top"f>rt<"bottom"lip><"clear">',
+        pageLength: 5,
+        lengthMenu: [5, 10, 20, 50]
+    });
+};
 
         function fetchData() {
             let role = '{{ $role }}';
@@ -385,28 +400,28 @@
                         // });
 
                         let table = $('#tableStatistik').DataTable({
-    destroy: true,
-    searching: false,
-    paging: false,
-    info: false,
-    ordering: false
-});
+                            destroy: true,
+                            searching: false,
+                            paging: false,
+                            info: false,
+                            ordering: false
+                        });
 
-table.clear();
+                        table.clear();
 
-response.statistik.forEach(function(item) {
-    table.row.add([
-        item.procedure_type,
-        item.total_patients,
-        item.male_patients,
-        item.female_patients,
-        formatRupiah(item.total_revenue),
-        formatRupiah(item.male_revenue),
-        formatRupiah(item.female_revenue)
-    ]);
-});
+                        response.statistik.forEach(function(item) {
+                            table.row.add([
+                                item.procedure_type,
+                                item.total_patients,
+                                item.male_patients,
+                                item.female_patients,
+                                formatRupiah(item.total_revenue),
+                                formatRupiah(item.male_revenue),
+                                formatRupiah(item.female_revenue)
+                            ]);
+                        });
 
-table.draw();
+                        table.draw();
 
 
 

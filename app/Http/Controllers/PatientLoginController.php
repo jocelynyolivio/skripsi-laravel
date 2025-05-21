@@ -16,19 +16,32 @@ class PatientLoginController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+{
+    // Validasi input
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required'
+    ]);
 
-        if (Auth::guard('patient')->attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('/');
+    // Coba login menggunakan guard 'patient'
+    if (Auth::guard('patient')->attempt($credentials)) {
+        $user = Auth::guard('patient')->user();
+
+        // Cek apakah email sudah diverifikasi
+        if (is_null($user->email_verified_at)) {
+            Auth::guard('patient')->logout();
+            return back()->with('loginError', 'Please verify your email before logging in.');
         }
 
-        return back()->with('loginError', 'Login Failed');
+        // Login berhasil dan email terverifikasi
+        $request->session()->regenerate();
+        return redirect()->intended('/');
     }
+
+    // Login gagal
+    return back()->with('loginError', 'Login Failed');
+}
+
 
     public function logout(Request $request)
     {

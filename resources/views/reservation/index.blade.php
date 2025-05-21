@@ -1,41 +1,104 @@
 @extends('layouts.main')
 
 @section('container')
-<div class="container mt-5">
-    <h3 class="mb-4 text-center">Make a Reservation</h3>
-    <!-- Form untuk memilih tanggal -->
+<style>
+    :root {
+        --primary-color: #8c8d5e;
+        --primary-color-light: #a3a47a;
+        --primary-color-dark: #75764d;
+        --secondary-color: #f8f9fa;
+        --text-color: #333;
+        --light-text: #f8f9fa;
+    }
+
+    .reservation-container {
+        background-color: var(--secondary-color);
+        border: 1px solid #ddd;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        color: var(--text-color);
+    }
+
+    .reservation-container h3 {
+        color: var(--primary-color-dark);
+        font-weight: bold;
+    }
+
+    body {
+        color: var(--text-color);
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: var(--light-text);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-color-dark);
+        border-color: var(--primary-color-dark);
+    }
+
+    .btn-outline-success {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-success:hover {
+        background-color: var(--primary-color);
+        color: var(--light-text);
+    }
+
+    .card {
+        border-color: var(--primary-color-light);
+    }
+
+    .card-header,
+    .card-body {
+        background-color: var(--secondary-color);
+    }
+
+    h3,
+    h5,
+    h6 {
+        color: var(--primary-color-dark);
+    }
+</style>
+
+<div class="container mt-5 col-md-6 justify-content-center reservation-container">
+    <h3 class="text-center mb-4">Make a Reservation</h3>
+
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <!-- Menampilkan pesan sukses jika ada reservasi yang berhasil dibuat -->
+        <div class="col">
             @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
             @endif
-            <form id="filterForm" class="p-4 border rounded">
-                <div class="form-group">
-                    <label for="date">Select Date:</label>
-                    <input type="date" id="date" name="date" class="form-control" min="{{ date('Y-m-d') }}" required>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="filterForm">
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Select Date:</label>
+                            <input type="date" id="date" name="date" class="form-control" min="{{ date('Y-m-d') }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Find Available Schedules</button>
+                    </form>
                 </div>
-
-                <button type="submit" class="btn btn-primary mt-3">Find Available Schedules</button>
-            </form>
-            <!-- Hasil Jadwal Dokter -->
-            <div id="results" class="mt-4">
-                
             </div>
+
+            <div id="results" class="mt-4"></div>
         </div>
-
     </div>
-
-
 
     <!-- Modal Konfirmasi -->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModalLabel">Confirm Your Reservation</h5>
+            <div class="modal-content border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">Confirm Your Reservation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -44,7 +107,6 @@
                     <p><strong>Time:</strong> <span id="confirmTime"></span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <form id="confirmForm" action="{{ route('reservation.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="patient_id" value="{{ auth()->id() }}">
@@ -52,112 +114,118 @@
                         <input type="hidden" name="tanggal_reservasi" id="confirmDateInput">
                         <input type="hidden" name="jam_mulai" id="confirmTimeStart">
                         <input type="hidden" name="jam_selesai" id="confirmTimeEnd">
-                        <button type="submit" class="btn btn-success">Confirm Reservation</button>
+                        <button type="submit" class="btn btn-primary w-100">Confirm Reservation</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const filterForm = document.getElementById('filterForm'); // Form pencarian
-        const resultsDiv = document.getElementById('results'); // Hasil jadwal
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal')); // Modal Bootstrap
+        const filterForm = document.getElementById('filterForm');
+        const resultsDiv = document.getElementById('results');
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
 
-        // Event saat mencari jadwal dokter
-        filterForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Hindari refresh halaman
+        filterForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const date = document.getElementById('date').value;
 
-            const date = document.getElementById('date').value; // Ambil tanggal yang dipilih
             if (!date) {
                 alert('Please select a date first.');
                 return;
             }
 
             try {
-                // Fetch data jadwal dokter berdasarkan tanggal
                 const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
                 if (!response.ok) throw new Error('Failed to fetch schedules.');
 
                 const data = await response.json();
                 renderSchedules(data);
             } catch (error) {
-                console.error('Error fetching schedules:', error);
-                resultsDiv.innerHTML = '<div class="alert alert-danger">Failed to load schedules.</div>';
+                resultsDiv.innerHTML = `<div class="alert alert-danger">Error loading schedules.</div>`;
             }
         });
 
-        // Fungsi untuk menampilkan hasil pencarian jadwal dokter
         function renderSchedules(data) {
             if (!data.doctors || data.doctors.length === 0) {
-                resultsDiv.innerHTML = `<div class="alert alert-info">No available schedules found for ${data.date}.</div>`;
+                resultsDiv.innerHTML = `<div class="alert alert-info">No available schedules for ${data.date}.</div>`;
                 return;
             }
 
-            let tableHTML = `
-            <h5>Schedules for ${data.date} (${data.day_of_week}):</h5>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Doctor</th>
-                        <th>Available Times</th>
-                    </tr>
-                </thead>
-                <tbody>
+            let html = `
+            <h5 class="mb-3">Available Schedules on ${data.date} (${data.day_of_week})</h5>
+            <div class="list-group">
         `;
 
-            data.doctors.forEach(doctorSchedules => {
-                tableHTML += `
-                <tr>
-                    <td>${doctorSchedules.doctor.name}</td>
-                    <td>
+            data.doctors.forEach(doctor => {
+                html += `
+                <div class="mb-3 border rounded p-3 shadow-sm">
+                    <h6 class="mb-2">${doctor.doctor.name}</h6>
             `;
-                doctorSchedules.schedules.forEach(time => {
-                    if (time.is_available) {
-                        tableHTML += `
-                        <button type="button" class="btn btn-success btn-sm select-time"
-                                data-doctor-id="${doctorSchedules.doctor.id}"
-                                data-doctor-name="${doctorSchedules.doctor.name}"
-                                data-date="${data.date}"
-                                data-time-start="${time.time_start}"
-                                data-time-end="${time.time_end}">
-                            ${time.time_start} - ${time.time_end}
+
+                doctor.schedules.forEach(schedule => {
+                    if (schedule.is_available) {
+                        html += `
+                        <button class="btn btn-outline-success btn-sm me-2 mb-2 select-time"
+                            data-doctor-id="${doctor.doctor.id}"
+                            data-doctor-name="${doctor.doctor.name}"
+                            data-date="${data.date}"
+                            data-time-start="${schedule.time_start}"
+                            data-time-end="${schedule.time_end}">
+                            ${schedule.time_start} - ${schedule.time_end}
                         </button>
                     `;
                     }
                 });
-                tableHTML += `</td></tr>`;
+
+                html += `</div>`;
             });
 
-            tableHTML += `</tbody></table>`;
-            resultsDiv.innerHTML = tableHTML;
+            html += `</div>`;
+            resultsDiv.innerHTML = html;
 
-            // Tambahkan event listener untuk semua tombol yang baru dibuat
-            document.querySelectorAll('.select-time').forEach(button => {
-                button.addEventListener('click', function() {
-                    // Ambil data dari button yang diklik
-                    const doctorId = this.dataset.doctorId;
+            document.querySelectorAll('.select-time').forEach(btn => {
+                btn.addEventListener('click', function() {
                     const doctorName = this.dataset.doctorName;
                     const date = this.dataset.date;
                     const timeStart = this.dataset.timeStart;
                     const timeEnd = this.dataset.timeEnd;
+                    const doctorId = this.dataset.doctorId;
 
-                    // Set data ke dalam modal konfirmasi
-                    document.getElementById('confirmDoctor').textContent = doctorName;
-                    document.getElementById('confirmDate').textContent = date;
-                    document.getElementById('confirmTime').textContent = `${timeStart} - ${timeEnd}`;
+                    Swal.fire({
+                        title: 'Confirm Your Reservation',
+                        html: `
+                <p><strong>Doctor:</strong> ${doctorName}</p>
+                <p><strong>Date:</strong> ${date}</p>
+                <p><strong>Time:</strong> ${timeStart} - ${timeEnd}</p>
+            `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Confirm',
+                        confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+                        cancelButtonColor: '#aaa',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Submit the reservation manually
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = "{{ route('reservation.store') }}";
 
-                    // Set input hidden untuk form reservasi
-                    document.getElementById('confirmDoctorId').value = doctorId;
-                    document.getElementById('confirmDateInput').value = date;
-                    document.getElementById('confirmTimeStart').value = timeStart;
-                    document.getElementById('confirmTimeEnd').value = timeEnd;
-
-                    // Tampilkan modal
-                    confirmModal.show();
+                            const token = document.querySelector('input[name="_token"]').value;
+                            form.innerHTML = `
+                    <input type="hidden" name="_token" value="${token}">
+                    <input type="hidden" name="patient_id" value="{{ auth()->id() }}">
+                    <input type="hidden" name="doctor_id" value="${doctorId}">
+                    <input type="hidden" name="tanggal_reservasi" value="${date}">
+                    <input type="hidden" name="jam_mulai" value="${timeStart}">
+                    <input type="hidden" name="jam_selesai" value="${timeEnd}">
+                `;
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
                 });
             });
         }

@@ -43,14 +43,14 @@
         <div id="selected-items" class="mb-3"></div>
 
         <div class="form-group">
-                <label for="voucher">Vouchers :</label>
-                <select class="form-control" id="voucher" name="voucher">
-                    <option value="">-- Pilih Voucher --</option>
-                    @foreach ($vouchers as $voucher)
-                    <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <label for="voucher">Vouchers :</label>
+            <select class="form-control" id="voucher" name="voucher">
+                <option value="">-- Pilih Voucher --</option>
+                @foreach ($vouchers as $voucher)
+                <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
+                @endforeach
+            </select>
+        </div>
 
         <!-- Total Amount Section -->
         <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
@@ -79,8 +79,10 @@
             <div class="mb-3">
                 <label for="payment_method" class="form-label">Cara Bayar</label>
                 <select class="form-control" id="payment_method" name="payments[0][method]" required>
-                <option value="">-- Pilih Metode Pembayaran --</option>
-
+                    <option value="">-- Pilih Metode Pembayaran --</option>
+                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                        Tunai
+                    </option>
                     <!-- QRIS -->
                     <optgroup label="QRIS">
                         <option value="QRIS BCA">QRIS BCA</option>

@@ -52,6 +52,8 @@
                         <span class="fs-6">Master Patients</span>
                     </a>
                 </li>
+                <!-- here supplier -->
+                
                 @if(auth()->user()?->role?->role_name === 'manager')
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/coa') ? 'active' : '' }}" href="{{ route('dashboard.coa.index') }}">

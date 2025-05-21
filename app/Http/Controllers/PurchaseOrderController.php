@@ -77,7 +77,25 @@ class PurchaseOrderController extends Controller
 
         // dd($validated['harga_total']);
         // Generate nomor unik
-        $orderNumber = 'PO-' . now()->format('Ymd') . '-' . ($validated['purchase_request_id'] ?? uniqid());       
+        $datePrefix = 'PO-' . now()->format('Ymd');
+
+        // Hitung jumlah PO yang sudah dibuat hari ini
+        $latestPoToday = \App\Models\PurchaseOrder::where('order_number', 'like', $datePrefix . '-%')
+            ->orderByDesc('order_number')
+            ->first();
+
+        if ($latestPoToday) {
+            // Ambil angka urutan terakhir, lalu tambahkan 1
+            $lastNumber = (int) str_replace($datePrefix . '-', '', $latestPoToday->order_number);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            // Belum ada, mulai dari 1
+            $nextNumber = 1;
+        }
+
+        // Buat nomor baru
+        $orderNumber = $datePrefix . '-' . $nextNumber;
+
 
         DB::beginTransaction();
         try {
@@ -85,7 +103,7 @@ class PurchaseOrderController extends Controller
             if ($request->hasFile('attachment')) {
                 $path = $request->file('attachment')->store('attachments/purchase_orders', 'public');
                 // $validated['attachment_path'] = $path;
-            } 
+            }
             // Create Purchase Order
             $purchaseOrder = PurchaseOrder::create([
                 'order_number' => $orderNumber,
@@ -114,7 +132,9 @@ class PurchaseOrderController extends Controller
                     'material_id' => $material['material_id'],
                     'quantity' => $material['quantity'],
                     'price' => $material['price'],
-                    'notes' => $material['notes'] ?? null
+                    'notes' => $material['notes'] ?? null,
+                    'purchase_request_detail_id' => $material['purchase_request_detail_id'] ?? null,
+
                 ]);
             }
             // dd('udh create pod');
@@ -197,5 +217,17 @@ class PurchaseOrderController extends Controller
     {
         $purchaseOrder->delete();
         return back()->with('success', 'Purchase Order deleted.');
+    }
+
+    public function selectRequest()
+    {
+        // dd('hai');
+        $requests = PurchaseRequest::with('details')
+            ->where('status', 'approved')
+            ->get()
+            ->filter(fn($req) => !$req->isFullyOrdered());
+
+
+        return view('dashboard.purchase_orders.select_request', compact('requests'));
     }
 }
