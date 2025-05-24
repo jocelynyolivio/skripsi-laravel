@@ -53,18 +53,24 @@ class PurchaseRequest extends Model
 
     public function isFullyOrdered()
     {
-        // Semua material dari request
-        $requestedMaterials = $this->details->pluck('material_id')->unique()->sort()->values();
+        // dd('masuk fully ordered');
+        // Material yang ada di request
+        $requestedMaterials = $this->details->pluck('dental_material_id')->unique()->sort()->values();
+        // dd($requestedMaterials);
 
-        // Semua material dari purchase_order_details yang relasinya ke detail dalam request ini
-        $orderedMaterials = \App\Models\PurchaseOrderDetail::whereIn('purchase_request_detail_id', $this->details->pluck('id'))
+        // Material yang sudah pernah diorder (jenis saja)
+        $orderedMaterials = PurchaseOrderDetail::whereHas('requestDetail', function ($q) {
+            $q->where('purchase_request_id', $this->id);
+        })
             ->with('requestDetail')
             ->get()
-            ->pluck('requestDetail.material_id')
+            ->pluck('requestDetail.dental_material_id')
             ->unique()
             ->sort()
             ->values();
 
-        return $requestedMaterials == $orderedMaterials;
+        // dd($orderedMaterials);
+
+        return $requestedMaterials->diff($orderedMaterials)->isEmpty();
     }
 }

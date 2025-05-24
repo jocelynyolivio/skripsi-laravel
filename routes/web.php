@@ -204,6 +204,8 @@ Route::get('dashboard/schedules/get-doctors-by-date', [ScheduleController::class
 // web.php
 Route::get('/dashboard/purchase_orders/select_request', [PurchaseOrderController::class, 'selectRequest'])
     ->name('dashboard.purchase_orders.select_request');
+Route::get('/dashboard/purchase_orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])->name('dashboard.purchase_orders.receive');
+Route::post('/dashboard/purchase_orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'storeReceived'])->name('dashboard.purchase_orders.storeReceived');
 
 // isi dashboarddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
@@ -260,6 +262,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/stock_cards/adjust', [StockCardController::class, 'adjustForm'])->name('stock_cards.adjust');
     Route::post('/stock_cards/adjust', [StockCardController::class, 'storeAdjustment'])->name('stock_cards.adjust.store');
     Route::resource('/stock_cards', StockCardController::class);
+
 
     Route::get('/purchases/create-from-order/{purchaseOrder}', [PurchaseController::class, 'createFromOrder'])->name('purchases.createFromOrder')->middleware('role:manager');
     Route::post('/purchases/store-from-order/{purchaseOrder}', [PurchaseController::class, 'storeFromOrder'])->name('purchases.storeFromOrder')->middleware('role:manager');
@@ -342,8 +345,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('purchases', PurchaseController::class)->middleware('role:manager');
 
-    Route::get('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
-    Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
+    // Route::get('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
+    // Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
 
     Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay')->middleware('role:manager');
     Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('expenses.pay')->middleware('role:manager');

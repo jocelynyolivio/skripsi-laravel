@@ -89,52 +89,67 @@
                     <div id="material-list">
                         @if(isset($purchaseRequest))
                         @foreach($purchaseRequest->details as $index => $detail)
-                        <div class="row mb-3 material-item align-items-center">
-                            <div class="col-md-1 text-center">
-                                <input type="checkbox"
-                                    name="selected_materials[{{ $index }}][include]"
-                                    value="1"
-                                    checked
-                                    class="form-check-input material-checkbox"
-                                    data-index="{{ $index }}">
-                            </div>
-                            <div class="col-md-3">
-                                <input type="hidden"
-                                    name="selected_materials[{{ $index }}][material_id]"
-                                    value="{{ $detail->dental_material_id }}"
-                                    class="material-id"
-                                    id="material_id_{{ $index }}">
-                                {{ $detail->material->name }} ({{ $detail->material->unit_type }})
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small">Requested Qty</label>
-                                <input type="number" class="form-control" value="{{ $detail->quantity }}" readonly>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small">Order Qty</label>
-                                <input type="number"
-                                    name="selected_materials[{{ $index }}][quantity]"
-                                    class="form-control quantity-input"
-                                    value="{{ $detail->quantity }}"
-                                    id="quantity_{{ $index }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small">Price</label>
-                                <input type="number"
-                                    name="selected_materials[{{ $index }}][price]"
-                                    class="form-control price-input"
-                                    step="0.01"
-                                    id="price_{{ $index }}">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small">Notes</label>
-                                <input type="text"
-                                    name="selected_materials[{{ $index }}][notes]"
-                                    class="form-control notes-input"
-                                    value="{{ $detail->notes ?? '' }}"
-                                    id="notes_{{ $index }}">
-                            </div>
-                        </div>
+@php
+$isUsed = in_array($detail->id, $usedDetailIds);
+@endphp
+
+<div class="row mb-3 material-item align-items-center">
+    <div class="col-md-1 text-center">
+        <input type="checkbox"
+            name="selected_materials[{{ $index }}][include]"
+            value="1"
+            class="form-check-input material-checkbox"
+            data-index="{{ $index }}"
+            {{ $isUsed ? 'disabled' : 'checked' }}>
+    </div>
+    <div class="col-md-3">
+        <input type="hidden"
+            name="selected_materials[{{ $index }}][material_id]"
+            value="{{ $detail->dental_material_id }}"
+            class="material-id"
+            id="material_id_{{ $index }}"
+            {{ $isUsed ? 'disabled' : '' }}>
+        {{ $detail->material->name }} ({{ $detail->material->unit_type }})
+        <input type="hidden"
+            name="selected_materials[{{ $index }}][purchase_request_detail_id]"
+            value="{{ $detail->id }}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small">Requested Qty</label>
+        <input type="number"
+            class="form-control"
+            value="{{ $detail->quantity }}"
+            readonly>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small">Order Qty</label>
+        <input type="number"
+            name="selected_materials[{{ $index }}][quantity]"
+            class="form-control quantity-input"
+            value="{{ $detail->quantity }}"
+            id="quantity_{{ $index }}"
+            {{ $isUsed ? 'disabled' : '' }}>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small">Price</label>
+        <input type="number"
+            name="selected_materials[{{ $index }}][price]"
+            class="form-control price-input"
+            step="0.01"
+            id="price_{{ $index }}"
+            {{ $isUsed ? 'disabled' : '' }}>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label small">Notes</label>
+        <input type="text"
+            name="selected_materials[{{ $index }}][notes]"
+            class="form-control notes-input"
+            value="{{ $detail->notes ?? '' }}"
+            id="notes_{{ $index }}"
+            {{ $isUsed ? 'disabled' : '' }}>
+    </div>
+</div>
+
                         @endforeach
                         @else
                         <div id="dynamic-material-list"></div>
@@ -192,8 +207,8 @@
                 </div>
 
                 <div class="text-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i> Save
+                    <button type="button" class="btn btn-primary" id="btn-save">
+                        <i class="fas fa-save me-2"></i>Save Purchase Order
                     </button>
                 </div>
             </form>
@@ -203,6 +218,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        document.getElementById('btn-save').addEventListener('click', function (e) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to save this purchase order?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, save it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('purchaseOrderForm').submit();
+                }
+            });
+        });
+        
         // Add material functionality
         document.getElementById('add-material')?.addEventListener('click', function() {
             let index = document.querySelectorAll('.material-item').length;

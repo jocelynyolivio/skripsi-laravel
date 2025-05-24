@@ -42,12 +42,6 @@
                 <td>
                     <a href="{{ route('dashboard.purchases.edit', $purchase->id) }}" class="btn btn-warning btn-sm">Edit</a>
 
-                    @if ($purchase->status !== 'received')
-                    <a href="{{ route('dashboard.purchases.receive', $purchase->id) }}" class="btn btn-primary">
-                        Receive Goods
-                    </a>
-                    @endif
-
                     @if ($purchase->latestPayment && $purchase->latestPayment->total_debt > 0)
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#payDebtModal-{{ $purchase->id }}">
                         Create Purchase Payment

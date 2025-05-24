@@ -129,4 +129,30 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const createInvoiceBtn = document.querySelector('.btn-primary');
+
+        if (createInvoiceBtn) {
+            createInvoiceBtn.addEventListener('click', function (e) {
+                e.preventDefault(); // Cegah redirect langsung
+
+                Swal.fire({
+                    title: 'Create Invoice?',
+                    text: "Are you sure you want to create an invoice from this Purchase Order?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, create it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = this.getAttribute('href');
+                    }
+                });
+            });
+        }
+    });
+</script>
+
 @endsection

@@ -20,7 +20,7 @@
             </a>
 
             @if(auth()->user()?->role?->role_name === 'manager')
-@if($purchaseRequest->status === 'approved' && !$purchaseRequest->isFullyOrdered())
+            @if($purchaseRequest->status === 'approved' && !$purchaseRequest->isFullyOrdered())
             <a href="{{ route('dashboard.purchase_orders.create', ['request_id' => $purchaseRequest->id]) }}" class="btn btn-primary">
                 Create Purchase Order
             </a>
@@ -100,7 +100,7 @@
                     <td>{{ $detail->material->name }} ({{ $detail->material->unit_type }})</td>
                     <td>{{ $detail->quantity }}</td>
                     <td>{{ number_format($detail->material->averageUsage(), 2) }}</td>
-                    <td>{{ $detail->material->lastStock() }}</td>
+                    <td>{{ $detail->material->lastStock() ?? '0' }}</td>
                     <td>{{ $detail->notes ?? '-' }}</td>
                 </tr>
                 @endforeach

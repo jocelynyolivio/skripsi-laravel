@@ -20,7 +20,6 @@ class PurchaseOrderDetail extends Model
         return $this->belongsTo(DentalMaterial::class);
     }
 
-    // Di PurchaseOrderDetail.php
     public function requestDetail()
     {
         return $this->belongsTo(PurchaseRequestDetail::class, 'purchase_request_detail_id');

@@ -556,6 +556,7 @@ class PurchaseController extends Controller
 
         return redirect()->route('dashboard.purchases.index')->with('success', 'Stock successfully updated!');
     }
+
     public function receive(PurchaseInvoice $purchase)
     {
         return view('dashboard.purchases.receive', compact('purchase'));

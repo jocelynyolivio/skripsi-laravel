@@ -25,4 +25,6 @@ class PurchaseRequestDetail extends Model
     {
         return $this->belongsTo(DentalMaterial::class, 'dental_material_id');
     }
+
+        
 }

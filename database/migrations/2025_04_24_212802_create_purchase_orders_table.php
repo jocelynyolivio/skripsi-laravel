@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id')->nullable();
             $table->date('due_date')->nullable();
             $table->date('ship_date')->nullable();
-            // $table->enum('status', ['draft', 'sent', 'approved', 'completed', 'cancelled'])->default('draft');
+            $table->enum('status', ['draft', 'sent', 'approved', 'completed', 'cancelled'])->default('draft');
             $table->text('shipping_address')->nullable();
             $table->string('payment_requirement')->nullable(); //kyk jatuh tempo ato cod dll
             $table->decimal('discount', 15, 2)->nullable();

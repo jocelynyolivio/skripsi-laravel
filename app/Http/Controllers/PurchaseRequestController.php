@@ -125,18 +125,5 @@ class PurchaseRequestController extends Controller
         //
     }
 
-    // public function isFullyOrdered()
-    // {
-    //     // Ambil semua ID material dalam request ini
-    //     $requestedMaterialIds = $this->details->pluck('material_id')->unique()->sort()->values();
 
-    //     // Ambil semua ID material yang sudah dibuatkan PO dari relasi purchase_orders
-    //     $orderedMaterialIds = $this->purchaseOrders
-    //         ->flatMap(function ($order) {
-    //             return $order->details->pluck('material_id');
-    //         })->unique()->sort()->values();
-
-    //     // Bandingkan apakah semua requested materials sudah dipesan
-    //     return $requestedMaterialIds->diff($orderedMaterialIds)->isEmpty();
-    // }
 }

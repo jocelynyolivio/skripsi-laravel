@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
+use App\Models\StockCard;
 use Illuminate\Support\Str;
 use GuzzleHttp\Psr7\Message;
 use Illuminate\Http\Request;
@@ -28,22 +29,77 @@ class PurchaseOrderController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
-    {
-        $suppliers = Supplier::all();
-        $materials = DentalMaterial::all();
+    // public function create(Request $request)
+    // {
+    //     dd('hai');
+    //     $suppliers = Supplier::all();
+    //     $materials = DentalMaterial::all();
 
-        if ($request->has('request_id')) {
-            $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
-            return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'purchaseRequest'));
-        }
+    //     if ($request->has('request_id')) {
+    //         $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
+    //         return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'purchaseRequest'));
+    //     }
 
-        $requests = PurchaseRequest::where('status', 'approved')->get();
-        return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'requests'));
+    //     $requests = PurchaseRequest::where('status', 'approved')->get();
+    //     return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'requests'));
+    // }
+
+    // ini kalo mau cek dan tampilin yang belom di buatkan PO nya aja
+//     public function create(Request $request)
+// {
+//     $suppliers = Supplier::all();
+//     $materials = DentalMaterial::all();
+
+//     if ($request->has('request_id')) {
+//         // Ambil ID detail yang sudah dipakai
+//         $usedDetailIds = PurchaseOrderDetail::pluck('purchase_request_detail_id')->toArray();
+
+//         // Ambil request beserta details dan material
+//         $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
+
+//         // Filter detail yang belum digunakan
+//         $filteredDetails = $purchaseRequest->details->filter(function ($detail) use ($usedDetailIds) {
+//             return !in_array($detail->id, $usedDetailIds);
+//         });
+
+//         // Set ulang relasi details dengan hasil filter
+//         $purchaseRequest->setRelation('details', $filteredDetails);
+
+//         return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'purchaseRequest'));
+//     }
+
+//     $requests = PurchaseRequest::where('status', 'approved')->get();
+//     return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'requests'));
+// }
+public function create(Request $request)
+{
+    $suppliers = Supplier::all();
+    $materials = DentalMaterial::all();
+
+    $purchaseRequest = null;
+    $usedDetailIds = [];
+
+    if ($request->has('request_id')) {
+        // Ambil ID detail yang sudah pernah dipakai
+        $usedDetailIds = PurchaseOrderDetail::pluck('purchase_request_detail_id')->toArray();
+
+        // Ambil request beserta details dan material
+        $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
     }
+
+    return view('dashboard.purchase_orders.create', compact(
+        'suppliers',
+        'materials',
+        'purchaseRequest',
+        'usedDetailIds'
+    ));
+}
+
+
 
     public function store(Request $request)
     {
+        
         $filteredMaterials = [];
         if ($request->has('selected_materials')) {
             foreach ($request->selected_materials as $material) {
@@ -72,10 +128,11 @@ class PurchaseOrderController extends Controller
             'selected_materials.*.material_id' => 'required|exists:dental_materials,id',
             'selected_materials.*.quantity' => 'required|numeric|min:1',
             'selected_materials.*.price' => 'required|numeric|min:0',
-            'selected_materials.*.notes' => 'nullable|string'
+            'selected_materials.*.notes' => 'nullable|string',
+            'selected_materials.*.purchase_request_detail_id' => 'nullable|string'
         ]);
 
-        // dd($validated['harga_total']);
+        // dd($validated);
         // Generate nomor unik
         $datePrefix = 'PO-' . now()->format('Ymd');
 
@@ -230,4 +287,86 @@ class PurchaseOrderController extends Controller
 
         return view('dashboard.purchase_orders.select_request', compact('requests'));
     }
+
+    public function receive(PurchaseOrder $purchaseOrder)
+{
+    return view('dashboard.purchase_orders.receive', compact('purchaseOrder'));
+}
+
+public function storeReceived(Request $request, PurchaseOrder $purchaseOrder)
+{
+    foreach ($request->received_quantity as $materialId => $quantityReceived) {
+        if ($quantityReceived > 0) {
+            // Ambil semua detail untuk material ini
+            $details = $purchaseOrder->details()->where('material_id', $materialId)->get();
+
+            $totalQuantity = 0;
+            $totalCost = 0;
+
+            foreach ($details as $detail) {
+                $unitPrice = $detail->price;
+
+                $totalQuantity += $quantityReceived;
+                $totalCost += $quantityReceived * $unitPrice;
+            }
+
+            // Update Stock Card: barang masuk, bukan pengeluaran
+            $this->updateStockCard(
+                $materialId,
+                $totalQuantity,
+                $totalCost / $totalQuantity,
+                $purchaseOrder->order_number,
+                false // barang masuk
+            );
+        }
+    }
+
+    // Update status order menjadi "completed"
+    $purchaseOrder->update(['status' => 'completed']);
+
+    return redirect()->route('dashboard.purchase_orders.index')->with('success', 'Barang berhasil diterima dan stok diperbarui.');
+}
+
+public function updateStockCard($dentalMaterialId, $quantity, $price, $referenceNumber, $isOut = false)
+    {
+        // **Ambil stok terakhir sebelum update**
+        $latestStock = StockCard::where('dental_material_id', $dentalMaterialId)
+            ->latest('created_at')
+            ->first();
+
+        $oldStock = $latestStock ? $latestStock->remaining_stock : 0;
+        $oldAveragePrice = $latestStock ? $latestStock->average_price : 0;
+
+        if ($isOut) {
+            // **Barang Keluar: Pakai Harga Rata-rata Terakhir**
+            StockCard::create([
+                'dental_material_id' => $dentalMaterialId,
+                'date' => now(),
+                'reference_number' => $referenceNumber,
+                'price_out' => $oldAveragePrice, // Pakai harga rata-rata terbaru
+                'quantity_out' => $quantity,
+                'remaining_stock' => max(0, $oldStock - $quantity), // Kurangi stok
+                'average_price' => $oldAveragePrice, // Harga tetap
+                'type' => 'usage'
+            ]);
+        } else {
+            // **Barang Masuk: Hitung Harga Rata-rata Baru**
+            $newStock = $oldStock + $quantity;
+            $newAveragePrice = ($oldStock * $oldAveragePrice + $quantity * $price) / $newStock;
+
+            // Simpan ke Stock Card dengan harga rata-rata yang diperbarui
+            StockCard::create([
+                'dental_material_id' => $dentalMaterialId,
+                'date' => now(),
+                'reference_number' => $referenceNumber,
+                'price_in' => $price,
+                'quantity_in' => $quantity,
+                'remaining_stock' => $newStock,
+                'average_price' => $newAveragePrice, // Harga rata-rata baru
+                'type' => 'purchase'
+            ]);
+        }
+    }
+
+
 }
