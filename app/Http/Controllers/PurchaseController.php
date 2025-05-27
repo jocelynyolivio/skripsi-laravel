@@ -644,4 +644,31 @@ class PurchaseController extends Controller
     //         'cashAccounts'
     //     ));
     // }
+
+
+public function show($id)
+{
+    // Ambil invoice berdasarkan ID dengan eager loading relasi
+    $purchaseInvoice = PurchaseInvoice::with([
+        'supplier',
+        'purchaseOrder',
+        'details.material',
+        'payments.coa'
+    ])->findOrFail($id);
+
+    // Hitung total yang sudah dibayar
+    $totalPaid = $purchaseInvoice->payments->sum('purchase_amount');
+
+    // Hitung sisa tagihan
+    $sisaTagihan = $purchaseInvoice->grand_total - $totalPaid;
+
+    // Kirim data ke view
+    return view('dashboard.purchases.show', [
+        'title' => 'Detail Purchase Invoice',
+        'purchaseInvoice' => $purchaseInvoice,
+        'totalPaid' => $totalPaid,
+        'sisaTagihan' => $sisaTagihan,
+    ]);
+}
+
 }

@@ -133,6 +133,9 @@
                         Tambah Pembayaran
                     </a>
                     @endif
+                    <a href="{{ route('dashboard.purchases.show', $purchase->id) }}" class="btn btn-sm btn-info" data-toggle="tooltip" data-original-title="Lihat Detail">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </a>
                 </td>
             </tr>
             @endforeach

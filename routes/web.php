@@ -268,6 +268,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/purchases/create-from-order/{purchaseOrder}', [PurchaseController::class, 'createFromOrder'])->name('purchases.createFromOrder')->middleware('role:manager');
     Route::post('/purchases/store-from-order/{purchaseOrder}', [PurchaseController::class, 'storeFromOrder'])->name('purchases.storeFromOrder')->middleware('role:manager');
     Route::get('/purchases', [PurchaseController::class, 'create'])->name('purchases.create')->middleware('role:manager');
+    Route::get('/purchases/{id}', [PurchaseController::class, 'show'])->name('purchases.show');
 
     Route::resource('/purchase_requests', PurchaseRequestController::class);
     Route::get('/purchase_requests/{purchaseRequest}/duplicate', [PurchaseRequestController::class, 'duplicate'])->name('purchase_requests.duplicate');
