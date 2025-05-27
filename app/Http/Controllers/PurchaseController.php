@@ -291,7 +291,7 @@ class PurchaseController extends Controller
             $this->saveInvoice($request, $purchaseOrder);
             return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created from order!');
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
@@ -445,7 +445,7 @@ class PurchaseController extends Controller
             $this->saveInvoice($request);
             return redirect()->route('dashboard.purchases.index')->with('success', 'Purchase Invoice created successfully.');
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }

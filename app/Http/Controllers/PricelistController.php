@@ -3,63 +3,75 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pricelist;
+use App\Models\Procedure;
 use Illuminate\Http\Request;
 
 class PricelistController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $pricelists = Pricelist::with('procedure')->paginate(10);
+        return view('dashboard.pricelists.index', compact('pricelists'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $procedures = Procedure::all();
+        return view('dashboard.pricelists.create', compact('procedures'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'procedure_id' => 'required|exists:procedures,id',
+            'price' => 'required|numeric',
+            'is_promo' => 'nullable|boolean',
+            'effective_date' => 'required|date',
+        ]);
+
+        Pricelist::create([
+            'procedure_id' => $request->procedure_id,
+            'price' => $request->price,
+            'is_promo' => $request->has('is_promo') ? true : false,
+            'effective_date' => $request->effective_date,
+        ]);
+
+        return redirect()->route('dashboard.pricelists.index')->with('success', 'Pricelist berhasil dibuat');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Pricelist $pricelist)
     {
-        //
+        return view('dashboard.pricelists.show', compact('pricelist'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Pricelist $pricelist)
     {
-        //
+        $procedures = Procedure::all();
+        return view('dashboard.pricelists.edit', compact('pricelist', 'procedures'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Pricelist $pricelist)
     {
-        //
+        $request->validate([
+            'procedure_id' => 'required|exists:procedures,id',
+            'price' => 'required|numeric',
+            'is_promo' => 'nullable|boolean',
+            'effective_date' => 'required|date',
+        ]);
+
+        $pricelist->update([
+            'procedure_id' => $request->procedure_id,
+            'price' => $request->price,
+            'is_promo' => $request->has('is_promo') ? true : false,
+            'effective_date' => $request->effective_date,
+        ]);
+
+        return redirect()->route('dashboard.pricelists.index')->with('success', 'Pricelist berhasil diperbarui');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Pricelist $pricelist)
     {
-        //
+        $pricelist->delete();
+        return redirect()->route('dashboard.pricelists.index')->with('success', 'Pricelist berhasil dihapus');
     }
 }

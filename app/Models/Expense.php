@@ -20,6 +20,7 @@ class Expense extends Model
         'supplier_id',
         'payment_method'
     ];
+    
     public function admin()
     {
         return $this->belongsTo(User::class, 'created_by');

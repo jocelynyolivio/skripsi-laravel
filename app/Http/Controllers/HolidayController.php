@@ -20,17 +20,24 @@ class HolidayController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'tanggal' => 'required|date',
-            'keterangan' => 'required|string|max:255',
-        ]);
+        try {
 
-        DB::table('holidays')->insert([
-            'tanggal' => $request->tanggal,
-            'keterangan' => $request->keterangan,
-        ]);
+            $request->validate([
+                'tanggal' => 'required|date|unique:holidays,tanggal',
+                'keterangan' => 'required|string|max:255',
+            ]);
 
-        return redirect()->route('dashboard.holidays.index')->with('success', 'Holiday created');
+
+            DB::table('holidays')->insert([
+                'tanggal' => $request->tanggal,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            return redirect()->route('dashboard.holidays.index')->with('success', 'Holiday created');
+        } catch (\Exception $e) {
+            // dd($e);
+            return redirect()->back()->with('error', 'Failed : ' . $e->getMessage());
+        }
     }
 
     public function show($id)

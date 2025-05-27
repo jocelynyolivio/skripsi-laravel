@@ -58,7 +58,7 @@
             </tbody>
         </table>
     @else
-        <p class="no-data">Data presensi tidak tersedia.</p>
+        <p class="no-data">No Attendance data available.</p>
     @endif
 </body>
 </html>

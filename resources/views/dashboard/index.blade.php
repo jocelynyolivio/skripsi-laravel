@@ -214,7 +214,7 @@
         </a>
     </div>
     <div class="col-md-6 mb-4">
-        <a href="#" class="text-decoration-none card-hover-effect">
+        <a href="{{ route('dashboard.medical_records.select')}}" class="text-decoration-none card-hover-effect">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Unfilled Medical Records</h5>

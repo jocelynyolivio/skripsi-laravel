@@ -17,6 +17,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PricelistController;
 use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\StockCardController;
 use App\Http\Controllers\AttendanceController;
@@ -210,8 +211,8 @@ Route::post('/dashboard/purchase_orders/{purchaseOrder}/receive', [PurchaseOrder
 // isi dashboarddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::resource('purchase_orders', PurchaseOrderController::class);
-    Route::resource('suppliers', SupplierController::class)->names('supplie
-    rs');
+    Route::resource('suppliers', SupplierController::class)->names('suppliers');
+    Route::resource('pricelists', PricelistController::class)->names('pricelists');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -313,6 +314,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::get('/medical_records/{medicalRecordId}/selectMaterials', [MedicalRecordController::class, 'selectMaterials'])->name('medical_records.selectMaterials');
     Route::post('/medical_records/{medicalRecordId}/saveMaterials', [MedicalRecordController::class, 'saveMaterials'])->name('medical_records.saveMaterials');
+    Route::get('/medical_records/select', [MedicalRecordController::class, 'selectIncomplete'])->name('medical_records.select');
+    Route::get('/medical_records/{medicalRecord}/materials', [MedicalRecordController::class, 'showMaterials'])->name('medical_records.showMaterials');
 
     Route::get('attendances', [AttendanceController::class, 'index'])->name('attendances.index')->middleware('role:manager');
     Route::get('attendances/create', [AttendanceController::class, 'create'])->name('attendances.create')->middleware('role:manager');

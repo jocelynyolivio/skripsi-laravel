@@ -9,7 +9,7 @@
 @endsection
 @section('container')
 <div class="container mt-5 col-md-6">
-    <h3 class="text-center">Edit Data Presensi</h3>
+    <h3 class="text-center">Edit Attendance</h3>
 
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -36,19 +36,20 @@
         </div>
 
         <div class="mb-3">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal" class="form-control" value="{{ $attendance->tanggal }}" required>
-        </div>
+    <label>Tanggal</label>
+    <input type="date" name="tanggal" class="form-control" value="{{ $attendance->tanggal->format('Y-m-d') }}" required>
+</div>
 
-        <div class="mb-3">
-            <label>Jam Masuk</label>
-            <input type="time" name="jam_masuk" class="form-control" value="{{ $attendance->jam_masuk }}" required>
-        </div>
+<div class="mb-3">
+    <label>Jam Masuk</label>
+    <input type="time" name="jam_masuk" class="form-control" value="{{ \Carbon\Carbon::parse($attendance->jam_masuk)->format('H:i') }}" required>
+</div>
 
-        <div class="mb-3">
-            <label>Jam Pulang</label>
-            <input type="time" name="jam_pulang" class="form-control" value="{{ $attendance->jam_pulang }}" required>
-        </div>
+<div class="mb-3">
+    <label>Jam Pulang</label>
+    <input type="time" name="jam_pulang" class="form-control" value="{{ \Carbon\Carbon::parse($attendance->jam_pulang)->format('H:i') }}" required>
+</div>
+
 
         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
         <a href="{{ route('dashboard.attendances.index') }}" class="btn btn-secondary">Batal</a>

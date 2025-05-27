@@ -45,61 +45,61 @@ class PurchaseOrderController extends Controller
     // }
 
     // ini kalo mau cek dan tampilin yang belom di buatkan PO nya aja
-//     public function create(Request $request)
-// {
-//     $suppliers = Supplier::all();
-//     $materials = DentalMaterial::all();
+    //     public function create(Request $request)
+    // {
+    //     $suppliers = Supplier::all();
+    //     $materials = DentalMaterial::all();
 
-//     if ($request->has('request_id')) {
-//         // Ambil ID detail yang sudah dipakai
-//         $usedDetailIds = PurchaseOrderDetail::pluck('purchase_request_detail_id')->toArray();
+    //     if ($request->has('request_id')) {
+    //         // Ambil ID detail yang sudah dipakai
+    //         $usedDetailIds = PurchaseOrderDetail::pluck('purchase_request_detail_id')->toArray();
 
-//         // Ambil request beserta details dan material
-//         $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
+    //         // Ambil request beserta details dan material
+    //         $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
 
-//         // Filter detail yang belum digunakan
-//         $filteredDetails = $purchaseRequest->details->filter(function ($detail) use ($usedDetailIds) {
-//             return !in_array($detail->id, $usedDetailIds);
-//         });
+    //         // Filter detail yang belum digunakan
+    //         $filteredDetails = $purchaseRequest->details->filter(function ($detail) use ($usedDetailIds) {
+    //             return !in_array($detail->id, $usedDetailIds);
+    //         });
 
-//         // Set ulang relasi details dengan hasil filter
-//         $purchaseRequest->setRelation('details', $filteredDetails);
+    //         // Set ulang relasi details dengan hasil filter
+    //         $purchaseRequest->setRelation('details', $filteredDetails);
 
-//         return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'purchaseRequest'));
-//     }
+    //         return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'purchaseRequest'));
+    //     }
 
-//     $requests = PurchaseRequest::where('status', 'approved')->get();
-//     return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'requests'));
-// }
-public function create(Request $request)
-{
-    $suppliers = Supplier::all();
-    $materials = DentalMaterial::all();
+    //     $requests = PurchaseRequest::where('status', 'approved')->get();
+    //     return view('dashboard.purchase_orders.create', compact('suppliers', 'materials', 'requests'));
+    // }
+    public function create(Request $request)
+    {
+        $suppliers = Supplier::all();
+        $materials = DentalMaterial::all();
 
-    $purchaseRequest = null;
-    $usedDetailIds = [];
+        $purchaseRequest = null;
+        $usedDetailIds = [];
 
-    if ($request->has('request_id')) {
-        // Ambil ID detail yang sudah pernah dipakai
-        $usedDetailIds = PurchaseOrderDetail::pluck('purchase_request_detail_id')->toArray();
+        if ($request->has('request_id')) {
+            // Ambil ID detail yang sudah pernah dipakai
+            $usedDetailIds = PurchaseOrderDetail::pluck('purchase_request_detail_id')->toArray();
 
-        // Ambil request beserta details dan material
-        $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
+            // Ambil request beserta details dan material
+            $purchaseRequest = PurchaseRequest::with('details.material')->findOrFail($request->request_id);
+        }
+
+        return view('dashboard.purchase_orders.create', compact(
+            'suppliers',
+            'materials',
+            'purchaseRequest',
+            'usedDetailIds'
+        ));
     }
-
-    return view('dashboard.purchase_orders.create', compact(
-        'suppliers',
-        'materials',
-        'purchaseRequest',
-        'usedDetailIds'
-    ));
-}
 
 
 
     public function store(Request $request)
     {
-        
+
         $filteredMaterials = [];
         if ($request->has('selected_materials')) {
             foreach ($request->selected_materials as $material) {
@@ -289,45 +289,80 @@ public function create(Request $request)
     }
 
     public function receive(PurchaseOrder $purchaseOrder)
-{
-    return view('dashboard.purchase_orders.receive', compact('purchaseOrder'));
-}
-
-public function storeReceived(Request $request, PurchaseOrder $purchaseOrder)
-{
-    foreach ($request->received_quantity as $materialId => $quantityReceived) {
-        if ($quantityReceived > 0) {
-            // Ambil semua detail untuk material ini
-            $details = $purchaseOrder->details()->where('material_id', $materialId)->get();
-
-            $totalQuantity = 0;
-            $totalCost = 0;
-
-            foreach ($details as $detail) {
-                $unitPrice = $detail->price;
-
-                $totalQuantity += $quantityReceived;
-                $totalCost += $quantityReceived * $unitPrice;
-            }
-
-            // Update Stock Card: barang masuk, bukan pengeluaran
-            $this->updateStockCard(
-                $materialId,
-                $totalQuantity,
-                $totalCost / $totalQuantity,
-                $purchaseOrder->order_number,
-                false // barang masuk
-            );
+    {
+        if ($purchaseOrder->status === 'received') {
+            return redirect()
+                ->route('dashboard.purchase_orders.index')
+                ->with('warning', "Purchase Order #{$purchaseOrder->order_number} sudah pernah diterima dan selesai.");
         }
+        return view('dashboard.purchase_orders.receive', compact('purchaseOrder'));
     }
 
-    // Update status order menjadi "completed"
-    $purchaseOrder->update(['status' => 'completed']);
+    public function storeReceived(Request $request, PurchaseOrder $purchaseOrder)
+    {
+        // dd('masuk store');
+        // 1. Pengecekan Awal: Tolak jika PO sudah pernah diterima.
+        if ($purchaseOrder->status === 'received') {
+            return redirect()->route('dashboard.purchase_orders.index')
+                ->with('warning', 'Gagal! Purchase Order ini sudah pernah diterima sebelumnya.');
+        }
+        // dd($purchaseOrder->status);
 
-    return redirect()->route('dashboard.purchase_orders.index')->with('success', 'Barang berhasil diterima dan stok diperbarui.');
-}
+        // 2. Mulai blok try-catch untuk menangani semua kemungkinan error.
+        try {
+            // 3. Gunakan Database Transaction. Semua harus berhasil, atau semua akan dibatalkan.
+            // DB::transaction(function () use ($request, $purchaseOrder) {
 
-public function updateStockCard($dentalMaterialId, $quantity, $price, $referenceNumber, $isOut = false)
+            foreach ($request->received_quantity as $materialId => $quantityReceived) {
+                if ($quantityReceived > 0) {
+                    // Ambil semua detail untuk material ini
+                    $details = $purchaseOrder->details()->where('material_id', $materialId)->get();
+
+                    $totalQuantity = 0;
+                    $totalCost = 0;
+
+                    foreach ($details as $detail) {
+                        $unitPrice = $detail->price;
+
+                        $totalQuantity += $quantityReceived;
+                        $totalCost += $quantityReceived * $unitPrice;
+                    }
+
+                    // Update Stock Card: barang masuk, bukan pengeluaran
+                    $this->updateStockCard(
+                        $materialId,
+                        $totalQuantity,
+                        $totalCost / $totalQuantity,
+                        $purchaseOrder->order_number,
+                        false // barang masuk
+                    );
+
+                    // dd('stock card updated');
+                }
+            }
+            $purchaseOrder->status = 'received';
+            // $purchaseOrder->status = 'completed';
+            // dd('status keganti');
+            // $purchaseOrder->received_at = now(); // Catat tanggal & waktu penerimaan.
+            $purchaseOrder->save();
+            // dd('saved');
+            // ); // <-- Akhir dari blok DB::transaction
+            return redirect()->route('dashboard.purchase_orders.index')
+                ->with('success', 'Penerimaan barang berhasil, stok telah diperbarui, dan status PO telah diubah menjadi "Received".');
+        } catch (\Exception $e) {
+            dd($e);
+            // 6. Jika terjadi error apapun di dalam blok 'try', tangkap di sini.
+            // Redirect kembali dengan pesan error yang jelas.
+            return redirect()->back()->with('error', 'Terjadi kesalahan fatal saat memproses data. Tidak ada data yang diubah. Error: ' . $e->getMessage());
+        }
+
+        // 7. Jika blok 'try' berhasil tanpa error, redirect dengan pesan sukses.
+        return redirect()->route('dashboard.purchase_orders.index')
+            ->with('success', 'Penerimaan barang berhasil, stok telah diperbarui, dan status PO telah diubah menjadi "Received".');
+    }
+
+
+    public function updateStockCard($dentalMaterialId, $quantity, $price, $referenceNumber, $isOut = false)
     {
         // **Ambil stok terakhir sebelum update**
         $latestStock = StockCard::where('dental_material_id', $dentalMaterialId)
@@ -367,6 +402,4 @@ public function updateStockCard($dentalMaterialId, $quantity, $price, $reference
             ]);
         }
     }
-
-
 }

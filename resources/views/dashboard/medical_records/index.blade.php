@@ -17,6 +17,13 @@
     </div>
     @endif
 
+    @if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+
+
     <table id="medicalRecordsTable" class="table table-striped mt-4">
         <thead>
             <tr>
@@ -95,9 +102,9 @@
                 </td>
                 <td>
                     <div class="d-flex flex-column gap-2">
-                    @if(auth()->user()?->role?->role_name === 'admin' || auth()->user()?->role?->role_name === 'manager')    
-                    @if(!$record->transaction)
-                        
+                        @if(auth()->user()?->role?->role_name === 'admin' || auth()->user()?->role?->role_name === 'manager')
+                        @if(!$record->transaction)
+
                         <a href="{{ route('dashboard.transactions.create', ['medicalRecordId' => $record->id]) }}" class="btn btn-sm btn-success d-flex align-items-center justify-content-center" style="width: 160px; height: 40px;"> <i class="fas fa-plus-circle me-1"></i> Create Transaction
                         </a>
                         @else
@@ -164,12 +171,28 @@
 
 
                         @endif
-
+                        <!-- 
                         <a href="{{ route('dashboard.medical_records.selectMaterials', ['medicalRecordId' => $record->id]) }}"
                             class="btn btn-sm btn-info d-flex align-items-center justify-content-center"
                             style="width: 160px; height: 40px;">
                             <i class="fas fa-plus-circle me-1"></i> Select Material
+                        </a> -->
+
+                        @if ($record->hasSelectedMaterials())
+                        <a href="{{ route('dashboard.medical_records.showMaterials', $record->id) }}"
+                            class="btn btn-sm btn-secondary d-flex align-items-center justify-content-center"
+                            style="width: 160px; height: 40px;">
+                            <i class="fas fa-eye me-1"></i> Show Materials
                         </a>
+                        @else
+                        <a href="{{ route('dashboard.medical_records.selectMaterials', $record->id) }}"
+                            class="btn btn-sm btn-info d-flex align-items-center justify-content-center"
+                            style="width: 160px; height: 40px;">
+                            <i class="fas fa-plus-circle me-1"></i> Select Material
+                        </a>
+                        @endif
+
+
 
 
                     </div>

@@ -14,7 +14,7 @@
     <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <form method="GET" action="{{ route('dashboard.stock_cards.index') }}" class="mb-3 row">
+    <form id="filterForm" method="GET" action="{{ route('dashboard.stock_cards.index') }}" class="mb-3 row">
         <div class="col-md-3">
             <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
         </div>
@@ -68,6 +68,20 @@
             responsive: true
         });
     });
+
+    $('#filterForm').on('submit', function(e) {
+            const startDate = new Date($('input[name="start_date"]').val());
+            const endDate = new Date($('input[name="end_date"]').val());
+
+            if (startDate && endDate && endDate <= startDate) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Date Range',
+                    text: 'Tanggal akhir harus lebih besar dari tanggal awal.'
+                });
+            }
+        });
 
     $('#stockCardTable').on('click', '.delete-button', function(e) {
         e.preventDefault();

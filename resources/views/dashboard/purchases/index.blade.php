@@ -40,7 +40,7 @@
 
                 <td>{{ ucfirst($purchase->status) }}</td>
                 <td>
-                    <a href="{{ route('dashboard.purchases.edit', $purchase->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <!-- <a href="{{ route('dashboard.purchases.edit', $purchase->id) }}" class="btn btn-warning btn-sm">Edit</a> -->
 
                     @if ($purchase->latestPayment && $purchase->latestPayment->total_debt > 0)
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#payDebtModal-{{ $purchase->id }}">
@@ -80,9 +80,11 @@
                                             <label for="payment_method" class="form-label">Cara Bayar</label>
                                             <select class="form-control" id="payment_method" name="payment_method" required>
                                                 <option value="">-- Pilih Metode Pembayaran --</option>
-                                                <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                                                    Tunai
-                                                </option>
+                                                <optgroup label="Tunai">
+                                                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                                                        Tunai
+                                                    </option>
+                                                </optgroup>
                                                 <!-- QRIS -->
                                                 <optgroup label="QRIS">
                                                     @foreach(['QRIS BCA', 'QRIS CIMB Niaga', 'QRIS Mandiri', 'QRIS BRI', 'QRIS BNI', 'QRIS Permata', 'QRIS Maybank', 'QRIS Danamon', 'QRIS Bank Mega'] as $method)

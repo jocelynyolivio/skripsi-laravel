@@ -1,12 +1,12 @@
 @extends('dashboard.layouts.main')
 
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Suppliers', 'url' => route('dashboard.suppliers.index')],
-            ['text' => 'Edit Supplier for ' . $supplier->nama]
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Suppliers', 'url' => route('dashboard.suppliers.index')],
+['text' => 'Edit Supplier for ' . $supplier->nama]
+]
+])
 @endsection
 
 @section('container')
@@ -15,48 +15,46 @@
     <form id="editSupplierForm" action="{{ route('dashboard.suppliers.update', $supplier->id) }}" method="POST">
         @csrf
         @method('PUT')
-        <div class="form-group">
+        <div class="mb-3">
             <label>Name</label>
             <input type="text" name="nama" class="form-control" value="{{ old('nama', $supplier->nama) }}" required>
             @error('nama')
-                <span class="text-danger">{{ $message }}</span>
+            <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Address</label>
             <input type="text" name="alamat" class="form-control" value="{{ old('alamat', $supplier->alamat) }}">
             @error('alamat')
-                <span class="text-danger">{{ $message }}</span>
+            <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Mobile Phone Number</label>
             <input type="text" name="nomor_telepon" class="form-control" value="{{ old('nomor_telepon', $supplier->nomor_telepon) }}">
             @error('nomor_telepon')
-                <span class="text-danger">{{ $message }}</span>
+            <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Email</label>
             <input type="email" name="email" class="form-control" value="{{ old('email', $supplier->email) }}">
             @error('email')
-                <span class="text-danger">{{ $message }}</span>
+            <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <br>
         <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{{ route('dashboard.suppliers.index') }}" class="btn btn-secondary">Cancel</a>
+
     </form>
 </div>
-@endsection
-
-@push('scripts')
 <script>
     document.getElementById('editSupplierForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
         Swal.fire({
-            title: 'Konfirmasi Update',
-            text: "Apakah Anda yakin ingin mengubah data supplier ini?",
+            title: 'Update Confirmation',
+            text: "Are you sure to update this supplier data?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -70,4 +68,4 @@
         });
     });
 </script>
-@endpush
+@endsection

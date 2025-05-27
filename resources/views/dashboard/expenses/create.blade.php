@@ -13,8 +13,10 @@
         @csrf
         <div class="mb-3">
             <label for="expense_date" class="form-label">Date</label>
-            <input type="date" name="expense_date" class="form-control" value="{{ old('expense_date', isset($expense) ? $expense->expense_date->toDateString() : now()->toDateString()) }}"
-            required>
+            <input type="date" name="expense_date" class="form-control"
+    value="{{ old('expense_date', isset($expense) ? \Carbon\Carbon::parse($expense->expense_date)->toDateString() : now()->toDateString()) }}"
+    required>
+
         </div>
 
         <div class="mb-3">
@@ -41,9 +43,12 @@
             <select class="form-control" id="payment_method" name="payment_method" required>
                 <option value="">-- Pilih Metode Pembayaran --</option>
 
-                <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                    Tunai
-                </option>
+                <optgroup label="Tunai">
+                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                        Tunai
+                    </option>
+                </optgroup>
+
 
 
                 <!-- QRIS -->

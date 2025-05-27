@@ -1,11 +1,11 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['text' => 'Purchases Invoices', 'url' => route('dashboard.purchases.index')],
-            ['text' => 'Create Purchase Invoice']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchases Invoices', 'url' => route('dashboard.purchases.index')],
+['text' => 'Create Purchase Invoice']
+]
+])
 @endsection
 @section('container')
 <div class="container mt-5 col-md-8">
@@ -16,7 +16,17 @@
         Create Purchase Invoice
         @endisset
     </h3>
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
 
+    @if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
     <form action="{{ isset($purchaseRequest) ? route('dashboard.purchases.storeFromRequest', $purchaseRequest->id) : route('dashboard.purchases.store') }}" method="POST">
         @csrf
 
@@ -35,6 +45,13 @@
                 @endforeach
             </select>
         </div>
+
+        <div class="mb-3">
+            <label for="invoice_date" class="form-label">Invoice Date</label>
+            <input type="date" class="form-control" id="invoice_date" name="invoice_date"
+                value="{{ old('invoice_date', now()->format('Y-m-d')) }}" required>
+        </div>
+
 
         <div class="mb-3">
             <label class="form-label">Purchase Date:</label>
@@ -94,7 +111,7 @@
             </tbody>
         </table>
 
-        
+
 
         <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
             <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
@@ -110,15 +127,19 @@
             <input type="number" class="form-control" name="ongkos_kirim" id="ongkosKirim" value="0" min="0">
         </div>
         <div class="card mt-3 bg-success text-white p-2 w-50 mx-auto">
-    <h5 class="text-center mb-0">Grand Total: Rp <span id="grand-total-display">0</span></h5>
-</div>
-<input type="hidden" id="grand_total" name="grand_total" value="0">
+            <h5 class="text-center mb-0">Grand Total: Rp <span id="grand-total-display">0</span></h5>
+        </div>
+        <input type="hidden" id="grand_total" name="grand_total" value="0">
 
         <!-- Purchase Payments Section -->
         <h5>Purchase Payments</h5>
         <div class="mb-3">
             <label class="form-label">Payment Amount:</label>
             <input type="number" class="form-control" name="payment_amount" id="paymentAmount" required>
+        </div>
+        <div class="mb-3">
+            <label for="payment_requirement" class="form-label">Payment Requirement</label>
+            <input type="text" class="form-control" id="payment_requirement" name="payment_requirement" required>
         </div>
 
         <div class="mb-3">
@@ -142,9 +163,9 @@
         </div>
         <input type="hidden" id="remaining_amount" name="remaining_amount" value="0">
         <br>
-        <button type="submit" class="btn btn-success w-100 d-block mx-auto">
-            Create Purchase Invoice
-        </button>
+        <button type="submit" class="btn btn-success w-100 d-block mx-auto" id="submitButton">
+    Create Purchase Invoice
+</button>
     </form>
 </div>
 
@@ -178,42 +199,48 @@
 
         // Fungsi untuk menghitung total amount dan sisa tagihan
         function calculateTotalAmount() {
-    let total = 0;
-    document.querySelectorAll('.total_price').forEach(input => {
-        total += parseFloat(input.value) || 0;
-    });
+            let total = 0;
+            document.querySelectorAll('.total_price').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
 
-    document.getElementById('total-amount-display').textContent = total.toLocaleString('id-ID', { minimumFractionDigits: 2 });
-    document.getElementById('total_amount').value = total.toFixed(2);
+            document.getElementById('total-amount-display').textContent = total.toLocaleString('id-ID', {
+                minimumFractionDigits: 2
+            });
+            document.getElementById('total_amount').value = total.toFixed(2);
 
-    // Ambil nilai discount dan ongkos kirim
-    let discount = parseFloat(document.getElementById('discount')?.value) || 0;
-    let ongkir = parseFloat(document.getElementById('ongkosKirim')?.value) || 0;
+            // Ambil nilai discount dan ongkos kirim
+            let discount = parseFloat(document.getElementById('discount')?.value) || 0;
+            let ongkir = parseFloat(document.getElementById('ongkosKirim')?.value) || 0;
 
-    // Hitung grand total
-    let grandTotal = total - discount + ongkir;
-    document.getElementById('grand-total-display').textContent = grandTotal.toLocaleString('id-ID', { minimumFractionDigits: 2 });
-    document.getElementById('grand_total').value = grandTotal.toFixed(2);
+            // Hitung grand total
+            let grandTotal = total - discount + ongkir;
+            document.getElementById('grand-total-display').textContent = grandTotal.toLocaleString('id-ID', {
+                minimumFractionDigits: 2
+            });
+            document.getElementById('grand_total').value = grandTotal.toFixed(2);
 
-    // Hitung sisa tagihan dari grand total
-    let paymentAmount = parseFloat(document.getElementById('paymentAmount')?.value) || 0;
-    let remainingAmount = grandTotal - paymentAmount;
+            // Hitung sisa tagihan dari grand total
+            let paymentAmount = parseFloat(document.getElementById('paymentAmount')?.value) || 0;
+            let remainingAmount = grandTotal - paymentAmount;
 
-    document.getElementById('remaining-amount-display').textContent = remainingAmount.toLocaleString('id-ID', { minimumFractionDigits: 2 });
-    document.getElementById('remaining_amount').value = remainingAmount.toFixed(2);
-}
-// Tambahkan event listener untuk discount & ongkos kirim
-['discount', 'ongkosKirim'].forEach(id => {
-        let el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', calculateTotalAmount);
+            document.getElementById('remaining-amount-display').textContent = remainingAmount.toLocaleString('id-ID', {
+                minimumFractionDigits: 2
+            });
+            document.getElementById('remaining_amount').value = remainingAmount.toFixed(2);
         }
-    });
+        // Tambahkan event listener untuk discount & ongkos kirim
+        ['discount', 'ongkosKirim'].forEach(id => {
+            let el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', calculateTotalAmount);
+            }
+        });
 
-     // Sudah ada juga event listener untuk total_price & paymentAmount? Tambahkan jika belum:
-     document.querySelectorAll('.total_price').forEach(input => {
-        input.addEventListener('input', calculateTotalAmount);
-    });
+        // Sudah ada juga event listener untuk total_price & paymentAmount? Tambahkan jika belum:
+        document.querySelectorAll('.total_price').forEach(input => {
+            input.addEventListener('input', calculateTotalAmount);
+        });
 
         // Fungsi untuk menambahkan baris material baru
         document.getElementById('addRow').addEventListener('click', function() {
@@ -247,6 +274,23 @@
 
         // Hitung total amount saat pertama kali load
         calculateTotalAmount();
+    });
+
+    document.getElementById('submitButton').addEventListener('click', function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to create this Purchase Invoice?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Save it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.closest('form').submit();
+            }
+        });
     });
 </script>
 

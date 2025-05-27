@@ -36,9 +36,12 @@
             <select class="form-control" id="payment_method" name="payment_method" required>
                 <option value="">-- Pilih Metode Pembayaran --</option>
 
-                <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                    Tunai
-                </option>
+                <optgroup label="Tunai">
+                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                        Tunai
+                    </option>
+                </optgroup>
+
 
                 <!-- QRIS -->
                 <optgroup label="QRIS">

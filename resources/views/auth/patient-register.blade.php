@@ -15,11 +15,13 @@
 
     .register-title {
         font-weight: 600;
-        color: #4b5320; /* olive tone */
+        color: #4b5320;
+        /* olive tone */
     }
 
     .btn-register {
-        background-color: #6c7344; /* olive tone */
+        background-color: #6c7344;
+        /* olive tone */
         color: white;
         border: none;
         padding: 10px;
@@ -81,7 +83,10 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control @error('home_mobile') is-invalid @enderror" id="home_mobile" name="home_mobile" placeholder="Mobile Phone" required value="{{ old('home_mobile') }}">
+                        <input type="text" class="form-control @error('home_mobile') is-invalid @enderror"
+                            id="home_mobile" name="home_mobile" placeholder="Mobile Phone" required
+                            value="{{ old('home_mobile', '+62') }}">
+
                         <label for="home_mobile">Mobile Phone</label>
                         @error('home_mobile')
                         <div class="invalid-feedback">Please input nomor telepon.</div>
@@ -96,13 +101,17 @@
                         @enderror
                     </div>
 
-                    <div class="form-floating mb-3">
+                    <div class="form-floating mb-3 position-relative">
                         <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Password" required>
                         <label for="password">Password</label>
+                        <span class="position-absolute top-50 end-0 translate-middle-y me-3" onclick="togglePassword()" style="cursor: pointer;">
+                            <i id="togglePasswordIcon" class="bi bi-eye-slash"></i>
+                        </span>
                         @error('password')
                         <div class="invalid-feedback">Password must be at least 5 characters.</div>
                         @enderror
                     </div>
+
 
                     <button class="btn-register w-100 mt-2" type="submit">Register</button>
                 </form>
@@ -114,4 +123,38 @@
         </div>
     </div>
 </div>
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const icon = document.getElementById('togglePasswordIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const mobileInput = document.getElementById('home_mobile');
+        const mobile = mobileInput.value;
+
+        const pattern = /^\+62\d{9,}$/; // +62 diikuti minimal 9 digit angka
+        if (!pattern.test(mobile)) {
+            e.preventDefault();
+            mobileInput.classList.add('is-invalid');
+            if (!mobileInput.nextElementSibling || !mobileInput.nextElementSibling.classList.contains('invalid-feedback')) {
+                const error = document.createElement('div');
+                error.classList.add('invalid-feedback');
+                error.innerText = 'Phone number must start with +62 and contain at least 9 digits after it.';
+                mobileInput.parentNode.appendChild(error);
+            }
+        }
+    });
+</script>
+
 @endsection

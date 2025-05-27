@@ -11,7 +11,6 @@
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Holidays</h3>
         <a href="{{ route('dashboard.holidays.create') }}" class="btn btn-primary">Create Holiday</a>
-
     </div>
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

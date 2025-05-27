@@ -38,4 +38,9 @@ class StockCard extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    public function material()
+    {
+        return $this->belongsTo(DentalMaterial::class, 'dental_material_id');
+    }
 }

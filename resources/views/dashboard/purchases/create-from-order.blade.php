@@ -30,17 +30,17 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Order Date</label>
-                        <input type="date" class="form-control" value="{{ $purchaseOrder->order_date }}" readonly>
+                        <input type="date" class="form-control" value="{{ $purchaseOrder->order_date }}" >
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Ship Date</label>
-                        <input type="date" class="form-control" value="{{ $purchaseOrder->ship_date }}" readonly>
+                        <input type="date" class="form-control" value="{{ $purchaseOrder->ship_date }}" >
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Shipping Address</label>
-                        <textarea class="form-control" readonly>{{ $purchaseOrder->shipping_address }}</textarea>
+                        <textarea class="form-control">{{ $purchaseOrder->shipping_address }}</textarea>
                     </div>
                 </div>
             </div>

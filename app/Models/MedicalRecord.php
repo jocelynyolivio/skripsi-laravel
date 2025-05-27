@@ -27,7 +27,7 @@ class MedicalRecord extends Model
     public function procedures()
     {
         return $this->belongsToMany(Procedure::class, 'medical_record_procedure', 'medical_record_id', 'procedure_id')
-            ->withPivot('tooth_number', 'notes','surface');
+            ->withPivot('tooth_number', 'notes', 'surface');
     }
 
 
@@ -60,5 +60,26 @@ class MedicalRecord extends Model
     public function adjustments()
     {
         return $this->hasMany(MedicalRecordAdjustment::class);
+    }
+
+    public function stockCards()
+    {
+        return $this->hasMany(StockCard::class, 'reference_number', 'reference_number');
+    }
+
+    public function hasSelectedMaterials()
+    {
+        return StockCard::where('reference_number', 'MR-' . $this->id)
+            ->where('type', 'usage')
+            ->exists();
+    }
+
+
+    public function usedMaterials()
+    {
+        return $this->stockCards()
+            ->where('type', 'usage')
+            ->with('material') // relasi ke DentalMaterial
+            ->get();
     }
 }

@@ -21,7 +21,6 @@
                 <th>Reservation Date</th>
                 <th>Start Time</th>
                 <th>End Time</th>
-                <th>WA Confirmation</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -34,18 +33,6 @@
                 <td>{{ $reservation->tanggal_reservasi }}</td>
                 <td>{{ $reservation->jam_mulai }}</td>
                 <td>{{ $reservation->jam_selesai }}</td>
-                <td>
-                    <a href="{{ route('dashboard.reservations.whatsapp', $reservation->id) }}"
-                        class="btn btn-sm btn-success"
-                        target="_blank">
-                        Chat Patient
-                    </a>
-                    @if($reservation->status_konfirmasi !== 'Sudah Dikonfirmasi')
-                    <a href="{{ route('dashboard.reservations.whatsappConfirm', $reservation->id) }}" class="btn btn-sm btn-primary wa-confirmation">
-                        Konfirmasi WA
-                    </a>
-                    @endif
-                </td>
                 <td>
                     @php
                     $statusClass = [
@@ -60,6 +47,20 @@
                     </span>
                 </td>
                 <td>
+                    @if(auth()->user()?->role?->role_name === 'admin' || auth()->user()?->role?->role_name === 'manager')
+                    <a href="{{ route('dashboard.reservations.whatsapp', $reservation->id) }}"
+                        class="btn btn-sm btn-success"
+                        target="_blank">
+                        Chat Patient
+                    </a>
+                    
+                    @if($reservation->status_konfirmasi !== 'Sudah Dikonfirmasi')
+                    <a href="{{ route('dashboard.reservations.whatsappConfirm', $reservation->id) }}" class="btn btn-sm btn-primary wa-confirmation">
+                        Konfirmasi WA
+                    </a>
+                    @endif
+                    @endif
+
                     @if(!$reservation->teeth_condition && !$reservation->subjective && !$reservation->objective &&!$reservation->assessment && !$reservation->plan && !$reservation->procedures()->exists())
                     <a href="{{ route('dashboard.reservations.edit', $reservation->id) }}" class="btn btn-sm btn-warning">Edit</a>
                     <form action="{{ route('dashboard.reservations.destroy', $reservation->id) }}" method="POST" style="display:inline;" class="delete-form">

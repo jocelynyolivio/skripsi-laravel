@@ -43,25 +43,25 @@ class ScheduleOverrideController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    // dd($request->all());
-    $request->validate([
-        'doctor_id' => 'nullable|exists:users,id',
-        'override_date' => 'nullable|date',
-        'start_time' => 'nullable|date_format:H:i',
-        'end_time' => 'nullable|date_format:H:i',
-        'is_available' => 'nullable|boolean',
-        'reason' => 'nullable|string|max:255',
-    ]);
+    {
+        // dd($request->all());
+        $request->validate([
+            'doctor_id' => 'nullable|exists:users,id',
+            'override_date' => 'nullable|date',
+            'start_time' => 'nullable',
+            'end_time' => 'nullable',
+            'is_available' => 'nullable|boolean',
+            'reason' => 'nullable|string|max:255',
+        ]);
 
-    // dd($request->all());
+        // dd($request);
 
-    $override = ScheduleOverride::findOrFail($id);
-    $override->update($request->all());
+        $override = ScheduleOverride::findOrFail($id);
+        $override->update($request->all());
 
-    return redirect()->route('dashboard.schedules.overrides.index')
-                     ->with('success', 'Schedule override updated successfully.');
-}
+        return redirect()->route('dashboard.schedules.overrides.index')
+            ->with('success', 'Schedule override updated successfully.');
+    }
 
     public function destroy(ScheduleOverride $override)
     {

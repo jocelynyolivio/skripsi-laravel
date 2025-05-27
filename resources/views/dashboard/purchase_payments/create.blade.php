@@ -82,9 +82,12 @@
                                 <label for="payment_method" class="form-label">Payment Method</label>
                                 <select class="form-control" id="payment_method" name="payment_method" required>
                                     <option value="">-- Select Payment Method --</option>
-                                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                                        Tunai
-                                    </option>
+                                    <optgroup label="Tunai">
+
+                                        <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                                            Tunai
+                                        </option>
+                                    </optgroup>
                                     <optgroup label="QRIS">
                                         @foreach(['QRIS BCA', 'QRIS CIMB Niaga', 'QRIS Mandiri', 'QRIS BRI', 'QRIS BNI', 'QRIS Permata', 'QRIS Maybank', 'QRIS Danamon', 'QRIS Bank Mega'] as $method)
                                         <option value="{{ $method }}" {{ old('payment_method', $invoice->payment_method) == $method ? 'selected' : '' }}>{{ $method }}</option>

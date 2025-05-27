@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('item_code')->nullable();
             $table->string('name'); // Nama prosedur, misalnya Tambal Gigi
-            $table->foreignId('procedure_type_id')->nullable()->constrained('procedure_types');
-            $table->text('description')->nullable(); // Deskripsi tentang prosedur
+            $table->foreignId('procedure_type_id')
+                ->nullable()
+                ->constrained('procedure_types')
+                ->nullOnDelete(); // <-- ini penting            $table->text('description')->nullable(); // Deskripsi tentang prosedur
             $table->boolean('requires_tooth')->default(true); // Default: prosedur butuh nomor gigi
             $table->timestamps();
         });

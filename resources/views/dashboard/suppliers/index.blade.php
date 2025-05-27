@@ -9,22 +9,20 @@
 @endsection
 @section('container')
 <div class="container mt-5">
-
-
     <div class="d-flex justify-content-between mb-3">
         <h3 class="mb-4">Suppliers List</h3>
         <a href="{{ route('dashboard.suppliers.create') }}" class="btn btn-success mb-3">Create New Suppliers</a>
     </div>
 
-    <table class="table table-bordered" id="suppliersTable">
+    <table class="table table-striped table-bordered" id="suppliersTable">
         <thead>
             <tr>
                 <th>No</th>
-                <th>Nama</th>
-                <th>Alamat</th>
-                <th>Nomor Telepon</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Number</th>
                 <th>Email</th>
-                <th>Aksi</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>

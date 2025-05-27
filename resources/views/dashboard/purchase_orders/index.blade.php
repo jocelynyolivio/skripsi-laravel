@@ -10,6 +10,9 @@
 
 @section('container')
 <div class="container mt-5">
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
     <div class="d-flex justify-content-between mb-3">
         <h3>Purchase Orders</h3>
         @if(auth()->user()?->role?->role_name === 'manager')
@@ -34,13 +37,20 @@
                 <td>{{ $order->order_date }}</td>
                 <td>
                     <a href="{{ route('dashboard.purchase_orders.show', $order) }}" class="btn btn-info btn-sm">View</a>
-                    <a href="{{ route('dashboard.purchase_orders.receive', $order->id) }}" class="btn btn-sm btn-success">Receive</a>
+                    @if ($order->status !== 'received')
+                    <a href="{{ route('dashboard.purchase_orders.receive', $order->id) }}" class="btn btn-sm btn-info">
+                        Receive
+                    </a>
+                    @else
+                    {{-- Jika sudah, tampilkan badge --}}
+                    <span class="badge bg-success">Completed</span>
+                    @endif
 
                     @if($order->purchaseInvoices->isEmpty() && auth()->user()?->role?->role_name === 'manager')
-        
-<form id="delete-form-{{ $order->id }}" action="{{ route('dashboard.purchase_orders.destroy', $order) }}" method="POST" style="display:inline-block">
+
+                    <form id="delete-form-{{ $order->id }}" action="{{ route('dashboard.purchase_orders.destroy', $order) }}" method="POST" style="display:inline-block">
                         @csrf @method('DELETE')
-<button type="button" class="btn btn-danger btn-sm btn-delete" data-form-id="delete-form-{{ $order->id }}">Delete</button>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete" data-form-id="delete-form-{{ $order->id }}">Delete</button>
                     </form>
                     @endif
 
@@ -52,35 +62,34 @@
     </table>
 </div>
 <script>
-$(document).ready(function() {
-    $('#purchaseOrderTable').DataTable({
-        "paging": true,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "responsive": true,
-    });
+    $(document).ready(function() {
+        $('#purchaseOrderTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+        });
 
-    $('.btn-delete').on('click', function(e) {
-        e.preventDefault();
-        const formId = $(this).data('form-id');
+        $('.btn-delete').on('click', function(e) {
+            e.preventDefault();
+            const formId = $(this).data('form-id');
 
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This action cannot be undone.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $('#' + formId).submit();
-            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#' + formId).submit();
+                }
+            });
         });
     });
-});
-
 </script>
 @endsection

@@ -1,9 +1,34 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchase Orders', 'url' => route('dashboard.purchase_orders.index')],
+['text' => 'Receive Goods from Purchase Order #'.$purchaseOrder->order_number]
+]
+])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-8 mx-auto">
     <div class="container text-center">
         <h3>Konfirmasi Penerimaan Barang dari Purchase Order</h3>
+
+        @if ($purchaseOrder->status === 'received')
+            <div class="alert alert-success mt-4" role="alert">
+                <h4 class="alert-heading">
+                    <i class="bi bi-check-circle-fill"></i> Sudah Diterima!
+                </h4>
+                <p>
+                    Purchase Order dengan nomor <strong>#{{ $purchaseOrder->order_number }}</strong> telah selesai diproses dan semua barang telah diterima.
+                </p>
+                <hr>
+                <p class="mb-0">
+                    Tidak ada tindakan lebih lanjut yang diperlukan untuk PO ini.
+                </p>
+                <a href="{{ route('dashboard.purchase_orders.index') }}" class="btn btn-primary mt-3">
+                    Kembali ke Daftar Purchase Order
+                </a>
+            </div>
+        @else
         <form id="receiveForm" action="{{ route('dashboard.purchase_orders.storeReceived', $purchaseOrder->id) }}" method="POST">
             @csrf
             <table class="table">
@@ -30,6 +55,7 @@
             </table>
             <button type="button" id="submitBtn" class="btn btn-success w-100">Simpan</button>
         </form>
+        @endif
     </div>
 </div>
 

@@ -52,6 +52,12 @@
                         <span class="fs-6">Master Patients</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/master/suppliers') ? 'active' : '' }}" href="{{ route('dashboard.suppliers.index') }}">
+                        <i class="bi bi-person-badge me-3 fs-5"></i>
+                        <span class="fs-6">Master Suppliers</span>
+                    </a>
+                </li>
                 <!-- here supplier -->
                 
                 @if(auth()->user()?->role?->role_name === 'manager')
@@ -59,6 +65,12 @@
                     <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/coa') ? 'active' : '' }}" href="{{ route('dashboard.coa.index') }}">
                         <i class="bi bi-person-badge me-3 fs-5"></i>
                         <span class="fs-6">Master COA</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center text-white-50 hover-bg-primary {{ Request::is('dashboard/pricelists') ? 'active' : '' }}" href="{{ route('dashboard.pricelists.index') }}">
+                        <i class="bi bi-person-badge me-3 fs-5"></i>
+                        <span class="fs-6">Master Pricelists</span>
                     </a>
                 </li>
                 <li class="nav-item">

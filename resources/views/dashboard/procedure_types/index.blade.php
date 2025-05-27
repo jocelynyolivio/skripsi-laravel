@@ -17,7 +17,7 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped" id="procedureTypeTable">
         <thead>
             <tr>
                 <th>Name</th>
@@ -43,11 +43,35 @@
     </table>
 </div>
 <script>
-    document.querySelectorAll('.delete-button').forEach(btn => {
-        btn.addEventListener('click', function () {
-            if (confirm('Yakin ingin menghapus data ini?')) {
-                this.closest('form').submit();
-            }
+    $(document).ready(function () {
+        $('#procedureTypeTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            responsive: true,
+            columnDefs: [{
+                orderable: false,
+                targets: 2 // kolom "Aksi"
+            }]
+        });
+
+        $('#procedureTypeTable').on('click', '.delete-button', function (e) {
+            e.preventDefault();
+            const form = $(this).closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         });
     });
 </script>

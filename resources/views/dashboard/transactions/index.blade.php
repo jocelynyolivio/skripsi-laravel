@@ -73,19 +73,21 @@
                     </span>
                 </td>
                 <td>
-                    <a href="{{ route('dashboard.transactions.showStruk', $transaction->id) }}" class="btn btn-info btn-sm">
-                        Show Struk
-                    </a>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('dashboard.transactions.showStruk', $transaction->id) }}" class="btn btn-info btn-sm">
+                            Show Struk
+                        </a>
 
-                    <a href="{{ route('dashboard.transactions.show', $transaction->id) }}" class="btn btn-info btn-sm">
-                        Show
-                    </a>
-                    @if($transaction->payment_status == 'belum lunas')
-                    <!-- Button Add Payments -->
-                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentModal-{{ $transaction->id }}">
-                        Add Payments
-                    </button>
-                    <a href="{{ route('dashboard.transactions.show', $transaction->id) }}">show</a>
+                        <a href="{{ route('dashboard.transactions.show', $transaction->id) }}" class="btn btn-info btn-sm">
+                            Show
+                        </a>
+
+                        @if($transaction->payment_status == 'belum lunas')
+                        <!-- Button Add Payments -->
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentModal-{{ $transaction->id }}">
+                            Add Payments
+                        </button>
+                    </div>
 
                     <!-- Modal Add Payments -->
                     <div class="modal fade" id="addPaymentModal-{{ $transaction->id }}" tabindex="-1" aria-labelledby="addPaymentModalLabel-{{ $transaction->id }}" aria-hidden="true">
@@ -118,9 +120,12 @@
                                             <select class="form-control" id="payment_method" name="payments[0][method]" required>
 
                                                 <option value="">-- Pilih Metode Pembayaran --</option>
-                                                <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                                                    Tunai
-                                                </option>
+                                                <optgroup label="Tunai">
+
+                                                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                                                        Tunai
+                                                    </option>
+                                                </optgroup>
 
                                                 <!-- QRIS -->
                                                 <optgroup label="QRIS">

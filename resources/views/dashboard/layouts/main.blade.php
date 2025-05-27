@@ -1,126 +1,153 @@
 <!doctype html>
-<html lang="en" data-bs-theme="auto">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SenyumQu Dashboard</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-
-    <!-- DataTables CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-
-    <!-- Custom CSS -->
-    <link href="/css/dashboard.css" rel="stylesheet">
-
-    <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
-            --sidebar-width: 250px;
+            --sidebar-width-expanded: 300px;
+            --sidebar-width-collapsed: 80px;
             --header-height: 56px;
-            --primary-hover: rgba(13, 110, 253, 0.15);
+            --sidebar-bg: #212529;
+            --sidebar-link-color: rgba(255, 255, 255, 0.7);
+            --sidebar-link-hover-bg: rgba(255, 255, 255, 0.1);
+            --sidebar-link-active-color: #ffffff;
+            --sidebar-link-active-bg: rgba(13, 110, 253, 0.2);
+            --sidebar-link-active-border: #0d6efd;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
         }
 
-        /* Header Styles */
+        /* ----- HEADER ----- */
         .navbar-header {
             height: var(--header-height);
-            background-color: #212529;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--sidebar-bg);
+            z-index: 1030;
             padding: 0;
         }
 
-        .navbar-brand {
-            font-weight: 600;
-            padding: 0.8rem 1rem;
+        /* Tombol Toggle untuk Desktop & Mobile */
+        .sidebar-toggle-btn {
+            color: var(--sidebar-link-color);
         }
 
-        /* Sidebar Styles */
+        .sidebar-toggle-btn:hover {
+            color: var(--sidebar-link-active-color);
+        }
+
+        /* ----- SIDEBAR ----- */
         .sidebar {
-            width: var(--sidebar-width);
-            height: calc(100vh - var(--header-height));
-            top: var(--header-height);
-            background-color: #212529;
-            transition: all 0.3s ease;
-            z-index: 99;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width-expanded);
+            background-color: var(--sidebar-bg);
+            padding-top: var(--header-height);
+            transition: width 0.3s ease-in-out;
+            z-index: 1020;
+            overflow-x: hidden;
+            /* Tetap hidden untuk horizontal */
+            overflow-y: auto;
+            /* Auto untuk vertikal jika perlu */
         }
 
         .sidebar .nav-link {
+            display: flex;
+            align-items: center;
             padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--sidebar-link-color);
+            white-space: nowrap;
             border-left: 3px solid transparent;
-            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .sidebar .nav-link .bi {
+            font-size: 1.2rem;
+            min-width: calc(var(--sidebar-width-collapsed) - 2 * 1.5rem);
+            text-align: center;
+            margin-right: 1rem;
+            transition: margin 0.3s ease-in-out;
         }
 
         .sidebar .nav-link:hover {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: var(--sidebar-link-hover-bg);
+            color: var(--sidebar-link-active-color);
         }
 
         .sidebar .nav-link.active {
-            background-color: rgba(13, 110, 253, 0.2);
-            color: white;
-            border-left: 3px solid #0d6efd;
+            color: var(--sidebar-link-active-color);
+            background-color: var(--sidebar-link-active-bg);
+            border-left-color: var(--sidebar-link-active-border);
         }
 
-        .sidebar .nav-link i {
-            width: 24px;
-            text-align: center;
-            margin-right: 12px;
-        }
-
-        .sidebar-section-title {
-            color: #adb5bd;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .sidebar-heading {
+            font-size: .75rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 600;
+            color: #adb5bd;
+            padding: 0.8rem 1.5rem 0.5rem;
             margin-top: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            /* <-- PERBAIKAN UTAMA */
         }
 
-        /* Main Content */
+        /* ----- KONTEN UTAMA ----- */
         main {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            margin-top: var(--header-height);
-            min-height: calc(100vh - var(--header-height));
+            margin-left: var(--sidebar-width-expanded);
+            padding: 2rem;
+            padding-top: calc(var(--header-height) + 2rem);
+            transition: margin-left 0.3s ease-in-out;
         }
 
-        /* Breadcrumb */
-        .breadcrumb {
-            background-color: transparent;
-            padding: 0.75rem 1rem;
+        /* ----- STATE SAAT SIDEBAR COLLAPSED ----- */
+        body.sidebar-collapsed .sidebar {
+            width: var(--sidebar-width-collapsed);
         }
 
-        .breadcrumb-item a {
-            color: #0d6efd;
-            text-decoration: none;
+        body.sidebar-collapsed main {
+            margin-left: var(--sidebar-width-collapsed);
         }
 
-        /* Responsive Adjustments */
+        body.sidebar-collapsed .sidebar .nav-link span,
+        body.sidebar-collapsed .sidebar .sidebar-heading {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        /* Tambahkan ini untuk menengahkan ikon saat sidebar collapsed */
+        body.sidebar-collapsed .sidebar .nav-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        body.sidebar-collapsed .sidebar .nav-link .bi {
+            margin-right: 0;
+        }
+
+        /* ----- RESPONSIVE UNTUK MOBILE (MENJADI OFF CANVAS) ----- */
         @media (max-width: 991.98px) {
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 1040;
             }
 
             .sidebar.show {
@@ -130,49 +157,44 @@
             main {
                 margin-left: 0;
             }
+
+            #sidebar-toggle-desktop {
+                display: none;
+            }
         }
 
-        /* Pastikan body dan html full height */
-        html,
-        body {
-            height: 100%;
+        #sidebar-toggle-mobile {
+            display: none;
         }
 
-        /* Sidebar harus full height */
-        .sidebar {
-            min-height: calc(100vh - var(--header-height));
-            height: auto !important;
-            /* Override jika ada height lain */
-        }
-
-        /* Konten utama mengisi sisa space */
-        main {
-            flex: 1;
-            overflow-y: auto;
-            /* Biarkan konten discroll jika melebihi height */
+        @media (max-width: 991.98px) {
+            #sidebar-toggle-mobile {
+                display: block;
+            }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
-<body class="d-flex flex-column min-vh-100"> <!-- Tambahkan class flex-column dan min-vh-100 -->
-    <!-- Header -->
-    <header class="navbar navbar-header sticky-top flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">
-            <i class="bi bi-tooth me-2"></i> SenyumQu Dental
-        </a>
+<body class="sidebar-collapsed">
+    <header class="navbar navbar-header fixed-top p-0 shadow-sm">
+        <div class="d-flex align-items-center">
+            <button id="sidebar-toggle-desktop" class="btn sidebar-toggle-btn fs-4" type="button">
+                <i class="bi bi-list"></i>
+            </button>
+            <button id="sidebar-toggle-mobile" class="btn sidebar-toggle-btn fs-4" type="button">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand text-white ms-2" href="/dashboard">
+                <i class="bi bi-tooth me-2"></i> SenyumQu Dental
+            </a>
+        </div>
 
-        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button"
-            data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
-            aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="navbar-nav">
+        <div class="navbar-nav me-3">
             <div class="nav-item text-nowrap">
                 <form action="/logout" method="post">
                     @csrf
-                    <button type="submit" class="nav-link px-4 bg-transparent border-0 text-white">
+                    <button type="submit" class="nav-link px-3 bg-transparent border-0 text-white">
                         <i class="bi bi-box-arrow-right me-2"></i> Logout
                     </button>
                 </form>
@@ -180,48 +202,224 @@
         </div>
     </header>
 
-    <div class="container-fluid flex-grow-1 d-flex flex-column"> <!-- Tambahkan flex-grow-1 dan d-flex -->
-        <div class="row flex-grow-1"> <!-- Tambahkan flex-grow-1 di sini -->
-            <!-- Sidebar -->
-            @include('dashboard.layouts.sidebar')
+    <nav class="sidebar">
+        <ul class="nav flex-column py-3">
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard') ? 'active' : '' }}" href="/dashboard" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            @if(auth()->user()?->role?->role_name === 'manager')
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/salaries*') ? 'active' : '' }}" href="/dashboard/salaries" data-bs-toggle="tooltip" data-bs-placement="right" title="Attendances & Slips">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Attendances & Slips</span>
+                </a>
+            </li>
+            @endif
 
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <!-- Breadcrumb -->
-                <nav aria-label="breadcrumb" class="mt-3 mb-4">
-                    <ol class="breadcrumb">
-                        @yield('breadcrumbs')
-                    </ol>
-                </nav>
+            <li class="sidebar-heading">Master Data</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('users*') ? 'active' : '' }}" href="{{ route('dashboard.masters.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Users">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Master Users</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/master/patients') ? 'active' : '' }}" href="{{ route('dashboard.masters.patients') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Patients">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Master Patients</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/master/suppliers') ? 'active' : '' }}" href="{{ route('dashboard.suppliers.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Suppliers">
+                    <i class="bi bi-truck"></i> <span>Master Suppliers</span>
+                </a>
+            </li>
+            @if(auth()->user()?->role?->role_name === 'manager')
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/coa') ? 'active' : '' }}" href="{{ route('dashboard.coa.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master COA">
+                    <i class="bi bi-journal-album"></i> <span>Master COA</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/pricelists') ? 'active' : '' }}" href="{{ route('dashboard.pricelists.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Pricelists">
+                    <i class="bi bi-tags-fill"></i> <span>Master Pricelists</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/holidays') ? 'active' : '' }}" href="{{ route('dashboard.holidays.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Holidays">
+                    <i class="bi bi-calendar-x"></i> <span>Master Holidays</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/attendances') ? 'active' : '' }}" href="{{ route('dashboard.attendances.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Attendances">
+                    <i class="bi bi-check-circle-fill"></i> <span>Master Attendances</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/procedure_types') ? 'active' : '' }}" href="{{ route('dashboard.procedure_types.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Procedure Types">
+                    <i class="bi bi-heart-pulse"></i> <span>Master Procedure Types</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/dental-materials*') ? 'active' : '' }}" href="{{ route('dashboard.dental-materials.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Dental Materials">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Master Dental Materials</span>
+                </a>
+            </li>
+            @endif
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/procedures') ? 'active' : '' }}" href="{{ route('dashboard.procedures.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Procedures">
+                    <i class="bi bi-clipboard-pulse"></i> <span>Master Procedures</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/procedure_materials*') ? 'active' : '' }}" href="{{ route('dashboard.procedure_materials.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Procedure Material">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    <span>Master Procedure Material</span>
+                </a>
+            </li>
 
-                <div class="flex-grow-1"> <!-- Pastikan konten mengisi sisa space -->
-                    @yield('container')
-                </div>
-            </main>
-        </div>
-    </div>
+            <li class="sidebar-heading">Reservations</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/reservations') ? 'active' : '' }}" href="{{ route('dashboard.reservations.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Reservations">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Reservations</span>
+                </a>
+            </li>
 
-    <!-- Bootstrap JS Bundle with Popper -->
+            <li class="sidebar-heading">Materials</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/stock_cards*') ? 'active' : '' }}" href="{{ route('dashboard.stock_cards.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Stock Cards">
+                    <i class="bi bi-card-checklist"></i> <span>Stock Cards</span>
+                </a>
+            </li>
+
+            <li class="sidebar-heading">Transactions</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/transactions*') ? 'active' : '' }}" href="{{ route('dashboard.transactions.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Transaction">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Transaction</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/expenses*') ? 'active' : '' }}" href="{{ route('dashboard.expenses.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Expenses">
+                    <i class="bi bi-currency-dollar"></i>
+                    <span>Expenses</span>
+                </a>
+            </li>
+
+            <li class="sidebar-heading">Purchases</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/purchase_requests*') ? 'active' : '' }}" href="{{ route('dashboard.purchase_requests.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Purchase Request">
+                    <i class="bi bi-receipt"></i>
+                    <span>Purchase Request</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/purchase_orders*') ? 'active' : '' }}" href="{{ route('dashboard.purchase_orders.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Purchase Orders">
+                    <i class="bi bi-cart-check"></i> <span>Purchase Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/purchases*') ? 'active' : '' }}" href="{{ route('dashboard.purchases.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Purchase Invoice">
+                    <i class="bi bi-file-earmark-ruled"></i> <span>Purchase Invoice</span>
+                </a>
+            </li>
+
+            @if(auth()->user()?->role?->role_name === 'manager')
+            <li class="sidebar-heading">Reports</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/reports/balance_sheet') ? 'active' : '' }}" href="{{ route('dashboard.reports.balance_sheet') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Balance Sheet">
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                    <span>Balance Sheet</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/reports/income_statement') ? 'active' : '' }}" href="{{ route('dashboard.reports.income_statement') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Income Statement">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Income Statement</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/reports/cash_flow') ? 'active' : '' }}" href="{{ route('dashboard.reports.cash_flow') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Cash Flow">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Cash Flow</span>
+                </a>
+            </li>
+
+            <li class="sidebar-heading">Journals</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/journals*') ? 'active' : '' }}" href="{{ route('dashboard.journals.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Journal Details">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Journal Details</span>
+                </a>
+            </li>
+            @endif
+
+            <li class="sidebar-heading">Schedules Management</li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/schedules/templates*') ? 'active' : '' }}" href="{{ route('dashboard.schedules.templates.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Schedule Templates">
+                    <i class="bi bi-calendar-range"></i>
+                    <span>Schedule Templates</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/schedules/overrides*') ? 'active' : '' }}" href="{{ route('dashboard.schedules.overrides.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Schedule Overrides">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>Schedule Overrides</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                @yield('breadcrumbs')
+            </ol>
+        </nav>
+
+        @yield('container')
+    </main>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Custom Dashboard JS -->
-    <script src="{{ asset('js/dashboard.js') }}"></script>
-
     <script>
-        // Toggle sidebar on mobile
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const toggler = document.querySelector('.navbar-toggler');
-
-            toggler.addEventListener('click', function() {
-                sidebar.classList.toggle('show');
+            // Inisialisasi Tooltip Bootstrap
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Auto-close sidebar when clicking on a link (mobile)
+            const sidebar = document.querySelector('.sidebar');
+            const desktopToggler = document.getElementById('sidebar-toggle-desktop');
+            const mobileToggler = document.getElementById('sidebar-toggle-mobile');
+
+            // Kontrol untuk Tombol Expand/Collapse di Desktop
+            if (desktopToggler) {
+                desktopToggler.addEventListener('click', function() {
+                    document.body.classList.toggle('sidebar-collapsed');
+                    // Saat sidebar berubah state, sembunyikan semua tooltip yang mungkin masih aktif
+                    tooltipList.forEach(tooltip => tooltip.hide());
+                });
+            }
+
+            // Kontrol untuk Tombol Offcanvas di Mobile
+            if (mobileToggler) {
+                mobileToggler.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            // Menutup sidebar mobile saat salah satu link diklik
             const navLinks = document.querySelectorAll('.sidebar .nav-link');
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
-                    if (window.innerWidth < 992) {
+                    if (sidebar.classList.contains('show')) {
                         sidebar.classList.remove('show');
                     }
                 });

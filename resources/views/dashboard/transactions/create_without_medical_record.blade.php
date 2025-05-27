@@ -80,9 +80,12 @@
                 <label for="payment_method" class="form-label">Cara Bayar</label>
                 <select class="form-control" id="payment_method" name="payments[0][method]" required>
                     <option value="">-- Pilih Metode Pembayaran --</option>
-                    <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                        Tunai
-                    </option>
+                    <optgroup label="Tunai">
+
+                        <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
+                            Tunai
+                        </option>
+                    </optgroup>
                     <!-- QRIS -->
                     <optgroup label="QRIS">
                         <option value="QRIS BCA">QRIS BCA</option>

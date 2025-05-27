@@ -13,28 +13,28 @@
     <h2>Create New Supplier</h2>
     <form id="createSupplierForm" action="{{ route('dashboard.suppliers.store') }}" method="POST">
         @csrf
-        <div class="form-group">
+        <div class="mb-3">
             <label>Name</label>
             <input type="text" name="nama" class="form-control" value="{{ old('nama') }}" required>
             @error('name')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Address</label>
             <input type="text" name="alamat" class="form-control" value="{{ old('alamat') }}">
             @error('alamat')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Mobile Phone Number</label>
             <input type="text" name="nomor_telepon" class="form-control" value="{{ old('nomor_telepon') }}">
             @error('nomor_telepon')
                 <span class="text-danger">{{ $message }}</span>
             @enderror
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Email</label>
             <input type="email" name="email" class="form-control" value="{{ old('email') }}">
             @error('email')
@@ -50,8 +50,8 @@
         e.preventDefault();
 
         Swal.fire({
-            title: 'Confirm Expense',
-            text: "Are you sure you want to create this expense?",
+            title: 'Confirm Supplier',
+            text: "Are you sure you want to create this supplier?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',

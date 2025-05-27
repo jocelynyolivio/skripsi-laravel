@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Patient;
 use App\Models\Procedure;
 use App\Models\StockCard;
@@ -25,6 +26,21 @@ class MedicalRecordController extends Controller
             'reservations' => $reservations
         ]);
     }
+
+    public function selectIncomplete()
+    {
+        // dd('hai');
+        $records = MedicalRecord::with(['patient', 'doctor'])
+            ->where(function ($query) {
+                $query->whereNull('teeth_condition')
+                    ->orDoesntHave('procedures');
+            })
+            ->orderBy('tanggal_reservasi', 'asc')
+            ->get();
+
+        return view('dashboard.medical_records.selectmedicalrecord', compact('records'));
+    }
+
 
     public function sendWhatsApp($id)
     {
@@ -196,50 +212,60 @@ class MedicalRecordController extends Controller
 
     public function selectMaterials($medicalRecordId)
     {
-        // Ambil rekam medis berdasarkan ID
-        $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
-
+        $medicalRecord = MedicalRecord::with('patient', 'procedures.dentalMaterials')->findOrFail($medicalRecordId);
+        // Jika relasi 'procedures' kosong, hentikan proses dan redirect.
+        if ($medicalRecord->procedures->isEmpty()) {
+            return redirect()->back()->with('error', 'Unable to select material. The doctor has not added any procedures to this medical record.');
+        }
         $procedures = $medicalRecord->procedures;
 
-        // Ambil daftar bahan dari prosedur yang terkait
         $dentalMaterialIds = $procedures->flatMap->dentalMaterials->pluck('id')->unique();
 
-        // Ambil stok terbaru dari StockCard berdasarkan dental_material_id
         $stockCards = StockCard::select('dental_material_id', 'remaining_stock', 'average_price')
             ->whereIn('dental_material_id', $dentalMaterialIds)
             ->orderBy('created_at', 'desc')
             ->get()
             ->unique('dental_material_id');
 
-        // Menyimpan bahan yang dibutuhkan untuk setiap prosedur
         $materials = [];
 
         foreach ($procedures as $procedure) {
             foreach ($procedure->dentalMaterials as $material) {
                 if (!isset($materials[$material->id])) {
-                    // Cari stok terbaru untuk bahan ini
                     $stock = $stockCards->firstWhere('dental_material_id', $material->id);
 
-                    // Menambahkan bahan hanya sekali, jika belum ada dalam array $materials
                     $materials[$material->id] = [
                         'name' => $material->name,
                         'unit_type' => $material->unit_type,
-                        'stock_quantity' => $stock ? $stock->remaining_stock : 0, // Pakai stok terbaru
-                        'average_price' => $stock ? $stock->average_price : 0, // Pakai harga rata-rata terbaru
-                        'quantity' => $material->pivot->quantity, // Jumlah bahan yang diperlukan
-                        'procedure_id' => $procedure->id // Hubungkan ke prosedur
+                        'stock_quantity' => $stock ? $stock->remaining_stock : 0,
+                        'average_price' => $stock ? $stock->average_price : 0,
+                        'quantity' => $material->pivot->quantity,
+                        'procedure_id' => $procedure->id,
                     ];
                 } else {
-                    // Jika bahan sudah ada, tambah jumlah kuantitas untuk prosedur yang sama
                     $materials[$material->id]['quantity'] += $material->pivot->quantity;
                 }
             }
         }
 
+        // Ambil semua bahan untuk dropdown tambahan
+        $allMaterials = DentalMaterial::all()->map(function ($material) {
+            $latestStock = StockCard::where('dental_material_id', $material->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            $material->stock_quantity = $latestStock ? $latestStock->remaining_stock : 0;
+            return $material;
+        });
+
+        $patientName = trim("{$medicalRecord->patient->fname} {$medicalRecord->patient->mname} {$medicalRecord->patient->lname}");
+
         return view('dashboard.medical_records.selectMaterials', [
             'medicalRecordId' => $medicalRecordId,
             'procedures' => $procedures,
             'materials' => $materials,
+            'allMaterials' => $allMaterials,
+            'patientName' => $patientName ?? 'Unknown',
+            'patientId' => $medicalRecord->patient->id ?? 0,
         ]);
     }
 
@@ -316,160 +342,169 @@ class MedicalRecordController extends Controller
     //         ->with('success', 'Dental materials have been successfully saved.');
     // }
 
-    public function saveMaterials(Request $request, $medicalRecordId)
-    {   
-        // dd('a');
+    public function showMaterials($medicalRecordId)
+    {
+        $referenceNumber = 'MR-' . $medicalRecordId;
+
+        $materialsUsed = StockCard::with('material') // pastikan relasi 'material' ada
+            ->where('reference_number', $referenceNumber)
+            ->where('type', 'usage')
+            ->get();
+
         $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
+        $patient = $medicalRecord->patient;
 
-        // Validasi input bahan dan kuantitas
-        $validatedData = $request->validate([
-            'quantities' => 'required|array',
-            'extra_materials' => 'array',
-            'extra_materials.*.material_id' => 'nullable|exists:dental_materials,id',
-            'extra_materials.*.selected_quantity' => 'nullable|numeric|min:0',
-        ]);
+        return view('dashboard.medical_records.showMaterials', compact('medicalRecord', 'materialsUsed', 'patient'));
+    }
 
-        // dd($validatedData);
+    public function saveMaterials(Request $request, $medicalRecordId)
+    {
+        // dd('a');
+        try {
+            $medicalRecord = MedicalRecord::findOrFail($medicalRecordId);
 
-        $totalHPP = 0;
+            // Validasi input bahan dan kuantitas
+            $validatedData = $request->validate([
+                'quantities' => 'nullable|array',
+                'extra_materials' => 'array',
+                'extra_materials.*.material_id' => 'nullable|exists:dental_materials,id',
+                'extra_materials.*.selected_quantity' => 'nullable|numeric|min:0',
+            ]);
 
-        // dd($validatedData['quantities']);
+            // dd($validatedData);
 
-        foreach ($validatedData['quantities'] as $materialId => $quantity) {
-            $quantity = (int) $quantity; // Konversi ke integer
+            $totalHPP = 0;
 
-            // dd($quantity);
+            // dd($validatedData['quantities']);
+            if (!empty($validatedData['quantities'])) {
+                foreach ($validatedData['quantities'] as $materialId => $quantity) {
+                    $quantity = (int) $quantity; // Konversi ke integer
 
-            if ($quantity > 0) {
-                $material = DentalMaterial::findOrFail($materialId);
-                // dd('ada');
+                    // dd($quantity);
 
-                // Ambil data stok terakhir dari kartu stok
-                $latestStock = StockCard::where('dental_material_id', $materialId)
-                    ->latest('created_at')
-                    ->first();
+                    if ($quantity > 0) {
+                        $material = DentalMaterial::findOrFail($materialId);
+                        // dd('ada');
 
-                if (!$latestStock || $latestStock->remaining_stock < $quantity) {
-                    return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                        // Ambil data stok terakhir dari kartu stok
+                        $latestStock = StockCard::where('dental_material_id', $materialId)
+                            ->latest('created_at')
+                            ->first();
+
+                        if (!$latestStock || $latestStock->remaining_stock < $quantity) {
+                            return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                        }
+
+                        // Kurangi stok di kartu stok
+                        $newStock = $latestStock->remaining_stock - $quantity;
+                        $hppPrice = $latestStock->average_price; // Harga per unit berdasarkan rata-rata
+
+                        // Simpan ke kartu stok
+                        StockCard::create([
+                            'dental_material_id' => $materialId,
+                            'date' => now(),
+                            'reference_number' => 'MR-' . $medicalRecordId, // Nomor referensi dari rekam medis
+                            'price_out' => $hppPrice,
+                            'quantity_out' => $quantity,
+                            'remaining_stock' => $newStock,
+                            'average_price' => $latestStock->average_price, // Harga tetap sama
+                            'type' => 'usage'
+                        ]);
+
+                        // dd('saved');
+
+                        // if ($material->stock_quantity < $quantity) {
+                        //     return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                        // }
+
+                        // Hitung HPP
+                        $materialHPP = $quantity * $hppPrice;
+                        $totalHPP += $materialHPP;
+                    }
                 }
+            }
+            // dd('saved');
+            // dd($totalHPP);
 
-                // Kurangi stok di kartu stok
-                $newStock = $latestStock->remaining_stock - $quantity;
-                $hppPrice = $latestStock->average_price; // Harga per unit berdasarkan rata-rata
+            if (!empty($validatedData['extra_materials'])) {
+                // dd('ada extra material');
+                foreach ($validatedData['extra_materials'] as $extra) {
+                    $materialId = $extra['material_id'] ?? null;
+                    $quantity = isset($extra['selected_quantity']) ? (float) $extra['selected_quantity'] : 0;
 
-                // Simpan ke kartu stok
-                StockCard::create([
-                    'dental_material_id' => $materialId,
-                    'date' => now(),
-                    'reference_number' => 'MR-' . $medicalRecordId, // Nomor referensi dari rekam medis
-                    'price_out' => $hppPrice,
-                    'quantity_out' => $quantity,
-                    'remaining_stock' => $newStock,
-                    'average_price' => $latestStock->average_price, // Harga tetap sama
-                    'type' => 'usage'
+                    if ($materialId && $quantity > 0) {
+                        $material = DentalMaterial::findOrFail($materialId);
+
+                        $latestStock = StockCard::where('dental_material_id', $materialId)
+                            ->latest('created_at')
+                            ->first();
+
+                        // dd($latestStock->remaining_stock);
+
+                        if (!$latestStock || $latestStock->remaining_stock < $quantity) {
+                            return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
+                        }
+
+                        $newStock = $latestStock->remaining_stock - $quantity;
+                        $hppPrice = $latestStock->average_price;
+
+                        StockCard::create([
+                            'dental_material_id' => $materialId,
+                            'date' => now(),
+                            'reference_number' => 'MR-' . $medicalRecordId,
+                            'price_out' => $hppPrice,
+                            'quantity_out' => $quantity,
+                            'remaining_stock' => $newStock,
+                            'average_price' => $hppPrice,
+                            'type' => 'usage'
+                        ]);
+
+                        $totalHPP += $quantity * $hppPrice;
+                    }
+                }
+            }
+
+            $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
+
+            // dd($transactionId);
+
+            if ($totalHPP > 0) {
+                // 1. Buat Journal Entry
+                $journalEntry = new JournalEntry();
+                $journalEntry->transaction_id = $transactionId; // Gunakan transaction_id dinamis
+                $journalEntry->entry_date = now();
+                $journalEntry->description = 'HPP untuk Prosedur pada Medical Record ' . $medicalRecord->id;
+                $journalEntry->save();
+
+                $idBahanDental = ChartOfAccount::where('name', 'HPP Bahan Dental')->value('id');
+                $idPersediaanBahanDental = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
+
+                // dd($idBahanDental, $idPersediaanBahanDental);
+
+                // 2. Debit HPP Bahan Dental
+                JournalDetail::create([
+                    'journal_entry_id' => $journalEntry->id,
+                    // 'coa_id' => 20, // ID COA HPP Bahan Dental
+                    'coa_id' => $idBahanDental, // ID COA HPP Bahan Dental
+                    'debit' => $totalHPP,
+                    'credit' => 0
                 ]);
 
-                // dd('saved');
-
-                // if ($material->stock_quantity < $quantity) {
-                //     return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
-                // }
-
-                // Hitung HPP
-                $materialHPP = $quantity * $hppPrice;
-                $totalHPP += $materialHPP;
+                // 3. Kredit Persediaan Bahan Dental
+                JournalDetail::create([
+                    'journal_entry_id' => $journalEntry->id,
+                    // 'coa_id' => 13, // ID COA Persediaan Bahan Dental
+                    'coa_id' => $idPersediaanBahanDental,
+                    'debit' => 0,
+                    'credit' => $totalHPP
+                ]);
             }
+            return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->patient_id])
+                ->with('success', 'Dental materials have been successfully saved.');
+        } catch (Exception $e) {
+            return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->patient_id])
+                ->with('error', 'Failed to save dental materials. Please try again.');
         }
-        // dd('saved');
-        // dd($totalHPP);
-
-        if (!empty($validatedData['extra_materials'])) {
-            // Gabungkan material_id dan selected_quantity dalam pasangan yang benar
-            $extraMaterials = $validatedData['extra_materials'];
-            $combinedExtras = [];
-        
-            for ($i = 0; $i < count($extraMaterials); $i += 2) {
-                if (isset($extraMaterials[$i]['material_id']) && isset($extraMaterials[$i + 1]['selected_quantity'])) {
-                    $combinedExtras[] = [
-                        'material_id' => $extraMaterials[$i]['material_id'],
-                        'selected_quantity' => $extraMaterials[$i + 1]['selected_quantity'],
-                    ];
-                }
-            }
-        
-            foreach ($combinedExtras as $extra) {
-                $materialId = $extra['material_id'];
-                $quantity = (float) $extra['selected_quantity'];
-        
-                if ($materialId && $quantity > 0) {
-                    $material = DentalMaterial::findOrFail($materialId);
-        
-                    $latestStock = StockCard::where('dental_material_id', $materialId)
-                        ->latest('created_at')
-                        ->first();
-        
-                    if (!$latestStock || $latestStock->remaining_stock < $quantity) {
-                        return redirect()->back()->with('error', 'Not enough stock for ' . $material->name);
-                    }
-        
-                    $newStock = $latestStock->remaining_stock - $quantity;
-                    $hppPrice = $latestStock->average_price;
-        
-                    StockCard::create([
-                        'dental_material_id' => $materialId,
-                        'date' => now(),
-                        'reference_number' => 'MR-' . $medicalRecordId,
-                        'price_out' => $hppPrice,
-                        'quantity_out' => $quantity,
-                        'remaining_stock' => $newStock,
-                        'average_price' => $hppPrice,
-                        'type' => 'usage'
-                    ]);
-        
-                    $totalHPP += $quantity * $hppPrice;
-                }
-            }
-        }
-        
-
-        $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
-
-        // dd($transactionId);
-
-        if ($totalHPP > 0) {
-            // 1. Buat Journal Entry
-            $journalEntry = new JournalEntry();
-            $journalEntry->transaction_id = $transactionId; // Gunakan transaction_id dinamis
-            $journalEntry->entry_date = now();
-            $journalEntry->description = 'HPP untuk Prosedur pada Medical Record ' . $medicalRecord->id;
-            $journalEntry->save();
-
-            $idBahanDental = ChartOfAccount::where('name', 'HPP Bahan Dental')->value('id');
-            $idPersediaanBahanDental = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
-
-            // dd($idBahanDental, $idPersediaanBahanDental);
-
-            // 2. Debit HPP Bahan Dental
-            JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                // 'coa_id' => 20, // ID COA HPP Bahan Dental
-                'coa_id' => $idBahanDental, // ID COA HPP Bahan Dental
-                'debit' => $totalHPP,
-                'credit' => 0
-            ]);
-
-            // 3. Kredit Persediaan Bahan Dental
-            JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                // 'coa_id' => 13, // ID COA Persediaan Bahan Dental
-                'coa_id' => $idPersediaanBahanDental,
-                'debit' => 0,
-                'credit' => $totalHPP
-            ]);
-        }
-
-        return redirect()->route('dashboard.medical_records.index', ['patientId' => $medicalRecord->patient_id])
-            ->with('success', 'Dental materials have been successfully saved.');
     }
 
 
@@ -586,18 +621,18 @@ class MedicalRecordController extends Controller
                 if (!isset($validatedData['tooth_numbers'][$procedureId]) || !is_array($validatedData['tooth_numbers'][$procedureId])) {
                     return redirect()->back()->with('error', "Tooth number is required for procedure ID: $procedureId");
                 }
-        
+
                 foreach ($validatedData['tooth_numbers'][$procedureId] as $toothNumber) {
                     $procedureNotes = $validatedData['procedure_notes'][$procedureId][$toothNumber] ?? null;
                     $procedureSurfaceArray = $validatedData['procedure_surface'][$procedureId][$toothNumber] ?? [];
-        
+
                     // Gabungkan array permukaan menjadi string, jika ada
                     $procedureSurface = is_array($procedureSurfaceArray) ? implode(',', $procedureSurfaceArray) : null;
-        
+
                     $combinationKey = $procedureId . '-' . $toothNumber;
                     if (!in_array($combinationKey, $uniqueCombinations)) {
                         $uniqueCombinations[] = $combinationKey;
-        
+
                         $medicalRecord->procedures()->attach($procedureId, [
                             'tooth_number' => $toothNumber,
                             'notes' => $procedureNotes,

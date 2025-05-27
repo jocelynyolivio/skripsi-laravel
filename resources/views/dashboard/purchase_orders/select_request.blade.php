@@ -1,6 +1,13 @@
 <!-- dd('bro'); -->
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['text' => 'Purchase Orders', 'url' => route('dashboard.purchase_orders.index')],
+['text' => 'Select Approved Purchase Request for Purchase Order']
+]
+])
+@endsection
 @section('container')
 <div class="container mt-5">
     <h3>Select Approved Purchase Request</h3>

@@ -73,19 +73,19 @@
                             <strong>Updated:</strong> {{ $expense->updated_at->format('d M Y H:i') }}
                         </div>
                         <div class="btn-group">
-                            <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-warning btn-sm me-2">
+                            <!-- <a href="{{ route('dashboard.expenses.edit', $expense->id) }}" class="btn btn-warning btn-sm me-2">
                                 <i class="fas fa-edit me-1"></i> Edit
-                            </a>
+                            </a> -->
                             <a href="{{ route('dashboard.expenses.duplicate', $expense->id) }}" class="btn btn-secondary btn-sm me-2">
                                 <i class="fas fa-copy me-1"></i> Duplicate
                             </a>
-                            <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST">
+                            <!-- <form action="{{ route('dashboard.expenses.destroy', $expense->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this expense?')">
                                     <i class="fas fa-trash me-1"></i> Delete
                                 </button>
-                            </form>
+                            </form> -->
                         </div>
                     </div>
                 </div>
