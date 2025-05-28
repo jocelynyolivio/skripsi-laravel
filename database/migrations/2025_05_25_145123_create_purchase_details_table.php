@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('dental_material_id')->constrained('dental_materials')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('unit_price', 15, 2);
+            $table->decimal('final_unit_price', 15, 2)->default(0);
             $table->decimal('subtotal', 15, 2);
             $table->timestamps();
         });

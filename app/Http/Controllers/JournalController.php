@@ -37,21 +37,9 @@ class JournalController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
-    // public function show($id)
-    // {
-    //     $journal = JournalEntry::with('details.account')->findOrFail($id);
-
-    //     return view('dashboard.journals.show', [
-    //         'title' => 'Journal Details',
-    //         'journal' => $journal
-    //     ]);
-    // }
-
     public function show($id)
     {
+        // dd('haui');
         // Ambil Journal Entry Berdasarkan ID
         $journal = JournalEntry::with('details.account')->findOrFail($id);
 
@@ -70,50 +58,53 @@ class JournalController extends Controller
             }
         }
 
-        if ($isHPP && $journal->transaction_id) {
-            $transaction = \App\Models\Transaction::find($journal->transaction_id);
+        // dd('hau');
 
-            if ($transaction) {
-                $medicalRecord = \App\Models\MedicalRecord::find($transaction->medical_record_id);
+        // dd($isHPP);
 
-                if ($medicalRecord) {
-                    // Cari semua stock keluar yang berhubungan dengan medical record ini
-                    $stockCards = \App\Models\StockCard::where('reference_number', 'LIKE', 'MR-' . $medicalRecord->id)
-                        ->whereNotNull('price_out') // Pastikan ini adalah stok yang keluar
-                        ->get();
+        if ($isHPP && $journal->medical_record_id) {
+            if ($journal->medical_record_id) {
+                dd('masuk if');
 
-                    foreach ($stockCards as $stock) {
-                        $quantityUsed = $stock->quantity_out;
-                        $unitPrice = $stock->average_price;
-                        $totalPrice = $quantityUsed * $unitPrice;
+                // Cari semua stock keluar yang berhubungan dengan medical record ini
+                $stockCards = \App\Models\StockCard::where('reference_number', 'LIKE', 'MR-' . $journal->medical_record_id)
+                    ->whereNotNull('price_out') // Pastikan ini adalah stok yang keluar
+                    ->get();
 
-                        // Simpan ke HPP Details
-                        $hppDetails[] = [
-                            'name' => $stock->dentalMaterial->name, // Ambil nama material dari relasi
-                            'quantity' => $quantityUsed,
-                            'unit_price' => $unitPrice,
-                            'total_price' => $totalPrice
-                        ];
+                foreach ($stockCards as $stock) {
+                    $quantityUsed = $stock->quantity_out;
+                    $unitPrice = $stock->average_price;
+                    $totalPrice = $quantityUsed * $unitPrice;
 
-                        // Akumulasi Total HPP
-                        $totalHPP += $totalPrice;
-                    }
+                    // Simpan ke HPP Details
+                    $hppDetails[] = [
+                        'name' => $stock->dentalMaterial->name, // Ambil nama material dari relasi
+                        'quantity' => $quantityUsed,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice
+                    ];
+
+                    // Akumulasi Total HPP
+                    $totalHPP += $totalPrice;
                 }
             }
+            return view('dashboard.journals.show', [
+                'title' => 'Journal Details',
+                'journal' => $journal,
+                'journalDetails' => $journalDetails,
+                'hppDetails' => $hppDetails,
+                'totalHPP' => $totalHPP,
+                'isHPP' => $isHPP
+            ]);
+        } else {
+            return view('dashboard.journals.show', [
+                'title' => 'Journal Details',
+                'journal' => $journal,
+                'journalDetails' => $journalDetails,
+                'isHPP' => $isHPP
+            ]);
         }
-
-
-
-        return view('dashboard.journals.show', [
-            'title' => 'Journal Details',
-            'journal' => $journal,
-            'journalDetails' => $journalDetails,
-            'hppDetails' => $hppDetails,
-            'totalHPP' => $totalHPP,
-            'isHPP' => $isHPP
-        ]);
     }
-
 
 
     /**

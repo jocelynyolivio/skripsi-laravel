@@ -9,7 +9,7 @@
     </div>
     @endif
 
-    <form id="createExpenseForm" action="{{ route('dashboard.expenses.store') }}" method="POST">
+    <form id="createExpenseForm" action="{{ route('dashboard.expenses.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="mb-3">
             <label for="expense_date" class="form-label">Date</label>
@@ -116,9 +116,19 @@
         </div>
 
         <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
+            <label for="description" class="form-label">Description (required)</label>
             <textarea name="description" class="form-control" required>{{ old('description', $expense->description ?? '') }}</textarea>
         </div>
+
+         <div class="mb-3">
+        <label for="attachment_file" class="form-label">Bukti/Lampiran (Opsional)</label>
+        <input class="form-control @error('attachment_file') is-invalid @enderror" type="file" id="attachment_file" name="attachment_file">
+        @error('attachment_file')
+            <div class="invalid-feedback">
+                {{ $message }}
+            </div>
+        @enderror
+    </div>
 
         <button type="submit" class="btn btn-success">Save</button>
     </form>

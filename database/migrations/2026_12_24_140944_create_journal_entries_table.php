@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('transaction_id')->nullable();
+            $table->unsignedBigInteger('medical_record_id')->nullable();
             $table->unsignedBigInteger('purchase_id')->nullable();
+            $table->unsignedBigInteger('expense_id')->nullable();
             $table->date('entry_date');
             $table->string('description');
             $table->timestamps();
@@ -24,10 +26,20 @@ return new class extends Migration
                 ->on('transactions')
                 ->onDelete('set null');
 
-                $table->foreign('purchase_id')
+            $table->foreign('medical_record_id')
+                ->references('id')
+                ->on('medical_records')
+                ->onDelete('set null');
+
+            $table->foreign('purchase_id')
                 ->references('id')
                 ->on('purchase_invoices')
-                ->onDelete('set null');    
+                ->onDelete('set null');
+
+            $table->foreign('expense_id')
+                ->references('id')
+                ->on('expenses')
+                ->onDelete('set null');
         });
     }
 

@@ -10,7 +10,7 @@ class PurchaseDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'purchase_invoice_id', 'dental_material_id', 'quantity', 'unit', 'unit_price', 'subtotal'
+        'purchase_invoice_id', 'dental_material_id', 'quantity', 'unit', 'unit_price', 'subtotal', 'final_unit_price'
     ];
 
     public function purchaseInvoice()

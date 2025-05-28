@@ -23,7 +23,7 @@
                             <td>
                                 <input type="number" name="received_quantity[{{ $detail->dental_material_id }}]" value="{{ $detail->quantity }}" min="0" class="form-control">
                             </td>
-                            <td>{{ number_format($detail->unit_price, 2) }}</td>
+                            <td>{{ number_format($detail->final_unit_price, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

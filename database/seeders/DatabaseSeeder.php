@@ -648,7 +648,7 @@ class DatabaseSeeder extends Seeder
             // fixed asset dan depreciation : berhubungan kyk tanah dll yang ada dpresiasi nya
             // harusnya ga kepake sih 
             ['code' => '1-10400', 'name' => 'Aset Tetap', 'type' => 'asset'],
-            ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'asset'],
+            ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'contra_asset'],
             ['code' => '1-10600', 'name' => 'Aset Lain-Lain', 'type' => 'asset'],
 
             // Kewajiban (Liabilities)
@@ -666,6 +666,9 @@ class DatabaseSeeder extends Seeder
 
             // Pendapatan (Revenue)
             ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
+            ['code' => '4-10002', 'name' => 'Pendapatan Penyesuaian Persediaan', 'type' => 'revenue'],
+            ['code' => '4-10101', 'name' => 'Diskon Penjualan', 'type' => 'contra_revenue'],
+
             // Sales Returns and Allowances adalah suatu peristiwa dimana barang yang kita jual dan telah sampai kepada pelanggan mengalami cacat produksi atau adanya kerusakan ketika terjadi pengiriman yang adanya kesepakatan bahwa risiko pengiriman ditanggung oleh perusahaan.
             // ['code' => '4-10100', 'name' => 'Retur Penjualan dan Pengurangan Harga', 'type' => 'revenue'],
 
@@ -681,8 +684,9 @@ class DatabaseSeeder extends Seeder
             ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
             ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
             ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense'],
-            ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'expense'], // Nilainya negatif, contra expenses
+            ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'contra_expense'], // Nilainya negatif, contra expenses
             ['code' => '5-10013', 'name' => 'Beban Pengiriman Pembelian', 'type' => 'expense'],
+            ['code' => '5-10014', 'name' => 'Beban Penyesuaian Persediaan', 'type' => 'expense'],
             // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
         ];
 

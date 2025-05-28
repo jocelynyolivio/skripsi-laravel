@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignId('procedure_type_id')
                 ->nullable()
                 ->constrained('procedure_types')
-                ->nullOnDelete(); // <-- ini penting            $table->text('description')->nullable(); // Deskripsi tentang prosedur
+                ->nullOnDelete(); // <-- ini penting             // Deskripsi tentang prosedur
+            $table->text('description')->nullable();
             $table->boolean('requires_tooth')->default(true); // Default: prosedur butuh nomor gigi
             $table->timestamps();
         });

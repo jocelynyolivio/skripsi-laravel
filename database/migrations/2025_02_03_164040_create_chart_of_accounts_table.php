@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique(); // Kode Akun (misal: 1100)
             $table->string('name');           // Nama Akun (misal: Kas)
-            $table->enum('type', ['asset', 'liability', 'equity', 'revenue', 'expense']);
+            $table->enum('type', ['asset', 'liability', 'equity', 'revenue', 'expense','contra_expense','contra_revenue','contra_asset']);
             $table->timestamps();
         });
     }

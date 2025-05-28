@@ -112,6 +112,11 @@ class PurchaseOrderController extends Controller
 
         // dd($request->all());
 
+         if ($request->has('details')) {
+        $existingMaterials = $request->selected_materials ?? [];
+        $request->merge(['selected_materials' => array_merge($existingMaterials, $request->details)]);
+    }
+
         $validated = $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
             'order_date' => 'required|date',
@@ -200,8 +205,8 @@ class PurchaseOrderController extends Controller
             return redirect()->route('dashboard.purchase_orders.show', $purchaseOrder)
                 ->with('success', 'Purchase Order created successfully!');
         } catch (\Exception $e) {
-            dd($e);
-            // DB::rollBack();
+            // dd($e);
+            DB::rollBack();
             return back()->withInput()
                 ->with('error', 'Failed to create Purchase Order: ' . $e->getMessage());
         }

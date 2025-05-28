@@ -12,6 +12,8 @@ class JournalEntry extends Model
     protected $fillable = [
         'transaction_id',
         'purchase_id',
+        'medical_record_id',
+        'expense_id',
         'entry_date',
         'description'
     ];
@@ -21,10 +23,10 @@ class JournalEntry extends Model
         return $this->hasMany(JournalDetail::class, 'journal_entry_id');
     }
 
-    public function transaction()
-    {
-        return $this->belongsTo(Transaction::class, 'transaction_id');
-    }
+    // public function transaction()
+    // {
+    //     return $this->belongsTo(Transaction::class, 'transaction_id');
+    // }
 
     public function purchaseinvoice()
     {

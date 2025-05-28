@@ -18,7 +18,9 @@ class Expense extends Model
         'description',
         'reference_number',
         'supplier_id',
-        'payment_method'
+        'payment_method',
+        'status',
+        'attachment_path'
     ];
     
     public function admin()

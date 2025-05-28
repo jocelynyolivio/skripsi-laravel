@@ -296,19 +296,127 @@ class PurchaseController extends Controller
         }
     }
 
-
-
     private function saveInvoice(Request $request, ?PurchaseOrder $purchaseOrder = null)
-    {
+{
+    $request->validate([
+        'purchase_order_id'  => 'nullable|exists:purchase_orders,id',
+        'invoice_date' => 'required|date',
+        'received_date' => 'nullable|date',
+        'supplier_id'         => 'required|exists:suppliers,id',
+        'payment_requirement' => 'nullable|string',
+        'due_date' => 'nullable|date',
+        'discount' => 'nullable',
+        'ongkos_kirim' => 'nullable',
+        'total_amount' => 'required',
+        'grand_total' => 'required',
+        'dental_material_id' => 'required|array',
+    ]);
 
+    return DB::transaction(function () use ($request) {
+
+        // Ambil nilai diskon dan ongkir untuk perhitungan
+        $discount =  $request->discount ?? 0;
+        $ongkos_kirim = $request->ongkos_kirim ?? 0;
+        
+        // Ambil subtotal dari request. Pastikan frontend mengirim nilai numerik yang bersih.
+        // total_amount adalah subtotal sebelum diskon dan ongkir.
+        $subtotal =  $request->total_amount;
+
+        // Jika subtotal 0 atau kurang, hentikan proses untuk menghindari pembagian dengan nol.
+        if ($subtotal <= 0) {
+            throw new \Exception("Subtotal tidak boleh nol.");
+        }
+
+        // Generate invoice number
+        $lastInvoice = PurchaseInvoice::orderByDesc('id')->first();
+        $nextNumber = $lastInvoice ? ((int) substr($lastInvoice->invoice_number, 4)) + 1 : 1;
+        $invoiceNumber = 'INV-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        // Buat invoice (kode ini sebagian besar tetap sama)
+        $invoice = PurchaseInvoice::create([
+            'invoice_number'      => $invoiceNumber,
+            'invoice_date'        => $request->invoice_date,
+            'purchase_order_id'   => $request->purchase_order_id,
+            'supplier_id'         => $request->supplier_id,
+            'payment_requirement' => $request->payment_requirement,
+            'receive_date'        => $request->receive_date,
+            'due_date'            => $request->due_date,
+            'discount'            => $discount,
+            'ongkos_kirim'        => $ongkos_kirim,
+            'grand_total'         => $request->grand_total, // grand_total dari request
+        ]);
+
+        // Simpan detail pembelian dengan LOGIKA BARU
+        foreach ($request->dental_material_id as $index => $material_id) {
+            $quantity =$request->quantity[$index];
+            $totalPrice =  $request->total_price[$index];
+            $unitPrice = ($quantity > 0) ? $totalPrice / $quantity : 0;
+
+            // --- Logika Alokasi Biaya Dimasukkan di Sini ---
+            $valueWeight = $totalPrice / $subtotal;
+            $allocatedShipping = $ongkos_kirim * $valueWeight;
+            $allocatedDiscount = $discount * $valueWeight;
+            $finalLineCost = $totalPrice + $allocatedShipping - $allocatedDiscount;
+            $finalUnitPrice = ($quantity > 0) ? $finalLineCost / $quantity : 0;
+            // --- Akhir Logika Alokasi ---
+
+            PurchaseDetail::create([
+                'purchase_invoice_id' => $invoice->id,
+                'dental_material_id'  => $material_id, // Anda sudah melakukan findOrFail sebelumnya, tapi ini lebih ringkas
+                'quantity'            => $quantity,
+                'unit_price'          => $unitPrice,       // Harga asli disimpan
+                'final_unit_price'    => $finalUnitPrice,  // << HARGA FINAL BARU DISIMPAN
+                'subtotal'            => $totalPrice,
+            ]);
+        }
+
+        // Buat entri jurnal dengan LOGIKA BARU
+        // (Saya menggabungkan 2 pembuatan JournalEntry Anda menjadi 1 untuk efisiensi)
+        $journalEntry = JournalEntry::create([
+            'entry_date'  => $request->invoice_date,
+            'description' => 'Pembelian dari ' . $invoice->supplier->name . ' - Invoice #' . $invoice->invoice_number,
+            'purchase_id' => $invoice->id, // Menggunakan kolom yang sudah ada
+        ]);
+
+        $inventoryAccount = ChartOfAccount::where('name', 'Persediaan Barang Medis')->firstOrFail();
+        $accountsPayable  = ChartOfAccount::where('name', 'Utang Usaha')->firstOrFail();
+
+        // Debit: Persediaan senilai grand_total
+        JournalDetail::create([
+            'journal_entry_id' => $journalEntry->id,
+            'coa_id'           => $inventoryAccount->id,
+            'debit'            => $request->grand_total,
+            'credit'           => 0,
+        ]);
+
+        // Kredit: Utang Usaha senilai grand_total
+        JournalDetail::create([
+            'journal_entry_id' => $journalEntry->id,
+            'coa_id'           => $accountsPayable->id,
+            'debit'            => 0,
+            'credit'           => $request->grand_total,
+        ]);
+        
+        // Hapus semua logika 'if discount' dan 'if ongkos_kirim' untuk jurnal.
+
+        return $invoice;
+    });
+
+    // ========================= AKHIR PERUBAHAN =========================
+}
+
+
+    private function saveInvoiceXXXXX(Request $request, ?PurchaseOrder $purchaseOrder = null)
+    {
         // dd('masuk function save invoice');
+        try{
         $request->validate([
             'purchase_order_id'  => 'nullable|exists:purchase_orders,id',
             'invoice_date' => 'required|date',
             'received_date' => 'nullable|date',
             // 'purchase_date'      => 'required|date',
             'supplier_id'        => 'required|exists:suppliers,id',
-            'payment_requirement' => 'required|string',
+            'payment_requirement' => 'nullable|string',
             'due_date' => 'nullable|date',
             'discount' => 'nullable',
             'ongkos_kirim' => 'nullable',
@@ -316,8 +424,11 @@ class PurchaseController extends Controller
             'grand_total' => 'required',
             'dental_material_id' => 'required|array',
         ]);
+    }catch (\Exception $e){
+        dd($e);
+    }
 
-        // dd($request);
+        dd($request);
 
         // Generate invoice number
         $lastInvoice = PurchaseInvoice::orderByDesc('id')->first();
@@ -344,8 +455,11 @@ class PurchaseController extends Controller
         foreach ($request->dental_material_id as $index => $material_id) {
             $material = DentalMaterial::findOrFail($material_id);
             $quantity = $request->quantity[$index];
-            $totalPrice = $request->total_price[$index];
+            // maksa
+            $totalPrice = $request->grand_total;
             $unitPrice = ($quantity > 0) ? $totalPrice / $quantity : 0;
+
+            dd($request->total_price[$index]);
 
             PurchaseDetail::create([
                 'purchase_invoice_id' => $invoice->id,
@@ -605,7 +719,7 @@ class PurchaseController extends Controller
         ]);
 
         $idUtangUsaha = ChartOfAccount::where('name', 'Utang Usaha')->value('id');
-        
+
 
         // Debit: Utang Usaha
         JournalDetail::create([
@@ -646,29 +760,28 @@ class PurchaseController extends Controller
     // }
 
 
-public function show($id)
-{
-    // Ambil invoice berdasarkan ID dengan eager loading relasi
-    $purchaseInvoice = PurchaseInvoice::with([
-        'supplier',
-        'purchaseOrder',
-        'details.material',
-        'payments.coa'
-    ])->findOrFail($id);
+    public function show($id)
+    {
+        // Ambil invoice berdasarkan ID dengan eager loading relasi
+        $purchaseInvoice = PurchaseInvoice::with([
+            'supplier',
+            'purchaseOrder',
+            'details.material',
+            'payments.coa'
+        ])->findOrFail($id);
 
-    // Hitung total yang sudah dibayar
-    $totalPaid = $purchaseInvoice->payments->sum('purchase_amount');
+        // Hitung total yang sudah dibayar
+        $totalPaid = $purchaseInvoice->payments->sum('purchase_amount');
 
-    // Hitung sisa tagihan
-    $sisaTagihan = $purchaseInvoice->grand_total - $totalPaid;
+        // Hitung sisa tagihan
+        $sisaTagihan = $purchaseInvoice->grand_total - $totalPaid;
 
-    // Kirim data ke view
-    return view('dashboard.purchases.show', [
-        'title' => 'Detail Purchase Invoice',
-        'purchaseInvoice' => $purchaseInvoice,
-        'totalPaid' => $totalPaid,
-        'sisaTagihan' => $sisaTagihan,
-    ]);
-}
-
+        // Kirim data ke view
+        return view('dashboard.purchases.show', [
+            'title' => 'Detail Purchase Invoice',
+            'purchaseInvoice' => $purchaseInvoice,
+            'totalPaid' => $totalPaid,
+            'sisaTagihan' => $sisaTagihan,
+        ]);
+    }
 }

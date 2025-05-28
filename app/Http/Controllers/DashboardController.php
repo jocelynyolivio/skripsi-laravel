@@ -140,14 +140,18 @@ class DashboardController extends Controller
                     ->groupBy('transactions.doctor_id', 'users.name')
                     ->get();
             } elseif ($role === 'dokter tetap') {
-                $data['pasienAkanDatang'] = MedicalRecord::whereDate('tanggal_reservasi', $today)->count();
-                $data['rekamMedisBelumDiisi'] = MedicalRecord::with('patient')
+                $data['pasienAkanDatang'] = MedicalRecord::where('doctor_id', $user->id)
+                    ->whereDate('tanggal_reservasi', $today)
+                    ->count();
+                $data['rekamMedisBelumDiisi'] = MedicalRecord::where('doctor_id', $user->id)
                     ->whereNull('teeth_condition')
-                    ->orderBy('tanggal_reservasi', 'asc')
                     ->count();
                 $data['listRekamMedisBelumDiisi'] = MedicalRecord::with(['patient', 'doctor'])
-                    ->whereNull('teeth_condition')
-                    ->orDoesntHave('procedures')
+                    ->where('doctor_id', $user->id) // Filter dokter yang login dulu
+                    ->where(function ($query) {    // Kelompokkan kondisi "belum diisi"
+                        $query->whereNull('teeth_condition')
+                            ->orDoesntHave('procedures');
+                    })
                     ->orderBy('tanggal_reservasi', 'asc')
                     ->get();
 

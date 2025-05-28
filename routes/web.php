@@ -268,7 +268,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/purchases/create-from-order/{purchaseOrder}', [PurchaseController::class, 'createFromOrder'])->name('purchases.createFromOrder')->middleware('role:manager');
     Route::post('/purchases/store-from-order/{purchaseOrder}', [PurchaseController::class, 'storeFromOrder'])->name('purchases.storeFromOrder')->middleware('role:manager');
     Route::get('/purchases', [PurchaseController::class, 'create'])->name('purchases.create')->middleware('role:manager');
-    Route::get('/purchases/{id}', [PurchaseController::class, 'show'])->name('purchases.show');
 
     Route::resource('/purchase_requests', PurchaseRequestController::class);
     Route::get('/purchase_requests/{purchaseRequest}/duplicate', [PurchaseRequestController::class, 'duplicate'])->name('purchase_requests.duplicate');
@@ -337,7 +336,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('expenses', ExpenseController::class);
     Route::get('/expenses/{expense}/duplicate', [ExpenseController::class, 'duplicate'])->name('expenses.duplicate');
-    Route::get('/{expense}', [ExpenseController::class, 'show'])->name('dashboard.expenses.show');
+    Route::get('/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
+    Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
     Route::prefix('odontograms')->name('odontograms.')->group(function () {
         Route::get('/{patientId}', [OdontogramController::class, 'index'])->name('index')->middleware('role:dokter_tetap,dokter_luar,manager');
@@ -346,11 +346,10 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
 
     Route::resource('salary_calculations', SalaryCalculationController::class)->middleware('role:manager');
 
+    Route::resource('purchases', PurchaseController::class);
 
-    Route::resource('purchases', PurchaseController::class)->middleware('role:manager');
-
-    // Route::get('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
-    // Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
+    Route::get('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
+    Route::post('/purchases/{purchase}/receive', [PurchaseController::class, 'storeReceived'])->name('purchases.storeReceived');
 
     Route::get('/purchases/{purchase}/pay', [PurchaseController::class, 'showPayForm'])->name('purchases.pay')->middleware('role:manager');
     Route::post('/purchases/{purchase}/pay', [ExpenseController::class, 'payDebt'])->name('expenses.pay')->middleware('role:manager');

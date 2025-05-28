@@ -39,7 +39,14 @@
             @foreach($medicalRecords as $record)
             <tr>
                 <td>{{ $record->tanggal_reservasi }}</td>
-                <td>{{ $record->teeth_condition }}</td>
+                <td>
+                    <div><strong>Teeth Condition:</strong> {{ $record->teeth_condition }}</div>
+                    <div><strong>S:</strong> {{ $record->subjective }}</div>
+                    <div><strong>O:</strong> {{ $record->objective }}</div>
+                    <div><strong>A:</strong> {{ $record->assessment }}</div>
+                    <div><strong>P:</strong> {{ $record->plan }}</div>
+                </td>
+
                 <td>
                     @if($record->procedures->isNotEmpty())
                     @foreach($proceduress as $procedure)

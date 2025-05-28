@@ -93,16 +93,48 @@
                         @endforeach
                     </tbody>
                     <tfoot>
-                        <tr class="table-active">
-                            <td colspan="4" class="text-end fw-bold">Total</td>
-                            <td class="text-end fw-bold">
-                                {{ number_format($purchaseOrder->details->sum(function($detail) { 
-                                    return $detail->price; 
-                                }), 2) }}
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
+    {{-- Kita hitung dulu semua nilainya agar mudah dibaca dan digunakan --}}
+    @php
+        $subtotal = $purchaseOrder->details->sum('price');
+        $discount = $purchaseOrder->discount ?? 0;
+        $shipping = $purchaseOrder->ongkos_kirim ?? 0;
+        $grandTotal = $subtotal - $discount + $shipping;
+    @endphp
+
+    {{-- Baris untuk Subtotal (Total harga barang) --}}
+    <tr>
+        <td colspan="4" class="text-end">Subtotal</td>
+        <td class="text-end">{{ number_format($subtotal, 2) }}</td>
+        <td></td>
+    </tr>
+
+    {{-- Baris untuk Diskon, hanya tampil jika ada diskon --}}
+    @if($discount > 0)
+    <tr>
+        <td colspan="4" class="text-end">Diskon</td>
+        <td class="text-end text-danger">- {{ number_format($discount, 2) }}</td>
+        <td></td>
+    </tr>
+    @endif
+
+    {{-- Baris untuk Ongkos Kirim, hanya tampil jika ada ongkos kirim --}}
+    @if($shipping > 0)
+    <tr>
+        <td colspan="4" class="text-end">Ongkos Kirim</td>
+        <td class="text-end">{{ number_format($shipping, 2) }}</td>
+        <td></td>
+    </tr>
+    @endif
+
+    {{-- Baris untuk Grand Total --}}
+    <tr class="table-active">
+        <td colspan="4" class="text-end fw-bold">Grand Total</td>
+        <td class="text-end fw-bold">
+            {{ number_format($grandTotal, 2) }}
+        </td>
+        <td></td>
+    </tr>
+</tfoot>
                 </table>
             </div>
         </div>

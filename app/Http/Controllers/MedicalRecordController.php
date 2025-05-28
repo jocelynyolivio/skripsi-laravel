@@ -51,7 +51,9 @@ class MedicalRecordController extends Controller
         $phoneNumber = $reservation->patient->home_mobile;
 
         // Pesan template
-        $message = "Halo {$reservation->patient->fname} {$reservation->patient->mname} {$reservation->patient->lname}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
+        $message = "Halo {$reservation->patient->fname} {$reservation->patient->mname} {$reservation->patient->lname}, Selamat datang di klinik gigi Senyumqu. Untuk konfirmasi kehadiran konsultasi di tanggal {$reservation->tanggal_reservasi} pukul {$reservation->jam_mulai} ya. Terima kasih! -Salam Admin Senyumqu";
+
+        // Halo Jocelyn, Selamat datang di klinik Senyumqu. Untuk konfirmasi kehadiran konsultasi tanggal 2025-05-16 pukul 11:00 ya. Terima kasih! -Salam Admin Senyumqu
 
         // Redirect ke wa.me dengan pesan template
         return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
@@ -464,18 +466,22 @@ class MedicalRecordController extends Controller
                 }
             }
 
-            $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
+            // $transactionId = Transaction::where('medical_record_id', $medicalRecord->id)->value('id');
 
             // dd($transactionId);
+            // dd('s');
+            // dd($totalHPP);
 
             if ($totalHPP > 0) {
+                // dd('mau buat jurnal');
                 // 1. Buat Journal Entry
                 $journalEntry = new JournalEntry();
-                $journalEntry->transaction_id = $transactionId; // Gunakan transaction_id dinamis
+                $journalEntry->medical_record_id = $medicalRecord->id;
                 $journalEntry->entry_date = now();
                 $journalEntry->description = 'HPP untuk Prosedur pada Medical Record ' . $medicalRecord->id;
                 $journalEntry->save();
 
+                // dd('journal saved');
                 $idBahanDental = ChartOfAccount::where('name', 'HPP Bahan Dental')->value('id');
                 $idPersediaanBahanDental = ChartOfAccount::where('name', 'Persediaan Barang Medis')->value('id');
 

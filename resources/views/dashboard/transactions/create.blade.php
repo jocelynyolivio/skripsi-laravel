@@ -31,7 +31,7 @@
                         <a href="{{ url()->previous() }}" class="btn btn-secondary mt-3">Go Back</a>
                     </div>
                 @else
-                <form action="{{ route('dashboard.transactions.store') }}" method="POST">
+                <form id="transaction-form" action="{{ route('dashboard.transactions.store') }}" method="POST">
                     @csrf
                     {{-- Hidden fields untuk data penting --}}
                     <input type="hidden" name="medical_record_id" value="{{ $medicalRecord->id }}">
@@ -228,7 +228,7 @@
                     </div>
 
                     <div class="text-end mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">
+                        <button type="submit" class="btn btn-primary btn-lg" id="create-btn">
                             <i class="bi bi-check-circle"></i> Create Transaction
                         </button>
                     </div>
@@ -316,5 +316,22 @@
         // Lakukan kalkulasi awal saat halaman dimuat
         calculateTotal();
     });
+
+    document.getElementById('transaction-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Create Transaction Confirmation',
+        text: "Are you sure want to create this transaction?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, buat!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.target.submit();
+        }
+    });
+});
 </script>
 @endsection

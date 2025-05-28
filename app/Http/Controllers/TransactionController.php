@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Models\JournalDetail;
 use App\Models\MedicalRecord;
 use App\Models\ChartOfAccount;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -161,6 +162,15 @@ class TransactionController extends Controller
 
             // dd($validated);
 
+            // LANGKAH 1: Inisialisasi semua variabel total yang kita butuhkan
+            $grossTotalAmount = 0; // Total sebelum diskon (untuk sisi Kredit Pendapatan)
+            $totalDiscountAmount = 0; // Total semua diskon (untuk sisi Debit Diskon)
+            $netTotalAmount = 0; // Total setelah diskon (untuk menentukan piutang)
+            $itemsData = [];
+            $doctorId = null;
+            $revenuePercentage = 0;
+            $totalRevenueAmount = 0;
+
             $medicalRecord = MedicalRecord::with('procedures')->find($validated['medical_record_id']);
             $totalAmount = 0;
             $itemsData = [];
@@ -168,6 +178,8 @@ class TransactionController extends Controller
             $doctorId = null;
             $revenuePercentage = 0;
             $totalRevenueAmount = 0;
+
+            // dd('initialize');
 
             // Hitung Total Amount dari Procedures
             if ($medicalRecord) {
@@ -186,6 +198,12 @@ class TransactionController extends Controller
                     $totalPrice = $unitPrice * $quantity;
                     $finalPrice = max($totalPrice - $discount, 0);
                     $revenueAmount = $finalPrice * ($revenuePercentage / 100);
+
+                    // Akumulasi total-total yang dibutuhkan
+                    $grossTotalAmount += $totalPrice;
+                    $totalDiscountAmount += $discount;
+                    $netTotalAmount += $finalPrice;
+
                     $totalRevenueAmount += $revenueAmount;
 
                     $itemsData[] = [
@@ -201,14 +219,14 @@ class TransactionController extends Controller
                 }
             }
 
-            // dd('ha');
+            // dd($netTotalAmount);
 
             // Buat transaksi baru
             $transaction = Transaction::create([
                 'medical_record_id' => $validated['medical_record_id'],
                 'user_id' => $validated['user_id'],
                 'admin_id' => $validated['admin_id'],
-                'total_amount' => $totalAmount,
+                'total_amount' => $netTotalAmount,
                 'status' => 'belum lunas',
                 'doctor_id' => $doctorId,
                 'revenue_percentage' => $revenuePercentage,
@@ -223,6 +241,8 @@ class TransactionController extends Controller
             foreach ($itemsData as $data) {
                 $transaction->items()->create($data);
             }
+
+            // dd('saved');
 
             // Simpan Payments
             $totalPayments = 0;
@@ -252,6 +272,8 @@ class TransactionController extends Controller
                     ->update(['birthday_voucher_used' => 1]);
             }
 
+            // dd('msk');
+
 
             // Simpan Receivable
             Receivable::create([
@@ -264,6 +286,10 @@ class TransactionController extends Controller
                 'status' => ($remainingAmount > 0) ? 'belum lunas' : 'lunas'
             ]);
 
+            $coa_pendapatan_id = ChartOfAccount::where('name', 'Pendapatan Penjualan')->value('id');
+            $coa_diskon_id = ChartOfAccount::where('name', 'Diskon Penjualan')->value('id');
+            $coa_piutang_id = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
+
             // Journal Entry
             $journalEntry = JournalEntry::create([
                 'transaction_id' => $transaction->id,
@@ -271,39 +297,57 @@ class TransactionController extends Controller
                 'description' => 'Penjualan pada ' . now()->format('d-m-Y'),
             ]);
 
-            $idPiutangUsaha = ChartOfAccount::where('name', 'Piutang Usaha')->value('id');
+            // dd('masuk jurnal entry');
+
+            // dd($grossTotalAmount);
+
+            JournalDetail::create([
+                'journal_entry_id' => $journalEntry->id,
+                'coa_id' => $coa_pendapatan_id,
+                'debit' => 0,
+                'credit' => $grossTotalAmount, // CONTOH: 350.000
+            ]);
+
+            // dd('journal detail created');
+
+            // dd($coa_pendapatan_id);
+
+            if ($totalDiscountAmount > 0) {
+                JournalDetail::create([
+                    'journal_entry_id' => $journalEntry->id,
+                    'coa_id' => $coa_diskon_id,
+                    'debit' => $totalDiscountAmount, // CONTOH: 30.000
+                    'credit' => 0
+                ]);
+            }
 
             if ($remainingAmount > 0) {
                 JournalDetail::create([
                     'journal_entry_id' => $journalEntry->id,
-                    'coa_id' => $idPiutangUsaha,
-                    'debit' => $remainingAmount,
+                    'coa_id' => $coa_piutang_id,
+                    'debit' => $remainingAmount, // CONTOH: 20.000
                     'credit' => 0
                 ]);
             }
 
-            if ($totalPayments > 0) {
-                JournalDetail::create([
-                    'journal_entry_id' => $journalEntry->id,
-                    'coa_id' => $paymentData['coa_id'][0],
-                    'debit' => $totalPayments,
-                    'credit' => 0
-                ]);
+            if (!empty($validated['payments'])) {
+                foreach ($validated['payments'] as $paymentData) {
+                    if ($paymentData['amount'] > 0) {
+                        JournalDetail::create([
+                            'journal_entry_id' => $journalEntry->id,
+                            'coa_id' => $paymentData['coa_id'], // coa_id dari Kas/Bank yang dipilih
+                            'debit' => $paymentData['amount'], // CONTOH: 300.000
+                            'credit' => 0
+                        ]);
+                    }
+                }
             }
-
-            $idPendapatanPenjualan = ChartOfAccount::where('name', 'Pendapatan Penjualan')->value('id');
-
-            JournalDetail::create([
-                'journal_entry_id' => $journalEntry->id,
-                'coa_id' => $idPendapatanPenjualan,
-                'debit' => 0,
-                'credit' => $totalAmount
-            ]);
-
+            DB::commit(); // Semua proses berhasil, simpan perubahan ke database
             return redirect()->route('dashboard.transactions.index')->with('success', 'Transaction created successfully!');
         } catch (\Exception $e) {
-            dd($e);
-            return redirect()->back()->with('error', 'Gagal karena ' . $e->getMessage());
+            DB::rollBack(); // Terjadi error, batalkan semua proses dalam transaksi
+            // dd($e); // Hapus atau ganti dengan logging di production
+            return redirect()->back()->with('error', 'Gagal membuat transaksi: ' . $e->getMessage())->withInput();
         }
     }
 

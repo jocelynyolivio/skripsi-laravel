@@ -36,8 +36,14 @@
                 <td>{{ $purchase->supplier->nama ?? '-' }}</td>
                 <td>{{ $purchase->invoice_date }}</td>
                 <td>Rp. {{ number_format($purchase->grand_total, 2, ',', '.') }}</td>
-                <td>Rp. {{ number_format($purchase->latestPayment->total_debt ?? 0, 2, ',', '.') }}</td>
-
+                <td>
+                    @php
+                    // Jika ada pembayaran terakhir, gunakan total utangnya.
+                    // Jika tidak, total utang adalah grand total dari invoice itu sendiri.
+                    $totalDebt = $purchase->latestPayment ? $purchase->latestPayment->total_debt : $purchase->grand_total;
+                    @endphp
+                    Rp. {{ number_format($totalDebt, 2, ',', '.') }}
+                </td>
                 <td>{{ ucfirst($purchase->status) }}</td>
                 <td>
                     <!-- <a href="{{ route('dashboard.purchases.edit', $purchase->id) }}" class="btn btn-warning btn-sm">Edit</a> -->
@@ -134,8 +140,15 @@
                     </a>
                     @endif
                     <a href="{{ route('dashboard.purchases.show', $purchase->id) }}" class="btn btn-sm btn-info" data-toggle="tooltip" data-original-title="Lihat Detail">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </a>
+                        <i class="fas fa-eye"></i> Detail
+                    </a>
+
+                    @if ($purchase->status !== 'received')
+                    <a href="{{ route('dashboard.purchases.receive', $purchase->id) }}" class="btn btn-primary">
+                        Receive Goods
+                    </a>
+                    @endif
+
                 </td>
             </tr>
             @endforeach

@@ -89,66 +89,41 @@
                     <div id="material-list">
                         @if(isset($purchaseRequest))
                         @foreach($purchaseRequest->details as $index => $detail)
-@php
-$isUsed = in_array($detail->id, $usedDetailIds);
-@endphp
+                        @php
+                        $isUsed = in_array($detail->id, $usedDetailIds);
+                        @endphp
 
-<div class="row mb-3 material-item align-items-center">
-    <div class="col-md-1 text-center">
-        <input type="checkbox"
-            name="selected_materials[{{ $index }}][include]"
-            value="1"
-            class="form-check-input material-checkbox"
-            data-index="{{ $index }}"
-            {{ $isUsed ? 'disabled' : 'checked' }}>
-    </div>
-    <div class="col-md-3">
-        <input type="hidden"
-            name="selected_materials[{{ $index }}][material_id]"
-            value="{{ $detail->dental_material_id }}"
-            class="material-id"
-            id="material_id_{{ $index }}"
-            {{ $isUsed ? 'disabled' : '' }}>
-        {{ $detail->material->name }} ({{ $detail->material->unit_type }})
-        <input type="hidden"
-            name="selected_materials[{{ $index }}][purchase_request_detail_id]"
-            value="{{ $detail->id }}">
-    </div>
-    <div class="col-md-2">
-        <label class="form-label small">Requested Qty</label>
-        <input type="number"
-            class="form-control"
-            value="{{ $detail->quantity }}"
-            readonly>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label small">Order Qty</label>
-        <input type="number"
-            name="selected_materials[{{ $index }}][quantity]"
-            class="form-control quantity-input"
-            value="{{ $detail->quantity }}"
-            id="quantity_{{ $index }}"
-            {{ $isUsed ? 'disabled' : '' }}>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label small">Price</label>
-        <input type="number"
-            name="selected_materials[{{ $index }}][price]"
-            class="form-control price-input"
-            step="0.01"
-            id="price_{{ $index }}"
-            {{ $isUsed ? 'disabled' : '' }}>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label small">Notes</label>
-        <input type="text"
-            name="selected_materials[{{ $index }}][notes]"
-            class="form-control notes-input"
-            value="{{ $detail->notes ?? '' }}"
-            id="notes_{{ $index }}"
-            {{ $isUsed ? 'disabled' : '' }}>
-    </div>
-</div>
+                        <div class="row mb-3 material-item align-items-end">
+                            <div class="col-md-1 text-center">
+                                {{-- Checkbox tidak berubah --}}
+                                <input type="checkbox" name="selected_materials[{{ $index }}][include]" value="1" class="form-check-input material-checkbox" data-index="{{ $index }}" {{ $isUsed ? 'disabled' : 'checked' }}>
+                            </div>
+                            <div class="col-md-3">
+                                {{-- Info material tidak berubah --}}
+                                <label class="form-label small d-block">Material</label>
+                                <input type="hidden" name="selected_materials[{{ $index }}][material_id]" value="{{ $detail->dental_material_id }}" class="material-id" id="material_id_{{ $index }}" {{ $isUsed ? 'disabled' : '' }}>
+                                {{ $detail->material->name }} ({{ $detail->material->unit_type }})
+                                <input type="hidden" name="selected_materials[{{ $index }}][purchase_request_detail_id]" value="{{ $detail->id }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Order Qty</label>
+                                <input type="number" name="selected_materials[{{ $index }}][quantity]" class="form-control quantity-input" value="{{ $detail->quantity }}" id="quantity_{{ $index }}" {{ $isUsed ? 'disabled' : '' }} required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Unit Price</label>
+                                {{-- Ini hanya untuk tampilan, dihitung oleh JS --}}
+                                <p class="form-control-plaintext mb-1 unit-price-display">Rp 0.00</p>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Total Price</label>
+                                {{-- Label "Price" diubah menjadi "Total Price" --}}
+                                <input type="number" name="selected_materials[{{ $index }}][price]" class="form-control price-input" step="0.01" id="price_{{ $index }}" {{ $isUsed ? 'disabled' : '' }} required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small">Notes</label>
+                                <input type="text" name="selected_materials[{{ $index }}][notes]" class="form-control notes-input" value="{{ $detail->notes ?? '' }}" id="notes_{{ $index }}" {{ $isUsed ? 'disabled' : '' }}>
+                            </div>
+                        </div>
 
                         @endforeach
                         @else
@@ -218,8 +193,124 @@ $isUsed = in_array($detail->id, $usedDetailIds);
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('purchaseOrderForm');
+        const dynamicMaterialList = document.getElementById('dynamic-material-list');
+        const addMaterialBtn = document.getElementById('add-material');
 
-        document.getElementById('btn-save').addEventListener('click', function (e) {
+        // FUNGSI UTAMA UNTUK MENGHITUNG SEMUANYA
+        function calculateTotalAmount() {
+            let subtotal = 0;
+
+            document.querySelectorAll('.material-item').forEach(item => {
+                const checkbox = item.querySelector('.material-checkbox');
+                const quantityInput = item.querySelector('.quantity-input');
+                const priceInput = item.querySelector('.price-input'); // Ini adalah Total Price
+                const unitPriceDisplay = item.querySelector('.unit-price-display');
+
+                if (checkbox && checkbox.checked && quantityInput && priceInput && unitPriceDisplay) {
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const totalPrice = parseFloat(priceInput.value) || 0;
+
+                    subtotal += totalPrice;
+
+                    const unitPrice = quantity > 0 ? totalPrice / quantity : 0;
+                    unitPriceDisplay.textContent = 'Rp ' + unitPrice.toLocaleString('id-ID', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                } else if (unitPriceDisplay) {
+                    unitPriceDisplay.textContent = 'Rp 0.00';
+                }
+            });
+
+            const discount = parseFloat(document.getElementById('discount')?.value) || 0;
+            const ongkosKirim = parseFloat(document.getElementById('ongkos_kirim')?.value) || 0;
+            const grandTotal = subtotal - discount + ongkosKirim;
+
+            document.getElementById('total-amount-display').textContent = 'Rp ' + subtotal.toLocaleString('id-ID', {
+                minimumFractionDigits: 2
+            });
+            document.getElementById('total_amount').value = subtotal.toFixed(2);
+            document.getElementById('grand-total-display').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID', {
+                minimumFractionDigits: 2
+            });
+            document.getElementById('harga_total').value = grandTotal.toFixed(2);
+        }
+
+        // SATU EVENT LISTENER UTAMA PADA FORM (EVENT DELEGATION)
+        form.addEventListener('input', function(e) {
+            // Pemicu untuk input kuantitas, harga, diskon, dan ongkos kirim
+            if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input') || e.target.id === 'discount' || e.target.id === 'ongkos_kirim') {
+                calculateTotalAmount();
+            }
+        });
+
+        form.addEventListener('change', function(e) {
+            // Pemicu untuk checkbox
+            if (e.target.classList.contains('material-checkbox')) {
+                const index = e.target.dataset.index;
+                const inputs = [
+                    document.getElementById(`quantity_${index}`),
+                    document.getElementById(`price_${index}`),
+                    document.getElementById(`notes_${index}`)
+                ];
+
+                inputs.forEach(input => {
+                    if (input) {
+                        input.disabled = !e.target.checked;
+                        input.required = e.target.checked;
+                    }
+                });
+                calculateTotalAmount(); // Panggil kalkulasi saat checkbox berubah
+            }
+        });
+
+        // FUNGSI UNTUK MENAMBAH MATERIAL BARU
+        if (addMaterialBtn) {
+            addMaterialBtn.addEventListener('click', function() {
+                let index = 'new_' + Date.now(); // Indeks unik untuk elemen baru
+                let html = `
+                <div class="row mb-3 material-item align-items-end">
+                    <div class="col-md-1 text-center">
+                        {{-- Checkbox tidak butuh nama karena hanya untuk UI --}}
+                        <input type="checkbox" value="1" class="form-check-input material-checkbox" data-index="${index}" checked>
+                    </div>
+                    <div class="col-md-3">
+                        {{-- UBAH 'details' MENJADI 'selected_materials' --}}
+                        <select name="selected_materials[${index}][material_id]" class="form-select material-id">
+                            @foreach($materials as $material)
+                                <option value="{{ $material->id }}">{{ $material->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="selected_materials[${index}][quantity]" class="form-control quantity-input" placeholder="Order Qty" required>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="form-control-plaintext mb-1 unit-price-display">Rp 0.00</p>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="selected_materials[${index}][price]" class="form-control price-input" step="0.01" placeholder="Total Price" required>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger btn-sm remove-material">X</button>
+                    </div>
+                </div>`;
+                dynamicMaterialList.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // FUNGSI UNTUK MENGHAPUS MATERIAL (DIBUNGKUS DENGAN PENGECEKAN)
+        if (dynamicMaterialList) { // <--- TAMBAHKAN PENGECEKAN INI
+            dynamicMaterialList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-material')) {
+                    e.target.closest('.material-item').remove();
+                    calculateTotalAmount(); // Panggil kalkulasi setelah menghapus baris
+                }
+            });
+        }
+
+        document.getElementById('btn-save').addEventListener('click', function(e) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "Do you want to save this purchase order?",
@@ -231,121 +322,13 @@ $isUsed = in_array($detail->id, $usedDetailIds);
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Saat konfirmasi, submit formnya
                     document.getElementById('purchaseOrderForm').submit();
                 }
             });
         });
-        
-        // Add material functionality
-        document.getElementById('add-material')?.addEventListener('click', function() {
-            let index = document.querySelectorAll('.material-item').length;
-            let html = `
-            <div class="row mb-2 material-item">
-                <div class="col-md-3">
-                    <select name="details[${index}][material_id]" class="form-control">
-                        @foreach($materials as $material)
-                            <option value="{{ $material->id }}">{{ $material->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2"><input type="number" name="details[${index}][quantity]" class="form-control"></div>
-                <div class="col-md-2"><input type="number" name="details[${index}][price]" class="form-control" step="0.01"></div>
-                <div class="col-md-2"><input type="text" name="details[${index}][unit]" class="form-control"></div>
-                <div class="col-md-2"><input type="text" name="details[${index}][notes]" class="form-control"></div>
-                <div class="col-md-1"><button type="button" class="btn btn-danger btn-sm remove-material">X</button></div>
-            </div>`;
-            document.getElementById('dynamic-material-list').insertAdjacentHTML('beforeend', html);
-        });
 
-        // Remove material functionality
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-material')) {
-                e.target.closest('.material-item').remove();
-            }
-        });
-
-        // Handle form submission
-        document.getElementById('purchaseOrderForm').addEventListener('submit', function(e) {
-            document.querySelectorAll('.material-checkbox').forEach(checkbox => {
-                if (!checkbox.checked) {
-                    const index = checkbox.dataset.index;
-                    document.querySelectorAll(`[name^="selected_materials[${index}]"]`).forEach(el => {
-                        el.remove();
-                    });
-                } else {
-                    const materialInput = document.querySelector(`#material_id_${checkbox.dataset.index}`);
-                    if (materialInput && materialInput.disabled) {
-                        materialInput.disabled = false;
-                    }
-                }
-            });
-        });
-
-        // Toggle material inputs based on checkbox state
-        function toggleMaterialInputs(checkbox) {
-            const index = checkbox.dataset.index;
-            const inputs = [
-                document.getElementById(`quantity_${index}`),
-                document.getElementById(`price_${index}`),
-                document.getElementById(`notes_${index}`)
-            ];
-
-            inputs.forEach(input => {
-                if (input) {
-                    input.disabled = !checkbox.checked;
-                    input.required = checkbox.checked;
-                }
-            });
-        }
-
-        // Initialize material checkboxes
-        document.querySelectorAll('.material-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                toggleMaterialInputs(this);
-            });
-            toggleMaterialInputs(checkbox);
-        });
-
-        // Calculate totals function
-        function calculateTotalAmount() {
-            let total = 0;
-            document.querySelectorAll('.material-item').forEach(item => {
-                const checkbox = item.querySelector('.material-checkbox');
-                const quantityInput = item.querySelector('.quantity-input');
-                const priceInput = item.querySelector('.price-input');
-
-                if (checkbox && checkbox.checked && quantityInput && priceInput) {
-                    const quantity = parseFloat(quantityInput.value) || 0;
-                    const price = parseFloat(priceInput.value) || 0;
-                    total += price;
-                }
-            });
-
-            const discount = parseFloat(document.getElementById('discount')?.value) || 0;
-            const ongkosKirim = parseFloat(document.getElementById('ongkos_kirim')?.value) || 0;
-            const grandTotal = total - discount + ongkosKirim;
-
-            document.getElementById('total-amount-display').textContent = total.toLocaleString('id-ID', {
-                minimumFractionDigits: 2
-            });
-            document.getElementById('total_amount').value = total.toFixed(2);
-            document.getElementById('grand-total-display').textContent = grandTotal.toLocaleString('id-ID', {
-                minimumFractionDigits: 2
-            });
-            document.getElementById('harga_total').value = grandTotal.toFixed(2);
-        }
-
-        // Event listeners for calculations
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('quantity-input') ||
-                e.target.classList.contains('price-input') ||
-                e.target.id === 'discount' ||
-                e.target.id === 'ongkos_kirim') {
-                calculateTotalAmount();
-            }
-        });
-
-        // Initial calculation
+        // Inisialisasi kalkulasi saat halaman dimuat
         calculateTotalAmount();
     });
 </script>
