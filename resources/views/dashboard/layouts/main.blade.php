@@ -6,213 +6,236 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SenyumQu Dashboard</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
 
-<style>
-    :root {
-        --sidebar-width-expanded: 300px;
-        --sidebar-width-collapsed: 80px;
-        --header-height: 56px;
-        --sidebar-bg: #212529;
-        --sidebar-link-color: rgba(255, 255, 255, 0.7);
-        --sidebar-link-hover-bg: rgba(255, 255, 255, 0.1);
-        --sidebar-link-active-color: #ffffff;
-        --sidebar-link-active-bg: rgba(13, 110, 253, 0.2);
-        --sidebar-link-active-border: #0d6efd;
-    }
+    <!-- <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/dataTables.bootstrap5.min.css">
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.dataTables.min.js"></script>
+    <script src="assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="assets/js/chart.js"></script>
+    <script src="assets/js/sweetalert2.all.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script> -->
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
-        transition: margin-left 0.3s ease-in-out;
-    }
+    <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/bootstrap-icons.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/dataTables.bootstrap5.min.css') }}">
+    <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('assets/js/chart.js') }}"></script>
+    <script src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 
-    /* ----- HEADER ----- */
-    .navbar-header {
-        height: var(--header-height);
-        background-color: var(--sidebar-bg);
-        z-index: 1030;
-        padding: 0;
-    }
+    <style>
+        :root {
+            --sidebar-width-expanded: 300px;
+            --sidebar-width-collapsed: 80px;
+            --header-height: 56px;
+            --sidebar-bg: #212529;
+            --sidebar-link-color: rgba(255, 255, 255, 0.7);
+            --sidebar-link-hover-bg: rgba(255, 255, 255, 0.1);
+            --sidebar-link-active-color: #ffffff;
+            --sidebar-link-active-bg: rgba(13, 110, 253, 0.2);
+            --sidebar-link-active-border: #0d6efd;
+        }
 
-    .sidebar-toggle-btn {
-        color: var(--sidebar-link-color);
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            transition: margin-left 0.3s ease-in-out;
+        }
 
-    .sidebar-toggle-btn:hover {
-        color: var(--sidebar-link-active-color);
-    }
+        /* ----- HEADER ----- */
+        .navbar-header {
+            height: var(--header-height);
+            background-color: var(--sidebar-bg);
+            z-index: 1030;
+            padding: 0;
+        }
 
-    /* ----- SIDEBAR ----- */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: var(--sidebar-width-collapsed);
-        background-color: var(--sidebar-bg);
-        padding-top: var(--header-height);
-        transition: width 0.3s ease-in-out;
-        z-index: 1020;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
+        .sidebar-toggle-btn {
+            color: var(--sidebar-link-color);
+        }
 
-    .sidebar .nav-link {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        color: var(--sidebar-link-color);
-        white-space: nowrap;
-        border-left: 3px solid transparent;
-        overflow: hidden;
-    }
+        .sidebar-toggle-btn:hover {
+            color: var(--sidebar-link-active-color);
+        }
 
-    .sidebar .nav-link .bi {
-        font-size: 1.2rem;
-        min-width: calc(var(--sidebar-width-collapsed) - 2 * 1.5rem);
-        text-align: center;
-        margin-right: 1rem;
-        transition: margin 0.3s ease-in-out;
-    }
-    
-    .sidebar .nav-link span,
-    .sidebar .sidebar-heading {
-         transition: opacity 0.2s ease-in-out, width 0.2s ease-in-out;
-    }
-
-    .sidebar .nav-link:hover {
-        background-color: var(--sidebar-link-hover-bg);
-        color: var(--sidebar-link-active-color);
-    }
-
-    .sidebar .nav-link.active {
-        color: var(--sidebar-link-active-color);
-        background-color: var(--sidebar-link-active-bg);
-        border-left-color: var(--sidebar-link-active-border);
-    }
-
-    .sidebar-heading {
-        font-size: .75rem;
-        text-transform: uppercase;
-        font-weight: 600;
-        color: #adb5bd;
-        padding: 0.8rem 1.5rem 0.5rem;
-        margin-top: 1rem;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    /* ----- KONTEN UTAMA ----- */
-    main {
-        padding: 2rem;
-        padding-top: calc(var(--header-height) + 2rem);
-        transition: margin-left 0.3s ease-in-out;
-        margin-left: var(--sidebar-width-collapsed);
-    }
-    
-    /* ----- STATE SAAT SIDEBAR EXPANDED (via class atau hover) ----- */
-    body.sidebar-expanded .sidebar,
-    .sidebar:hover {
-        width: var(--sidebar-width-expanded);
-    }
-    
-    body.sidebar-expanded main,
-    body:not(.sidebar-expanded) .sidebar:hover + main {
-         margin-left: var(--sidebar-width-expanded);
-    }
-    
-    /* === PERBAIKAN DI SINI === */
-    body.sidebar-expanded .sidebar .nav-link span,
-    body.sidebar-expanded .sidebar .sidebar-heading,
-    .sidebar:hover .nav-link span,
-    .sidebar:hover .sidebar-heading {
-         opacity: 1;
-         visibility: visible;
-         width: auto; /* <-- BARIS INI DITAMBAHKAN */
-    }
-    
-    body.sidebar-expanded .sidebar .nav-link,
-    .sidebar:hover .nav-link {
-         justify-content: flex-start;
-         padding-left: 1.5rem;
-         padding-right: 1.5rem;
-    }
-    
-    body.sidebar-expanded .sidebar .nav-link .bi,
-    .sidebar:hover .nav-link .bi {
-         margin-right: 1rem;
-    }
-
-    /* ----- STATE SAAT SIDEBAR COLLAPSED (DEFAULT) ----- */
-    .sidebar .nav-link span,
-    .sidebar .sidebar-heading {
-        opacity: 0;
-        visibility: hidden;
-        width: 0;
-    }
-
-    .sidebar .nav-link {
-        justify-content: center;
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    .sidebar .nav-link .bi {
-        margin-right: 0;
-    }
-
-    /* ----- RESPONSIVE UNTUK MOBILE (MENJADI OFF CANVAS) ----- */
-    @media (max-width: 991.98px) {
+        /* ----- SIDEBAR ----- */
         .sidebar {
-            transform: translateX(-100%);
-            width: var(--sidebar-width-expanded);
-            z-index: 1040;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width-collapsed);
+            background-color: var(--sidebar-bg);
+            padding-top: var(--header-height);
+            transition: width 0.3s ease-in-out;
+            z-index: 1020;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
-        .sidebar.show {
-            transform: translateX(0);
+        .sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--sidebar-link-color);
+            white-space: nowrap;
+            border-left: 3px solid transparent;
+            overflow: hidden;
         }
 
+        .sidebar .nav-link .bi {
+            font-size: 1.2rem;
+            min-width: calc(var(--sidebar-width-collapsed) - 2 * 1.5rem);
+            text-align: center;
+            margin-right: 1rem;
+            transition: margin 0.3s ease-in-out;
+        }
+
+        .sidebar .nav-link span,
+        .sidebar .sidebar-heading {
+            transition: opacity 0.2s ease-in-out, width 0.2s ease-in-out;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: var(--sidebar-link-hover-bg);
+            color: var(--sidebar-link-active-color);
+        }
+
+        .sidebar .nav-link.active {
+            color: var(--sidebar-link-active-color);
+            background-color: var(--sidebar-link-active-bg);
+            border-left-color: var(--sidebar-link-active-border);
+        }
+
+        .sidebar-heading {
+            font-size: .75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #adb5bd;
+            padding: 0.8rem 1.5rem 0.5rem;
+            margin-top: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* ----- KONTEN UTAMA ----- */
         main {
-            margin-left: 0;
+            padding: 2rem;
+            padding-top: calc(var(--header-height) + 2rem);
+            transition: margin-left 0.3s ease-in-out;
+            margin-left: var(--sidebar-width-collapsed);
         }
 
-        #sidebar-toggle-desktop {
-            display: none;
+        /* ----- STATE SAAT SIDEBAR EXPANDED (via class atau hover) ----- */
+        body.sidebar-expanded .sidebar,
+        .sidebar:hover {
+            width: var(--sidebar-width-expanded);
         }
-         
-         .sidebar .nav-link span,
-         .sidebar .sidebar-heading {
+
+        body.sidebar-expanded main,
+        body:not(.sidebar-expanded) .sidebar:hover+main {
+            margin-left: var(--sidebar-width-expanded);
+        }
+
+        /* === PERBAIKAN DI SINI === */
+        body.sidebar-expanded .sidebar .nav-link span,
+        body.sidebar-expanded .sidebar .sidebar-heading,
+        .sidebar:hover .nav-link span,
+        .sidebar:hover .sidebar-heading {
             opacity: 1;
             visibility: visible;
             width: auto;
-         }
-         .sidebar .nav-link {
-            justify-content: flex-start;
-         }
-         .sidebar .nav-link .bi {
-            margin-right: 1rem;
-         }
-    }
-
-    #sidebar-toggle-mobile {
-        display: none;
-    }
-
-    @media (max-width: 991.98px) {
-        #sidebar-toggle-mobile {
-            display: block;
+            /* <-- BARIS INI DITAMBAHKAN */
         }
-    }
-</style>
+
+        body.sidebar-expanded .sidebar .nav-link,
+        .sidebar:hover .nav-link {
+            justify-content: flex-start;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        body.sidebar-expanded .sidebar .nav-link .bi,
+        .sidebar:hover .nav-link .bi {
+            margin-right: 1rem;
+        }
+
+        /* ----- STATE SAAT SIDEBAR COLLAPSED (DEFAULT) ----- */
+        .sidebar .nav-link span,
+        .sidebar .sidebar-heading {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .sidebar .nav-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .sidebar .nav-link .bi {
+            margin-right: 0;
+        }
+
+        /* ----- RESPONSIVE UNTUK MOBILE (MENJADI OFF CANVAS) ----- */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width-expanded);
+                z-index: 1040;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            #sidebar-toggle-desktop {
+                display: none;
+            }
+
+            .sidebar .nav-link span,
+            .sidebar .sidebar-heading {
+                opacity: 1;
+                visibility: visible;
+                width: auto;
+            }
+
+            .sidebar .nav-link {
+                justify-content: flex-start;
+            }
+
+            .sidebar .nav-link .bi {
+                margin-right: 1rem;
+            }
+        }
+
+        #sidebar-toggle-mobile {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            #sidebar-toggle-mobile {
+                display: block;
+            }
+        }
+    </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
@@ -426,7 +449,7 @@
         @yield('container')
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
