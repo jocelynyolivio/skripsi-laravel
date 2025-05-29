@@ -35,6 +35,8 @@
     <script src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 
+    <script src="{{ asset('assets/js/chartjs-plugin-datalabels.min.js') }}"></script>
+
     <style>
         :root {
             --sidebar-width-expanded: 300px;

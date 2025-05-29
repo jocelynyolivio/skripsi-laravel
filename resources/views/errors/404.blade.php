@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <title>404 - Page Not Found</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+<link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">    <style>
         body {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             height: 100vh;
