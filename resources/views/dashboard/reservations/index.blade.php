@@ -13,6 +13,19 @@
         <a href="{{ route('dashboard.schedules.index') }}" class="btn btn-primary mb-3">Create New Reservation</a>
     </div>
 
+         @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
+                    @if(session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                    @endif
+
     <table id="reservationTable" class="table table-striped table-bordered">
         <thead>
             <tr>

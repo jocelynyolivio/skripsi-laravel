@@ -136,7 +136,7 @@
                     </div>
                     @elseif(is_null($purchase->latestPayment))
                     <a href="{{ route('dashboard.purchase_payments.create', $purchase->id) }}" class="btn btn-success">
-                        Tambah Pembayaran
+                        Create Purchase Payment
                     </a>
                     @endif
                     <a href="{{ route('dashboard.purchases.show', $purchase->id) }}" class="btn btn-sm btn-info" data-toggle="tooltip" data-original-title="Lihat Detail">

@@ -1,5 +1,12 @@
 @extends('dashboard.layouts.main')
-
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+    'customBreadcrumbs' => [
+        ['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')], // Item breadcrumb pertama
+        ['text' => 'Receive goods for invoice ' . $purchase->id] // Item breadcrumb kedua (halaman saat ini)
+    ]
+])
+@endsection
 @section('container')
 <div class="container mt-5 col-md-8 mx-auto">
     <div class="container text-center">

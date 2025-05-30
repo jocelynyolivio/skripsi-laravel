@@ -18,6 +18,7 @@
             <select name="doctor_id" id="doctor_id" class="form-select">
                 @foreach($doctors as $doctor)
                 <option value="{{ $doctor->id }}">{{ $doctor->name }}</option>
+                <p>{{ $doctor->name }}</p>
                 @endforeach
             </select>
         </div>

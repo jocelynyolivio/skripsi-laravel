@@ -2,9 +2,10 @@
 
 @section('breadcrumbs')
 @include('dashboard.layouts.breadcrumbs', [
-'customBreadcrumbs' => [
-['text' => 'Purchases Payment']
-]
+    'customBreadcrumbs' => [
+        ['text' => 'Purchase Invoices', 'url' => route('dashboard.purchases.index')], // Item breadcrumb pertama
+        ['text' => 'Create Payment'] // Item breadcrumb kedua (halaman saat ini)
+    ]
 ])
 @endsection
 

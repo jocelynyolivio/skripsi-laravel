@@ -44,7 +44,7 @@
                             @foreach($materials as $material)
                             <option value="{{ $material->id }}"
                                 {{ (old("materials.$i.dental_material_id", $detail->dental_material_id ?? '') == $material->id) ? 'selected' : '' }}>
-                                {{ $material->name }}
+                                {{ $material->name }} ( {{ $material->unit_type }} )
                             </option>
                             @endforeach
                         </select>
@@ -87,7 +87,7 @@
                     <select name="materials[${rowIndex}][dental_material_id]" class="form-control" required>
                         <option value="" disabled selected>Choose Material</option>
                         @foreach($materials as $material)
-                        <option value="{{ $material->id }}">{{ $material->name }}</option>
+                        <option value="{{ $material->id }}">{{ $material->name }} ({{ $material->unit_type }})</option>
                         @endforeach
                     </select>
                 </td>

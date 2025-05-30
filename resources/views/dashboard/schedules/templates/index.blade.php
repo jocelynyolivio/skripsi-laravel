@@ -13,6 +13,18 @@
     <h3 class="mb-4">Schedule Templates</h3>
     <a href="{{ route('dashboard.schedules.templates.create') }}" class="btn btn-primary mb-3">Create New Template</a>
     </div>
+     @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
+                    @if(session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                    @endif
 
     @if($templates->isEmpty())
         <p>No templates available.</p>

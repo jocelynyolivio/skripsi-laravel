@@ -12,6 +12,19 @@
         <h3>Purchase Requests</h3>
         <a href="{{ route('dashboard.purchase_requests.create') }}" class="btn btn-success mb-3">Create New Request</a>
     </div>
+
+    @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    @endif
+
+                    @if(session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                    @endif
     <table id="purchaseRequestTable" class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -20,18 +33,17 @@
                 <th>Date</th>
                 <th>Requested By</th>
                 <th>Status</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             @foreach($requests as $request)
             <tr>
                 <td>
-                    <a href="{{ route('dashboard.purchase_requests.show', $request->id) }}" class="text-primary fw-bold text-decoration-none">
-                        <i class="bi bi-eye"></i> {{ $request->request_number }}
-                    </a>
+                    {{ $request->request_number }} {{-- Hanya menampilkan nomor request --}}
                 </td>
                 <td>@foreach($request->details as $detail)
-                    <li>{{ $detail->material->name }}@endforeach</li>
+                    <li>{{ $detail->material->name }} ( {{ $detail->material->unit_type }} )@endforeach</li>
                 </td>
                 <td>{{ $request->request_date }}</td>
                 <td>{{ $request->requester->name ?? '-' }}</td>
@@ -46,6 +58,9 @@
                     <span class="badge bg-secondary">{{ ucfirst($request->status) }}</span>
                     @endif
                 </td>
+                <td><a href="{{ route('dashboard.purchase_requests.show', $request->id) }}" class="btn btn-primary btn-sm">
+                        Detail
+                    </a></td>
             </tr>
             @endforeach
         </tbody>

@@ -28,7 +28,7 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(10);
+    $users = $query->latest()->get();
 
         return view('dashboard.masters.index', compact('users', 'role', 'search'));
     }
@@ -87,18 +87,18 @@ class UserController extends Controller
             $user = User::findOrFail($id);
 
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
                 'password' => 'nullable|string|min:8|confirmed',
-                'role_id' => 'required|exists:roles,id',
+                'role_id' => 'nullable|exists:roles,id',
                 'tempat_lahir' => 'nullable|string|max:255',
                 'tanggal_lahir' => 'nullable|date',
-                'tanggal_bergabung' => 'required|date',
+                'tanggal_bergabung' => 'nullable|date',
                 'nomor_sip' => 'nullable|string|max:255',
-                'nik' => 'required|string|max:255|unique:users,nik,' . $user->id,
-                'nomor_telepon' => 'required|string|max:20',
-                'alamat' => 'required|string',
-                'nomor_rekening' => 'required|string|max:255|unique:users,nomor_rekening,' . $user->id,
+                'nik' => 'nullable|string|max:255|unique:users,nik,' . $user->id,
+                'nomor_telepon' => 'nullable|string|max:20',
+                'alamat' => 'nullable|string',
+                'nomor_rekening' => 'nullable|string|max:255|unique:users,nomor_rekening,' . $user->id,
                 'deskripsi' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'is_active' => 'boolean'
