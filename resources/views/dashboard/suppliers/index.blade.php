@@ -11,7 +11,7 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between mb-3">
         <h3 class="mb-4">Suppliers List</h3>
-        <a href="{{ route('dashboard.suppliers.create') }}" class="btn btn-success mb-3">Create New Suppliers</a>
+        <a href="{{ route('dashboard.suppliers.create') }}" class="btn btn-primary mb-3">Create New Suppliers</a>
     </div>
 
     <table class="table table-striped table-bordered" id="suppliersTable">

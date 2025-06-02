@@ -1,340 +1,481 @@
 @extends('dashboard.layouts.main')
 
+@section('breadcrumbs')
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['url' => route('dashboard.transactions.index'), 'text' => 'Transactions'],
+['text' => 'Create Manual Transaction']
+]
+])
+@endsection
+
 @section('container')
-<div class="container mt-5 col-md-6">
-    <h3 class="text-center">Create Transaction (Without Medical Record)</h3>
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9"> {{-- Adjusted column width for a comprehensive form --}}
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h4 class="card-title mb-0">Create Manual Transaction</h4>
+                <p class="text-muted mb-0">For transactions without a prior medical record.</p>
+            </div>
+            <div class="card-body">
+                @if(session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+                @endif
 
-    @if(session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
+                <form id="manual-transaction-form" action="{{ route('dashboard.transactions.storeWithoutMedicalRecord') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="admin_id" value="{{ auth()->id() }}">
+
+                    {{-- Patient Selection Section --}}
+                    <div class="border rounded p-3 mb-4">
+                        <h5 class="mb-3">1. Select Patient</h5>
+                        <div class="mb-3">
+                            <label for="patient_id" class="form-label">Patient <span class="text-danger">*</span></label>
+                            <select class="form-select @error('patient_id') is-invalid @enderror" id="patient_id" name="patient_id" required>
+                                <option value="">-- Select Patient --</option>
+                                @foreach($patients as $patient)
+                                <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}>
+                                    {{ $patient->fname }} {{ $patient->mname ?? '' }} {{ $patient->lname }} (ID: {{ $patient->id }})
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('patient_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Procedure Management Section --}}
+                    <div class="border rounded p-3 mb-4">
+                        <h5 class="mb-3">2. Manage Procedures</h5>
+                        <div class="mb-3">
+                            <label for="procedure_id_selector" class="form-label">Add Procedure</label>
+                            <div class="input-group">
+                                <select class="form-select" id="procedure_id_selector">
+                                    <option value="">-- Select Procedure --</option>
+                                    @foreach($proceduresWithPrices as $item)
+                                    <option value="{{ $item['procedure']->id }}"
+                                        data-base-price="{{ $item['basePrice'] }}"
+                                        data-promo-price="{{ $item['promoPrice'] ?? '' }}">
+                                        {{ $item['procedure']->item_code }} - {{ $item['procedure']->name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <button type="button" class="btn btn-primary" id="add-procedure-btn">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="selected-items-container" class="mt-3">
+                            {{-- Dynamically added procedures will appear here --}}
+                            <p class="text-muted" id="no-items-text">No procedures added yet.</p>
+                        </div>
+                    </div>
+
+                    {{-- Voucher and Totals Summary Section --}}
+                    <div class="row mt-4 align-items-end">
+                        <div class="col-md-6 mb-3">
+                            <label for="voucher" class="form-label">Apply Voucher (Optional)</label>
+                            <select class="form-select" id="voucher" name="voucher">
+                                <option value="">-- No Voucher --</option>
+                                @foreach ($vouchers as $voucher)
+                                <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">Total Amount:</h5>
+                                    <h5 class="mb-0 text-primary" id="total-amount-display">Rp 0</h5>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between align-items-center text-danger">
+                                    <h6 class="mb-0">Remaining Bill:</h6>
+                                    <h6 class="mb-0" id="remaining-amount-display">Rp 0</h6>
+                                </div>
+                                <input type="hidden" id="total_amount_hidden" name="total_amount" value="0">
+                                <input type="hidden" id="remaining_amount_hidden" name="remaining_amount" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Payment Details Section --}}
+                    <div class="border rounded p-3 mt-4">
+                        <h5 class="mb-3">3. Payment Details</h5>
+                        <div id="payments-container">
+                            {{-- Default first payment item --}}
+                            <div class="payment-item">
+                                <div class="row g-3">
+                                    <div class="col-md-6 col-lg-4">
+                                        <label for="payment_amount_0" class="form-label">Payment Amount <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control payment-amount-input" id="payment_amount_0" name="payments[0][amount]" min="0" value="0" required>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label for="payment_method_0" class="form-label">Payment Method <span class="text-danger">*</span></label>
+                                        <select class="form-select payment-method-select" id="payment_method_0" name="payments[0][method]" required>
+                                            <option value="">-- Select Method --</option>
+                                            <optgroup label="Tunai">
+                                                <option value="tunai" {{ old('payments.0.method') == 'tunai' ? 'selected' : '' }}>Tunai</option>
+                                            </optgroup>
+                                            <optgroup label="QRIS">
+                                                <option value="QRIS BCA">QRIS BCA</option>
+                                                {{-- Add other QRIS options here --}}
+                                                <option value="QRIS Mandiri">QRIS Mandiri</option>
+                                            </optgroup>
+                                            <optgroup label="Kartu Kredit/Debit">
+                                                <option value="Visa">Visa</option>
+                                                {{-- Add other Card options here --}}
+                                                <option value="Mastercard">Mastercard</option>
+                                            </optgroup>
+                                            <optgroup label="Transfer Bank">
+                                                <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+                                                {{-- Add other Transfer options here --}}
+                                            </optgroup>
+                                            <optgroup label="E-Wallet">
+                                                <option value="GoPay">GoPay</option>
+                                                {{-- Add other E-Wallet options here --}}
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label for="coa_id_0" class="form-label">Deposit To (Account) <span class="text-danger">*</span></label>
+                                        <select class="form-select coa-select" id="coa_id_0" name="payments[0][coa_id]" required>
+                                            <option value="">-- Select Account --</option>
+                                            @foreach ($cashAccounts as $account)
+                                            <option value="{{ $account->id }}" {{ old('payments.0.coa_id') == $account->id ? 'selected' : '' }}>
+                                                {{ $account->code }} - {{ $account->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 col-lg-12">
+                                        <label for="payment_notes_0" class="form-label">Notes (Optional)</label>
+                                        <input type="text" class="form-control payment-notes-input" id="payment_notes_0" name="payments[0][notes]" value="{{ old('payments.0.notes') }}">
+                                    </div>
+                                </div>
+                                {{-- Option to add more payment methods can be added here if needed --}}
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Submit Button --}}
+                    <div class="text-end mt-4">
+                        <a href="{{ route('dashboard.transactions.index') }}" class="btn btn-secondary me-2">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="create-transaction-btn">
+                            <i class="bi bi-check-circle"></i> Create Transaction
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    @endif
-
-    <form action="{{ route('dashboard.transactions.storeWithoutMedicalRecord') }}" method="POST">
-        @csrf
-
-        <input type="hidden" name="admin_id" value="{{ auth()->id() }}">
-        <div class="mb-3">
-            <label for="patient_id" class="form-label">Patient</label>
-            <select class="form-control" id="patient_id" name="patient_id" required>
-                @foreach($patients as $patient)
-                <option value="{{ $patient->id }}">{{ $patient->fname }} {{ $patient->mname }} {{ $patient->lname }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="procedure_id" class="form-label">Select Procedures</label>
-            <div class="input-group">
-                <select class="form-control" id="procedure_id">
-                    <option value="">-- Select Procedure --</option>
-                    @foreach($proceduresWithPrices as $item)
-                    <option value="{{ $item['procedure']->id }}"
-                        data-base-price="{{ $item['basePrice'] }}"
-                        data-promo-price="{{ $item['promoPrice'] }}">
-                        {{ $item['procedure']->item_code }} - {{ $item['procedure']->name }}
-                    </option>
-                    @endforeach
-                </select>
-                <button type="button" class="btn btn-primary" id="add-procedure">Add</button>
-            </div>
-        </div>
-
-        <div id="selected-items" class="mb-3"></div>
-
-        <div class="form-group">
-            <label for="voucher">Vouchers :</label>
-            <select class="form-control" id="voucher" name="voucher">
-                <option value="">-- Pilih Voucher --</option>
-                @foreach ($vouchers as $voucher)
-                <option value="{{ $voucher->birthday_voucher_code }}">{{ $voucher->birthday_voucher_code }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <!-- Total Amount Section -->
-        <div class="card mt-3 bg-primary text-white p-2 w-50 mx-auto">
-            <h5 class="text-center mb-0">Total Amount: Rp <span id="total-amount-display">0</span></h5>
-        </div>
-        <input type="hidden" id="total_amount" name="total_amount" value="0">
-
-        <!-- Input untuk Payments -->
-        <h5>Payments:</h5>
-        <div id="payments-container">
-            <div class="payment-item mb-3">
-                <label>Payment Amount:</label>
-                <input type="number" class="form-control" id="payment" name="payments[0][amount]" min="0" value="0" required>
-            </div>
-
-            <div class="form-group">
-                <label for="coa_id">Setor Ke (Akun Kas/Bank)</label>
-                <select class="form-control" id="coa_id" name="payments[0][coa_id]" required>
-                    <option value="">-- Pilih Akun Kas/Bank --</option>
-                    @foreach ($cashAccounts as $account)
-                    <option value="{{ $account->id }}">{{ $account->code }} - {{ $account->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="payment_method" class="form-label">Cara Bayar</label>
-                <select class="form-control" id="payment_method" name="payments[0][method]" required>
-                    <option value="">-- Pilih Metode Pembayaran --</option>
-                    <optgroup label="Tunai">
-
-                        <option value="tunai" {{ old('payment_method', $expense->payment_method ?? '') == 'tunai' ? 'selected' : '' }}>
-                            Tunai
-                        </option>
-                    </optgroup>
-                    <!-- QRIS -->
-                    <optgroup label="QRIS">
-                        <option value="QRIS BCA">QRIS BCA</option>
-                        <option value="QRIS CIMB Niaga">QRIS CIMB Niaga</option>
-                        <option value="QRIS Mandiri">QRIS Mandiri</option>
-                        <option value="QRIS BRI">QRIS BRI</option>
-                        <option value="QRIS BNI">QRIS BNI</option>
-                        <option value="QRIS Permata">QRIS Permata</option>
-                        <option value="QRIS Maybank">QRIS Maybank</option>
-                        <option value="QRIS Danamon">QRIS Danamon</option>
-                        <option value="QRIS Bank Mega">QRIS Bank Mega</option>
-                    </optgroup>
-
-                    <!-- Kartu Kredit/Debit -->
-                    <optgroup label="Kartu Kredit/Debit">
-                        <option value="Visa">Visa</option>
-                        <option value="Mastercard">Mastercard</option>
-                        <option value="JCB">JCB</option>
-                        <option value="American Express">American Express (AMEX)</option>
-                        <option value="GPN">GPN (Gerbang Pembayaran Nasional)</option>
-                        <option value="Kartu Kredit BCA">Kartu Kredit BCA</option>
-                        <option value="Kartu Kredit Mandiri">Kartu Kredit Mandiri</option>
-                        <option value="Kartu Kredit BRI">Kartu Kredit BRI</option>
-                        <option value="Kartu Kredit BNI">Kartu Kredit BNI</option>
-                        <option value="Kartu Kredit CIMB Niaga">Kartu Kredit CIMB Niaga</option>
-                    </optgroup>
-
-                    <!-- Transfer Bank -->
-                    <optgroup label="Transfer Bank">
-                        <option value="Transfer Bank BCA">Transfer Bank BCA</option>
-                        <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
-                        <option value="Transfer Bank BRI">Transfer Bank BRI</option>
-                        <option value="Transfer Bank BNI">Transfer Bank BNI</option>
-                        <option value="Transfer Bank CIMB Niaga">Transfer Bank CIMB Niaga</option>
-                        <option value="Transfer Bank Permata">Transfer Bank Permata</option>
-                        <option value="Transfer Bank Maybank">Transfer Bank Maybank</option>
-                    </optgroup>
-
-                    <!-- E-Wallet -->
-                    <optgroup label="E-Wallet">
-                        <option value="GoPay">GoPay</option>
-                        <option value="OVO">OVO</option>
-                        <option value="Dana">Dana</option>
-                        <option value="LinkAja">LinkAja</option>
-                        <option value="ShopeePay">ShopeePay</option>
-                        <option value="Doku Wallet">Doku Wallet</option>
-                        <option value="PayPal">PayPal</option>
-                    </optgroup>
-                </select>
-            </div>
-
-
-            <label>Notes:</label>
-            <input type="string" class="form-control" name="payments[0][notes]">
-        </div>
-
-        <!-- Sisa Tagihan -->
-        <div class="card mt-3 bg-warning text-dark p-2 w-50 mx-auto">
-            <h5 class="text-center mb-0">Sisa Tagihan: Rp <span id="remaining-amount-display">0</span></h5>
-        </div>
-        <br>
-        <button type="submit" class="btn btn-success w-100 d-block mx-auto">Create Transaction</button>
-
-</div>
-
-</form>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("Script Loaded: Form Transaction Without Medical Record is Ready!");
+        const procedureSelector = document.getElementById('procedure_id_selector');
+        const addProcedureButton = document.getElementById('add-procedure-btn');
+        const selectedItemsContainer = document.getElementById('selected-items-container');
+        const noItemsText = document.getElementById('no-items-text');
 
-        const procedureSelect = document.getElementById('procedure_id');
-        const addProcedureButton = document.getElementById('add-procedure');
-        const selectedItemsContainer = document.getElementById('selected-items');
-        const totalAmountField = document.getElementById('total_amount');
+        const totalAmountField = document.getElementById('total_amount_hidden');
         const totalAmountDisplay = document.getElementById('total-amount-display');
-        const remainingPaymentDisplay = document.getElementById('remaining-amount-display');
-        const paymentInput = document.getElementById('payment');
+        const remainingAmountField = document.getElementById('remaining_amount_hidden');
+        const remainingAmountDisplay = document.getElementById('remaining-amount-display');
+        const paymentAmountInput = document.querySelector('.payment-amount-input'); // Assumes one payment method for now
 
         let itemIndex = 0;
+        let proceduresData = []; // To store data of added procedures
 
-        function updateTotal() {
-            console.log("Menghitung Total Amount...");
-            let newTotal = 0;
+        function formatCurrency(value, withRp = true) {
+            const number = parseFloat(value) || 0;
+            const formatted = number.toLocaleString('id-ID');
+            return withRp ? 'Rp ' + formatted : formatted;
+        }
 
-            document.querySelectorAll('.quantity-input').forEach((input, index) => {
-                const quantity = parseInt(input.value) || 1;
-                const priceSelect = document.querySelectorAll('.price-select')[index];
-                const unitPrice = parseFloat(priceSelect.value) || 0;
-                const discountInput = document.querySelectorAll('.discount-input')[index];
-                const discountType = document.querySelectorAll('.discount-type')[index].value;
+        function calculateGrandTotal() {
+            let grandTotal = 0;
+            proceduresData.forEach(item => {
+                const quantity = parseInt(item.quantity) || 1;
+                const unitPrice = parseFloat(item.unitPrice) || 0;
+                let discount = parseFloat(item.discountValue) || 0;
+                let itemSubtotal = unitPrice * quantity;
 
-                let discount = parseFloat(discountInput.value) || 0;
-                let finalDiscount = discount;
-
-                if (discountType === 'percent') {
-                    finalDiscount = Math.min((unitPrice * quantity) * (discount / 100), unitPrice * quantity);
-                    discountInput.value = finalDiscount.toFixed(0); // Update nilai di form input
+                if (item.discountType === 'percent') {
+                    discount = (itemSubtotal * (discount / 100));
                 }
+                discount = Math.min(discount, itemSubtotal); // Cap discount
 
-                const finalPrice = Math.max((unitPrice * quantity) - finalDiscount, 0);
-                document.querySelectorAll('.final-price-display')[index].textContent = formatCurrency(finalPrice);
-
-                console.log(`Item Index: ${index}`);
-                console.log(`Quantity: ${quantity}`);
-                console.log(`Unit Price: Rp ${unitPrice}`);
-                console.log(`Discount Type: ${discountType}`);
-                console.log(`Discount: Rp ${discount}`);
-                console.log(`Final Discount (Rp): ${finalDiscount}`);
-                console.log(`Final Price: Rp ${finalPrice}`);
-
-                newTotal += finalPrice;
+                grandTotal += (itemSubtotal - discount);
             });
 
-            console.log(`New Total Amount: Rp ${newTotal}`);
-            totalAmountField.value = newTotal.toFixed(0);
-            totalAmountDisplay.textContent = formatCurrency(newTotal);
-
-            updatePaymentLimit(newTotal);
-            calculateRemainingPayment(newTotal);
+            totalAmountField.value = grandTotal;
+            totalAmountDisplay.textContent = formatCurrency(grandTotal);
+            calculateRemainingPayment();
+            updatePaymentInputMax();
         }
 
+        function calculateRemainingPayment() {
+            const total = parseFloat(totalAmountField.value) || 0;
+            const payment = parseFloat(paymentAmountInput.value) || 0;
+            const remaining = Math.max(0, total - payment);
 
-        function calculateRemainingPayment(total) {
-            console.log("Calculating Remaining Payment...");
-            let payment = parseFloat(paymentInput.value) || 0;
-            let remaining = Math.max(total - payment, 0);
-
-            remainingPaymentDisplay.textContent = formatCurrency(remaining);
-
-            console.log(`Payment Made: Rp ${payment}`);
-            console.log(`Remaining Payment: Rp ${remaining}`);
+            remainingAmountField.value = remaining;
+            remainingAmountDisplay.textContent = formatCurrency(remaining);
         }
 
-        function updatePaymentLimit(total) {
-            console.log("Updating Payment Input Limit...");
-
-            paymentInput.max = total;
-            let payment = parseFloat(paymentInput.value) || 0;
-
-            if (payment > total) {
-                console.warn("⚠️ Payment amount exceeds total due. Adjusting...");
-                paymentInput.value = total;
-                payment = total;
+        function updatePaymentInputMax() {
+            const total = parseFloat(totalAmountField.value) || 0;
+            paymentAmountInput.max = total;
+            if (parseFloat(paymentAmountInput.value) > total) {
+                paymentAmountInput.value = total;
+                calculateRemainingPayment();
             }
-
-            calculateRemainingPayment(total);
         }
 
         addProcedureButton.addEventListener('click', function() {
-            const selectedOption = procedureSelect.options[procedureSelect.selectedIndex];
+            const selectedOption = procedureSelector.options[procedureSelector.selectedIndex];
+            if (!selectedOption.value) {
+                Swal.fire('No Procedure', 'Please select a procedure to add.', 'warning');
+                return;
+            }
+
             const procedureId = selectedOption.value;
+            // Check if procedure already added
+            if (proceduresData.find(p => p.id === procedureId)) {
+                Swal.fire('Already Added', 'This procedure has already been added.', 'info');
+                return;
+            }
+
             const procedureName = selectedOption.text;
-            const basePrice = parseFloat(selectedOption.getAttribute('data-base-price')) || 0;
-            const promoPrice = parseFloat(selectedOption.getAttribute('data-promo-price')) || null;
+            const basePrice = parseFloat(selectedOption.dataset.basePrice) || 0;
+            const promoPrice = selectedOption.dataset.promoPrice ? parseFloat(selectedOption.dataset.promoPrice) : null;
 
-            console.log(`Selected Procedure ID: ${procedureId}`);
-            console.log(`Selected Procedure Name: ${procedureName}`);
-            console.log(`Base Price: Rp ${basePrice}`);
-            console.log(`Promo Price: Rp ${promoPrice}`);
+            const currentItemIndex = itemIndex++;
+            const procedureDataItem = {
+                id: procedureId,
+                name: procedureName,
+                basePrice: basePrice,
+                promoPrice: promoPrice,
+                unitPrice: basePrice, // Default to base price
+                quantity: 1,
+                discountValue: 0,
+                discountType: 'rp', // 'rp' or 'percent'
+                itemIndex: currentItemIndex
+            };
+            proceduresData.push(procedureDataItem);
 
-            if (procedureId && !document.getElementById(`item-${procedureId}`)) {
-                console.log("Adding Procedure to List...");
+            renderAddedItem(procedureDataItem);
+            calculateGrandTotal();
+            if (noItemsText) noItemsText.style.display = 'none';
+            procedureSelector.value = ""; // Reset selector
+        });
 
-                const itemDiv = document.createElement('div');
-                itemDiv.classList.add('card', 'p-2', 'mb-2');
-                itemDiv.id = `item-${procedureId}`;
-                itemDiv.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span><strong>${procedureName}</strong></span>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="removeItem('${procedureId}')">Remove</button>
+        function renderAddedItem(itemData) {
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('card', 'mb-3', 'shadow-sm', `procedure-item-${itemData.itemIndex}`);
+            itemDiv.dataset.itemIndex = itemData.itemIndex;
+
+            let priceOptionsHtml = `<option value="${itemData.basePrice}" ${itemData.unitPrice == itemData.basePrice ? 'selected' : ''}>Base: ${formatCurrency(itemData.basePrice)}</option>`;
+            if (itemData.promoPrice !== null && typeof itemData.promoPrice !== 'undefined' && itemData.promoPrice !== '') { // Added check for promoPrice
+                priceOptionsHtml += `<option value="${itemData.promoPrice}" ${itemData.unitPrice == itemData.promoPrice ? 'selected' : ''}>Promo: ${formatCurrency(itemData.promoPrice)}</option>`;
+            }
+
+            itemDiv.innerHTML = `
+            <div class="card-header bg-white py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-primary">${itemData.name}</h6>
+                    <button type="button" class="btn btn-danger btn-sm remove-item-btn py-0 px-2" data-item-index="${itemData.itemIndex}">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="quantity-${itemData.itemIndex}" class="form-label form-label-sm">Quantity</label>
+                        <input type="number" class="form-control form-control-sm quantity-input" id="quantity-${itemData.itemIndex}" name="items[${itemData.itemIndex}][quantity]" value="${itemData.quantity}" min="1" data-item-index="${itemData.itemIndex}">
+                        <input type="hidden" name="items[${itemData.itemIndex}][id]" value="${itemData.id}">
                     </div>
-                    <label>Quantity:</label>
-                    <input type="number" name="items[${itemIndex}][quantity]" class="form-control w-50 quantity-input" value="1" min="1">
-
-                    <label>Price:</label>
-                    <select name="items[${itemIndex}][unit_price]" class="form-control price-select">
-                        <option value="${basePrice}" selected>Base Price: Rp ${formatCurrency(basePrice)}</option>
-                        ${promoPrice ? `<option value="${promoPrice}">Promo Price: Rp ${formatCurrency(promoPrice)}</option>` : ''}
-                    </select>
-
-                    <label>Discount:</label>
-                    <div class="input-group">
-                        <input type="number" name="items[${itemIndex}][discount]" class="form-control discount-input" value="0" min="0">
-                        <select class="form-select discount-type" data-index="${itemIndex}">
-                            <option value="rp" selected>Rp</option>
-                            <option value="percent">%</option>
+                    <div class="col-md-4">
+                        <label for="price-select-${itemData.itemIndex}" class="form-label form-label-sm">Unit Price</label>
+                        <select class="form-select form-select-sm price-select" id="price-select-${itemData.itemIndex}" name="items[${itemData.itemIndex}][unit_price]" data-item-index="${itemData.itemIndex}">
+                            ${priceOptionsHtml}
                         </select>
                     </div>
-
-                    <label>Final Price:</label>
-                    <p><strong>Rp <span class="final-price-display">0</span></strong></p>
-
-                    <input type="hidden" name="items[${itemIndex}][id]" value="${procedureId}">
-                `;
-                selectedItemsContainer.appendChild(itemDiv);
-                itemIndex++;
-                console.log("Procedure Added. Updating Total...");
-                updateTotal();
-            } else {
-                console.log("Procedure is already in the list or not selected.");
-            }
-        });
-
-        window.removeItem = function(procedureId) {
-            console.log(`Removing Procedure ID: ${procedureId}`);
-            const itemDiv = document.getElementById(`item-${procedureId}`);
-            if (itemDiv) {
-                itemDiv.remove();
-                console.log("Procedure Removed. Updating Total...");
-                updateTotal();
-            }
-        };
-
-        document.addEventListener('input', function(event) {
-            if (event.target.classList.contains('quantity-input') ||
-                event.target.classList.contains('discount-input')) {
-                console.log("Quantity atau Diskon diubah. Mengupdate total...");
-                updateTotal();
-            }
-        });
-
-        document.addEventListener('change', function(event) {
-            if (event.target.classList.contains('price-select') ||
-                event.target.classList.contains('discount-type')) {
-                console.log("Harga atau tipe diskon berubah. Mengupdate total...");
-                updateTotal();
-            }
-        });
-
-
-        paymentInput.addEventListener('input', function() {
-            console.log("Payment Changed. Updating Remaining Payment...");
-            let total = parseFloat(totalAmountField.value) || 0;
-            updatePaymentLimit(total);
-        });
-
-        function formatCurrency(amount) {
-            return amount.toLocaleString('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0
-            }).replace('Rp', '').trim();
+                    <div class="col-md-5">
+                        <label for="discount-${itemData.itemIndex}" class="form-label form-label-sm">Discount</label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control form-control-sm discount-input" id="discount-${itemData.itemIndex}" name="items[${itemData.itemIndex}][discount_value]" value="${itemData.discountValue}" min="0" data-item-index="${itemData.itemIndex}">
+                            <select class="form-select form-select-sm discount-type" name="items[${itemData.itemIndex}][discount_type]" style="max-width: 65px;" data-item-index="${itemData.itemIndex}">
+                                <option value="rp" ${itemData.discountType === 'rp' ? 'selected' : ''}>Rp</option>
+                                <option value="percent" ${itemData.discountType === 'percent' ? 'selected' : ''}>%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-2 text-end">
+                        <small class="text-muted">Applied Discount: Rp <span class="applied-discount-display">0</span></small><br>
+                        <strong>Subtotal: Rp <span class="final-price-display">0</span></strong>
+                    </div>
+                </div>
+            </div>
+        `;
+            selectedItemsContainer.appendChild(itemDiv);
+            updateItemDisplay(itemData.itemIndex);
         }
 
-        updateTotal();
+        selectedItemsContainer.addEventListener('click', function(event) {
+            if (event.target.closest('.remove-item-btn')) {
+                const button = event.target.closest('.remove-item-btn');
+                const idxToRemove = parseInt(button.dataset.itemIndex);
+
+                proceduresData = proceduresData.filter(p => p.itemIndex !== idxToRemove);
+                document.querySelector(`.procedure-item-${idxToRemove}`).remove();
+
+                if (proceduresData.length === 0 && noItemsText) {
+                    noItemsText.style.display = 'block';
+                }
+                calculateGrandTotal();
+            }
+        });
+
+        selectedItemsContainer.addEventListener('change', function(event) {
+            const target = event.target;
+            if (target.classList.contains('quantity-input') || target.classList.contains('price-select') || target.classList.contains('discount-input') || target.classList.contains('discount-type')) {
+                const idx = parseInt(target.dataset.itemIndex);
+                const itemData = proceduresData.find(p => p.itemIndex === idx);
+                if (itemData) {
+                    if (target.classList.contains('quantity-input')) itemData.quantity = target.value;
+                    if (target.classList.contains('price-select')) itemData.unitPrice = target.value;
+                    if (target.classList.contains('discount-input')) itemData.discountValue = target.value;
+                    if (target.classList.contains('discount-type')) itemData.discountType = target.value;
+
+                    updateItemDisplay(idx);
+                    calculateGrandTotal();
+                }
+            }
+        });
+        selectedItemsContainer.addEventListener('input', function(event) { // For discount input to react immediately
+            const target = event.target;
+            if (target.classList.contains('discount-input') || target.classList.contains('quantity-input')) {
+                const idx = parseInt(target.dataset.itemIndex);
+                const itemData = proceduresData.find(p => p.itemIndex === idx);
+                if (itemData) {
+                    if (target.classList.contains('quantity-input')) itemData.quantity = target.value;
+                    if (target.classList.contains('discount-input')) itemData.discountValue = target.value;
+
+                    updateItemDisplay(idx);
+                    calculateGrandTotal();
+                }
+            }
+        });
+
+
+        function updateItemDisplay(idx) {
+            const itemData = proceduresData.find(p => p.itemIndex === idx);
+            if (!itemData) return;
+
+            const itemDiv = document.querySelector(`.procedure-item-${idx}`);
+            const quantity = parseInt(itemData.quantity) || 1;
+            const unitPrice = parseFloat(itemData.unitPrice) || 0;
+            let discountAmount = parseFloat(itemData.discountValue) || 0;
+            const itemSubtotalBeforeDiscount = unitPrice * quantity;
+
+            if (itemData.discountType === 'percent') {
+                discountAmount = (itemSubtotalBeforeDiscount * (discountAmount / 100));
+            }
+            discountAmount = Math.min(discountAmount, itemSubtotalBeforeDiscount); // Cap discount
+
+            const finalItemPrice = itemSubtotalBeforeDiscount - discountAmount;
+
+            itemDiv.querySelector('.applied-discount-display').textContent = formatCurrency(discountAmount, false);
+            itemDiv.querySelector('.final-price-display').textContent = formatCurrency(finalItemPrice, false);
+        }
+
+        if (paymentAmountInput) {
+            paymentAmountInput.addEventListener('input', calculateRemainingPayment);
+        }
+
+        // Initial calculation if there are any old inputs (e.g. from validation error)
+        // This part needs to be more robust if you use old() for items
+        calculateGrandTotal();
+
+        // Form submission confirmation
+        const form = document.getElementById('manual-transaction-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (proceduresData.length === 0) {
+                    Swal.fire('No Procedures', 'Please add at least one procedure to the transaction.', 'warning');
+                    return;
+                }
+                const total = parseFloat(totalAmountField.value) || 0;
+                const payment = parseFloat(paymentAmountInput.value) || 0;
+                if (payment < total && payment > 0) {
+                    Swal.fire({
+                        title: 'Incomplete Payment',
+                        text: `The payment amount (Rp ${formatCurrency(payment,false)}) is less than the total bill (Rp ${formatCurrency(total,false)}). The remaining bill of Rp ${formatCurrency(total-payment,false)} will be recorded as payable. Continue?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Continue',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            e.target.submit();
+                        }
+                    });
+                } else if (payment <= 0 && total > 0) {
+                    Swal.fire({
+                        title: 'No Payment Made',
+                        text: `No payment has been entered for a bill of Rp ${formatCurrency(total,false)}. The entire amount will be recorded as payable. Continue?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Continue',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            e.target.submit();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Confirm Transaction Creation',
+                        html: `Total Bill: <strong>${formatCurrency(total)}</strong><br>Payment Made: <strong>${formatCurrency(payment)}</strong><br>Remaining: <strong>${formatCurrency(total-payment)}</strong><br><br>Are you sure you want to create this transaction?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Create!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            e.target.submit();
+                        }
+                    });
+                }
+            });
+        }
     });
 </script>
+<style>
+    .form-label-sm {
+        font-size: .7875em;
+        /* Smaller labels for item cards */
+        margin-bottom: .2rem;
+    }
 
+    .form-control-sm,
+    .form-select-sm {
+        font-size: .7875rem;
+        /* Smaller inputs for item cards */
+    }
 
+    #selected-items-container .card-header h6 {
+        font-size: 0.9rem;
+    }
+</style>
 @endsection

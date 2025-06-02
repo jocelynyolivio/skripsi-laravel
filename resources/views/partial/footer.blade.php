@@ -38,7 +38,7 @@
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-phone-alt me-3"></i>
-                        <p class="small mb-0">+62 812-3456-7890</p>
+                        <p class="small mb-0">0812-3456-7890</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <i class="fas fa-envelope me-3"></i>

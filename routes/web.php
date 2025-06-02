@@ -224,11 +224,11 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::post('/salaries/process', [SalaryController::class, 'processSalaries'])->name('salaries.process')->middleware('role:manager');
     Route::post('/salaries/calculate', [SalaryController::class, 'calculateSalaries'])->name('salaries.calculate')->middleware('role:manager');
     Route::post('/salaries/doctors', [SalaryController::class, 'calculateDoctorSalaries'])->name('salaries.doctor')->middleware('role:manager');
-    Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store')->middleware('role:manager');
+    // Route::post('/salaries/store', [SalaryController::class, 'storeSalaries'])->name('salaries.store')->middleware('role:manager');
     Route::post('/salaries/storeDoctor', [SalaryController::class, 'storeDoctorSalaries'])->name('salaries.storeDoctor')->middleware('role:manager');
     Route::get('/salaries', [SalaryController::class, 'index'])->name('salaries.index')->middleware('role:manager');
     Route::get('/salaries/data', [SalaryController::class, 'getSalaryData'])->name('salaries.data')->middleware('role:manager');
-    // Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store')->middleware('role:manager');
+    Route::post('/salaries/handle', [SalaryController::class, 'handleSalaries'])->name('salaries.store')->middleware('role:manager');
 
     // slip gaji masing"
     Route::get('/salaries/slips', [SalaryController::class, 'slips'])->name('salaries.slips');
@@ -326,10 +326,15 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::delete('attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy')->middleware('role:manager');
 
     Route::resource('/dental-materials', DentalMaterialController::class);
-    Route::resource('procedure_materials', ProcedureMaterialController::class);
+    Route::post('procedure-materials/perform-overwrite', [ProcedureMaterialController::class, 'performOverwriteById'])
+        ->name('procedure_materials.perform_overwrite');
+    Route::resource('procedure_materials', ProcedureMaterialController::class);    
 
     Route::get('/journals', [JournalController::class, 'index'])->name('journals.index')->middleware('role:manager');
     Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show')->middleware('role:manager');
+    Route::get('/journals/create', [JournalController::class, 'create'])->name('journals.create'); // Route untuk form create
+    Route::post('/journals', [JournalController::class, 'store'])->name('journals.store');       // Route untuk menyimpan jurnal baru
+    Route::get('journals/{id}/reverse', [JournalController::class, 'createReversingEntry'])->name('journals.createReversingEntry');
 
     Route::resource('/coa', ChartOfAccountController::class)->middleware('role:manager');
     Route::resource('/holidays', HolidayController::class)->middleware('role:manager');

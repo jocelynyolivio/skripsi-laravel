@@ -48,8 +48,6 @@
             @endforeach
         </tbody>
     </table>
-
-    {{ $pricelists->links() }}
 </div>
 <script>
     $(document).ready(function() {

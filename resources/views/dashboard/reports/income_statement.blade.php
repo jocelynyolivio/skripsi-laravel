@@ -1,4 +1,5 @@
-@extends('dashboard.layouts.main')
+@extends('dashboard.layouts.main') {{-- Pastikan layout utama Anda --}}
+
 @section('breadcrumbs')
     @include('dashboard.layouts.breadcrumbs', [
         'customBreadcrumbs' => [
@@ -6,21 +7,27 @@
         ]
     ])
 @endsection
+
 @section('container')
 <div class="container-fluid py-4">
     <div class="card">
         <div class="card-header pb-0">
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Laporan Laba Rugi</h4>
+                {{-- Form untuk filter periode dan tanggal --}}
                 <form action="{{ route('dashboard.reports.income_statement') }}" method="GET" class="row g-2 align-items-center">
                     <div class="col-auto">
-                        <select name="period" class="form-select form-select-sm">
-                            <option value="monthly" {{ $period == 'monthly' ? 'selected' : '' }}>Bulanan</option>
-                            <option value="yearly" {{ $period == 'yearly' ? 'selected' : '' }}>Tahunan</option>
+                        <label for="period" class="visually-hidden">Periode</label>
+                        <select name="period" id="period" class="form-select form-select-sm">
+                            {{-- Menggunakan variabel $period dari controller --}}
+                            <option value="monthly" {{ ($period ?? 'monthly') == 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                            <option value="yearly" {{ ($period ?? 'monthly') == 'yearly' ? 'selected' : '' }}>Tahunan</option>
                         </select>
                     </div>
                     <div class="col-auto">
-                        <input type="date" name="date" value="{{ $dateInput }}" class="form-control form-control-sm"> {{-- Ganti $date menjadi $dateInput --}}
+                        <label for="date" class="visually-hidden">Tanggal</label>
+                        {{-- Menggunakan variabel $dateInput dari controller --}}
+                        <input type="date" name="date" id="date" value="{{ $dateInput ?? \Carbon\Carbon::now()->format('Y-m-d') }}" class="form-control form-control-sm">
                     </div>
                     <div class="col-auto">
                         <button type="submit" class="btn btn-sm btn-primary">Tampilkan</button>
@@ -31,75 +38,81 @@
             <div class="text-center">
                 <h5 class="mb-1">SenyumQu Dental Clinic</h5>
                 <p class="mb-0 text-sm">
-                    Periode: {{ $period == 'monthly' ?
-                        Carbon\Carbon::parse($dateInput)->isoFormat('MMMM Y') :  // Ganti $date menjadi $dateInput
-                        Carbon\Carbon::parse($dateInput)->isoFormat('Y') }}       // Ganti $date menjadi $dateInput
+                    Periode:
+                    @if(($period ?? 'monthly') == 'monthly')
+                        {{ \Carbon\Carbon::parse($dateInput ?? \Carbon\Carbon::now())->isoFormat('MMMM YYYY') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($dateInput ?? \Carbon\Carbon::now())->isoFormat('YYYY') }}
+                    @endif
                 </p>
             </div>
         </div>
 
         <div class="card-body">
+            {{-- Bagian Pendapatan --}}
             <div class="table-responsive">
                 <table class="table table-sm align-items-center mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light-custom">
                         <tr>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Pendapatan (Kotor)</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Jumlah (IDR)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Pendapatan (Kotor)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end pe-3">Jumlah (IDR)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($grossRevenuesData as $item) {{-- Ganti $revenues --}}
+                        @forelse($grossRevenuesData as $item)
                         <tr>
                             <td class="ps-4">
-                                <p class="text-xs font-weight-bold mb-0">{{ $item->code }} - {{ $item->name }}</p>
+                                <p class="text-xs font-weight-normal mb-0">{{ $item->code }} - {{ $item->name }}</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($item->amount, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-normal mb-0">{{ number_format($item->amount, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="2" class="text-center text-xs">Tidak ada data pendapatan.</td>
+                            <td colspan="2" class="text-center text-xs ps-4">Tidak ada data pendapatan kotor.</td>
                         </tr>
                         @endforelse
-                        <tr class="bg-gray-100">
+                        <tr class="bg-gray-100-custom">
                             <td class="ps-4">
                                 <p class="text-xs font-weight-bold mb-0">Total Pendapatan (Kotor)</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalGrossRevenue, 2) }}</p> {{-- Ganti $totalRevenue --}}
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalGrossRevenue, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            @if($contraRevenuesData->count() > 0)
+            {{-- Bagian Kontra Pendapatan (Jika Ada) --}}
+            @if(isset($contraRevenuesData) && $contraRevenuesData->count() > 0)
             <div class="table-responsive mt-3">
                 <table class="table table-sm align-items-center mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light-custom">
                         <tr>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Pengurang Pendapatan</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Jumlah (IDR)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end pe-3">Jumlah (IDR)</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($contraRevenuesData as $item)
                         <tr>
                             <td class="ps-4">
-                                <p class="text-xs font-weight-normal mb-0 ms-3">{{ $item->code }} - {{ $item->name }}</p> {{-- Indentasi sedikit --}}
+                                <p class="text-xs font-weight-normal mb-0 ms-3">{{ $item->code }} - {{ $item->name }}</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-normal mb-0">({{ number_format($item->amount, 2) }})</p> {{-- Tampilkan sebagai pengurang --}}
+                            <td class="text-end pe-3">
+                                {{-- Ditampilkan dalam kurung sebagai pengurang --}}
+                                <p class="text-xs font-weight-normal mb-0">({{ number_format($item->amount, 2, ',', '.') }})</p>
                             </td>
                         </tr>
                         @endforeach
-                        <tr class="bg-gray-100">
+                        <tr class="bg-gray-100-custom">
                             <td class="ps-4">
                                 <p class="text-xs font-weight-bold mb-0">Total Pengurang Pendapatan</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">({{ number_format($totalContraRevenue, 2) }})</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bold mb-0">({{ number_format($totalContraRevenue, 2, ',', '.') }})</p>
                             </td>
                         </tr>
                     </tbody>
@@ -107,109 +120,155 @@
             </div>
             @endif
 
-            <div class="table-responsive mt-1"> {{-- Lebih dekat jika ada kontra revenue, atau mt-3 jika tidak --}}
+            {{-- Pendapatan Bersih --}}
+            <div class="table-responsive {{ (isset($contraRevenuesData) && $contraRevenuesData->count() > 0) ? 'mt-1' : 'mt-3' }}">
                 <table class="table table-sm align-items-center mb-0">
                     <tbody>
-                        <tr class="fw-bold" style="background-color: #e9ecef;"> {{-- Beri highlight berbeda sedikit --}}
+                        <tr class="highlight-row-custom">
                             <td class="ps-4">
-                                <p class="text-xs mb-0">Pendapatan Bersih</p>
+                                <p class="text-xs font-weight-bold mb-0">Pendapatan Bersih</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs mb-0">{{ number_format($totalNetRevenue, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalNetRevenue, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-
+            {{-- Bagian Beban Pokok Pendapatan (HPP) --}}
             <div class="table-responsive mt-4">
                 <table class="table table-sm align-items-center mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light-custom">
                         <tr>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Beban Pokok Pendapatan</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Jumlah (IDR)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Beban Pokok Pendapatan (HPP)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end pe-3">Jumlah (IDR)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($hppData as $item) {{-- Ganti $hpp --}}
+                        @forelse($hppData as $item)
                         <tr>
                             <td class="ps-4">
-                                <p class="text-xs font-weight-bold mb-0">{{ $item->code }} - {{ $item->name }}</p>
+                                <p class="text-xs font-weight-normal mb-0">{{ $item->code }} - {{ $item->name }}</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($item->amount, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-normal mb-0">{{ number_format($item->amount, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="2" class="text-center text-xs">Tidak ada data HPP.</td>
+                            <td colspan="2" class="text-center text-xs ps-4">Tidak ada data HPP.</td>
                         </tr>
                         @endforelse
-                        <tr class="bg-gray-100">
+                        <tr class="bg-gray-100-custom">
                             <td class="ps-4">
                                 <p class="text-xs font-weight-bold mb-0">Total Beban Pokok Pendapatan</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalHpp, 2) }}</p>
-                            </td>
-                        </tr>
-                        <tr class="border-top">
-                            <td class="ps-4">
-                                <p class="text-xs font-weight-bold mb-0">Laba Kotor</p>
-                            </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($grossProfit, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalHpp, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
+            {{-- Laba Kotor --}}
+            <div class="table-responsive mt-1">
+                <table class="table table-sm align-items-center mb-0">
+                    <tbody>
+                        <tr class="highlight-row-custom border-top-custom">
+                            <td class="ps-4">
+                                <p class="text-xs font-weight-bolder mb-0">LABA KOTOR</p>
+                            </td>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bolder mb-0">{{ number_format($grossProfit, 2, ',', '.') }}</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Bagian Beban Operasional (Kotor) --}}
             <div class="table-responsive mt-4">
                 <table class="table table-sm align-items-center mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light-custom">
                         <tr>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Beban Operasional</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end">Jumlah (IDR)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Beban Operasional (Kotor)</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end pe-3">Jumlah (IDR)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($operatingExpensesData as $item) {{-- Ganti $operatingExpenses --}}
+                        @forelse($operatingExpensesData as $item)
                         <tr>
                             <td class="ps-4">
-                                <p class="text-xs font-weight-bold mb-0">{{ $item->code }} - {{ $item->name }}</p>
+                                <p class="text-xs font-weight-normal mb-0">{{ $item->code }} - {{ $item->name }}</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($item->amount, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-normal mb-0">{{ number_format($item->amount, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="2" class="text-center text-xs">Tidak ada data beban operasional.</td>
+                            <td colspan="2" class="text-center text-xs ps-4">Tidak ada data beban operasional kotor.</td>
                         </tr>
                         @endforelse
-                        <tr class="bg-gray-100">
+                        <tr class="bg-gray-100-custom">
                             <td class="ps-4">
-                                <p class="text-xs font-weight-bold mb-0">Total Beban Operasional</p>
+                                <p class="text-xs font-weight-bold mb-0">Total Beban Operasional (Kotor)</p>
                             </td>
-                            <td class="text-end">
-                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalOperatingExpenses, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bold mb-0">{{ number_format($totalGrossOperatingExpenses, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
+            {{-- Bagian Kontra Beban (Jika Ada) --}}
+            @if(isset($contraExpensesData) && $contraExpensesData->count() > 0)
+            <div class="table-responsive mt-3">
+                <table class="table table-sm align-items-center mb-0">
+                    <thead class="bg-light-custom">
+                        <tr>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-4">Pengurang Beban Operasional</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-end pe-3">Jumlah (IDR)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($contraExpensesData as $item)
+                        <tr>
+                            <td class="ps-4">
+                                <p class="text-xs font-weight-normal mb-0 ms-3">{{ $item->code }} - {{ $item->name }}</p>
+                            </td>
+                            <td class="text-end pe-3">
+                                {{-- Ditampilkan dalam kurung sebagai pengurang --}}
+                                <p class="text-xs font-weight-normal mb-0">({{ number_format($item->amount, 2, ',', '.') }})</p>
+                            </td>
+                        </tr>
+                        @endforeach
+                        <tr class="bg-gray-100-custom">
+                            <td class="ps-4">
+                                <p class="text-xs font-weight-bold mb-0">Total Pengurang Beban Operasional</p>
+                            </td>
+                            <td class="text-end pe-3">
+                                <p class="text-xs font-weight-bold mb-0">({{ number_format($totalContraExpense, 2, ',', '.') }})</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            {{-- Laba Bersih --}}
             <div class="table-responsive mt-4">
                 <table class="table table-sm align-items-center">
                     <tbody>
-                        <tr class="bg-primary text-white">
+                        <tr class="bg-primary-custom text-white-custom">
                             <td class="ps-4">
-                                <p class="text-sm font-weight-bolder mb-0">LABA BERSIH</p> {{-- Buat lebih besar --}}
+                                <p class="text-sm font-weight-bolder mb-0">LABA BERSIH</p>
                             </td>
-                            <td class="text-end pe-3"> {{-- Tambah padding end --}}
-                                <p class="text-sm font-weight-bolder mb-0">{{ number_format($netIncome, 2) }}</p>
+                            <td class="text-end pe-3">
+                                <p class="text-sm font-weight-bolder mb-0">{{ number_format($netIncome, 2, ',', '.') }}</p>
                             </td>
                         </tr>
                     </tbody>
@@ -219,24 +278,46 @@
     </div>
 </div>
 
+{{-- Gaya CSS tambahan (sama seperti di view Neraca, bisa dipindah ke file CSS terpisah) --}}
 <style>
-    .bg-light {
+    .bg-light-custom {
         background-color: #f8f9fa !important;
     }
-    .bg-gray-100 {
-        background-color: #e9ecef !important; /* Sedikit lebih gelap dari default gray-100 bootstrap */
+    .bg-gray-100-custom {
+        background-color: #e9ecef !important;
+    }
+    .highlight-row-custom {
+        background-color: #ddeeff !important; /* Warna highlight untuk subtotal penting */
+        font-weight: bold;
+    }
+    .highlight-row-custom p {
+        font-weight: bold !important;
+    }
+    .border-top-custom {
+        border-top: 2px solid #cfe2ff !important; /* Garis pemisah yang lebih jelas */
+    }
+    .bg-primary-custom {
+        background-color: #0d6efd !important; /* Warna primer Bootstrap */
+    }
+    .text-white-custom p {
+        color: white !important;
     }
     .text-xxs {
-        font-size: 0.68rem !important; /* Sedikit adjust */
+        font-size: 0.68rem !important;
     }
-    .border-top {
-        border-top: 2px solid #dee2e6 !important;
+    .table-sm th, .table-sm td {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+        vertical-align: middle;
     }
-    .fw-bold p, p.font-weight-bolder { /* style p di dalam cell bold */
-        font-weight: 600 !important;
+    .ps-4 {
+        padding-left: 1.5rem !important;
     }
-    p.font-weight-normal {
-        font-weight: 400 !important;
+    .pe-3 {
+        padding-right: 1rem !important;
+    }
+    .ms-3 {
+        margin-left: 1rem !important;
     }
 </style>
 @endsection

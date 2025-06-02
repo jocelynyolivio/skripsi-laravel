@@ -119,6 +119,7 @@ class SalaryController extends Controller
 
     public function calculateSalaries(Request $request)
     {
+        // dd('masuk calculate salaries');
         $month = $request->input('month');
         $year = $request->input('year');
 
@@ -304,6 +305,7 @@ class SalaryController extends Controller
 
     public function handleSalaries(Request $request)
     {
+        // dd('masuk handle');
         if ($request->input('action') == 'calculate') {
             return $this->calculateSalaries($request);
         } elseif ($request->input('action') == 'store') {
@@ -315,9 +317,10 @@ class SalaryController extends Controller
 
     public function storeSalaries(Request $request)
     {
+        // dd('store');
         // dd($request->all()); // Debugging
         $salaries = $request->input('salaries');
-        // dd($coa_out);
+        // dd($salaries);
 
         if (!is_array($salaries)) {
             return back()->withErrors(['msg' => 'Data gaji tidak valid.']);
@@ -341,7 +344,7 @@ class SalaryController extends Controller
                         'adjustment_notes' => $salary['adjustment_notes'] ?? null,
                     ]
                 );
-
+dd('stlh loop');
                 // // Simpan Journal Entry (langsung masuk ke Beban Gaji)
                 $journal = \App\Models\JournalEntry::create([
                     'entry_date' => now(),

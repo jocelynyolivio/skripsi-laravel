@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('code')->unique(); // Kode Akun (misal: 1100)
             $table->string('name');           // Nama Akun (misal: Kas)
             $table->enum('type', ['asset', 'liability', 'equity', 'revenue', 'expense','contra_expense','contra_revenue','contra_asset']);
+
+            $table->boolean('is_cash_equivalent')->default(false); // Apakah akun ini Kas atau Setara Kas?
+            $table->enum('cash_flow_activity', ['operating', 'investing', 'financing', 'none'])->nullable()->default('none'); // Aktivitas Arus Kas utama yang terkait DENGAN AKUN INI (jika bukan kas)
+            
             $table->timestamps();
         });
     }

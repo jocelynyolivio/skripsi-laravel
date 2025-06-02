@@ -621,73 +621,132 @@ class DatabaseSeeder extends Seeder
         // ];
 
         // tambahan
+        // $accounts = [
+        //     // Aset Lancar (Current Assets)
+        //     ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
+        //     ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset'],
+        //     ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset'],
+        //     ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset'],
+        //     ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset'],
+        //     ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset'],
+        //     ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset'],
+        //     ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset'],
+        //     ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
+        //     ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
+
+        //     // Piutang Usaha (acount receivables)
+        //     ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
+
+        //     // Persediaan (inventory bahan medis)
+        //     //ini 12 13
+        //     ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
+        //     ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
+
+        //     // beban dibayar dimuka (prepaid expenses)
+        //     ['code' => '1-10300', 'name' => 'Beban Dibayar di Muka', 'type' => 'asset'],
+
+        //     // fixed asset dan depreciation : berhubungan kyk tanah dll yang ada dpresiasi nya
+        //     // harusnya ga kepake sih 
+        //     ['code' => '1-10400', 'name' => 'Aset Tetap', 'type' => 'asset'],
+        //     ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'contra_asset'],
+        //     ['code' => '1-10600', 'name' => 'Aset Lain-Lain', 'type' => 'asset'],
+
+        //     // Kewajiban (Liabilities)
+        //     // accounts payable
+        //     ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
+        //     ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
+
+        //     // Accrued liabilities harus dicatat pada periode di mana transaksi terjadi, bukan saat pembayaran dilakukan, agar sesuai dengan prinsip akuntansi akrual.
+        //     // Sebagai contoh, jika sebuah perusahaan berlangganan layanan perangkat lunak bulanan senilai Rp5.000.000, tetapi pembayaran dilakukan setiap tiga bulan, maka setiap bulan perusahaan tersebut harus mencatat Rp5.000.000 sebagai accrued liabilities hingga faktur dibayarkan. Setelah pembayaran dilakukan, accrued liabilities akan berkurang.
+        //     // ['code' => '2-20100', 'name' => 'Accrued Liabi', 'type' => 'liability'],
+
+        //     // Ekuitas (Equity)
+        //     ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
+        //     ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity'],
+
+        //     // Pendapatan (Revenue)
+        //     ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
+        //     ['code' => '4-10002', 'name' => 'Pendapatan Penyesuaian Persediaan', 'type' => 'revenue'],
+        //     ['code' => '4-10101', 'name' => 'Diskon Penjualan', 'type' => 'contra_revenue'],
+
+        //     // Sales Returns and Allowances adalah suatu peristiwa dimana barang yang kita jual dan telah sampai kepada pelanggan mengalami cacat produksi atau adanya kerusakan ketika terjadi pengiriman yang adanya kesepakatan bahwa risiko pengiriman ditanggung oleh perusahaan.
+        //     // ['code' => '4-10100', 'name' => 'Retur Penjualan dan Pengurangan Harga', 'type' => 'revenue'],
+
+        //     // Beban (Expenses)
+        //     ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
+        //     ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
+        //     ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
+        //     ['code' => '5-10004', 'name' => 'Beban Iklan', 'type' => 'expense'],
+        //     ['code' => '5-10005', 'name' => 'Biaya Admin Bank', 'type' => 'expense'],
+        //     ['code' => '5-10006', 'name' => 'Beban ATK', 'type' => 'expense'],
+        //     ['code' => '5-10007', 'name' => 'Beban Listrik', 'type' => 'expense'],
+        //     ['code' => '5-10008', 'name' => 'Beban Air', 'type' => 'expense'],
+        //     ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
+        //     ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
+        //     ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense'],
+        //     ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'contra_expense'], // Nilainya negatif, contra expenses
+        //     ['code' => '5-10013', 'name' => 'Beban Pengiriman Pembelian', 'type' => 'expense'],
+        //     ['code' => '5-10014', 'name' => 'Beban Penyesuaian Persediaan', 'type' => 'expense'],
+        //     // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
+        // ];
         $accounts = [
             // Aset Lancar (Current Assets)
-            ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
-            ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset'],
-            ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset'],
-            ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset'],
-            ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset'],
-            ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset'],
-            ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset'],
-            ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset'],
-            ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
-            ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
+            ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'], // General bank account
+            ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
+            
+            // Pinjaman Direksi: Ini bisa rumit. Jika direksi memberi pinjaman ke perusahaan, itu arus kas masuk pendanaan. Jika perusahaan memberi pinjaman ke direksi, itu arus kas keluar investasi (jika dianggap investasi) atau operasional (jika terkait operasional). Asumsi ini adalah PIUTANG kepada direksi.
+            ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'investing'], // Atau 'financing' jika perusahaan yg terima pinjaman. Dari sisi aset, ini adalah piutang ke direksi.
 
-            // Piutang Usaha (acount receivables)
-            ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
+            // Piutang Usaha (Accounts Receivables)
+            ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
 
-            // Persediaan (inventory bahan medis)
-            //ini 12 13
-            ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
-            ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
+            // Persediaan (Inventory)
+            ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
 
-            // beban dibayar dimuka (prepaid expenses)
-            ['code' => '1-10300', 'name' => 'Beban Dibayar di Muka', 'type' => 'asset'],
+            // Beban Dibayar di Muka (Prepaid Expenses)
+            ['code' => '1-10300', 'name' => 'Beban Dibayar di Muka', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
 
-            // fixed asset dan depreciation : berhubungan kyk tanah dll yang ada dpresiasi nya
-            // harusnya ga kepake sih 
-            ['code' => '1-10400', 'name' => 'Aset Tetap', 'type' => 'asset'],
-            ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'contra_asset'],
-            ['code' => '1-10600', 'name' => 'Aset Lain-Lain', 'type' => 'asset'],
+            // Aset Tetap dan Akumulasi Penyusutan
+            ['code' => '1-10400', 'name' => 'Aset Tetap', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'investing'], // Pembelian/penjualan aset tetap
+            ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'contra_asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'none'], // Non-kas, penyesuaian di metode tidak langsung
+            ['code' => '1-10600', 'name' => 'Aset Lain-Lain', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'investing'], // Tergantung sifatnya, bisa investasi
 
             // Kewajiban (Liabilities)
-            // accounts payable
-            ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
-            ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
-
-            // Accrued liabilities harus dicatat pada periode di mana transaksi terjadi, bukan saat pembayaran dilakukan, agar sesuai dengan prinsip akuntansi akrual.
-            // Sebagai contoh, jika sebuah perusahaan berlangganan layanan perangkat lunak bulanan senilai Rp5.000.000, tetapi pembayaran dilakukan setiap tiga bulan, maka setiap bulan perusahaan tersebut harus mencatat Rp5.000.000 sebagai accrued liabilities hingga faktur dibayarkan. Setelah pembayaran dilakukan, accrued liabilities akan berkurang.
-            // ['code' => '2-20100', 'name' => 'Accrued Liabi', 'type' => 'liability'],
+            ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'], // Pembayaran pajak adalah operasional
 
             // Ekuitas (Equity)
-            ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
-            ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity'],
+            ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'financing'], // Setoran/penarikan modal
+            ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'none'], // Akumulasi laba, perubahan non-kas kecuali ada dividen
 
             // Pendapatan (Revenue)
-            ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
-            ['code' => '4-10002', 'name' => 'Pendapatan Penyesuaian Persediaan', 'type' => 'revenue'],
-            ['code' => '4-10101', 'name' => 'Diskon Penjualan', 'type' => 'contra_revenue'],
-
-            // Sales Returns and Allowances adalah suatu peristiwa dimana barang yang kita jual dan telah sampai kepada pelanggan mengalami cacat produksi atau adanya kerusakan ketika terjadi pengiriman yang adanya kesepakatan bahwa risiko pengiriman ditanggung oleh perusahaan.
-            // ['code' => '4-10100', 'name' => 'Retur Penjualan dan Pengurangan Harga', 'type' => 'revenue'],
+            ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '4-10002', 'name' => 'Pendapatan Penyesuaian Persediaan', 'type' => 'revenue', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'], // Biasanya non-kas atau terkait HPP
+            ['code' => '4-10101', 'name' => 'Diskon Penjualan', 'type' => 'contra_revenue', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'], // Mengurangi penerimaan kas operasional
 
             // Beban (Expenses)
-            ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
-            ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
-            ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
-            ['code' => '5-10004', 'name' => 'Beban Iklan', 'type' => 'expense'],
-            ['code' => '5-10005', 'name' => 'Biaya Admin Bank', 'type' => 'expense'],
-            ['code' => '5-10006', 'name' => 'Beban ATK', 'type' => 'expense'],
-            ['code' => '5-10007', 'name' => 'Beban Listrik', 'type' => 'expense'],
-            ['code' => '5-10008', 'name' => 'Beban Air', 'type' => 'expense'],
-            ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
-            ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
-            ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense'],
-            ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'contra_expense'], // Nilainya negatif, contra expenses
-            ['code' => '5-10013', 'name' => 'Beban Pengiriman Pembelian', 'type' => 'expense'],
-            ['code' => '5-10014', 'name' => 'Beban Penyesuaian Persediaan', 'type' => 'expense'],
-            // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
+            ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'], // Terkait persediaan & utang usaha
+            ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10004', 'name' => 'Beban Iklan', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10005', 'name' => 'Biaya Admin Bank', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10006', 'name' => 'Beban ATK', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10007', 'name' => 'Beban Listrik', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10008', 'name' => 'Beban Air', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'contra_expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'], // Mengurangi pengeluaran kas operasional
+            ['code' => '5-10013', 'name' => 'Beban Pengiriman Pembelian', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'],
+            ['code' => '5-10014', 'name' => 'Beban Penyesuaian Persediaan', 'type' => 'expense', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'operating'], // Biasanya non-kas
         ];
 
         foreach ($accounts as $account) {

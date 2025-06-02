@@ -232,7 +232,6 @@
         </div>
     </div>
 </div>
-
 <div class="row">
     <!-- Performa Dokter -->
     <div class="col-md-6">
@@ -262,10 +261,10 @@
         display: block;
     }
 </style>
-<script src="{{ asset('assets/js/chart.js') }}"></script>
-<script src="{{ asset('assets/js/chartjs-plugin-datalabels.min.js') }}"></script>
-<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script> -->
+<!-- <script src="{{ asset('assets/js/chart.js') }}"></script>
+<script src="{{ asset('assets/js/chartjs-plugin-datalabels.min.js') }}"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
     function formatRupiah(value) {
         if (!value) return 'Rp 0';
@@ -298,8 +297,7 @@
             reservasiList.forEach(reservasi => {
                 html += `
             <tr>
-                <td>${reservasi.patient?.name || '-'}</td>
-                <td>${reservasi.doctor?.name || '-'}</td>
+<td>${([reservasi.patient?.fname, reservasi.patient?.mname, reservasi.patient?.lname].filter(Boolean).join(' ')) || '-'}</td>                <td>${reservasi.doctor?.name || '-'}</td>
                 <td>${reservasi.tanggal_reservasi}</td>
                 <td>${reservasi.jam_mulai}</td>
                 <td>${reservasi.jam_selesai}</td>

@@ -52,7 +52,7 @@ class ReservationController extends Controller
         $message = "Halo {$reservation->patient->fname} {$reservation->patient->mname} {$reservation->patient->lname}, untuk konfirmasi kehadiran di {$reservation->tanggal_reservasi} dan {$reservation->jam_mulai} ya. Terima kasih!";
 
         // Redirect ke wa.me dengan pesan template
-        return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
+        return redirect("https://wa.me/{$phoneNumber}?text=" . urlencode($message));
     }
 
     public function waConfirmation($id)
@@ -205,7 +205,7 @@ class ReservationController extends Controller
         // Menyimpan flash message ke session
         session()->flash('success', 'Reservation created. Please wait to be contacted by Admin');
 
-        return redirect()->route('reservation.index'); // Redirect ke halaman reservasi setelah sukses
+        return redirect()->route('reservations.upcoming');
     }
 
     public function upcomingReservations()

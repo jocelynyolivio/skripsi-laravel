@@ -5,9 +5,8 @@
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Stock Card List</h3>
         <div class="mb-3">
-    <a href="{{ route('dashboard.stock_cards.adjust') }}" class="btn btn-warning">Stock Adjustment</a>
-</div>
-
+            <a href="{{ route('dashboard.stock_cards.adjust') }}" class="btn btn-warning">Stock Adjustment</a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -16,17 +15,20 @@
 
     <form id="filterForm" method="GET" action="{{ route('dashboard.stock_cards.index') }}" class="mb-3 row">
         <div class="col-md-3">
-            <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
+            <label for="start_date" class="form-label visually-hidden">Start Date</label>
+            <input type="date" name="start_date" id="start_date" class="form-control" 
+                   value="{{ request('start_date', \Carbon\Carbon::now()->startOfMonth()->toDateString()) }}">
         </div>
         <div class="col-md-3">
-            <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+            <label for="end_date" class="form-label visually-hidden">End Date</label>
+            <input type="date" name="end_date" id="end_date" class="form-control" 
+                   value="{{ request('end_date', \Carbon\Carbon::now()->endOfMonth()->toDateString()) }}">
         </div>
         <div class="col-md-3">
             <button type="submit" class="btn btn-primary">Filter</button>
             <a href="{{ route('dashboard.stock_cards.index') }}" class="btn btn-secondary">Reset</a>
         </div>
     </form>
-
 
     <table id="stockCardTable" class="table table-striped table-bordered">
         <thead>
@@ -70,18 +72,24 @@
     });
 
     $('#filterForm').on('submit', function(e) {
-            const startDate = new Date($('input[name="start_date"]').val());
-            const endDate = new Date($('input[name="end_date"]').val());
+        const startDateVal = $('input[name="start_date"]').val();
+        const endDateVal = $('input[name="end_date"]').val();
 
-            if (startDate && endDate && endDate <= startDate) {
+        // Hanya lakukan validasi jika kedua tanggal diisi
+        if (startDateVal && endDateVal) {
+            const startDate = new Date(startDateVal);
+            const endDate = new Date(endDateVal);
+
+            if (endDate < startDate) { // Perbaiki kondisi: endDate harus lebih besar atau sama dengan startDate
                 e.preventDefault();
                 Swal.fire({
                     icon: 'error',
                     title: 'Invalid Date Range',
-                    text: 'Tanggal akhir harus lebih besar dari tanggal awal.'
+                    text: 'Tanggal akhir harus lebih besar atau sama dengan tanggal awal.'
                 });
             }
-        });
+        }
+    });
 
     $('#stockCardTable').on('click', '.delete-button', function(e) {
         e.preventDefault();

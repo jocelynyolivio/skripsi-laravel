@@ -3,7 +3,7 @@
 @section('breadcrumbs')
 @include('dashboard.layouts.breadcrumbs', [
 'customBreadcrumbs' => [
-['text' => 'Purchases Orders']
+['text' => 'Purchase Orders']
 ]
 ])
 @endsection

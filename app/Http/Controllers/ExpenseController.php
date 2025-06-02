@@ -64,7 +64,7 @@ class ExpenseController extends Controller
                 'created_by' => auth()->id(),
                 'description' => $request->description,
                 'amount' => $request->amount,
-                'status' => 'ACTIVE',
+                'status' => 'active',
                 'attachment_path' => $attachmentPath, // <-- SIMPAN PATH FILE DI SINI
                 'coa_out' => $request->coa_out,
                 'coa_in' => $request->coa_in,

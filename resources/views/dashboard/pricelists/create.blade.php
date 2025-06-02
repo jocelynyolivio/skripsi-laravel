@@ -41,7 +41,7 @@
         <div class="mb-3 form-check">
             <input type="checkbox" name="is_promo" value="1" class="form-check-input" id="is_promo"
                 {{ old('is_promo', $pricelist->is_promo ?? false) ? 'checked' : '' }}>
-            <label for="is_promo" class="form-check-label">Promo?</label>
+            <label for="is_promo" class="form-check-label">Promo</label>
         </div>
 
         <div class="mb-3">

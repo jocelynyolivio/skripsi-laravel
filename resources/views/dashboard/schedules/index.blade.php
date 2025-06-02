@@ -101,167 +101,217 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', async function() {
-        const patientSelect = document.getElementById('patient');
-        const reservationForm = document.getElementById('reservationForm');
-        const resultsDiv = document.getElementById('results');
-        const resultsClickedDiv = document.getElementById('resultsClicked');
-        let selectedSchedule = null;
+document.addEventListener('DOMContentLoaded', async function() {
+    const patientSelect = document.getElementById('patient');
+    const reservationForm = document.getElementById('reservationForm');
+    const resultsDiv = document.getElementById('results');
+    const resultsClickedDiv = document.getElementById('resultsClicked');
+    let selectedSchedule = null;
+    let selectedScheduleElement = null; // Untuk menyimpan elemen yang dipilih
 
-        // Fetch patients data
-        try {
-            const response = await fetch('/dashboard/schedules/get-patients');
-            const patients = await response.json();
+    // Fetch patients data
+    try {
+        const response = await fetch('/dashboard/schedules/get-patients');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const patients = await response.json();
 
-            patients.forEach(patient => {
-                const option = document.createElement('option');
-                option.value = patient.id;
-                option.textContent = (patient.fname || '') + ' ' + (patient.mname || '') + ' ' + (patient.lname || '');
-                patientSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error fetching patients:', error);
-            patientSelect.innerHTML = '<option value="">Error loading patients</option>';
+        patients.forEach(patient => {
+            const option = document.createElement('option');
+            option.value = patient.id;
+            // Gabungkan nama dengan aman, tangani jika ada bagian nama yang null/kosong
+            option.textContent = [patient.fname, patient.mname, patient.lname].filter(name => name).join(' ');
+            patientSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error fetching patients:', error);
+        // Berikan pesan error yang lebih informatif atau fallback UI jika perlu
+        const errorOption = document.createElement('option');
+        errorOption.value = "";
+        errorOption.textContent = "Error loading patients";
+        errorOption.disabled = true;
+        patientSelect.innerHTML = ''; // Kosongkan dulu jika ada opsi default
+        patientSelect.appendChild(errorOption);
+        // Mungkin nonaktifkan form atau beri tahu pengguna
+    }
+
+    // Handle form submission
+    document.getElementById('filterForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        // Reset tampilan schedule yang dipilih sebelumnya dan sembunyikan form reservasi
+        resultsClickedDiv.innerHTML = '';
+        reservationForm.style.display = 'none';
+        selectedSchedule = null;
+        if (selectedScheduleElement) {
+            // Pastikan selectedScheduleElement direset ke style default jika ada
+             selectedScheduleElement.classList.remove('btn-success', 'text-white');
+             selectedScheduleElement.classList.add('btn-outline-success');
+             selectedScheduleElement = null;
         }
 
-        // Handle form submission
-        document.getElementById('filterForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
 
-            const date = document.getElementById('date').value;
-            const patientId = document.getElementById('patient').value;
+        const date = document.getElementById('date').value;
+        const patientId = document.getElementById('patient').value;
 
-            if (!patientId) {
-                alert('Please select a patient first.');
+        if (!patientId) {
+            Swal.fire({ // Menggunakan Swal untuk alert yang lebih baik
+                icon: 'warning',
+                title: 'Oops...',
+                text: 'Please select a patient first.',
+            });
+            return;
+        }
+        if (!date) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Oops...',
+                text: 'Please select a date first.',
+            });
+            return;
+        }
+
+
+        try {
+            const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+
+            if (!data.doctors || data.doctors.length === 0) {
+                resultsDiv.innerHTML = `
+                <div class="alert alert-warning mt-3">
+                    No available schedules found for <strong>${data.date_formatted || data.date}</strong> (${data.day_of_week}).
+                </div>
+                `;
                 return;
             }
 
-            try {
-                const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
-                const data = await response.json();
-
-                if (data.doctors.length === 0) {
-                    resultsDiv.innerHTML = `
-                    <div class="alert alert-warning">
-                        No available schedules found for ${data.date} (${data.day_of_week}).
-                    </div>
-                `;
-                    return;
-                }
-
-                resultsDiv.innerHTML = ` 
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Available Schedules for ${data.date} (${data.day_of_week})</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th width="40%">Doctor</th>
-                                        <th>Available Times</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${data.doctors.map(doctor => `
-                                        <tr class="doctor-row" data-doctor-id="${doctor.doctor.id}">
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0">${doctor.doctor.name}</h6>
-                                                    </div>
+            resultsDiv.innerHTML = `
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Available Schedules for <strong>${data.date_formatted || data.date}</strong> (${data.day_of_week})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="35%" class="ps-3">Doctor</th>
+                                    <th>Available Times</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.doctors.map(doctor => `
+                                    <tr class="doctor-row" data-doctor-id="${doctor.doctor.id}">
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-0">${doctor.doctor.name}</h6>
                                                 </div>
-                                            </td> 
-                                            <td>
-                                                ${doctor.schedules.filter(schedule => schedule.is_available).map(schedule => 
-                                                    `<span class="badge bg-primary schedule-badge" 
-                                                          data-time-start="${schedule.time_start}" 
-                                                          data-time-end="${schedule.time_end}" 
-                                                          data-doctor-id="${doctor.doctor.id}"
-                                                          data-doctor-name="${doctor.doctor.name}">
-                                                        ${schedule.time_start} - ${schedule.time_end}
-                                                    </span>`
-                                                ).join(' ')}
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-wrap">
+                                            ${doctor.schedules.filter(schedule => schedule.is_available).map(schedule =>
+                                                // PERUBAHAN DI SINI: Gunakan btn-outline-success sebagai default
+                                                // dan ganti <span> menjadi <button> untuk semantik yang lebih baik
+                                                `<button type="button" class="btn btn-sm btn-outline-success schedule-badge"
+                                                    data-time-start="${schedule.time_start}"
+                                                    data-time-end="${schedule.time_end}"
+                                                    data-doctor-id="${doctor.doctor.id}"
+                                                    data-doctor-name="${doctor.doctor.name}">
+                                                    ${schedule.time_start} - ${schedule.time_end}
+                                                </button>`
+                                            ).join('') || '<span class="text-muted fst-italic">No specific time slots, contact directly.</span>'}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
             `;
 
-            } catch (error) {
-                console.error('Error:', error);
-                resultsDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    Error loading schedule data. Please try again later.
-                </div>
+        } catch (error) {
+            console.error('Error fetching schedules:', error);
+            resultsDiv.innerHTML = `
+            <div class="alert alert-danger mt-3">
+                Error loading schedule data. Please try again later. Details: ${error.message}
+            </div>
             `;
+        }
+    });
+
+    // Handle schedule selection
+    resultsDiv.addEventListener('click', function(event) {
+        // Hanya target elemen dengan kelas 'schedule-badge'
+        if (event.target.classList.contains('schedule-badge')) {
+            const clickedBadge = event.target;
+
+            // Jika ada badge yang sudah dipilih sebelumnya, reset stylenya
+            if (selectedScheduleElement && selectedScheduleElement !== clickedBadge) {
+                selectedScheduleElement.classList.remove('btn-success', 'text-white');
+                selectedScheduleElement.classList.add('btn-outline-success');
             }
-        });
 
-        // Handle schedule selection
-        resultsDiv.addEventListener('click', function(event) {
-            if (event.target.classList.contains('schedule-badge')) {
-                // Remove previous selection highlights
-                document.querySelectorAll('.schedule-badge').forEach(badge => {
-                    badge.classList.remove('bg-success');
-                    badge.classList.add('bg-primary');
-                });
-
-                // Highlight selected badge
-                event.target.classList.remove('bg-primary');
-                event.target.classList.add('bg-success');
+            // Toggle style untuk badge yang diklik
+            if (clickedBadge.classList.contains('btn-outline-success')) {
+                // Jika belum dipilih, pilih
+                clickedBadge.classList.remove('btn-outline-success');
+                clickedBadge.classList.add('btn-success', 'text-white');
+                selectedScheduleElement = clickedBadge; // Simpan elemen yang dipilih
 
                 // Get selected schedule data
                 selectedSchedule = {
-                    time_start: event.target.dataset.timeStart,
-                    time_end: event.target.dataset.timeEnd,
-                    doctor_id: event.target.dataset.doctorId,
-                    doctor_name: event.target.dataset.doctorName,
-                    date: document.getElementById('date').value
+                    time_start: clickedBadge.dataset.timeStart,
+                    time_end: clickedBadge.dataset.timeEnd,
+                    doctor_id: clickedBadge.dataset.doctorId,
+                    doctor_name: clickedBadge.dataset.doctorName,
+                    date: document.getElementById('date').value,
+                    date_formatted: document.querySelector('#results .card-header h5 strong') ? document.querySelector('#results .card-header h5 strong').textContent : document.getElementById('date').value
                 };
 
                 // Set hidden form values
                 document.getElementById('patient_id').value = document.getElementById('patient').value;
                 document.getElementById('doctor_id').value = selectedSchedule.doctor_id;
-                document.getElementById('reservation_date').value = selectedSchedule.date;
+                document.getElementById('reservation_date').value = selectedSchedule.date; // Kirim YYYY-MM-DD
                 document.getElementById('time_start').value = selectedSchedule.time_start;
                 document.getElementById('time_end').value = selectedSchedule.time_end;
 
                 // Show confirmation
                 resultsClickedDiv.innerHTML = `
-                <div class="card border-success">
+                <div class="card border-success mt-3">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">Selected Appointment</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Date:</strong> ${selectedSchedule.date}</p>
-                                <p><strong>Time:</strong> ${selectedSchedule.time_start} - ${selectedSchedule.time_end}</p>
+                                <p class="mb-1"><strong>Date:</strong> ${selectedSchedule.date_formatted}</p>
+                                <p class="mb-0"><strong>Time:</strong> ${selectedSchedule.time_start} - ${selectedSchedule.time_end}</p>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Doctor:</strong> ${selectedSchedule.doctor_name}</p>
-                                <p><strong>Patient:</strong> ${patientSelect.options[patientSelect.selectedIndex].text}</p>
+                                <p class="mb-1"><strong>Doctor:</strong> ${selectedSchedule.doctor_name}</p>
+                                <p class="mb-0"><strong>Patient:</strong> ${patientSelect.options[patientSelect.selectedIndex].text}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
-
-                // Show reservation form
+                `;
                 reservationForm.style.display = 'block';
+                resultsClickedDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                // Scroll to confirmation
-                resultsClickedDiv.scrollIntoView({
-                    behavior: 'smooth'
-                });
+            } else {
+                // Jika sudah dipilih, batalkan pilihan (deselect)
+                clickedBadge.classList.remove('btn-success', 'text-white');
+                clickedBadge.classList.add('btn-outline-success');
+                selectedScheduleElement = null; // Tidak ada yang dipilih
+                selectedSchedule = null;
+                resultsClickedDiv.innerHTML = ''; // Kosongkan konfirmasi
+                reservationForm.style.display = 'none'; // Sembunyikan form reservasi
             }
-        });
+        }
     });
+});
 </script>
 @endsection

@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StockCard;
+use Illuminate\Support\Str;
 use App\Models\JournalEntry;
 use Illuminate\Http\Request;
+use App\Models\JournalDetail;
+use App\Models\ChartOfAccount;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class JournalController extends Controller
 {
@@ -24,19 +31,47 @@ class JournalController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+    
+public function create()
+{
+    $coas = ChartOfAccount::all();
+    return view('dashboard.journals.create', compact('coas'));
+}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+public function store(Request $request)
+{
+    $request->validate([
+        'entry_date' => 'required|date',
+        'description' => 'nullable|string',
+        'coa_in' => 'required|exists:chart_of_accounts,id',
+        'coa_out' => 'required|exists:chart_of_accounts,id|different:coa_in',
+        'amount' => 'required|numeric|min:0.01',
+    ]);
 
+    // Buat journal entry utama
+    $entry = JournalEntry::create([
+        'entry_date' => $request->entry_date,
+        'description' => $request->description,
+    ]);
+
+    // Tambah detail debit
+    JournalDetail::create([
+        'journal_entry_id' => $entry->id,
+        'coa_id' => $request->coa_in,
+        'debit' => $request->amount,
+        'credit' => 0,
+    ]);
+
+    // Tambah detail kredit
+    JournalDetail::create([
+        'journal_entry_id' => $entry->id,
+        'coa_id' => $request->coa_out,
+        'debit' => 0,
+        'credit' => $request->amount,
+    ]);
+
+    return redirect()->route('dashboard.journals.index')->with('success', 'Jurnal berhasil dibuat.');
+}
     public function show($id)
     {
         // dd('haui');

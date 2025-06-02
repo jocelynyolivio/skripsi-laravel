@@ -56,7 +56,7 @@ class MedicalRecordController extends Controller
         // Halo Jocelyn, Selamat datang di klinik Senyumqu. Untuk konfirmasi kehadiran konsultasi tanggal 2025-05-16 pukul 11:00 ya. Terima kasih! -Salam Admin Senyumqu
 
         // Redirect ke wa.me dengan pesan template
-        return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
+        return redirect("https://wa.me/{$phoneNumber}?text=" . urlencode($message));
     }
 
     public function waConfirmation($id)

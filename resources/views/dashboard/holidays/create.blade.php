@@ -8,13 +8,15 @@
 ])
 @endsection
 @section('container')
+<div class="container mt-5 col-md-6">
+    <h2>Create Holidays</h2>
     @if(session('error'))
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     @endif
-    <h2>Create Holidays</h2>
+
     <form action="{{ route('dashboard.holidays.store') }}" method="POST">
         @csrf
         <div class="form-group">
@@ -28,5 +30,6 @@
         <br>
         <button type="submit" class="btn btn-success">Save</button>
     </form>
+</div>
 </div>
 @endsection

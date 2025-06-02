@@ -48,6 +48,11 @@
 
 <div class="container mt-5 col-md-6 justify-content-center reservation-container">
     <h3 class="mb-4 text-center">Upcoming Reservations</h3>
+            @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+            @endif
 
     @if($reservations->isEmpty())
         <div class="alert alert-info text-center">No upcoming reservations.</div>

@@ -67,7 +67,7 @@ class PatientController extends Controller
         $message = "Halo {$patientBirthday->fname}, selamat ulang tahun! Anda mendapatkan voucher spesial dari kami. Terima kasih telah menjadi pasien kami. Berikut kode voucher anda : {$patientBirthday->birthday_voucher_code} dapat digunakan sampai {$patientBirthday->birthday_voucher_expired_at}";
 
         // Redirect ke wa.me dengan pesan template
-        return redirect("https://wa.me/62{$phoneNumber}?text=" . urlencode($message));
+        return redirect("https://wa.me/{$phoneNumber}?text=" . urlencode($message));
     }
 
     public function generateVoucherBirthday($id)

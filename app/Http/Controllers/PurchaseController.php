@@ -644,6 +644,7 @@ class PurchaseController extends Controller
 
     public function storeReceived(Request $request, PurchaseInvoice $purchase)
     {
+        // dd('hi'); 
         foreach ($request->received_quantity as $materialId => $quantityReceived) {
             if ($quantityReceived > 0) {
                 // **Ambil semua Purchase Detail untuk Material ini**
@@ -653,7 +654,7 @@ class PurchaseController extends Controller
                 $totalCost = 0;
 
                 foreach ($details as $detail) {
-                    $unitPrice = $detail->unit_price; // Harga per unit dari Purchase Detail
+                    $unitPrice = $detail->final_unit_price; // Harga per unit dari Purchase Detail
 
                     // **Hitung total kuantitas & total biaya**
                     $totalQuantity += $quantityReceived;

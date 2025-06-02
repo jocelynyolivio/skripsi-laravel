@@ -41,6 +41,10 @@
     a:hover {
         text-decoration: underline;
     }
+
+    .required-star {
+        color: red;
+    }
 </style>
 
 <div class="container mt-5">
@@ -56,13 +60,13 @@
             <main class="register-card">
                 <h2 class="mb-4 text-center register-title">Patient Registration</h2>
 
-                <form action="/patient/register" method="post">
+                <form action="/patient/register" method="post" id="registrationForm">
                     @csrf
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control @error('fname') is-invalid @enderror" id="fname" name="fname" placeholder="First Name" required value="{{ old('fname') }}">
-                        <label for="fname">First Name</label>
+                        <label for="fname">First Name <span class="required-star">*</span></label>
                         @error('fname')
-                        <div class="invalid-feedback">Please input first name.</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -70,7 +74,7 @@
                         <input type="text" class="form-control @error('mname') is-invalid @enderror" id="mname" name="mname" placeholder="Middle Name" value="{{ old('mname') }}">
                         <label for="mname">Middle Name</label>
                         @error('mname')
-                        <div class="invalid-feedback">Please input middle name.</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -78,40 +82,40 @@
                         <input type="text" class="form-control @error('lname') is-invalid @enderror" id="lname" name="lname" placeholder="Last Name" value="{{ old('lname') }}">
                         <label for="lname">Last Name</label>
                         @error('lname')
-                        <div class="invalid-feedback">Please input last name.</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control @error('home_mobile') is-invalid @enderror"
-                            id="home_mobile" name="home_mobile" placeholder="Mobile Phone" required
-                            value="{{ old('home_mobile', '+62') }}">
-
-                        <label for="home_mobile">Mobile Phone</label>
+                               id="home_mobile" name="home_mobile" placeholder="Mobile Phone" required
+                               value="{{ old('home_mobile', '62') }}">
+                        <label for="home_mobile">Mobile Phone <span class="required-star">*</span></label>
                         @error('home_mobile')
-                        <div class="invalid-feedback">Please input nomor telepon.</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
+                        {{-- Element untuk pesan error dari JavaScript --}}
+                        <div class="invalid-feedback" id="home_mobile_js_error_message"></div>
                     </div>
 
                     <div class="form-floating mb-3">
                         <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Email" required value="{{ old('email') }}">
-                        <label for="email">Email address</label>
+                        <label for="email">Email address <span class="required-star">*</span></label>
                         @error('email')
-                        <div class="invalid-feedback">Please input a valid email.</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-floating mb-3 position-relative">
                         <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Password" required>
-                        <label for="password">Password</label>
+                        <label for="password">Password <span class="required-star">*</span></label>
                         <span class="position-absolute top-50 end-0 translate-middle-y me-3" onclick="togglePassword()" style="cursor: pointer;">
                             <i id="togglePasswordIcon" class="bi bi-eye-slash"></i>
                         </span>
                         @error('password')
-                        <div class="invalid-feedback">Password must be at least 5 characters.</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
 
                     <button class="btn-register w-100 mt-2" type="submit">Register</button>
                 </form>
@@ -139,22 +143,74 @@
         }
     }
 
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const mobileInput = document.getElementById('home_mobile');
-        const mobile = mobileInput.value;
+    const mobileInput = document.getElementById('home_mobile');
+    const initialPrefix = '62';
 
-        const pattern = /^\+62\d{9,}$/; // +62 diikuti minimal 9 digit angka
-        if (!pattern.test(mobile)) {
-            e.preventDefault();
-            mobileInput.classList.add('is-invalid');
-            if (!mobileInput.nextElementSibling || !mobileInput.nextElementSibling.classList.contains('invalid-feedback')) {
-                const error = document.createElement('div');
-                error.classList.add('invalid-feedback');
-                error.innerText = 'Phone number must start with +62 and contain at least 9 digits after it.';
-                mobileInput.parentNode.appendChild(error);
+    // Fungsi untuk memastikan input selalu dimulai dengan '62' dan hanya berisi angka setelahnya
+    function sanitizeMobileInput() {
+        let value = mobileInput.value;
+        if (!value.startsWith(initialPrefix)) {
+            // Jika pengguna mencoba menghapus '62' atau '62' tidak ada di awal
+            const numericPart = value.replace(/\D/g, ''); // Ambil semua digit
+            // Gabungkan kembali dengan prefix, hilangkan '62' jika pengguna mengetiknya lagi setelah prefix
+            mobileInput.value = initialPrefix + numericPart.replace(/^62/, '');
+        } else {
+            // Jika sudah diawali '62', pastikan hanya angka yang mengikuti
+            const afterPrefix = value.substring(initialPrefix.length);
+            mobileInput.value = initialPrefix + afterPrefix.replace(/\D/g, '');
+        }
+    }
+
+    // Panggil sanitize saat ada input
+    mobileInput.addEventListener('input', sanitizeMobileInput);
+
+    // Panggil sanitize saat field kehilangan fokus (blur) untuk memastikan format akhir
+    mobileInput.addEventListener('blur', sanitizeMobileInput);
+
+
+    // Inisialisasi nilai jika field kosong dan tidak ada old value
+    // (value dari blade `old('home_mobile', '62')` sudah menangani ini pada page load)
+    if (mobileInput.value === '') { // Ini terjadi jika old('home_mobile') adalah string kosong
+         mobileInput.value = initialPrefix;
+    } else if (!mobileInput.value.startsWith(initialPrefix)) { // Jika old() ada tapi tidak dimulai 62
+        sanitizeMobileInput(); // Coba perbaiki saat load
+    }
+
+
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        const mobileValue = mobileInput.value;
+        const jsErrorElement = document.getElementById('home_mobile_js_error_message');
+        const isServerErrorActive = mobileInput.classList.contains('is-invalid') && mobileInput.parentElement.querySelector('.invalid-feedback.d-block');
+
+        // Regex: harus diawali '62' dan diikuti 9 sampai 13 digit angka.
+        // Jika Anda ingin spesifik "minimal 11 angka dibelakangnya": /^62\d{11,}$/
+        // Jika Anda ingin spesifik "tepat 11 angka dibelakangnya": /^62\d{11}$/
+        const pattern = /^62\d{9,13}$/;
+
+        // Bersihkan pesan error JS sebelumnya
+        mobileInput.classList.remove('is-invalid'); // Hapus dulu, tambahkan lagi jika error
+        if (jsErrorElement) {
+            jsErrorElement.textContent = '';
+            jsErrorElement.style.display = 'none';
+        }
+
+        if (!pattern.test(mobileValue)) {
+            e.preventDefault(); // Hentikan submit form
+
+            // Tampilkan pesan error JS hanya jika tidak ada pesan error dari server yang aktif
+            if (!isServerErrorActive) {
+                mobileInput.classList.add('is-invalid');
+                if (jsErrorElement) {
+                    jsErrorElement.textContent = 'Nomor telepon harus diawali 62 dan diikuti 9-13 digit angka (misal: 6281234567890).';
+                    jsErrorElement.style.display = 'block';
+                }
+            } else {
+                // Jika ada error server, pastikan .is-invalid tetap ada
+                mobileInput.classList.add('is-invalid');
             }
         }
+        // Jika valid, pesan error JS sudah dibersihkan. Validasi server akan berjalan jika form disubmit.
     });
 </script>
 
-@endsection
+@endsection 
