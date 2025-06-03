@@ -826,5 +826,133 @@ class DatabaseSeeder extends Seeder
             'nomor_telepon' => '0811100029292',
             'email' => 'supplier1@gmail.com'
         ]);
+
+        $suppliers = [
+            // Contoh dari Anda (jika ingin disertakan dengan data spesifik)
+            // [
+            //     'nama' => 'supplier1',
+            //     'alamat' => 'kenjeran',
+            //     'nomor_telepon' => '0811100029292',
+            //     'email' => 'supplier1@gmail.com'
+            // ],
+
+            // Data dari gambar
+            ['nama' => 'Tokopedia - Alice Dental', 'alamat' => 'Jakarta Barat'],
+            ['nama' => 'Tokopedia - Andini Dental Supply', 'alamat' => null],
+            ['nama' => 'Tokopedia - DENPRO Dental Store', 'alamat' => 'Kota Malang'],
+            ['nama' => 'Tokopedia - Cobra Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - Dental Grosir', 'alamat' => 'Kab. Sidoarjo'],
+            ['nama' => 'Toko Utama Grosir', 'alamat' => 'Kota Malang'],
+            ['nama' => 'Tokopedia - Dental Supply', 'alamat' => 'Jl. Dokter Cipto No. 22, Malang'],
+            ['nama' => 'Cahaya Alam Sutat', 'alamat' => 'Jl. Embong Wungu'],
+            ['nama' => 'Toko Sumber Rejeki', 'alamat' => null],
+            ['nama' => 'Tokopedia - TKShops', 'alamat' => 'Kota Surabaya'],
+            ['nama' => 'Toko Bahan Gigi Murah Care (THC)', 'alamat' => 'Surabaya'],
+            ['nama' => 'SQH Sewa Ruko', 'alamat' => null],
+            ['nama' => 'Dentalogi', 'alamat' => null],
+            ['nama' => 'Toko Andayana', 'alamat' => null],
+            ['nama' => 'SQH Dental Store', 'alamat' => null],
+            ['nama' => 'Tokopedia - Vention Official Store', 'alamat' => null],
+            ['nama' => 'Tokopedia - Sentra Dental Grosir', 'alamat' => null],
+            ['nama' => 'Toko Sarjana Sawangan', 'alamat' => null],
+            ['nama' => 'Tokopedia - Eos Dental (Eos)', 'alamat' => null],
+            ['nama' => 'SQH POIJ', 'alamat' => null],
+            ['nama' => 'Mitra Dental Malang (laboratorium Retainer)', 'alamat' => null],
+            ['nama' => 'SQH PDAM', 'alamat' => null],
+            ['nama' => 'Toko Sinar Jaya', 'alamat' => 'Jl. Brigjen Slamet Riadi No. 4A, Oro-Oro Dowo - Malang'],
+            ['nama' => 'Tokopedia - Dental Jaya - Yogyakarta', 'alamat' => 'Online - Tokopedia'], // Link di gambar
+            ['nama' => 'Tokopedia - My Dentist Store', 'alamat' => 'Online - Tokopedia'], // Link di gambar
+            ['nama' => 'Tokopedia - CNR Dental', 'alamat' => 'Jakarta Selatan'],
+            ['nama' => 'Karya Mandiri Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - Laris Blessing Jakarta Barat', 'alamat' => 'Jakarta Barat'],
+            ['nama' => 'Cahaya Terang 2', 'alamat' => 'Jl. Jaksa Agung Suprapto No. 40/A.3'],
+            ['nama' => 'Toko Sumber Jaya', 'alamat' => null],
+            ['nama' => 'Surya Dental Lab', 'alamat' => null],
+            ['nama' => 'Tokopedia Dental', 'alamat' => null],
+            ['nama' => 'Depo Bangunan PT Magadaegro Indonesia', 'alamat' => 'Jl. Raya Kemplo No. 69 Singosari, Malang'],
+            ['nama' => 'Tokopedia - Medilab Dental', 'alamat' => null],
+            ['nama' => 'PT. Camic Indonesia', 'alamat' => null],
+            // 'Cobra Dental' sudah ada di atas sebagai 'Tokopedia - Cobra Dental', bisa jadi duplikat atau entitas berbeda. Saya skip untuk menghindari duplikasi nama jika merujuk hal yang sama.
+            ['nama' => 'Abadi Dental Lab', 'alamat' => 'SURABAYA'],
+            ['nama' => 'Tokopedia - Alkes ID', 'alamat' => 'BEKASI'],
+            ['nama' => 'Tokopedia - Healthy Dent', 'alamat' => 'JAKARTA TIMUR'],
+            ['nama' => 'FASSAN - DENT', 'alamat' => 'MALANG'],
+            ['nama' => 'PT. Cobra Dental Supply (Apotek DMC - Malang)', 'alamat' => 'MALANG'],
+            ['nama' => 'Tokopedia - Sentrum Dental', 'alamat' => 'SURABAYA'],
+            ['nama' => 'GIGI SURABAYA', 'alamat' => null],
+            ['nama' => 'Agung Shopy 69 Surabaya', 'alamat' => 'Surabaya'],
+            ['nama' => 'Tokopedia - Sinar Grosir Surabaya', 'alamat' => null],
+            ['nama' => 'SQH VENDOR', 'alamat' => null],
+            ['nama' => 'PT. Andini Jaya', 'alamat' => 'Jalan NayAus No. 27D, Petojo Utara, Gambir, Jakarta Pusat 10130 Indonesia'],
+            ['nama' => 'Anugerah Medika', 'alamat' => null],
+            ['nama' => 'Global Teknik Dent', 'alamat' => 'Jl. Raya Candi 3 No. 503'],
+            ['nama' => 'Konter', 'alamat' => null], // Nama 'Konter' sangat generik, mungkin perlu diperjelas.
+            ['nama' => 'Tokopedia - FDC Dental', 'alamat' => 'Jakarta Barat'],
+            ['nama' => 'H&N Gloves', 'alamat' => 'Jakarta Barat'],
+            ['nama' => 'Toko Ifa', 'alamat' => null],
+            ['nama' => 'Apotik Sehati', 'alamat' => null],
+            ['nama' => 'Tokopedia - Laris Store97', 'alamat' => 'Jakarta Barat'],
+            ['nama' => 'Tokopedia - MG Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - Jago Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - Champion Medical', 'alamat' => 'Jakarta Barat'],
+            ['nama' => 'Tokopedia - OneMed Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - TrustMedica Indonesia', 'alamat' => null],
+            ['nama' => 'Tokopedia - Thomasong Dental', 'alamat' => null],
+            ['nama' => 'Toko Obat Sumber Waras', 'alamat' => 'Malang'],
+            ['nama' => 'Tokopedia - Dentalica', 'alamat' => null],
+            ['nama' => 'Tokopedia - Dental Point', 'alamat' => null],
+            ['nama' => 'Mitra Usaha - Pengadaan Yohan Yuwono', 'alamat' => null],
+            ['nama' => 'Duta Farma', 'alamat' => null],
+            ['nama' => 'Tokopedia - Dental Malang Udesign', 'alamat' => null],
+            ['nama' => 'Tokopedia - Holy Mart', 'alamat' => null],
+            ['nama' => 'Tokopedia - BMS Dentalindo', 'alamat' => null],
+            ['nama' => 'PT. Apex Instrumen Husantara', 'alamat' => null],
+            ['nama' => 'Permata Dental Laboratory', 'alamat' => null],
+            ['nama' => 'Toko ASTAKI', 'alamat' => 'Jl. Raya Tawangmangu Bedak 8A'],
+            ['nama' => 'Indonet', 'alamat' => null],
+            ['nama' => 'Santosa Houseware', 'alamat' => 'Jl. Laks. Martadinata 74 Kota Malang'],
+            ['nama' => 'Tokopedia - GlobalAlkes Store', 'alamat' => null],
+            ['nama' => 'Goya', 'alamat' => null], // Nama 'Goya' sangat generik
+            ['nama' => 'CV. Prima Abadi Dentalindo', 'alamat' => 'Jl. K.H. Hasyim AshariRuko Roxy Mas Blok B2 No. 30Jakarta Pusat 10150(Sebelah Bank Mega, seberang PT. Inti Karya)'],
+            ['nama' => 'Tokopedia - Sejahtera Bersama Grosir', 'alamat' => null],
+            ['nama' => 'Tokopedia - Global Dental Supply Malang', 'alamat' => null],
+            ['nama' => 'Toko Maju Jaya', 'alamat' => null],
+            ['nama' => 'DGDENT Supplies', 'alamat' => null],
+            ['nama' => 'Tokopedia - Dentrum Dental', 'alamat' => null], // Kemungkinan duplikat dengan "Tokopedia - Sentrum Dental"
+            ['nama' => 'Onemed - Medicom', 'alamat' => null],
+            ['nama' => 'Tokopedia - AMZ Gloves', 'alamat' => null],
+            ['nama' => 'PT. Pasifik Cita Retailindo', 'alamat' => null],
+            ['nama' => 'Jaya Agung Mas Steel', 'alamat' => null],
+            ['nama' => 'Ady Wibowo', 'alamat' => null],
+            ['nama' => 'Safeglove Tokopedia', 'alamat' => null],
+            ['nama' => 'Tokopedia - USA Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - TrustMedica Indonesia - Jakarta Barat', 'alamat' => 'Jakarta Barat'], // Lebih spesifik dari yang di atas
+            ['nama' => 'Tokopedia - Anugerah Sukses Sejati', 'alamat' => null],
+            ['nama' => 'Ar - Riza Dental Equipment', 'alamat' => 'Jln. Satsui Tubun No. 8A,Kelurahan Kebonsari, Kecamatan Sukun, Kota Malang'],
+            ['nama' => 'PT. Global Medik Persada', 'alamat' => null],
+            ['nama' => 'Malang Dental Laboratory', 'alamat' => null],
+            ['nama' => 'Dental Grosir Malang', 'alamat' => 'Perum Graha Gilang Purnama C4, Baran Gerdrri, Kedungkajar, Pakis, Malang'],
+            ['nama' => 'Siswoyo Tekno', 'alamat' => null],
+            ['nama' => 'Toko Obat Menang Jaya', 'alamat' => null],
+            ['nama' => 'MDI Dental', 'alamat' => null],
+            ['nama' => 'Tokopedia - Sahabat Medica Surabaya', 'alamat' => null],
+            ['nama' => 'Shopee - Lion Dental', 'alamat' => null],
+            ['nama' => 'Shopee - Dunia Dental Shop', 'alamat' => null],
+        ];
+
+        $defaultNomorTelepon = 'Tidak Ada Informasi';
+        $defaultEmail = 'Tidak Ada Informasi';
+
+        foreach ($suppliers as $supplierData) {
+            // Gunakan firstOrCreate untuk menghindari duplikasi berdasarkan nama supplier
+            Supplier::firstOrCreate(
+                ['nama' => $supplierData['nama']],
+                [
+                    'alamat' => $supplierData['alamat'],
+                    'nomor_telepon' => $supplierData['nomor_telepon'] ?? $defaultNomorTelepon,
+                    'email' => $supplierData['email'] ?? $defaultEmail
+                ]
+            );
+        }
     }
 }
