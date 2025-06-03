@@ -21,9 +21,6 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         // sesuai data absensi excel
@@ -171,45 +168,35 @@ class DatabaseSeeder extends Seeder
             Patient::create($data);
         }
 
-        // ScheduleTemplate::create([
-        //     'doctor_id' => 23,
-        //     'day_of_week' => 'Monday',
-        //     'start_time' => '10:00:00',
-        //     'end_time' => '17:00:00',
-        //     'is_active' => true,
-        //     'created_at' => Carbon::now(),
-        //     'updated_at' => Carbon::now(),
-        // ]);
-
         $schedules = [
             // SENIN
             ['doctor_id' => 10, 'day' => 'Monday', 'start' => '08:00:00', 'end' => '14:00:00'],
             ['doctor_id' => 9, 'day' => 'Monday', 'start' => '14:00:00', 'end' => '20:00:00'],
-        
+
             // SELASA
             ['doctor_id' => 22, 'day' => 'Tuesday', 'start' => '08:00:00', 'end' => '14:00:00'],
             ['doctor_id' => 7,  'day' => 'Tuesday', 'start' => '14:00:00', 'end' => '20:00:00'],
-        
+
             // RABU
             ['doctor_id' => 10, 'day' => 'Wednesday', 'start' => '08:00:00', 'end' => '14:00:00'],
             ['doctor_id' => 9,  'day' => 'Wednesday', 'start' => '14:00:00', 'end' => '20:00:00'],
-        
+
             // KAMIS
             ['doctor_id' => 8,  'day' => 'Thursday', 'start' => '08:00:00', 'end' => '14:00:00'],
             ['doctor_id' => 10, 'day' => 'Thursday', 'start' => '14:00:00', 'end' => '20:00:00'],
-        
+
             // JUMAT
             ['doctor_id' => 9,  'day' => 'Friday', 'start' => '08:00:00', 'end' => '14:00:00'],
             ['doctor_id' => 10, 'day' => 'Friday', 'start' => '14:00:00', 'end' => '20:00:00'],
-        
+
             // SABTU
             ['doctor_id' => 8,  'day' => 'Saturday', 'start' => '08:00:00', 'end' => '13:00:00'],
             ['doctor_id' => 22, 'day' => 'Saturday', 'start' => '14:00:00', 'end' => '20:00:00'],
-        
+
             // MINGGU
             ['doctor_id' => 22, 'day' => 'Sunday', 'start' => '11:00:00', 'end' => '17:00:00'],
         ];
-        
+
         foreach ($schedules as $s) {
             ScheduleTemplate::create([
                 'doctor_id' => $s['doctor_id'],
@@ -219,34 +206,6 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ]);
         }
-
-        DentalMaterial::create([
-            'name' => 'Resin Komposit',
-            'description' => 'Bahan untuk penambalan gigi berlubang',
-            'unit_type' => 'ml'
-        ]);
-
-        DentalMaterial::create([
-            'name' => 'Anestesi',
-            'description' => 'Cairan anestesi lokal untuk prosedur dental',
-            'unit_type' => 'ml'
-        ]);
-
-        DentalMaterial::create([
-            'name' => 'Cavity Liner',
-            'description' => 'Bahan pelapis untuk restorasi tambalan',
-            'unit_type' => 'ml'
-        ]);
-
-        DentalMaterial::create([
-            'name' => 'Amalgam',
-            'description' => 'Bahan tambalan yang mengandung logam',
-            'unit_type' => 'ml'
-        ]);
-
-        DentalMaterial::create(['name' => 'Alkohol 70%', 'description' => 'Cairan antiseptik', 'unit_type' => 'ml']);
-        DentalMaterial::create(['name' => 'Gigi Tiruan', 'description' => 'Gigi palsu', 'unit_type' => 'pcs']);
-        DentalMaterial::create(['name' => 'Bubuk Gips', 'description' => 'Bahan cetakan', 'unit_type' => 'g']);
 
         $types = [
             ['name' => 'Diagnosa', 'description' => 'Pemeriksaan dan diagnosis kondisi gigi'],
@@ -262,97 +221,10 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Post - Orthodonti', 'description' => 'Perawatan lanjutan setelah orthodonti'],
             ['name' => 'Orthodonti dari DRG LUAR', 'description' => 'Perawatan orthodonti dari dokter luar'],
         ];
-        
+
         foreach ($types as $type) {
             ProcedureType::create($type);
-        }        
-
-        // Procedure::create([
-        //     'name' => 'Tambal Gigi',
-        //     'description' => 'Prosedur untuk menambal gigi yang berlubang menggunakan bahan tambalan seperti resin komposit.',
-        // ]);
-
-        // Procedure::create([
-        //     'name' => 'Pembersihan Karang Gigi',
-        //     'description' => 'Prosedur untuk membersihkan karang gigi dan plak dengan scaler.',
-        // ]);
-
-        // Procedure::create([
-        //     'name' => 'Pencabutan Gigi',
-        //     'description' => 'Prosedur untuk mencabut gigi yang tidak bisa diselamatkan.',
-        // ]);
-
-        // $procedureMaterials = [
-        //     // Tambal Gigi
-        //     ['procedure_id' => 1, 'dental_material_id' => 1, 'quantity' => 2], // Resin Komposit
-        //     ['procedure_id' => 1, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
-        //     ['procedure_id' => 1, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
-        //     ['procedure_id' => 1, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (optional)
-
-        //     // Pencabutan Gigi
-        //     ['procedure_id' => 3, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi
-        //     ['procedure_id' => 3, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
-        //     ['procedure_id' => 3, 'dental_material_id' => 1, 'quantity' => 1], // Resin Komposit (pelindung pasca pencabutan)
-
-        //     // Pembersihan Karang Gigi
-        //     ['procedure_id' => 2, 'dental_material_id' => 3, 'quantity' => 1], // Cavity Liner
-        //     ['procedure_id' => 2, 'dental_material_id' => 2, 'quantity' => 1], // Anestesi (opsional)
-        //     ['procedure_id' => 2, 'dental_material_id' => 4, 'quantity' => 1], // Amalgam (kasus tertentu)
-        // ];
-
-        // // Loop dan buat satu per satu dengan create()
-        // foreach ($procedureMaterials as $data) {
-        //     ProcedureMaterial::create($data);
-        // }
-
-
-        // Tambal Gigi - Base Price
-        // Pricelist::create([
-        //     'procedure_id' => 1,
-        //     'price' => 300000, // Harga dasar: 300.000
-        //     'is_promo' => false,
-        //     'effective_date' => Carbon::now()->subDays(5),
-        // ]);
-
-        // // Tambal Gigi - Promo Price
-        // Pricelist::create([
-        //     'procedure_id' => 1,
-        //     'price' => 200000, // Harga promosi: 200.000
-        //     'is_promo' => true,
-        //     'effective_date' => Carbon::now()->subDays(2),
-        // ]);
-
-        // // Pembersihan Karang Gigi - Base Price
-        // Pricelist::create([
-        //     'procedure_id' => 2,
-        //     'price' => 400000, // Harga dasar: 400.000
-        //     'is_promo' => false,
-        //     'effective_date' => Carbon::now()->subDays(10),
-        // ]);
-
-        // // Pembersihan Karang Gigi - Promo Price
-        // Pricelist::create([
-        //     'procedure_id' => 2,
-        //     'price' => 300000, // Harga promosi: 300.000
-        //     'is_promo' => true,
-        //     'effective_date' => Carbon::now()->subDays(3),
-        // ]);
-
-        // // Pencabutan Gigi - Base Price
-        // Pricelist::create([
-        //     'procedure_id' => 3,
-        //     'price' => 500000, // Harga dasar: 500.000
-        //     'is_promo' => false,
-        //     'effective_date' => Carbon::now()->subDays(7),
-        // ]);
-
-        // // Pencabutan Gigi - Promo Price
-        // Pricelist::create([
-        //     'procedure_id' => 3,
-        //     'price' => 350000, // Harga promosi: 350.000
-        //     'is_promo' => true,
-        //     'effective_date' => Carbon::now()->subDays(1),
-        // ]);
+        }
 
         $procedures = [
             ['item_code' => '01A', 'name' => 'Janji Temu', 'procedure_type_id' => 1],
@@ -360,7 +232,7 @@ class DatabaseSeeder extends Seeder
             ['item_code' => '01C', 'name' => 'Tambahan Kategori 1', 'procedure_type_id' => 1],
             ['item_code' => '01D', 'name' => 'Tambahan Kategori 2', 'procedure_type_id' => 1],
             ['item_code' => '01E', 'name' => 'Tambahan Kategori 3', 'procedure_type_id' => 1],
-            
+
             ['item_code' => '02A', 'name' => 'Tambal Estetis gigi depan (kecil)', 'procedure_type_id' => 2],
             ['item_code' => '02B', 'name' => 'Tambal Estetis gigi depan (besar)', 'procedure_type_id' => 2],
             ['item_code' => '02C', 'name' => 'Tambal Estetis gigi belakang (class I)', 'procedure_type_id' => 2],
@@ -372,7 +244,7 @@ class DatabaseSeeder extends Seeder
             ['item_code' => '02I', 'name' => 'Bongkar tambalan', 'procedure_type_id' => 2],
             ['item_code' => '02J', 'name' => 'Occlusal Adjustment', 'procedure_type_id' => 2],
             ['item_code' => '02K', 'name' => 'Inlay/Onlay Porcelain', 'procedure_type_id' => 2],
-            
+
             ['item_code' => '03A', 'name' => 'Devitalisasi', 'procedure_type_id' => 3],
             ['item_code' => '03B', 'name' => 'Medikasi', 'procedure_type_id' => 3],
             ['item_code' => '03C', 'name' => '1 saluran akar (sampai dengan pengisian)', 'procedure_type_id' => 3],
@@ -382,112 +254,112 @@ class DatabaseSeeder extends Seeder
             ['item_code' => '03G', 'name' => 'Metal alloy Post and core', 'procedure_type_id' => 3],
             ['item_code' => '03H', 'name' => 'Fiber Post and core', 'procedure_type_id' => 3],
             ['item_code' => '03I', 'name' => 'Bongkar pengisian', 'procedure_type_id' => 3],
-            ['item_code' => '03J', 'name' => 'Mumifikasi', 'procedure_type_id' => 3 ],
-            
-            ['item_code' => '04A', 'name' => 'Bongkar crown','procedure_type_id' => 4],
-            ['item_code' => '04B', 'name' => 'Full metal Crown','procedure_type_id' => 4],
-            ['item_code' => '04C', 'name' => 'PFM Crown','procedure_type_id' => 4],
-            ['item_code' => '04D', 'name' => 'Premium lab composite Crown','procedure_type_id' => 4],
-            ['item_code' => '04E', 'name' => 'E-max / Zirconia Crown','procedure_type_id' => 4],
-            ['item_code' => '04F', 'name' => 'Provisoris','procedure_type_id' => 4],
-            ['item_code' => '04G', 'name' => 'Cetak alginat','procedure_type_id' => 4],
-            ['item_code' => '04H', 'name' => 'Cetak PVS','procedure_type_id' => 4],
-            ['item_code' => '04I', 'name' => 'Re-sementasi','procedure_type_id' => 4],
-            ['item_code' => '04J', 'name' => 'Wax up per gigi','procedure_type_id' => 4],
-            
-            ['item_code' => '05A', 'name' => 'Cabut gigi depan','procedure_type_id' => 5],
-            ['item_code' => '05B', 'name' => 'Cabut gigi belakang','procedure_type_id' => 5],
-            ['item_code' => '05C', 'name' => 'Cabut komplikasi depan atau belakang','procedure_type_id' => 5],
-            ['item_code' => '05D', 'name' => 'Penjahitan','procedure_type_id' => 5],
-            ['item_code' => '05E', 'name' => 'Impaksi simple','procedure_type_id' => 5],
-            ['item_code' => '05F', 'name' => 'Impaksi kompleks','procedure_type_id' => 5],
-            ['item_code' => '05G', 'name' => 'Kuretase per gigi','procedure_type_id' => 5],
-            ['item_code' => '05H', 'name' => 'Spongostan','procedure_type_id' => 5],
-            ['item_code' => '05I', 'name' => 'Eksisi','procedure_type_id' => 5],
-            ['item_code' => '05J', 'name' => 'Lepas Jahitan','procedure_type_id' => 5],
-            
-            ['item_code' => '06A', 'name' => 'Cabut non injeksi','procedure_type_id' => 6],
-            ['item_code' => '06B', 'name' => 'Cabut dengan injeksi','procedure_type_id' => 6],
-            ['item_code' => '06C', 'name' => 'Penambalan dengan GIC','procedure_type_id' => 6],
-            ['item_code' => '06D', 'name' => 'Topikal aplikasi fluor 1 mulut','procedure_type_id' => 6],
-            ['item_code' => '06E', 'name' => 'Perawatan saraf anak, hingga selesai','procedure_type_id' => 6],
-            
-            ['item_code' => '07A', 'name' => 'Acrylic (Frame saja)','procedure_type_id' => 7],
-            ['item_code' => '07B', 'name' => 'Flexible with Valplast/ Thermosens (Frame saja)','procedure_type_id' => 7],
-            ['item_code' => '07C', 'name' => 'Metal Alloy frame kombinasi Acrylic (Frame saja)','procedure_type_id' => 7],
-            ['item_code' => '07D', 'name' => 'Rebasing recountour/repair','procedure_type_id' => 7],
-            ['item_code' => '07E', 'name' => 'Tambahan per gigi acrylic','procedure_type_id' => 7],
-            ['item_code' => '07F', 'name' => 'Gigi tiruan lengkap per rahang komplit','procedure_type_id' => 7],
-            ['item_code' => '07G', 'name' => 'Tambahan per gigi valplast','procedure_type_id' => 7],
-            ['item_code' => '07H', 'name' => 'Tambahan per gigi metal frame','procedure_type_id' => 7],
-            
-            ['item_code' => '08A', 'name' => 'Scaling Grade 1','procedure_type_id' => 8],
-            ['item_code' => '08B', 'name' => 'Scaling Grade 2','procedure_type_id' => 8],
-            ['item_code' => '08C', 'name' => 'Scaling Grade 3','procedure_type_id' => 8],
-            ['item_code' => '08D', 'name' => 'Stain removal dan oral profilaksis','procedure_type_id' => 8],
-            ['item_code' => '08E', 'name' => 'Root planning/curetage (1 regio)','procedure_type_id' => 8],
-            ['item_code' => '08F', 'name' => 'Splinting fiber (3-6 unit)','procedure_type_id' => 8],
-            ['item_code' => '08G', 'name' => 'Medikasi periodontal per gigi','procedure_type_id' => 8],
-            ['item_code' => '08H', 'name' => 'Medikasi 1 regio','procedure_type_id' => 8],
-            
-            ['item_code' => '09A', 'name' => 'Whitening in office (2x aplikasi)','procedure_type_id' => 9],
-            ['item_code' => '09B', 'name' => 'Whitening in office (4x aplikasi)','procedure_type_id' => 9],
-            ['item_code' => '09C', 'name' => 'Home whitening per rahang','procedure_type_id' => 9],
-            ['item_code' => '09D', 'name' => 'Diamond','procedure_type_id' => 9],
-            ['item_code' => '09E', 'name' => 'Veneer komposit per gigi','procedure_type_id' => 9],
-            ['item_code' => '09F', 'name' => 'Veneer porcelain per gigi','procedure_type_id' => 9],
-            ['item_code' => '09G', 'name' => 'Sementasi dengan resin semen','procedure_type_id' => 9],
-            ['item_code' => '09H', 'name' => 'Internal Bleaching per gigi','procedure_type_id' => 9],
-            
-            ['item_code' => '10A', 'name' => 'Pemasangan Metal Bracket komplit','procedure_type_id' => 10],
-            ['item_code' => '10B', 'name' => 'Metal 1 rahang','procedure_type_id' => 10],
-            ['item_code' => '10C', 'name' => 'Pemasangan Metal Bracket premium komplit','procedure_type_id' => 10],
-            ['item_code' => '10D', 'name' => 'Ceramic','procedure_type_id' => 10],
-            ['item_code' => '10E', 'name' => 'Ceramic 1 rahang','procedure_type_id' => 10],
-            ['item_code' => '10F', 'name' => 'Ceramic premium','procedure_type_id' => 10],
-            ['item_code' => '10G', 'name' => 'Ceramic premium 1 rahang','procedure_type_id' => 10],
-            ['item_code' => '10H', 'name' => 'Self ligating','procedure_type_id' => 10],
-            ['item_code' => '10I', 'name' => 'Self ligating 1 rahang','procedure_type_id' => 10],
-            ['item_code' => '10J', 'name' => 'Piranti ortho lepasan per rahang','procedure_type_id' => 10],
-            ['item_code' => '10K', 'name' => 'Slicing / rahang','procedure_type_id' => 10],
-            ['item_code' => '10L', 'name' => 'Kontrol (RA, RB)','procedure_type_id' => 10],
-            ['item_code' => '10M', 'name' => 'Ganti Kawat NiTi (per rahang)','procedure_type_id' => 10],
-            ['item_code' => '10N', 'name' => 'Ganti Kawat Thermal (per rahang)','procedure_type_id' => 10],
-            ['item_code' => '10O', 'name' => 'Reverse wire per rahang','procedure_type_id' => 10],
-            ['item_code' => '10P', 'name' => 'Pasang button, crimpable hook, ocs','procedure_type_id' => 10],
-            ['item_code' => '10Q', 'name' => 'Peninggian gigit per gigi','procedure_type_id' => 10],
-            ['item_code' => '10R', 'name' => 'Pasang molar band per gigi','procedure_type_id' => 10],
-            ['item_code' => '10S', 'name' => 'Pasang attachment per gigi','procedure_type_id' => 10],
-            ['item_code' => '10T', 'name' => 'Perekatan kembali bracket lepas','procedure_type_id' => 10],
-            ['item_code' => '10U', 'name' => 'Penggantian braket hilang (Metal)','procedure_type_id' => 10],
-            ['item_code' => '10V', 'name' => 'Penggantian braket hilang (Ceramic)','procedure_type_id' => 10],
-            ['item_code' => '10W', 'name' => 'Penggantian braket hilang (Self Ligating)','procedure_type_id' => 10],
-            ['item_code' => '10X', 'name' => 'Night Guard','procedure_type_id' => 10],
-            ['item_code' => '10Y', 'name' => 'LMA','procedure_type_id' => 10],
-            ['item_code' => '10Y 01', 'name' => 'Myobrace','procedure_type_id' => 10],
-            ['item_code' => '10Z', 'name' => 'LMA (BR)','procedure_type_id' => 10],
-            
-            ['item_code' => '11A', 'name' => 'Retainer hawley (per rahang)','procedure_type_id' => 11],
-            ['item_code' => '11B', 'name' => 'Retainer invisible (per rahang)','procedure_type_id' => 11],
-            ['item_code' => '11C', 'name' => 'Fixed Retainer','procedure_type_id' => 11],
-            ['item_code' => '11D', 'name' => 'Lepas Behel dan scaling','procedure_type_id' => 11],
-            ['item_code' => '11E', 'name' => 'Orthokit','procedure_type_id' => 11],
-            
-            ['item_code' => '12A', 'name' => 'Kontrol (RA, RB)','procedure_type_id' => 12],
-            ['item_code' => '12B', 'name' => 'Ganti Kawat NiTi (per rahang)','procedure_type_id' => 12],
-            ['item_code' => '12C', 'name' => 'Ganti Kawat Thermal (per rahang)','procedure_type_id' => 12],
-            ['item_code' => '12D', 'name' => 'Reverse wire per rahang','procedure_type_id' => 12],
-            ['item_code' => '12E', 'name' => 'Pasang button, crimpable hook, ocs','procedure_type_id' => 12],
-            ['item_code' => '12F', 'name' => 'Peninggian gigit per gigi','procedure_type_id' => 12],
-            ['item_code' => '12G', 'name' => 'Pasang molar band per gigi','procedure_type_id' => 12],
-            ['item_code' => '12H', 'name' => 'Pasang attachment per gigi','procedure_type_id' => 12],
-            ['item_code' => '12I', 'name' => 'Perekatan kembali bracket lepas','procedure_type_id' => 12],
-            ['item_code' => '12J', 'name' => 'Penggantian braket hilang (Metal)','procedure_type_id' => 12],
-            ['item_code' => '12K', 'name' => 'Penggantian braket hilang (Ceramic)','procedure_type_id' => 12],
-            ['item_code' => '12L', 'name' => 'Penggantian braket hilang (Self Ligating)','procedure_type_id' => 12],
-            ['item_code' => '12M', 'name' => 'Lepas Behel dan scaling','procedure_type_id' => 12],
-            ['item_code' => '12N', 'name' => 'Analisa Kasus (sederhana)','procedure_type_id' => 12],
-            ['item_code' => '12O', 'name' => 'Analisa Kasus (kompleks)','procedure_type_id' => 12],
+            ['item_code' => '03J', 'name' => 'Mumifikasi', 'procedure_type_id' => 3],
+
+            ['item_code' => '04A', 'name' => 'Bongkar crown', 'procedure_type_id' => 4],
+            ['item_code' => '04B', 'name' => 'Full metal Crown', 'procedure_type_id' => 4],
+            ['item_code' => '04C', 'name' => 'PFM Crown', 'procedure_type_id' => 4],
+            ['item_code' => '04D', 'name' => 'Premium lab composite Crown', 'procedure_type_id' => 4],
+            ['item_code' => '04E', 'name' => 'E-max / Zirconia Crown', 'procedure_type_id' => 4],
+            ['item_code' => '04F', 'name' => 'Provisoris', 'procedure_type_id' => 4],
+            ['item_code' => '04G', 'name' => 'Cetak alginat', 'procedure_type_id' => 4],
+            ['item_code' => '04H', 'name' => 'Cetak PVS', 'procedure_type_id' => 4],
+            ['item_code' => '04I', 'name' => 'Re-sementasi', 'procedure_type_id' => 4],
+            ['item_code' => '04J', 'name' => 'Wax up per gigi', 'procedure_type_id' => 4],
+
+            ['item_code' => '05A', 'name' => 'Cabut gigi depan', 'procedure_type_id' => 5],
+            ['item_code' => '05B', 'name' => 'Cabut gigi belakang', 'procedure_type_id' => 5],
+            ['item_code' => '05C', 'name' => 'Cabut komplikasi depan atau belakang', 'procedure_type_id' => 5],
+            ['item_code' => '05D', 'name' => 'Penjahitan', 'procedure_type_id' => 5],
+            ['item_code' => '05E', 'name' => 'Impaksi simple', 'procedure_type_id' => 5],
+            ['item_code' => '05F', 'name' => 'Impaksi kompleks', 'procedure_type_id' => 5],
+            ['item_code' => '05G', 'name' => 'Kuretase per gigi', 'procedure_type_id' => 5],
+            ['item_code' => '05H', 'name' => 'Spongostan', 'procedure_type_id' => 5],
+            ['item_code' => '05I', 'name' => 'Eksisi', 'procedure_type_id' => 5],
+            ['item_code' => '05J', 'name' => 'Lepas Jahitan', 'procedure_type_id' => 5],
+
+            ['item_code' => '06A', 'name' => 'Cabut non injeksi', 'procedure_type_id' => 6],
+            ['item_code' => '06B', 'name' => 'Cabut dengan injeksi', 'procedure_type_id' => 6],
+            ['item_code' => '06C', 'name' => 'Penambalan dengan GIC', 'procedure_type_id' => 6],
+            ['item_code' => '06D', 'name' => 'Topikal aplikasi fluor 1 mulut', 'procedure_type_id' => 6],
+            ['item_code' => '06E', 'name' => 'Perawatan saraf anak, hingga selesai', 'procedure_type_id' => 6],
+
+            ['item_code' => '07A', 'name' => 'Acrylic (Frame saja)', 'procedure_type_id' => 7],
+            ['item_code' => '07B', 'name' => 'Flexible with Valplast/ Thermosens (Frame saja)', 'procedure_type_id' => 7],
+            ['item_code' => '07C', 'name' => 'Metal Alloy frame kombinasi Acrylic (Frame saja)', 'procedure_type_id' => 7],
+            ['item_code' => '07D', 'name' => 'Rebasing recountour/repair', 'procedure_type_id' => 7],
+            ['item_code' => '07E', 'name' => 'Tambahan per gigi acrylic', 'procedure_type_id' => 7],
+            ['item_code' => '07F', 'name' => 'Gigi tiruan lengkap per rahang komplit', 'procedure_type_id' => 7],
+            ['item_code' => '07G', 'name' => 'Tambahan per gigi valplast', 'procedure_type_id' => 7],
+            ['item_code' => '07H', 'name' => 'Tambahan per gigi metal frame', 'procedure_type_id' => 7],
+
+            ['item_code' => '08A', 'name' => 'Scaling Grade 1', 'procedure_type_id' => 8],
+            ['item_code' => '08B', 'name' => 'Scaling Grade 2', 'procedure_type_id' => 8],
+            ['item_code' => '08C', 'name' => 'Scaling Grade 3', 'procedure_type_id' => 8],
+            ['item_code' => '08D', 'name' => 'Stain removal dan oral profilaksis', 'procedure_type_id' => 8],
+            ['item_code' => '08E', 'name' => 'Root planning/curetage (1 regio)', 'procedure_type_id' => 8],
+            ['item_code' => '08F', 'name' => 'Splinting fiber (3-6 unit)', 'procedure_type_id' => 8],
+            ['item_code' => '08G', 'name' => 'Medikasi periodontal per gigi', 'procedure_type_id' => 8],
+            ['item_code' => '08H', 'name' => 'Medikasi 1 regio', 'procedure_type_id' => 8],
+
+            ['item_code' => '09A', 'name' => 'Whitening in office (2x aplikasi)', 'procedure_type_id' => 9],
+            ['item_code' => '09B', 'name' => 'Whitening in office (4x aplikasi)', 'procedure_type_id' => 9],
+            ['item_code' => '09C', 'name' => 'Home whitening per rahang', 'procedure_type_id' => 9],
+            ['item_code' => '09D', 'name' => 'Diamond', 'procedure_type_id' => 9],
+            ['item_code' => '09E', 'name' => 'Veneer komposit per gigi', 'procedure_type_id' => 9],
+            ['item_code' => '09F', 'name' => 'Veneer porcelain per gigi', 'procedure_type_id' => 9],
+            ['item_code' => '09G', 'name' => 'Sementasi dengan resin semen', 'procedure_type_id' => 9],
+            ['item_code' => '09H', 'name' => 'Internal Bleaching per gigi', 'procedure_type_id' => 9],
+
+            ['item_code' => '10A', 'name' => 'Pemasangan Metal Bracket komplit', 'procedure_type_id' => 10],
+            ['item_code' => '10B', 'name' => 'Metal 1 rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10C', 'name' => 'Pemasangan Metal Bracket premium komplit', 'procedure_type_id' => 10],
+            ['item_code' => '10D', 'name' => 'Ceramic', 'procedure_type_id' => 10],
+            ['item_code' => '10E', 'name' => 'Ceramic 1 rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10F', 'name' => 'Ceramic premium', 'procedure_type_id' => 10],
+            ['item_code' => '10G', 'name' => 'Ceramic premium 1 rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10H', 'name' => 'Self ligating', 'procedure_type_id' => 10],
+            ['item_code' => '10I', 'name' => 'Self ligating 1 rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10J', 'name' => 'Piranti ortho lepasan per rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10K', 'name' => 'Slicing / rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10L', 'name' => 'Kontrol (RA, RB)', 'procedure_type_id' => 10],
+            ['item_code' => '10M', 'name' => 'Ganti Kawat NiTi (per rahang)', 'procedure_type_id' => 10],
+            ['item_code' => '10N', 'name' => 'Ganti Kawat Thermal (per rahang)', 'procedure_type_id' => 10],
+            ['item_code' => '10O', 'name' => 'Reverse wire per rahang', 'procedure_type_id' => 10],
+            ['item_code' => '10P', 'name' => 'Pasang button, crimpable hook, ocs', 'procedure_type_id' => 10],
+            ['item_code' => '10Q', 'name' => 'Peninggian gigit per gigi', 'procedure_type_id' => 10],
+            ['item_code' => '10R', 'name' => 'Pasang molar band per gigi', 'procedure_type_id' => 10],
+            ['item_code' => '10S', 'name' => 'Pasang attachment per gigi', 'procedure_type_id' => 10],
+            ['item_code' => '10T', 'name' => 'Perekatan kembali bracket lepas', 'procedure_type_id' => 10],
+            ['item_code' => '10U', 'name' => 'Penggantian braket hilang (Metal)', 'procedure_type_id' => 10],
+            ['item_code' => '10V', 'name' => 'Penggantian braket hilang (Ceramic)', 'procedure_type_id' => 10],
+            ['item_code' => '10W', 'name' => 'Penggantian braket hilang (Self Ligating)', 'procedure_type_id' => 10],
+            ['item_code' => '10X', 'name' => 'Night Guard', 'procedure_type_id' => 10],
+            ['item_code' => '10Y', 'name' => 'LMA', 'procedure_type_id' => 10],
+            ['item_code' => '10Y 01', 'name' => 'Myobrace', 'procedure_type_id' => 10],
+            ['item_code' => '10Z', 'name' => 'LMA (BR)', 'procedure_type_id' => 10],
+
+            ['item_code' => '11A', 'name' => 'Retainer hawley (per rahang)', 'procedure_type_id' => 11],
+            ['item_code' => '11B', 'name' => 'Retainer invisible (per rahang)', 'procedure_type_id' => 11],
+            ['item_code' => '11C', 'name' => 'Fixed Retainer', 'procedure_type_id' => 11],
+            ['item_code' => '11D', 'name' => 'Lepas Behel dan scaling', 'procedure_type_id' => 11],
+            ['item_code' => '11E', 'name' => 'Orthokit', 'procedure_type_id' => 11],
+
+            ['item_code' => '12A', 'name' => 'Kontrol (RA, RB)', 'procedure_type_id' => 12],
+            ['item_code' => '12B', 'name' => 'Ganti Kawat NiTi (per rahang)', 'procedure_type_id' => 12],
+            ['item_code' => '12C', 'name' => 'Ganti Kawat Thermal (per rahang)', 'procedure_type_id' => 12],
+            ['item_code' => '12D', 'name' => 'Reverse wire per rahang', 'procedure_type_id' => 12],
+            ['item_code' => '12E', 'name' => 'Pasang button, crimpable hook, ocs', 'procedure_type_id' => 12],
+            ['item_code' => '12F', 'name' => 'Peninggian gigit per gigi', 'procedure_type_id' => 12],
+            ['item_code' => '12G', 'name' => 'Pasang molar band per gigi', 'procedure_type_id' => 12],
+            ['item_code' => '12H', 'name' => 'Pasang attachment per gigi', 'procedure_type_id' => 12],
+            ['item_code' => '12I', 'name' => 'Perekatan kembali bracket lepas', 'procedure_type_id' => 12],
+            ['item_code' => '12J', 'name' => 'Penggantian braket hilang (Metal)', 'procedure_type_id' => 12],
+            ['item_code' => '12K', 'name' => 'Penggantian braket hilang (Ceramic)', 'procedure_type_id' => 12],
+            ['item_code' => '12L', 'name' => 'Penggantian braket hilang (Self Ligating)', 'procedure_type_id' => 12],
+            ['item_code' => '12M', 'name' => 'Lepas Behel dan scaling', 'procedure_type_id' => 12],
+            ['item_code' => '12N', 'name' => 'Analisa Kasus (sederhana)', 'procedure_type_id' => 12],
+            ['item_code' => '12O', 'name' => 'Analisa Kasus (kompleks)', 'procedure_type_id' => 12],
         ];
 
         foreach ($procedures as $procedure) {
@@ -500,18 +372,127 @@ class DatabaseSeeder extends Seeder
         }
 
         $prices = [
-            20000, 50000, 50000, 150000, 250000, 300000, 350000, 300000, 375000, 100000,
-            125000, 200000, 100000, 35000, 100000, 1200000, 200000, 150000, 800000, 1000000,
-            1250000, 1700000, 300000, 350000, 200000, 200000, 100000, 750000, 1350000, 750000,
-            3000000, 200000, 80000, 200000, 100000, 75000, 250000, 350000, 500000, 100000,
-            2500000, 4000000, 150000, 150000, 150000, 100000, 100000, 175000, 150000, 300000,
-            400000, 700000, 1300000, 2100000, 300000, 100000, 4000000, 150000, 250000, 250000,
-            300000, 350000, 50000, 500000, 1750000, 125000, 450000, 800000, 1500000, 800000,
-            250000, 500000, 2750000, 400000, 400000, 3500000, 2500000, 5000000, 5000000, 4000000,
-            7000000, 5500000, 8500000, 7500000, 1300000, 100000, 100000, 50000, 100000, 100000,
-            50000, 50000, 100000, 25000, 50000, 100000, 275000, 900000, 550000, 3500000, 2500000,
-            3750000, 350000, 450000, 500000, 500000, 50000, 200000, 100000, 200000, 200000,
-            100000, 100000, 200000, 50000, 100000, 200000, 550000, 1800000, 750000, 600000,
+            20000,
+            50000,
+            50000,
+            150000,
+            250000,
+            300000,
+            350000,
+            300000,
+            375000,
+            100000,
+            125000,
+            200000,
+            100000,
+            35000,
+            100000,
+            1200000,
+            200000,
+            150000,
+            800000,
+            1000000,
+            1250000,
+            1700000,
+            300000,
+            350000,
+            200000,
+            200000,
+            100000,
+            750000,
+            1350000,
+            750000,
+            3000000,
+            200000,
+            80000,
+            200000,
+            100000,
+            75000,
+            250000,
+            350000,
+            500000,
+            100000,
+            2500000,
+            4000000,
+            150000,
+            150000,
+            150000,
+            100000,
+            100000,
+            175000,
+            150000,
+            300000,
+            400000,
+            700000,
+            1300000,
+            2100000,
+            300000,
+            100000,
+            4000000,
+            150000,
+            250000,
+            250000,
+            300000,
+            350000,
+            50000,
+            500000,
+            1750000,
+            125000,
+            450000,
+            800000,
+            1500000,
+            800000,
+            250000,
+            500000,
+            2750000,
+            400000,
+            400000,
+            3500000,
+            2500000,
+            5000000,
+            5000000,
+            4000000,
+            7000000,
+            5500000,
+            8500000,
+            7500000,
+            1300000,
+            100000,
+            100000,
+            50000,
+            100000,
+            100000,
+            50000,
+            50000,
+            100000,
+            25000,
+            50000,
+            100000,
+            275000,
+            900000,
+            550000,
+            3500000,
+            2500000,
+            3750000,
+            350000,
+            450000,
+            500000,
+            500000,
+            50000,
+            200000,
+            100000,
+            200000,
+            200000,
+            100000,
+            100000,
+            200000,
+            50000,
+            100000,
+            200000,
+            550000,
+            1800000,
+            750000,
+            600000,
             1200000
         ];
 
@@ -527,6 +508,199 @@ class DatabaseSeeder extends Seeder
                 'created_at'      => $now,
                 'updated_at'      => $now,
             ]);
+        }
+
+        $materials = [
+            // Umum & Konsul
+            ['name' => 'POLIBIB', 'description' => 'Disposable patient bib', 'unit_type' => 'pcs'],
+            ['name' => 'SALIVA EJECTOR', 'description' => 'Disposable saliva ejector tip', 'unit_type' => 'pcs'],
+            ['name' => 'GELAS KUMUR', 'description' => 'Disposable cup', 'unit_type' => 'pcs'],
+            ['name' => 'HANDSCOON XS', 'description' => 'Disposable gloves, size XS', 'unit_type' => 'pcs'],
+            ['name' => 'HANDSCOON M', 'description' => 'Disposable gloves, size M', 'unit_type' => 'pcs'],
+            ['name' => 'NURSE CAP', 'description' => 'Disposable nurse cap', 'unit_type' => 'pcs'],
+            ['name' => 'ALKOHOL 70%', 'description' => 'Alcohol 70% solution', 'unit_type' => 'ml'],
+            ['name' => 'MASKER KARET PUTIH', 'description' => 'Disposable face mask, white, earloop', 'unit_type' => 'pcs'],
+
+            // Tambal
+            ['name' => 'PREPARASI BUR', 'description' => 'Dental bur for preparation', 'unit_type' => 'pcs'],
+            ['name' => 'ETCHING', 'description' => 'Dental etching gel/liquid', 'unit_type' => 'ml'], // Koreksi dari ECTHING
+            ['name' => 'COTTON ROLL', 'description' => 'Dental cotton roll', 'unit_type' => 'pcs'], // Koreksi dari CATTON ROLL
+            ['name' => 'BONDING', 'description' => 'Dental bonding agent', 'unit_type' => 'ml'],
+            ['name' => 'MICROBRUSH', 'description' => 'Disposable micro applicator brush', 'unit_type' => 'pcs'],
+            // TODO: User, verifikasi apakah LIGHTCURE adalah material habis pakai (misal shield/tip) atau alat. Jika alat, hapus dari sini.
+            ['name' => 'LIGHTCURE', 'description' => 'Item related to light curing (e.g. disposable tip/shield)', 'unit_type' => 'pcs'],
+            ['name' => 'COMPOSIT', 'description' => 'Dental composite resin', 'unit_type' => 'gr'],
+            ['name' => 'FLOW', 'description' => 'Flowable dental composite resin', 'unit_type' => 'gr'],
+            ['name' => 'ARTICULATING PAPER', 'description' => 'Articulating paper sheet/strip', 'unit_type' => 'pcs'], // Misal per lembar
+            ['name' => 'GIC', 'description' => 'Glass Ionomer Cement (application/capsule)', 'unit_type' => 'unit'], // 'unit' atau 'aplikasi'
+            ['name' => 'ANTISEPTIC GEL', 'description' => 'Antiseptic gel for dental use', 'unit_type' => 'ml'],
+
+            // Scaling
+            ['name' => 'PASTA POLES', 'description' => 'Polishing paste', 'unit_type' => 'gr'],
+
+            // Cabut
+            ['name' => 'PEHACAIN', 'description' => 'Local anesthetic solution (Pehacain)', 'unit_type' => 'ampul'],
+            ['name' => 'ANASTESI TOPICAL', 'description' => 'Topical anesthetic gel/cream', 'unit_type' => 'gr'],
+            ['name' => 'KASSA TAMPON', 'description' => 'Gauze tampon/pad', 'unit_type' => 'pcs'],
+            ['name' => 'BETADINE', 'description' => 'Betadine antiseptic solution', 'unit_type' => 'ml'],
+            ['name' => 'SPONGESTAN', 'description' => 'Hemostatic absorbable gelatin sponge', 'unit_type' => 'pcs'],
+
+            // PSA
+            ['name' => 'CAIRAN AQUADES', 'description' => 'Distilled water (Aqua Dest)', 'unit_type' => 'ml'], // cc dikonversi ke ml
+            ['name' => 'CAIRAN CAOH', 'description' => 'Calcium Hydroxide solution', 'unit_type' => 'ml'], // cc dikonversi ke ml
+            // TODO: User, verifikasi CAVITRON. Jika ini alat, mungkin yang dimaksud adalah tip atau powdernya.
+            ['name' => 'CAVITRON', 'description' => 'Consumable for Cavitron scaler (e.g. powder/tip)', 'unit_type' => 'gr'],
+            ['name' => 'COTTON PELLET', 'description' => 'Dental cotton pellet', 'unit_type' => 'pcs'], // Koreksi dari CATTON PELET
+            ['name' => 'PAPER POINT 15-40', 'description' => 'Assorted paper points (ISO 15-40)', 'unit_type' => 'pcs'], // Asumsi 1 pack/set jika beragam ukuran
+            ['name' => 'PAPER POINT F1', 'description' => 'Paper point, size F1', 'unit_type' => 'pcs'],
+            ['name' => 'PAPER POINT F2', 'description' => 'Paper point, size F2', 'unit_type' => 'pcs'],
+            ['name' => 'PAPER POINT F3', 'description' => 'Paper point, size F3', 'unit_type' => 'pcs'],
+            ['name' => 'GUTTAPERCHA 15-40', 'description' => 'Assorted Gutta Percha points (ISO 15-40)', 'unit_type' => 'pcs'], // Koreksi dari GUTTAP, asumsi 1 pack/set
+            ['name' => 'GUTTAPERCHA F1', 'description' => 'Gutta Percha point, size F1', 'unit_type' => 'pcs'],
+            ['name' => 'GUTTAPERCHA F2', 'description' => 'Gutta Percha point, size F2', 'unit_type' => 'pcs'],
+            ['name' => 'GUTTAPERCHA F3', 'description' => 'Gutta Percha point, size F3', 'unit_type' => 'pcs'],
+            ['name' => 'SPIRITUS', 'description' => 'Spiritus/Medical alcohol', 'unit_type' => 'ml'],
+            ['name' => 'ANY SEAL', 'description' => 'Root canal sealer (e.g., Any Seal brand)', 'unit_type' => 'gr'], // Asumsi unit gr, bisa juga ml
+            ['name' => 'CAPLUS', 'description' => 'Material, possibly for capping or filling (e.g., Caplus brand)', 'unit_type' => 'gr'], // Asumsi unit gr
+        ];
+
+        foreach ($materials as $material) {
+            DentalMaterial::firstOrCreate(
+                ['name' => $material['name']],
+                [
+                    'description' => $material['description'],
+                    'unit_type' => $material['unit_type']
+                ]
+            );
+        }
+
+        $procedureMappings = [
+            'KONSUL' => [
+                'item_code' => '01B', // Konsultasi
+                'materials' => [
+                    ['name' => 'POLIBIB', 'quantity' => 1],
+                    ['name' => 'SALIVA EJECTOR', 'quantity' => 1],
+                    ['name' => 'GELAS KUMUR', 'quantity' => 1],
+                    ['name' => 'HANDSCOON XS', 'quantity' => 4],
+                    ['name' => 'HANDSCOON M', 'quantity' => 2],
+                    ['name' => 'NURSE CAP', 'quantity' => 1],
+                    ['name' => 'ALKOHOL 70%', 'quantity' => 20],
+                    ['name' => 'MASKER KARET PUTIH', 'quantity' => 1],
+                ]
+            ],
+            'TAMBAL' => [
+                'item_code' => '02A', // Tambal Estetis gigi depan (kecil)
+                'materials' => [
+                    ['name' => 'POLIBIB', 'quantity' => 1],
+                    ['name' => 'SALIVA EJECTOR', 'quantity' => 1],
+                    ['name' => 'GELAS KUMUR', 'quantity' => 1],
+                    ['name' => 'HANDSCOON XS', 'quantity' => 4],
+                    ['name' => 'HANDSCOON M', 'quantity' => 2],
+                    ['name' => 'NURSE CAP', 'quantity' => 1],
+                    ['name' => 'PREPARASI BUR', 'quantity' => 2],
+                    ['name' => 'ETCHING', 'quantity' => 0.1],
+                    ['name' => 'COTTON ROLL', 'quantity' => 4],
+                    ['name' => 'BONDING', 'quantity' => 0.05],
+                    ['name' => 'MICROBRUSH', 'quantity' => 1],
+                    ['name' => 'LIGHTCURE', 'quantity' => 1],
+                    ['name' => 'COMPOSIT', 'quantity' => 0.175],
+                    ['name' => 'FLOW', 'quantity' => 0.1],
+                    ['name' => 'ARTICULATING PAPER', 'quantity' => 0.5], // 1/2 lembar
+                    ['name' => 'GIC', 'quantity' => 1],
+                    ['name' => 'ALKOHOL 70%', 'quantity' => 20],
+                    ['name' => 'ANTISEPTIC GEL', 'quantity' => 10],
+                    ['name' => 'MASKER KARET PUTIH', 'quantity' => 1],
+                ]
+            ],
+            'SCALING' => [
+                'item_code' => '08A', // Scaling Grade 1
+                'materials' => [
+                    ['name' => 'POLIBIB', 'quantity' => 1],
+                    ['name' => 'SALIVA EJECTOR', 'quantity' => 1],
+                    ['name' => 'GELAS KUMUR', 'quantity' => 1],
+                    ['name' => 'HANDSCOON XS', 'quantity' => 4],
+                    ['name' => 'HANDSCOON M', 'quantity' => 2],
+                    ['name' => 'NURSE CAP', 'quantity' => 1],
+                    ['name' => 'PASTA POLES', 'quantity' => 1.6],
+                    ['name' => 'ALKOHOL 70%', 'quantity' => 20],
+                    ['name' => 'ANTISEPTIC GEL', 'quantity' => 10], // Dari gambar, kolom scaling ada Antiseptic Gel
+                    ['name' => 'MASKER KARET PUTIH', 'quantity' => 1],
+                ]
+            ],
+            'CABUT' => [
+                'item_code' => '05A', // Cabut gigi depan
+                'materials' => [
+                    ['name' => 'POLIBIB', 'quantity' => 1],
+                    ['name' => 'SALIVA EJECTOR', 'quantity' => 1],
+                    ['name' => 'GELAS KUMUR', 'quantity' => 1],
+                    ['name' => 'HANDSCOON XS', 'quantity' => 4],
+                    ['name' => 'HANDSCOON M', 'quantity' => 2],
+                    ['name' => 'NURSE CAP', 'quantity' => 1],
+                    ['name' => 'PEHACAIN', 'quantity' => 1],
+                    ['name' => 'ANASTESI TOPICAL', 'quantity' => 1],
+                    ['name' => 'KASSA TAMPON', 'quantity' => 7],
+                    ['name' => 'BETADINE', 'quantity' => 1],
+                    ['name' => 'ALKOHOL 70%', 'quantity' => 20],
+                    ['name' => 'ANTISEPTIC GEL', 'quantity' => 10],
+                    ['name' => 'MASKER KARET PUTIH', 'quantity' => 1],
+                    ['name' => 'SPONGESTAN', 'quantity' => 1],
+                ]
+            ],
+            'PSA' => [
+                'item_code' => '03C', // 1 saluran akar (sampai dengan pengisian)
+                'materials' => [
+                    ['name' => 'POLIBIB', 'quantity' => 1],
+                    ['name' => 'SALIVA EJECTOR', 'quantity' => 1],
+                    ['name' => 'GELAS KUMUR', 'quantity' => 1],
+                    ['name' => 'HANDSCOON XS', 'quantity' => 4],
+                    ['name' => 'HANDSCOON M', 'quantity' => 2],
+                    ['name' => 'NURSE CAP', 'quantity' => 1],
+                    ['name' => 'CAIRAN AQUADES', 'quantity' => 3],
+                    ['name' => 'CAIRAN CAOH', 'quantity' => 3],
+                    ['name' => 'COTTON ROLL', 'quantity' => 7],
+                    ['name' => 'CAVITRON', 'quantity' => 2], // Verifikasi ini
+                    ['name' => 'COTTON PELLET', 'quantity' => 5],
+                    ['name' => 'PAPER POINT 15-40', 'quantity' => 1], // Asumsi 1 pack/set
+                    ['name' => 'PAPER POINT F1', 'quantity' => 6], // Asumsi 4-6 menjadi 6
+                    ['name' => 'PAPER POINT F2', 'quantity' => 6],
+                    ['name' => 'PAPER POINT F3', 'quantity' => 6],
+                    ['name' => 'GUTTAPERCHA 15-40', 'quantity' => 1], // Asumsi 1 pack/set
+                    ['name' => 'GUTTAPERCHA F1', 'quantity' => 3], // Asumsi 1-3 menjadi 3
+                    ['name' => 'GUTTAPERCHA F2', 'quantity' => 3],
+                    ['name' => 'GUTTAPERCHA F3', 'quantity' => 3],
+                    ['name' => 'SPIRITUS', 'quantity' => 5],
+                    ['name' => 'ANY SEAL', 'quantity' => 0.05],
+                    ['name' => 'CAPLUS', 'quantity' => 0.50],
+                    ['name' => 'ALKOHOL 70%', 'quantity' => 20],
+                    ['name' => 'ANTISEPTIC GEL', 'quantity' => 10],
+                    ['name' => 'MASKER KARET PUTIH', 'quantity' => 1],
+                ]
+            ],
+        ];
+
+        foreach ($procedureMappings as $key => $procData) {
+            $procedure = Procedure::where('item_code', $procData['item_code'])->first();
+
+            if ($procedure) {
+                foreach ($procData['materials'] as $matData) {
+                    $dentalMaterial = DentalMaterial::where('name', $matData['name'])->first();
+                    if ($dentalMaterial) {
+                        ProcedureMaterial::firstOrCreate(
+                            [
+                                'procedure_id' => $procedure->id,
+                                'dental_material_id' => $dentalMaterial->id,
+                            ],
+                            [
+                                'quantity' => $matData['quantity']
+                            ]
+                        );
+                    } else {
+                        $this->command->warn("Material not found: " . $matData['name'] . ". Skipping for procedure " . $procedure->name);
+                    }
+                }
+            } else {
+                $this->command->warn("Procedure not found with item_code: " . $procData['item_code'] . ". Skipping linkage for " . $key);
+            }
         }
 
         // Bahan Baku
@@ -582,113 +756,6 @@ class DatabaseSeeder extends Seeder
             ['tanggal' => '2025-12-25', 'keterangan' => 'Hari Raya Natal'],
         ]);
 
-        // $accounts = [
-        //     // Aset Lancar (Current Assets)
-        //     ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
-        //     ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset'],
-        //     ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset'],
-        //     ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset'],
-        //     ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset'],
-        //     ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset'],
-        //     ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset'],
-        //     ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset'],
-        //     ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
-        //     ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
-
-        //     // Piutang Usaha
-        //     ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
-
-        //     // Persediaan
-        //     //ini 12 13
-        //     ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
-        //     ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
-
-        //     // Kewajiban (Liabilities)
-        //     ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
-        //     ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
-
-        //     // Ekuitas (Equity)
-        //     ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
-        //     ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity'],
-
-        //     // Pendapatan (Revenue)
-        //     ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
-
-        //     // Beban (Expenses)
-        //     ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
-        //     ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
-        //     ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
-        // ];
-
-        // tambahan
-        // $accounts = [
-        //     // Aset Lancar (Current Assets)
-        //     ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset'],
-        //     ['code' => '1-10002', 'name' => 'Rekening Bank', 'type' => 'asset'],
-        //     ['code' => '1-10003', 'name' => 'SQ01 Bank Mandiri', 'type' => 'asset'],
-        //     ['code' => '1-10004', 'name' => 'Pusat Bank BCA', 'type' => 'asset'],
-        //     ['code' => '1-10005', 'name' => 'SQ01 Petty Cash', 'type' => 'asset'],
-        //     ['code' => '1-10006', 'name' => 'SQ01 Bank CIMB Niaga', 'type' => 'asset'],
-        //     ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset'],
-        //     ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset'],
-        //     ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset'],
-        //     ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset'],
-
-        //     // Piutang Usaha (acount receivables)
-        //     ['code' => '1-10100', 'name' => 'Piutang Usaha', 'type' => 'asset'],
-
-        //     // Persediaan (inventory bahan medis)
-        //     //ini 12 13
-        //     ['code' => '1-10200', 'name' => 'Persediaan Barang', 'type' => 'asset'],
-        //     ['code' => '1-10201', 'name' => 'Persediaan Barang Medis', 'type' => 'asset'],
-
-        //     // beban dibayar dimuka (prepaid expenses)
-        //     ['code' => '1-10300', 'name' => 'Beban Dibayar di Muka', 'type' => 'asset'],
-
-        //     // fixed asset dan depreciation : berhubungan kyk tanah dll yang ada dpresiasi nya
-        //     // harusnya ga kepake sih 
-        //     ['code' => '1-10400', 'name' => 'Aset Tetap', 'type' => 'asset'],
-        //     ['code' => '1-10500', 'name' => 'Depresiasi Kumulatif', 'type' => 'contra_asset'],
-        //     ['code' => '1-10600', 'name' => 'Aset Lain-Lain', 'type' => 'asset'],
-
-        //     // Kewajiban (Liabilities)
-        //     // accounts payable
-        //     ['code' => '2-10001', 'name' => 'Utang Usaha', 'type' => 'liability'],
-        //     ['code' => '2-10002', 'name' => 'Utang Pajak', 'type' => 'liability'],
-
-        //     // Accrued liabilities harus dicatat pada periode di mana transaksi terjadi, bukan saat pembayaran dilakukan, agar sesuai dengan prinsip akuntansi akrual.
-        //     // Sebagai contoh, jika sebuah perusahaan berlangganan layanan perangkat lunak bulanan senilai Rp5.000.000, tetapi pembayaran dilakukan setiap tiga bulan, maka setiap bulan perusahaan tersebut harus mencatat Rp5.000.000 sebagai accrued liabilities hingga faktur dibayarkan. Setelah pembayaran dilakukan, accrued liabilities akan berkurang.
-        //     // ['code' => '2-20100', 'name' => 'Accrued Liabi', 'type' => 'liability'],
-
-        //     // Ekuitas (Equity)
-        //     ['code' => '3-10001', 'name' => 'Modal Pemilik', 'type' => 'equity'],
-        //     ['code' => '3-10002', 'name' => 'Laba Ditahan', 'type' => 'equity'],
-
-        //     // Pendapatan (Revenue)
-        //     ['code' => '4-10001', 'name' => 'Pendapatan Penjualan', 'type' => 'revenue'],
-        //     ['code' => '4-10002', 'name' => 'Pendapatan Penyesuaian Persediaan', 'type' => 'revenue'],
-        //     ['code' => '4-10101', 'name' => 'Diskon Penjualan', 'type' => 'contra_revenue'],
-
-        //     // Sales Returns and Allowances adalah suatu peristiwa dimana barang yang kita jual dan telah sampai kepada pelanggan mengalami cacat produksi atau adanya kerusakan ketika terjadi pengiriman yang adanya kesepakatan bahwa risiko pengiriman ditanggung oleh perusahaan.
-        //     // ['code' => '4-10100', 'name' => 'Retur Penjualan dan Pengurangan Harga', 'type' => 'revenue'],
-
-        //     // Beban (Expenses)
-        //     ['code' => '5-10001', 'name' => 'Beban Gaji', 'type' => 'expense'],
-        //     ['code' => '5-10002', 'name' => 'HPP Bahan Dental', 'type' => 'expense'],
-        //     ['code' => '5-10003', 'name' => 'Beban Sewa', 'type' => 'expense'],
-        //     ['code' => '5-10004', 'name' => 'Beban Iklan', 'type' => 'expense'],
-        //     ['code' => '5-10005', 'name' => 'Biaya Admin Bank', 'type' => 'expense'],
-        //     ['code' => '5-10006', 'name' => 'Beban ATK', 'type' => 'expense'],
-        //     ['code' => '5-10007', 'name' => 'Beban Listrik', 'type' => 'expense'],
-        //     ['code' => '5-10008', 'name' => 'Beban Air', 'type' => 'expense'],
-        //     ['code' => '5-10009', 'name' => 'Beban Internet', 'type' => 'expense'],
-        //     ['code' => '5-10010', 'name' => 'Beban Telepon', 'type' => 'expense'],
-        //     ['code' => '5-10011', 'name' => 'Bagi Hasil Dokter', 'type' => 'expense'],
-        //     ['code' => '5-10012', 'name' => 'Diskon Pembelian', 'type' => 'contra_expense'], // Nilainya negatif, contra expenses
-        //     ['code' => '5-10013', 'name' => 'Beban Pengiriman Pembelian', 'type' => 'expense'],
-        //     ['code' => '5-10014', 'name' => 'Beban Penyesuaian Persediaan', 'type' => 'expense'],
-        //     // ['code' => '5-10006', 'name' => 'Penyusutan Aset Tetap', 'type' => 'expense'],
-        // ];
         $accounts = [
             // Aset Lancar (Current Assets)
             ['code' => '1-10001', 'name' => 'Kas', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
@@ -700,7 +767,7 @@ class DatabaseSeeder extends Seeder
             ['code' => '1-10007', 'name' => 'SQ01 Permata', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
             ['code' => '1-10008', 'name' => 'SQ01 Bank BCA', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
             ['code' => '1-10012', 'name' => 'SQ01 Bank BCA (Cabang XYZ)', 'type' => 'asset', 'is_cash_equivalent' => true, 'cash_flow_activity' => 'none'],
-            
+
             // Pinjaman Direksi: Ini bisa rumit. Jika direksi memberi pinjaman ke perusahaan, itu arus kas masuk pendanaan. Jika perusahaan memberi pinjaman ke direksi, itu arus kas keluar investasi (jika dianggap investasi) atau operasional (jika terkait operasional). Asumsi ini adalah PIUTANG kepada direksi.
             ['code' => '1-10010', 'name' => 'Pinjaman Direksi', 'type' => 'asset', 'is_cash_equivalent' => false, 'cash_flow_activity' => 'investing'], // Atau 'financing' jika perusahaan yg terima pinjaman. Dari sisi aset, ini adalah piutang ke direksi.
 
