@@ -32,6 +32,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\DentalMaterialController;
 use App\Http\Controllers\ExpenseRequestController;
+use App\Http\Controllers\TestOdontogramController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\PurchasePaymentController;
 use App\Http\Controllers\PurchaseRequestController;
@@ -181,7 +182,8 @@ Route::get('dashboard/test-odontogram', function () {
     return view('dashboard.test-odontogram.full-view');
 });
 
-
+Route::get('dashboard/patients/{patient}/test-odontogram', [TestOdontogramController::class, 'show']);
+Route::post('dashboard/patients/{patient}/test-odontogram', [TestOdontogramController::class, 'store'])->name('odontogram.store');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('internal')

@@ -58,8 +58,11 @@
                     <!-- Tombol baru untuk melihat rekam medis pasien -->
                     <a href="{{ route('dashboard.medical_records.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-info">View Medical Records</a>
                     @if(auth()->user()?->role?->role_name === 'dokter luar' || auth()->user()?->role?->role_name === 'dokter tetap')
-                    <a href="{{ route('dashboard.odontograms.index', ['patientId' => $patient->id]) }}" class="btn btn-sm btn-primary">View Odontogram</a>
-                    @endif
+    <a href="{{ url('dashboard/patients/' . $patient->id . '/test-odontogram') }}" class="btn btn-sm btn-primary">
+        View Odontogram
+    </a>
+@endif
+
                 </td>
             </tr>
             @endforeach
