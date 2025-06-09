@@ -5,6 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ $title ?? 'SenyumQu Dental Clinic' }}</title>
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.png') }}">
+
   <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/css/bootstrap-icons.min.css') }}" rel="stylesheet">
 
