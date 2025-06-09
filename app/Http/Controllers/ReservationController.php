@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Schedules;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
+use App\Mail\ReservationInvitation;
 use Illuminate\Support\Facades\Mail;
 
 class ReservationController extends Controller
@@ -167,7 +169,6 @@ class ReservationController extends Controller
 
     public function store(Request $request)
     {
-        // dd('ha');
         // Validasi input
         $request->validate([
             'doctor_id' => 'required|integer',
@@ -177,8 +178,9 @@ class ReservationController extends Controller
         ]);
 
         // Mengambil ID pasien yang sedang login
-        $patientId = auth()->guard('patient')->user()->id;
-        // $patientName = auth()->guard('patient')->user()->name;
+        $patient = auth()->guard('patient')->user(); // Ambil seluruh objek patient
+        $patientId = $patient->id;
+        $patientName = $patient->name; // Asumsi nama pasien ada di kolom 'name' di model Patient/User yang digunakan guard 'patient'
 
         // Simpan data reservasi ke database
         MedicalRecord::create([
@@ -189,21 +191,31 @@ class ReservationController extends Controller
             'jam_selesai' => $request->jam_selesai,
         ]);
 
-        // Kirim Email ke Admin TANPA Mail Class
-        // Mail::raw(
-        //     "🔔 Notifikasi Reservasi Baru! \n\n" .
-        //         "📌 Pasien: {$patientName} \n" .
-        //         "🩺 Dokter ID: {$request->doctor_id} \n" .
-        //         "📅 Tanggal: {$request->tanggal_reservasi} \n" .
-        //         "⏰ Jam: {$request->jam_mulai} - {$request->jam_selesai} \n\n" .
-        //         "Cek sistem untuk lebih lanjut.",
-        //     function ($message) {
-        //         $message->to('emailnyayoli@gmail.com')
-        //             ->subject('🔔 Reservasi Baru dari Pasien!');
-        //     }
-        // );
+        // Membuat detail reservasi untuk email
+        $startDateTime = Carbon::parse($request->tanggal_reservasi . ' ' . $request->jam_mulai);
+        $endDateTime = Carbon::parse($request->tanggal_reservasi . ' ' . $request->jam_selesai);
+
+        // Ambil data dokter dari tabel users menggunakan doctor_id
+        $doctorUser = User::find($request->doctor_id);
+
+        if ($doctorUser) {
+            $reservationDetails = [
+                'title' => 'Reservasi Baru dengan Pasien ' . $patientName, // Judul yang jelas untuk dokter
+                'description' => 'Detail Reservasi: Pasien ' . $patientName . ' pada tanggal ' . $request->tanggal_reservasi . ' jam ' . $request->jam_mulai . ' sampai ' . $request->jam_selesai . '.',
+                'start_time' => $startDateTime,
+                'end_time' => $endDateTime,
+                'doctor_name' => $doctorUser->name, // Nama dokter dari model User
+                'doctor_email' => $doctorUser->email, // Email dokter dari model User
+                'patient_name' => $patientName, // Nama pasien untuk detail deskripsi
+            ];
+
+            // Kirim email undangan ke dokter
+            Mail::to($doctorUser->email)
+                ->send(new ReservationInvitation($reservationDetails));
+        }
+
         // Menyimpan flash message ke session
-        session()->flash('success', 'Reservation created. Please wait to be contacted by Admin');
+        session()->flash('success', 'Reservasi berhasil dibuat. Mohon tunggu Admin menghubungi Anda untuk konfirmasi.');
 
         return redirect()->route('reservations.upcoming');
     }
