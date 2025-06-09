@@ -255,7 +255,7 @@
                             <td class="ps-0 text-xs font-weight-normal">Saldo Kas dan Setara Kas, Awal Periode</td>
                             <td class="text-end text-xs font-weight-normal pe-3">{{ number_format($beginningCashBalance ?? 0, 2, ',', '.') }}</td>
                         </tr>
-                        <tr class="bg-primary-custom text-white-custom highlight-final-balance">
+                        <tr class="bg-primary-custom highlight-final-balance">
                             <td class="ps-0 text-sm font-weight-bolder">Saldo Kas dan Setara Kas, Akhir Periode</td>
                             <td class="text-end text-sm font-weight-bolder pe-3">{{ number_format($endingCashBalance ?? 0, 2, ',', '.') }}</td>
                         </tr>

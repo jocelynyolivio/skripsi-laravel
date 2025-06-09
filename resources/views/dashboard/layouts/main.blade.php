@@ -42,12 +42,18 @@
             padding: 0;
             /* Pastikan header adalah flex container agar ms-auto berfungsi */
             display: flex;
-            justify-content: space-between; /* Ini akan membantu jika ada item lain */
+            justify-content: space-between;
+            /* Ini akan membantu jika ada item lain */
             align-items: center;
         }
 
-        .sidebar-toggle-btn { color: var(--sidebar-link-color); }
-        .sidebar-toggle-btn:hover { color: var(--sidebar-link-active-color); }
+        .sidebar-toggle-btn {
+            color: var(--sidebar-link-color);
+        }
+
+        .sidebar-toggle-btn:hover {
+            color: var(--sidebar-link-active-color);
+        }
 
         .sidebar {
             background-color: var(--sidebar-bg);
@@ -56,34 +62,56 @@
             transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
             overflow-x: hidden;
         }
+
         .sidebar .nav-link {
-            display: flex; align-items: center; padding: 0.75rem 1.5rem;
-            color: var(--sidebar-link-color); white-space: nowrap;
-            border-left: 3px solid transparent; overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--sidebar-link-color);
+            white-space: nowrap;
+            border-left: 3px solid transparent;
+            overflow: hidden;
         }
+
         .sidebar .nav-link .bi {
-            font-size: 1.2rem; text-align: center;
+            font-size: 1.2rem;
+            text-align: center;
             transition: margin-right 0.3s ease-in-out, min-width 0.3s ease-in-out;
         }
-        .sidebar .nav-link span, .sidebar .sidebar-heading {
+
+        .sidebar .nav-link span,
+        .sidebar .sidebar-heading {
             transition: opacity 0.2s ease-in-out 0.1s, visibility 0.2s ease-in-out 0.1s, width 0.2s ease-in-out 0.1s;
         }
+
         .sidebar .nav-link:hover {
-            background-color: var(--sidebar-link-hover-bg); color: var(--sidebar-link-active-color);
+            background-color: var(--sidebar-link-hover-bg);
+            color: var(--sidebar-link-active-color);
         }
+
         .sidebar .nav-link.active {
-            color: var(--sidebar-link-active-color); background-color: var(--sidebar-link-active-bg);
+            color: var(--sidebar-link-active-color);
+            background-color: var(--sidebar-link-active-bg);
             border-left-color: var(--sidebar-link-active-border);
         }
+
         .sidebar-heading {
-            font-size: .75rem; text-transform: uppercase; font-weight: 600; color: #adb5bd;
-            padding: 0.8rem 1.5rem 0.5rem; margin-top: 1rem; white-space: nowrap; overflow: hidden;
+            font-size: .75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #adb5bd;
+            padding: 0.8rem 1.5rem 0.5rem;
+            margin-top: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
         }
+
         .sidebar .menu-wrapper {
             height: calc(100vh - var(--header-height));
-            display: block; 
-            overflow-y: auto; 
+            display: block;
+            overflow-y: auto;
         }
+
         .sidebar.offcanvas .menu-wrapper.offcanvas-body {
             height: 100%;
             padding: 0;
@@ -95,99 +123,186 @@
         }
 
         @media (min-width: 992px) {
-            #sidebar-toggle-mobile { display: none !important; }
-            #sidebar-toggle-desktop { display: block !important; }
-
-            .sidebar {
-                position: fixed; top: 0; left: 0;
-                padding-top: var(--header-height); z-index: 1020;
+            #sidebar-toggle-mobile {
+                display: none !important;
             }
 
-            body.sidebar-collapsed .sidebar { width: var(--sidebar-width-collapsed); }
-            body.sidebar-collapsed main { margin-left: var(--sidebar-width-collapsed); }
+            #sidebar-toggle-desktop {
+                display: block !important;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                padding-top: var(--header-height);
+                z-index: 1020;
+            }
+
+            body.sidebar-collapsed .sidebar {
+                width: var(--sidebar-width-collapsed);
+            }
+
+            body.sidebar-collapsed main {
+                margin-left: var(--sidebar-width-collapsed);
+            }
+
             body.sidebar-collapsed .sidebar .nav-link span,
-            body.sidebar-collapsed .sidebar .sidebar-heading { opacity: 0; visibility: hidden; width: 0; }
-            body.sidebar-collapsed .sidebar .nav-link .bi { margin-right: 0; min-width: calc(var(--sidebar-width-collapsed) - 3rem); }
-            body.sidebar-collapsed .sidebar .nav-link { justify-content: center; }
+            body.sidebar-collapsed .sidebar .sidebar-heading {
+                opacity: 0;
+                visibility: hidden;
+                width: 0;
+            }
+
+            body.sidebar-collapsed .sidebar .nav-link .bi {
+                margin-right: 0;
+                min-width: calc(var(--sidebar-width-collapsed) - 3rem);
+            }
+
+            body.sidebar-collapsed .sidebar .nav-link {
+                justify-content: center;
+            }
+
             body.sidebar-collapsed .sidebar .menu-wrapper {
-                overflow-y: hidden; display: block; justify-content: flex-start;
+                overflow-y: hidden;
+                display: block;
+                justify-content: flex-start;
             }
 
             body.sidebar-collapsed .sidebar:hover {
                 width: var(--sidebar-width-expanded);
-                box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
             }
+
             body.sidebar-collapsed .sidebar:hover .menu-wrapper {
-                overflow-y: auto; display: block; justify-content: flex-start;
+                overflow-y: auto;
+                display: block;
+                justify-content: flex-start;
             }
-            body.sidebar-collapsed .sidebar:hover + main {
+
+            body.sidebar-collapsed .sidebar:hover+main {
                 margin-left: var(--sidebar-width-expanded);
             }
+
             body.sidebar-collapsed .sidebar:hover .nav-link span,
             body.sidebar-collapsed .sidebar:hover .sidebar-heading {
-                opacity: 1; visibility: visible; width: auto; transition-delay: 0.15s;
+                opacity: 1;
+                visibility: visible;
+                width: auto;
+                transition-delay: 0.15s;
             }
+
             body.sidebar-collapsed .sidebar:hover .nav-link .bi {
-                margin-right: 1rem; min-width: auto;
+                margin-right: 1rem;
+                min-width: auto;
             }
+
             body.sidebar-collapsed .sidebar:hover .nav-link {
                 justify-content: flex-start;
             }
 
-            body:not(.sidebar-collapsed) .sidebar { width: var(--sidebar-width-expanded); }
-            body:not(.sidebar-collapsed) main { margin-left: var(--sidebar-width-expanded); }
-            body:not(.sidebar-collapsed) .sidebar .menu-wrapper {
-                overflow-y: auto; display: block; justify-content: flex-start;
+            body:not(.sidebar-collapsed) .sidebar {
+                width: var(--sidebar-width-expanded);
             }
+
+            body:not(.sidebar-collapsed) main {
+                margin-left: var(--sidebar-width-expanded);
+            }
+
+            body:not(.sidebar-collapsed) .sidebar .menu-wrapper {
+                overflow-y: auto;
+                display: block;
+                justify-content: flex-start;
+            }
+
             body:not(.sidebar-collapsed) .sidebar .nav-link span,
-            body:not(.sidebar-collapsed) .sidebar .sidebar-heading { opacity: 1; visibility: visible; width: auto; }
-            body:not(.sidebar-collapsed) .sidebar .nav-link .bi { margin-right: 1rem; min-width: auto; }
-            body:not(.sidebar-collapsed) .sidebar .nav-link { justify-content: flex-start; }
+            body:not(.sidebar-collapsed) .sidebar .sidebar-heading {
+                opacity: 1;
+                visibility: visible;
+                width: auto;
+            }
+
+            body:not(.sidebar-collapsed) .sidebar .nav-link .bi {
+                margin-right: 1rem;
+                min-width: auto;
+            }
+
+            body:not(.sidebar-collapsed) .sidebar .nav-link {
+                justify-content: flex-start;
+            }
         }
 
         @media (max-width: 991.98px) {
-            #sidebar-toggle-desktop { display: none !important; }
-            #sidebar-toggle-mobile { display: block !important; }
+            #sidebar-toggle-desktop {
+                display: none !important;
+            }
+
+            #sidebar-toggle-mobile {
+                display: block !important;
+            }
 
             #mainSidebar.offcanvas {
                 width: var(--sidebar-width-expanded) !important;
-                padding-top: 0; z-index: 1045;
+                padding-top: 0;
+                z-index: 1045;
             }
+
             #mainSidebar.offcanvas .offcanvas-header {
-                background-color: var(--sidebar-bg); color: var(--sidebar-link-active-color);
-                border-bottom: 1px solid rgba(255,255,255,0.1);
+                background-color: var(--sidebar-bg);
+                color: var(--sidebar-link-active-color);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
+
             #mainSidebar.offcanvas .menu-wrapper.offcanvas-body {
                 background-color: var(--sidebar-bg);
-                overflow-y: auto; display: block; justify-content: flex-start;
+                overflow-y: auto;
+                display: block;
+                justify-content: flex-start;
             }
-            #mainSidebar.offcanvas .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-            #mainSidebar.offcanvas .nav-link span,
-            #mainSidebar.offcanvas .sidebar-heading { opacity: 1; visibility: visible; width: auto; }
-            #mainSidebar.offcanvas .nav-link .bi { margin-right: 1rem; min-width: auto; }
-            #mainSidebar.offcanvas .nav-link { justify-content: flex-start; }
 
-            main { margin-left: 0 !important; }
+            #mainSidebar.offcanvas .btn-close {
+                filter: invert(1) grayscale(100%) brightness(200%);
+            }
+
+            #mainSidebar.offcanvas .nav-link span,
+            #mainSidebar.offcanvas .sidebar-heading {
+                opacity: 1;
+                visibility: visible;
+                width: auto;
+            }
+
+            #mainSidebar.offcanvas .nav-link .bi {
+                margin-right: 1rem;
+                min-width: auto;
+            }
+
+            #mainSidebar.offcanvas .nav-link {
+                justify-content: flex-start;
+            }
+
+            main {
+                margin-left: 0 !important;
+            }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<body> 
 
+<body>
     <header class="navbar navbar-header fixed-top p-0 shadow-sm">
         <div class="d-flex align-items-center">
             <button id="sidebar-toggle-desktop" class="btn sidebar-toggle-btn fs-4" type="button">
                 <i class="bi bi-list"></i>
             </button>
             <button id="sidebar-toggle-mobile" class="btn sidebar-toggle-btn fs-4" type="button"
-                    data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
+                data-bs-toggle="offcanvas" data-bs-target="#mainSidebar" aria-controls="mainSidebar">
                 <i class="bi bi-list"></i>
             </button>
             <a class="navbar-brand text-white ms-2" href="/dashboard">
                 <i class="bi bi-tooth me-2"></i> SenyumQu Dental
             </a>
         </div>
-        <div class="navbar-nav ms-auto me-3"> 
+        <div class="navbar-nav ms-auto me-3">
             <div class="nav-item text-nowrap">
                 <form action="/logout" method="post">
                     @csrf
@@ -204,7 +319,7 @@
             <h5 class="offcanvas-title" id="mainSidebarLabel">Menu Navigasi</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="menu-wrapper"> 
+        <div class="menu-wrapper">
             <ul class="nav flex-column py-3">
                 <li class="nav-item">
                     <a class="nav-link {{ Request::is('dashboard') ? 'active' : '' }}" href="/dashboard" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
@@ -219,11 +334,20 @@
                         <span>Attendances & Slips</span>
                     </a>
                 </li>
+                @else
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('dashboard/salaries/slips') ? 'active' : '' }}" href="/dashboard/salaries/slips" data-bs-toggle="tooltip" data-bs-placement="right" title="Attendances & Slips">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Slips</span>
+                    </a>
+                </li>
                 @endif
 
                 <li class="sidebar-heading">Master Data</li>
                 <li class="nav-item">
-                    <a class="nav-link {{ Request::is('dashboard/masters*') ? 'active' : '' }}" href="{{ route('dashboard.masters.index') }}" data-bs-toggle="tooltip" data-bs-placement="right" title="Master Users">
+                    <a class="nav-link {{ (request()->routeIs('dashboard.masters.*') && !request()->routeIs('dashboard.masters.patients*')) ? 'active' : '' }}"
+                        href="{{ route('dashboard.masters.index') }}"
+                        data-bs-toggle="tooltip" data-bs-placement="right" title="Master Users">
                         <i class="bi bi-people-fill"></i>
                         <span>Master Users</span>
                     </a>
@@ -416,7 +540,7 @@
                     }
                     mainSidebar.classList.remove('offcanvas', 'offcanvas-start', 'show');
                     mainSidebar.style.paddingTop = 'var(--header-height)';
-                    
+
                     if (menuWrapper) {
                         menuWrapper.classList.remove('offcanvas-body');
                         // Height diatur oleh CSS
@@ -434,7 +558,7 @@
                     body.classList.remove('sidebar-collapsed', 'sidebar-pinned-open');
                     mainSidebar.classList.add('offcanvas', 'offcanvas-start');
                     mainSidebar.style.paddingTop = '0';
-                    
+
                     if (menuWrapper) {
                         menuWrapper.classList.add('offcanvas-body');
                     }
@@ -442,7 +566,7 @@
                     mobileToggler.setAttribute('data-bs-toggle', 'offcanvas');
                     mobileToggler.setAttribute('data-bs-target', '#mainSidebar');
                     if (!bootstrap.Offcanvas.getInstance(mainSidebar)) {
-                         bsOffcanvasInstance = new bootstrap.Offcanvas(mainSidebar);
+                        bsOffcanvasInstance = new bootstrap.Offcanvas(mainSidebar);
                     }
                 }
             }
@@ -474,4 +598,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -34,7 +34,7 @@
     @if($attendances->isEmpty())
     <p class="text-center mt-3">Belum ada data presensi.</p>
     @else
-    <table class="table table-bordered mt-3" id="attendanceTable">
+    <table class="table table-striped table-bordered mt-3" id="attendanceTable">
         <thead>
             <tr>
                 <th>ID</th>

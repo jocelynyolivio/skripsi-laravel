@@ -5,6 +5,19 @@
     <div class="d-flex justify-content-between mb-3">
         <h3 class="text-center">Unfilled Medical Record</h3>
     </div>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
 
     @if ($records->isEmpty())
         <p class="text-success">All medical records are complete.</p>

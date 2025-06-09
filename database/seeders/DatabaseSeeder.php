@@ -940,8 +940,8 @@ class DatabaseSeeder extends Seeder
             ['nama' => 'Shopee - Dunia Dental Shop', 'alamat' => null],
         ];
 
-        $defaultNomorTelepon = 'Tidak Ada Informasi';
-        $defaultEmail = 'Tidak Ada Informasi';
+        $defaultNomorTelepon = '-';
+        $defaultEmail = '-';
 
         foreach ($suppliers as $supplierData) {
             // Gunakan firstOrCreate untuk menghindari duplikasi berdasarkan nama supplier

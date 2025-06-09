@@ -713,7 +713,6 @@ class MedicalRecordController extends Controller
         // Ambil semua rekam medis yang belum memiliki transaksi
         $medicalRecords = MedicalRecord::doesntHave('transaction')->get();
 
-
         return view('dashboard.medical_records.selectForTransaction', [
             'title' => 'Select Medical Record',
             'medicalRecords' => $medicalRecords,

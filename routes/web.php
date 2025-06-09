@@ -256,6 +256,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/masters/create', [UserController::class, 'create'])->name('masters.create')->middleware('role:manager');
     Route::post('/masters', [UserController::class, 'store'])->name('masters.store')->middleware('role:manager');
     Route::get('/masters/{id}/edit', [UserController::class, 'edit'])->name('masters.edit')->middleware('role:manager');
+    Route::get('/masters/{id}/show', [UserController::class, 'show'])->name('masters.show');
     Route::put('/masters/{id}', [UserController::class, 'update'])->name('masters.update')->middleware('role:manager');
     Route::delete('/masters/{id}', [UserController::class, 'destroy'])->name('masters.destroy')->middleware('role:manager');
 
@@ -330,7 +331,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::resource('/dental-materials', DentalMaterialController::class);
     Route::post('procedure-materials/perform-overwrite', [ProcedureMaterialController::class, 'performOverwriteById'])
         ->name('procedure_materials.perform_overwrite');
-    Route::resource('procedure_materials', ProcedureMaterialController::class);    
+    Route::resource('procedure_materials', ProcedureMaterialController::class);
 
     Route::get('/journals', [JournalController::class, 'index'])->name('journals.index')->middleware('role:manager');
     Route::get('/journals/show/{id}', [JournalController::class, 'show'])->name('journals.show')->middleware('role:manager');

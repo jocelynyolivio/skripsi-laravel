@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('procedure_id')->constrained()->onDelete('cascade');
             $table->decimal('price', 10, 2);
             $table->boolean('is_promo')->default(false); // Menyimpan apakah harga adalah promosi
-            $table->date('effective_date'); // Tanggal harga berlaku
+            $table->date('effective_date')->nullable(); // Tanggal harga berlaku
             $table->timestamps();
         });
     }

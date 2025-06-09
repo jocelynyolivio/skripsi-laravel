@@ -1,9 +1,9 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
 @include('dashboard.layouts.breadcrumbs', [
-    'customBreadcrumbs' => [
-        ['text' => 'Procedures']
-    ]
+'customBreadcrumbs' => [
+['text' => 'Procedures']
+]
 ])
 @endsection
 @section('container')
@@ -14,7 +14,7 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
     <table id="proceduresTable" class="table table-striped table-bordered">
@@ -23,8 +23,9 @@
                 <th>Name</th>
                 <th>Code</th>
                 <th>Type</th>
+                <th>Description</th>
                 <th>Requires Tooth</th>
-                <th>Aksi</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -33,6 +34,7 @@
                 <td>{{ $procedure->name }}</td>
                 <td>{{ $procedure->item_code }}</td>
                 <td>{{ $procedure->procedureType->name ?? '-' }}</td>
+                <td>{{ $procedure->description }}</td>
                 <td>{{ $procedure->requires_tooth ? 'Yes' : 'No' }}</td>
                 <td>
                     <a href="{{ route('dashboard.procedures.edit', $procedure->id) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -54,7 +56,7 @@
     $(document).ready(function() {
         $('#proceduresTable').DataTable();
 
-        $('.delete-button').click(function (e) {
+        $('.delete-button').click(function(e) {
             e.preventDefault();
             const form = $(this).closest('form');
             Swal.fire({

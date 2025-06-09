@@ -9,19 +9,42 @@
 @endsection
 @section('container')
 <div class="container col-md-6 mt-5">
-    <h3>Edit Procedure Type</h3>
-    <form action="{{ route('dashboard.procedure_types.update', $procedureType->id) }}" method="POST">
+    <h2>Edit Procedure Type</h2>
+    <form id="editPTForm" action="{{ route('dashboard.procedure_types.update', $procedureType->id) }}" method="POST">
         @csrf
         @method('PUT')
-        <div class="form-group">
+        <div class="mb-3">
             <label>Nama</label>
             <input type="text" name="name" class="form-control" required value="{{ old('name', $procedureType->name) }}">
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Deskripsi</label>
             <textarea name="description" class="form-control">{{ old('description', $procedureType->description) }}</textarea>
         </div>
-        <button type="submit" class="btn btn-success mt-2">Update</button>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+<button type="submit" class="btn btn-primary">Update</button>            <a href="{{ route('dashboard.procedure_types.index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
+<script>
+    document.getElementById('editPTForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Update Confirmation',
+            text: "Are you sure to update this Procedure Type data?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, sure!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+</script>
 @endsection

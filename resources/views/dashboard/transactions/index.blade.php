@@ -30,6 +30,47 @@
     </div>
     @endif
 
+
+    <div class="row mb-4">
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-success py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Total Lunas (30 Hari Terakhir)</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                Rp {{ number_format($paidTransactions, 0, ',', '.') }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-check-fill fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-danger py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                Total Belum Lunas (Sisa Tagihan)</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">
+                                Rp {{ number_format($unpaidTransactions, 0, ',', '.') }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-receipt-cutoff fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <table id="transactionTable" class="table table-striped table-bordered">
         <thead>
             <tr>
@@ -39,7 +80,6 @@
                 <th>Admin</th>
                 <th>Amount</th>
                 <th>Sisa Tagihan</th>
-                <th>Created At</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -61,11 +101,6 @@
                 <td>Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
                 <td>
                     Rp {{ number_format($transaction->remaining_amount, 0, ',', '.') }}
-                </td>
-                <td>
-
-                    <p>Last edited by: {{ $transaction->editor->name ?? 'Unknown' }}</p>
-                    <p>Last edited at: {{ $transaction->created_at->format('d M Y H:i') }}</p>
                 </td>
                 <td>
                     <span class="badge bg-{{ $transaction->payment_status == 'belum lunas' ? 'danger' : 'success' }}">

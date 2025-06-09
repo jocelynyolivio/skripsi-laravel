@@ -28,7 +28,7 @@ class UserController extends Controller
             });
         }
 
-    $users = $query->latest()->get();
+        $users = $query->latest()->get();
 
         return view('dashboard.masters.index', compact('users', 'role', 'search'));
     }
@@ -45,7 +45,7 @@ class UserController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8',
+                'password' => 'required|string|min:8|confirmed',
                 'role_id' => 'required|exists:roles,id',
                 'tempat_lahir' => 'nullable|string|max:255',
                 'tanggal_lahir' => 'nullable|date',
@@ -89,7 +89,7 @@ class UserController extends Controller
             $validated = $request->validate([
                 'name' => 'nullable|string|max:255',
                 'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
-                'password' => 'nullable|string|min:8|confirmed',
+                'password' => 'nullable|string|min:8',
                 'role_id' => 'nullable|exists:roles,id',
                 'tempat_lahir' => 'nullable|string|max:255',
                 'tanggal_lahir' => 'nullable|date',
@@ -144,6 +144,17 @@ class UserController extends Controller
 
         return redirect()->route('dashboard.masters.index')
             ->with('success', 'User deleted successfully.');
+    }
+
+
+    public function show($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            return view('dashboard.masters.show', compact('user'));
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard.masters.index')->with('error', 'User not found.');
+        }
     }
 
     public function toggleStatus($id)

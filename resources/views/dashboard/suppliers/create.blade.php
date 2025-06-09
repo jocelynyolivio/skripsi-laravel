@@ -14,7 +14,7 @@
     <form id="createSupplierForm" action="{{ route('dashboard.suppliers.store') }}" method="POST">
         @csrf
         <div class="mb-3">
-            <label>Name</label>
+            <label>Name <span class="text-danger">*</span></label>
             <input type="text" name="nama" class="form-control" value="{{ old('nama') }}" required>
             @error('name')
                 <span class="text-danger">{{ $message }}</span>
@@ -42,7 +42,11 @@
             @enderror
         </div>
         <br>
-        <button type="submit" class="btn btn-success">Create New</button>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-primary">Create</button>
+            <a href="{{ route('dashboard.suppliers.index') }}" class="btn btn-secondary px-4">Cancel</a>
+        </div>
     </form>
 </div>
 <script>

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Patient;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PatientController extends Controller
 {
@@ -155,6 +156,27 @@ class PatientController extends Controller
 
             // dd($validatedData);
 
+            // Daftar field nomor ponsel yang perlu ditambahkan prefix '62'
+            $phoneFields = ['home_mobile', 'office_mobile', 'emergency_contact_phone'];
+
+            foreach ($phoneFields as $field) {
+                // Cek apakah field tersebut ada di request dan tidak kosong
+                if (!empty($validatedData[$field])) {
+                    $number = $validatedData[$field];
+
+                    // Menghapus karakter non-numerik untuk kebersihan data (opsional tapi disarankan)
+                    $number = preg_replace('/[^0-9]/', '', $number);
+
+                    // Jika nomor diawali dengan '0', hapus '0' tersebut
+                    if (substr($number, 0, 1) === '0') {
+                        $number = substr($number, 1);
+                    }
+
+                    // Tambahkan prefix '62' dan simpan kembali ke array
+                    $validatedData[$field] = '62' . $number;
+                }
+            }
+
             // Generate Patient ID
             $initialLetter = strtoupper(substr($request->fname, 0, 1)); // Ambil huruf pertama dari nama
             $lastPatient = Patient::where('patient_id', 'like', "$initialLetter%")->orderBy('id', 'desc')->first();
@@ -228,92 +250,112 @@ class PatientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+   public function update(Request $request, Patient $patient)
     {
-        $patient = Patient::findOrFail($id);
-        $patient->updated_by = auth()->id();
-
-        // dd('msk');
+        // Aturan validasi yang disesuaikan untuk proses update
+        $rules = [
+            'fname' => 'required|string|max:255',
+            'mname' => 'nullable|string|max:255',
+            'lname' => 'nullable|string|max:255',
+            'gender' => 'required|in:Male,Female,Other',
+            // Pastikan NIK unik, kecuali untuk pasien ini sendiri
+            'nik' => 'required|string|max:20|unique:patients,nik,' . $patient->id,
+            'blood_type' => 'required|string|max:10',
+            'parent_name' => 'nullable|string|max:255',
+            'place_of_birth' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'religion' => 'nullable|string|max:100',
+            'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
+            'family_status' => 'nullable|string|max:100',
+            'occupation' => 'nullable|string|max:255',
+            'nationality' => 'nullable|string|max:100',
+            'home_address' => 'required|string',
+            'home_address_domisili' => 'nullable|string',
+            'home_RT' => 'nullable|string|max:10',
+            'home_RW' => 'nullable|string|max:10',
+            'home_kelurahan' => 'nullable|string|max:100',
+            'home_kecamatan' => 'nullable|string|max:100',
+            'home_city' => 'nullable|string|max:255',
+            'home_zip_code' => 'nullable|string|max:10',
+            'home_country' => 'nullable|string|max:255',
+            'home_phone' => 'nullable|string|max:20',
+            'home_mobile' => 'required|string|max:20',
+            'home_email' => 'nullable|email|max:255',
+            'office_address' => 'nullable|string',
+            'office_city' => 'nullable|string|max:255',
+            'office_zip_code' => 'nullable|string|max:10',
+            'office_country' => 'nullable|string|max:255',
+            'office_phone' => 'nullable|string|max:20',
+            'office_mobile' => 'nullable|string|max:20',
+            'office_email' => 'nullable|email|max:255',
+            'emergency_contact_name' => 'required|string|max:255',
+            'emergency_contact_relation' => 'required|string|max:100',
+            'emergency_contact_phone' => 'required|string|max:20',
+            'form_data_awal' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'informed_consent' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            // Email dan password bersifat opsional saat update
+            'email' => 'nullable|email|unique:patients,email,' . $patient->id,
+            'password' => 'nullable|string|min:6',
+        ];
 
         try {
-            $validatedData = $request->validate([
-                'fname' => 'required|string|max:255',
-                'mname' => 'nullable|string|max:255',
-                'lname' => 'nullable|string|max:255',
-                'gender' => 'required|in:Male,Female,Other',
-                'nik' => 'required|string|max:20',
-                'blood_type' => 'required|string|max:5',
-                'parent_name' => 'nullable|string|max:255',
-                'place_of_birth' => 'required|string|max:255',
-                'date_of_birth' => 'required|date',
-                'religion' => 'nullable|string|max:100',
-                'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
-                'family_status' => 'nullable|string|max:100',
-                'occupation' => 'nullable|string|max:255',
-                'nationality' => 'nullable|string|max:100',
-                'home_address' => 'required|string',
-                'home_address_domisili' => 'nullable|string',
-                'home_RT' => 'nullable|string|max:10',
-                'home_RW' => 'nullable|string|max:10',
-                'home_kelurahan' => 'nullable|string|max:100',
-                'home_kecamatan' => 'nullable|string|max:100',
-                'home_city' => 'nullable|string|max:255',
-                'home_zip_code' => 'nullable|string|max:10',
-                'home_country' => 'nullable|string|max:255',
-                'home_phone' => 'nullable|string|max:20',
-                'home_mobile' => 'required|string|max:20',
-                'home_email' => 'nullable|email|max:255',
-                'office_address' => 'nullable|string',
-                'office_city' => 'nullable|string|max:255',
-                'office_zip_code' => 'nullable|string|max:10',
-                'office_country' => 'nullable|string|max:255',
-                'office_phone' => 'nullable|string|max:20',
-                'office_mobile' => 'nullable|string|max:20',
-                'office_email' => 'nullable|email|max:255',
-                'emergency_contact_name' => 'required|string|max:255',
-                'emergency_contact_relation' => 'required|string|max:100',
-                'emergency_contact_phone' => 'required|string|max:20',
-                'form_data_awal' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-                'informed_consent' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-                'email' => 'nullable|email',
-                'password' => 'nullable|string|min:6',
-            ]);
+            // Lakukan validasi
+            $validatedData = $request->validate($rules);
 
-            // Jika password tidak diisi, gunakan password lama
-            if (!$request->filled('password')) {
-                $validatedData['password'] = $patient->password;
-            } else {
-                $validatedData['password'] = bcrypt($request->password);
+            // --- Normalisasi Nomor Telepon (Menambahkan '62') ---
+            $phoneFields = ['home_phone', 'home_mobile', 'office_phone', 'office_mobile', 'emergency_contact_phone'];
+            foreach ($phoneFields as $field) {
+                if (!empty($validatedData[$field])) {
+                    $number = preg_replace('/[^0-9]/', '', $validatedData[$field]);
+                    if (substr($number, 0, 1) === '0') {
+                        $number = substr($number, 1);
+                    }
+                    $validatedData[$field] = '62' . $number;
+                }
             }
 
-            // Handle file upload untuk Form Data Awal
+            // --- Penanganan File Upload ---
+            // Cek jika ada file baru untuk 'form_data_awal'
             if ($request->hasFile('form_data_awal')) {
+                // Hapus file lama jika ada
+                if ($patient->form_data_awal) {
+                    Storage::disk('public')->delete($patient->form_data_awal);
+                }
+                // Simpan file baru
                 $validatedData['form_data_awal'] = $request->file('form_data_awal')->store('patients/forms', 'public');
-            } else {
-                $validatedData['form_data_awal'] = $patient->form_data_awal;
             }
 
-            // Handle file upload untuk Informed Consent
+            // Cek jika ada file baru untuk 'informed_consent'
             if ($request->hasFile('informed_consent')) {
+                // Hapus file lama jika ada
+                if ($patient->informed_consent) {
+                    Storage::disk('public')->delete($patient->informed_consent);
+                }
+                // Simpan file baru
                 $validatedData['informed_consent'] = $request->file('informed_consent')->store('patients/consent', 'public');
-            } else {
-                $validatedData['informed_consent'] = $patient->informed_consent;
             }
 
-            // Pastikan `patient_id` tidak berubah
-            $validatedData['patient_id'] = $patient->patient_id;
+            // --- Penanganan Password ---
+            // Hanya update password jika field diisi
+            if ($request->filled('password')) {
+                $validatedData['password'] = bcrypt($request->password);
+            } else {
+                // Jika tidak diisi, hapus dari data yang akan di-update
+                unset($validatedData['password']);
+            }
 
-            // Update data pasien
+            // Tambahkan ID pengguna yang melakukan update
+            $validatedData['updated_by'] = auth()->id();
+
+            // Lakukan update pada data pasien
             $patient->update($validatedData);
 
-            return redirect()->route('dashboard.masters.patients')->with('success', 'Patient updated successfully!');
+            return redirect()->route('dashboard.masters.patients')->with('success', 'Patient data updated successfully!');
+
         } catch (\Exception $e) {
-            dd($e);
-            return redirect()->back()->with('error', 'Gagal karena ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update patient: ' . $e->getMessage())->withInput();
         }
     }
-
-
 
     /**
      * Remove the specified resource from storage.

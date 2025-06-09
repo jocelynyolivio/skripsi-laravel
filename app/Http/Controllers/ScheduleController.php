@@ -308,6 +308,7 @@ class ScheduleController extends Controller
 
     public function saveReservation(Request $request, $id = null)
     {
+        // dd('masuk save reservation');
         // Validasi input
         $request->validate([
             'patient_id' => 'required|integer',
@@ -316,6 +317,7 @@ class ScheduleController extends Controller
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
         ]);
+        // dd($request);
 
         // Jika ID diberikan, update reservasi yang ada, jika tidak buat baru
         $reservation = $id ? MedicalRecord::findOrFail($id) : new MedicalRecord();

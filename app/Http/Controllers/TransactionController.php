@@ -507,6 +507,7 @@ class TransactionController extends Controller
 
     public function index()
     {
+        // dd('hai');
         // Ambil semua transaksi dengan informasi terkait
         $transactions = Transaction::with(['patient', 'admin', 'medicalRecord.patient'])->get();
         $coa = ChartOfAccount::all();

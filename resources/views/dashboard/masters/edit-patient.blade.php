@@ -1,16 +1,16 @@
 @extends('dashboard.layouts.main')
 @section('breadcrumbs')
-    @include('dashboard.layouts.breadcrumbs', [
-        'customBreadcrumbs' => [
-            ['url' => route('dashboard.masters.patients'), 'text' => 'Master Patients'],
-            ['text' => 'Edit Patient']
-        ]
-    ])
+@include('dashboard.layouts.breadcrumbs', [
+'customBreadcrumbs' => [
+['url' => route('dashboard.masters.patients'), 'text' => 'Master Patients'],
+['text' => 'Edit Patient']
+]
+])
 @endsection
 
 @section('container')
 <div class="container mt-5 col-md-8">
-    <h3 class="text-center mb-4">Edit Patient</h3>
+    <h3 class="text-center mb-4">Edit Patient : {{$patient->fname}}</h3>
 
     <form action="{{ route('dashboard.masters.patients.update', $patient->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -25,7 +25,8 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="fname" class="form-label">First Name*</label>
+                            {{-- SESUAIKAN: Label dan required --}}
+                            <label for="fname" class="form-label">First Name <span class="text-danger">*</span></label>
                             <input type="text" name="fname" id="fname" class="form-control" value="{{ old('fname', $patient->fname) }}" required>
                         </div>
                     </div>
@@ -46,9 +47,10 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="gender" class="form-label">Gender*</label>
+                            {{-- SESUAIKAN: Label dan required --}}
+                            <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
                             <select name="gender" id="gender" class="form-select" required>
-                                <option disabled {{ old('gender', $patient->gender) == '' ? 'selected' : '' }}>-- Select Gender --</option>
+                                <option disabled>-- Select Gender --</option>
                                 <option value="Male" {{ old('gender', $patient->gender) == 'Male' ? 'selected' : '' }}>Male</option>
                                 <option value="Female" {{ old('gender', $patient->gender) == 'Female' ? 'selected' : '' }}>Female</option>
                                 <option value="Other" {{ old('gender', $patient->gender) == 'Other' ? 'selected' : '' }}>Other</option>
@@ -57,14 +59,26 @@
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="nik" class="form-label">NIK*</label>
+                            {{-- SESUAIKAN: Label dan required --}}
+                            <label for="nik" class="form-label">NIK <span class="text-danger">*</span></label>
                             <input type="text" name="nik" id="nik" class="form-control" value="{{ old('nik', $patient->nik) }}" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="blood_type" class="form-label">Blood Type*</label>
-                            <input type="text" name="blood_type" id="blood_type" class="form-control" value="{{ old('blood_type', $patient->blood_type) }}" required>
+                            <label for="blood_type" class="form-label">Blood Type <span class="text-danger">*</span></label>
+                            <select name="blood_type" id="blood_type" class="form-select" required>
+                                <option value="" disabled>Select Blood Type</option>
+                                <option value="A+" {{ old('blood_type', $patient->blood_type) == 'A+' ? 'selected' : '' }}>A+</option>
+                                <option value="A-" {{ old('blood_type', $patient->blood_type) == 'A-' ? 'selected' : '' }}>A-</option>
+                                <option value="B+" {{ old('blood_type', $patient->blood_type) == 'B+' ? 'selected' : '' }}>B+</option>
+                                <option value="B-" {{ old('blood_type', $patient->blood_type) == 'B-' ? 'selected' : '' }}>B-</option>
+                                <option value="AB+" {{ old('blood_type', $patient->blood_type) == 'AB+' ? 'selected' : '' }}>AB+</option>
+                                <option value="AB-" {{ old('blood_type', $patient->blood_type) == 'AB-' ? 'selected' : '' }}>AB-</option>
+                                <option value="O+" {{ old('blood_type', $patient->blood_type) == 'O+' ? 'selected' : '' }}>O+</option>
+                                <option value="O-" {{ old('blood_type', $patient->blood_type) == 'O-' ? 'selected' : '' }}>O-</option>
+                                <option value="Unknown" {{ old('blood_type', $patient->blood_type) == 'Unknown' ? 'selected' : '' }}>Unknown</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -87,13 +101,13 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="place_of_birth" class="form-label">Place of Birth*</label>
+                            <label for="place_of_birth" class="form-label">Place of Birth <span class="text-danger">*</span></label>
                             <input type="text" name="place_of_birth" id="place_of_birth" class="form-control" value="{{ old('place_of_birth', $patient->place_of_birth) }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="date_of_birth" class="form-label">Date of Birth*</label>
+                            <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
                             <input type="date" name="date_of_birth" id="date_of_birth" class="form-control" value="{{ old('date_of_birth', $patient->date_of_birth) }}" required>
                         </div>
                     </div>
@@ -129,7 +143,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="mb-3">
-                            <label for="nationality" class="form-label">Nationality*</label>
+                            <label for="nationality" class="form-label">Nationality <span class="text-danger">*</span></label>
                             <input type="text" name="nationality" id="nationality" class="form-control" value="{{ old('nationality', $patient->nationality) }}" required>
                         </div>
                     </div>
@@ -144,7 +158,7 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="home_address" class="form-label">Address*</label>
+                    <label for="home_address" class="form-label">Address <span class="text-danger">*</span></label>
                     <textarea name="home_address" id="home_address" class="form-control" required>{{ old('home_address', $patient->home_address) }}</textarea>
                 </div>
 
@@ -179,7 +193,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -205,13 +219,20 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="home_phone" class="form-label">Phone</label>
-                            <input type="text" name="home_phone" id="home_phone" class="form-control" value="{{ old('home_phone', $patient->home_phone) }}">
+                            {{-- SESUAIKAN: Tambah +62 --}}
+                            <div class="input-group">
+                                <span class="input-group-text">+62</span>
+                                <input type="text" name="home_phone" id="home_phone" class="form-control" value="{{ old('home_phone', substr($patient->home_phone, 2)) }}">
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="home_mobile" class="form-label">Mobile*</label>
-                            <input type="text" name="home_mobile" id="home_mobile" class="form-control" value="{{ old('home_mobile', $patient->home_mobile) }}" required>
+                            <label for="home_mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">+62</span>
+                                <input type="text" name="home_mobile" id="home_mobile" class="form-control" value="{{ old('home_mobile', substr($patient->home_mobile, 2)) }}" required>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -234,7 +255,7 @@
                     <label for="office_address" class="form-label">Address</label>
                     <textarea name="office_address" id="office_address" class="form-control">{{ old('office_address', $patient->office_address) }}</textarea>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -260,7 +281,11 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="office_phone" class="form-label">Phone</label>
-                            <input type="text" name="office_phone" id="office_phone" class="form-control" value="{{ old('office_phone', $patient->office_phone) }}">
+                            {{-- SESUAIKAN: Tambah +62 --}}
+                            <div class="input-group">
+                                <span class="input-group-text">+62</span>
+                                <input type="text" name="office_phone" id="office_phone" class="form-control" value="{{ old('office_phone', substr($patient->office_phone, 2)) }}">
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -288,20 +313,23 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="emergency_contact_name" class="form-label">Contact Name*</label>
+                            <label for="emergency_contact_name" class="form-label">Contact Name <span class="text-danger">*</span></label>
                             <input type="text" name="emergency_contact_name" id="emergency_contact_name" class="form-control" value="{{ old('emergency_contact_name', $patient->emergency_contact_name) }}" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="emergency_contact_relation" class="form-label">Relation*</label>
+                            <label for="emergency_contact_relation" class="form-label">Relation <span class="text-danger">*</span></label>
                             <input type="text" name="emergency_contact_relation" id="emergency_contact_relation" class="form-control" value="{{ old('emergency_contact_relation', $patient->emergency_contact_relation) }}" required>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="emergency_contact_phone" class="form-label">Contact Phone*</label>
-                            <input type="text" name="emergency_contact_phone" id="emergency_contact_phone" class="form-control" value="{{ old('emergency_contact_phone', $patient->emergency_contact_phone) }}" required>
+                            <label for="emergency_contact_phone" class="form-label">Contact Phone <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">+62</span>
+                                <input type="text" name="emergency_contact_phone" id="emergency_contact_phone" class="form-control" value="{{ old('emergency_contact_phone', substr($patient->emergency_contact_phone, 2)) }}" required>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -377,9 +405,74 @@
             </div>
         </div>
 
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg">Update Patient</button>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-primary px-4">Update Patient</button>
+            <a href="{{ route('dashboard.masters.patients') }}" class="btn btn-secondary px-4">Cancel</a>
         </div>
     </form>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editPatientForm = document.getElementById('editPatientForm');
+
+        editPatientForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Selalu cegah submit di awal
+
+            let isValid = true;
+            const requiredFields = editPatientForm.querySelectorAll('[required]');
+
+            // Validasi field yang wajib diisi
+            requiredFields.forEach(field => {
+                field.classList.remove('is-invalid');
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Harap isi semua field yang wajib ditandai dengan bintang (*).',
+                    icon: 'error',
+                    confirmButtonText: 'Mengerti'
+                });
+                return;
+            }
+
+            // Jika validasi lolos, tampilkan dialog konfirmasi
+            Swal.fire({
+                title: 'Konfirmasi Perubahan',
+                text: "Apakah Anda yakin ingin memperbarui data pasien ini?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd', // Warna primary bootstrap
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, perbarui!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan alert "loading"
+                    Swal.fire({
+                        title: 'Memproses Perubahan...',
+                        text: 'Mohon tunggu sebentar.',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Kirim form
+                    editPatientForm.submit();
+                }
+            });
+        });
+    });
+</script>
+<style>
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+</style>
 @endsection

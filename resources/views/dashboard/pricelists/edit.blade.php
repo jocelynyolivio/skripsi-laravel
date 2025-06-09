@@ -11,21 +11,25 @@
 <div class="container mt-5 col-md-6">
     <h1>Edit Pricelist</h1>
 
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
 
     <form action="{{ route('dashboard.pricelists.update', $pricelist) }}" id="editPricelistForm" method="POST">
         @csrf
         @method('PUT')
         <div class="mb-3">
-            <label>Procedure</label>
+            <label>Procedure <span class="text-danger">*</span></label>
             <select name="procedure_id" class="form-control" required>
                 <option value="">-- Select Procedure --</option>
                 @foreach($procedures as $proc)
@@ -35,8 +39,8 @@
         </div>
 
         <div class="mb-3">
-            <label>Price</label>
-            <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') ?? $pricelist->price }}" required>
+            <label>Price <span class="text-danger">*</span></label>
+            <input type="number" name="price" class="form-control" value="{{ old('price') ?? $pricelist->price }}" required>
         </div>
 
         <div class="mb-3 form-check">
@@ -50,13 +54,13 @@
         <div class="mb-3">
             <label>Effective Date</label>
             <input type="date" name="effective_date" class="form-control"
-                value="{{ old('effective_date', isset($pricelist) ? date('Y-m-d', strtotime($pricelist->effective_date)) : '') }}"
-                required>
+                value="{{ old('effective_date', isset($pricelist) ? date('Y-m-d', strtotime($pricelist->effective_date)) : '') }}">
         </div>
 
-
-        <button class="btn btn-primary" type="submit">Update</button>
-        <a href="{{ route('dashboard.pricelists.index') }}" class="btn btn-secondary">Cancel</a>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-primary" type="submit">Update</button>
+            <a href="{{ route('dashboard.pricelists.index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
 <script>
@@ -70,8 +74,8 @@
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, simpan!',
-            cancelButtonText: 'Batal'
+            confirmButtonText: 'Yes, sure!',
+            cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.submit();

@@ -344,7 +344,7 @@ class SalaryController extends Controller
                         'adjustment_notes' => $salary['adjustment_notes'] ?? null,
                     ]
                 );
-dd('stlh loop');
+// dd('stlh loop');
                 // // Simpan Journal Entry (langsung masuk ke Beban Gaji)
                 $journal = \App\Models\JournalEntry::create([
                     'entry_date' => now(),

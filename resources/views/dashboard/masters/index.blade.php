@@ -16,8 +16,16 @@
     </div>
 
     @if(session('success'))
-    <div class="alert alert-success">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     @endif
 
@@ -42,9 +50,7 @@
                 <th>Email</th>
                 <th>Mobile Number</th>
                 <th>Role</th>
-                @if(auth()->user()?->role?->role_name === 'manager')
                 <th>Action</th>
-                @endif
             </tr>
         </thead>
         <tbody>
@@ -63,8 +69,9 @@
                     Manager
                     @endif
                 </td>
-                @if(auth()->user()?->role?->role_name === 'manager')
                 <td>
+                    @if(auth()->user()?->role?->role_name === 'manager')
+
                     <!-- Tombol Edit -->
                     <a href="{{ route('dashboard.masters.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
 
@@ -74,8 +81,11 @@
                         @method('DELETE')
                         <button type="button" class="btn btn-sm btn-danger delete-button">Delete</button>
                     </form>
+                    @else
+                    <a href="{{ route('dashboard.masters.show', $user->id) }}" class="btn btn-sm btn-warning">Show</a>
+                    @endif
+
                 </td>
-                @endif
             </tr>
             @endforeach
         </tbody>

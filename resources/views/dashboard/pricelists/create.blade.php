@@ -24,7 +24,7 @@
     <form action="{{ route('dashboard.pricelists.store') }}" id="createPricelistForm" method="POST">
         @csrf
         <div class="mb-3">
-            <label>Procedure</label>
+            <label>Procedure <span class="text-danger">*</span></label>
             <select name="procedure_id" class="form-control" required>
                 <option value="">-- Select Procedure --</option>
                 @foreach($procedures as $proc)
@@ -34,7 +34,7 @@
         </div>
 
         <div class="mb-3">
-            <label>Price</label>
+            <label>Price <span class="text-danger">*</span></label>
             <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') }}" required>
         </div>
 
@@ -45,12 +45,14 @@
         </div>
 
         <div class="mb-3">
-            <label>Effective Date</label>
+            <label>Effective Date <span class="text-danger">*</span></label>
             <input type="date" name="effective_date" class="form-control" value="{{ old('effective_date') }}" required>
         </div>
 
-        <button class="btn btn-primary" type="submit">Simpan</button>
-        <a href="{{ route('dashboard.pricelists.index') }}" class="btn btn-secondary">Batal</a>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button class="btn btn-primary" type="submit">Create</button>
+        <a href="{{ route('dashboard.pricelists.index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
 <script>
@@ -58,14 +60,14 @@
         e.preventDefault();
 
         Swal.fire({
-            title: 'Create Pricelist Confirmation',
+            title: 'Confirm Pricelist',
             text: "Are you sure want to create this pricelist data?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, simpan!',
-            cancelButtonText: 'Batal'
+            confirmButtonText: 'Yes, sure!',
+            cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.submit();

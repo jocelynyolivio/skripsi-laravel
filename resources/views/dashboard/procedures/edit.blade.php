@@ -27,18 +27,7 @@
         </div>
     @endif
 
-    {{-- Menampilkan error validasi umum --}}
-    @if ($errors->any())
-        <div class="alert alert-danger pb-0">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('dashboard.procedures.update', $procedure->id) }}" method="POST">
+    <form id="editProcedureForm" action="{{ route('dashboard.procedures.update', $procedure->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -92,10 +81,30 @@
             @enderror
         </div>
 
-        <div class="mt-4"> {{-- Memberi jarak atas untuk tombol --}}
-            <button type="submit" class="btn btn-success">Update Procedure</button>
-            <a href="{{ route('dashboard.procedures.index') }}" class="btn btn-secondary">Batal</a>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-primary">Update Procedure</button>
+            <a href="{{ route('dashboard.procedures.index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
+<script>
+    document.getElementById('editProcedureForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Update Confirmation',
+            text: "Are you sure to update this procedure data?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, sure!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+</script>
 @endsection

@@ -149,13 +149,30 @@
         });
 
         function renderSchedules(data) {
+            // Asumsikan 'data.date' adalah string tanggal yang valid, misalnya "2025-06-07" atau objek Date.
+            const dateObject = new Date(data.date);
+
+            // Daftar nama bulan singkat
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            // Mengambil komponen tanggal, bulan, dan tahun
+            const day = String(dateObject.getDate()).padStart(2, '0');
+            const month = monthNames[dateObject.getMonth()];
+            const year = dateObject.getFullYear();
+
+            // Menggabungkan menjadi format yang diinginkan
+            const formattedDate = `${day} ${month} ${year}`;
+
+            // Menggunakan tanggal yang sudah diformat di dalam innerHTML
             if (!data.doctors || data.doctors.length === 0) {
-                resultsDiv.innerHTML = `<div class="alert alert-info">No available schedules for ${data.date}.</div>`;
+                resultsDiv.innerHTML = `<div class="alert alert-info">No available schedules for ${formattedDate}.</div>`;
                 return;
             }
 
             let html = `
-            <h5 class="mb-3">Available Schedules on ${data.date} (${data.day_of_week})</h5>
+            <h5 class="mb-3">Available Schedules on ${formattedDate} (${data.day_of_week})</h5>
             <div class="list-group">
         `;
 

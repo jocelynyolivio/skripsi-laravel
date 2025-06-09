@@ -3,6 +3,19 @@
 @section('container')
 <div class="container mt-5">
     <h3 class="text-center">Select Medical Record for Transaction</h3>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
     <!-- <table class="table table-striped mt-4"> -->
     <table id="selectMedicalForTransactionTable" class="table table-striped mt-4">
         <thead>

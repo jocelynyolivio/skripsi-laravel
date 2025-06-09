@@ -17,7 +17,7 @@
     <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <table class="table table-bordered" id="pricelistTable">
+    <table class="table table-striped table-bordered" id="pricelistTable">
         <thead>
             <tr>
                 <th>ID</th>
