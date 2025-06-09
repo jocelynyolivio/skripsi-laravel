@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Patient;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use App\Models\MedicalRecord;
 use App\Models\ScheduleOverride;
 use App\Models\ScheduleTemplate;
+use App\Mail\ReservationInvitation;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 
 class ScheduleController extends Controller
 {
@@ -339,10 +342,42 @@ class ScheduleController extends Controller
         ]);
 
         $reservation->save();
+        // dd('reservation saved to database');
+
+        // Membuat detail reservasi untuk email
+        $startDateTime = Carbon::parse($request->tanggal_reservasi . ' ' . $request->jam_mulai);
+        $endDateTime = Carbon::parse($request->tanggal_reservasi . ' ' . $request->jam_selesai);
+
+        // dd($startDateTime);
+        // Ambil data dokter dari tabel users menggunakan doctor_id
+        $doctorUser = User::find($request->doctor_id);
+        // dd($doctorUser);
+
+        // Ambil juga data pasien untuk deskripsi, jika diperlukan
+        $patient = \App\Models\Patient::find($request->patient_id);
+
+        if ($doctorUser && $patient) { // Pastikan user dokter dan pasien ditemukan
+            $reservationDetails = [
+                'title' => 'Reservasi Dokter ' . $doctorUser->name, // Gunakan nama dari tabel users
+                'description' => 'Reservasi dengan dokter ' . $doctorUser->name . ' untuk pasien ' . $patient->nama . '.', // Sesuaikan dengan nama field di model Patient
+                'start_time' => $startDateTime,
+                'end_time' => $endDateTime,
+                'doctor_name' => $doctorUser->name, // Gunakan nama dari tabel users
+                'doctor_email' => $doctorUser->email, // Ambil email dari tabel users
+                'patient_name' => $patient->nama, // Nama pasien untuk deskripsi acara
+                // 'patient_email' tidak perlu lagi di sini jika tidak mengirim ke pasien
+            ];
+
+            // Kirim email hanya ke dokter
+            Mail::to($doctorUser->email)
+                ->send(new ReservationInvitation($reservationDetails));
+                // dd('mail sent!!!!');
+        }
 
         // Menyimpan flash message ke session
         $message = $id ? 'Reservation Updated' : 'Reservation Created.';
         session()->flash('success', $message);
+
 
         return redirect()->route('dashboard.reservations.index');
     }
