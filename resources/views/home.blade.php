@@ -103,37 +103,47 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials-section">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-title">What Our Patients Say</h2>
-            </div>
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="testimonial-card text-center">
-                        <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Patient" class="testimonial-img">
-                        <h6>Sarah W.</h6>
-                        <p>"The staff were incredibly friendly and professional. My teeth have never looked better!"</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="testimonial-card text-center">
-                        <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Patient" class="testimonial-img">
-                        <h6>John D.</h6>
-                        <p>"Great experience from start to finish. Highly recommended for anyone in Malang."</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="testimonial-card text-center">
-                        <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Patient" class="testimonial-img">
-                        <h6>Linda K.</h6>
-                        <p>"Professional, modern, and pain-free. I’m very happy with my new smile!"</p>
-                    </div>
-                </div>
-            </div>
+    <section id="doctor-schedules" class="doctor-schedules-section" style=" padding: 80px 0;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title" style="color: var(--primary-color);">Our Doctors' Schedules</h2>
         </div>
-    </section>
+
+        <div class="row justify-content-center">
+            @foreach ($doctorSchedules as $day => $schedulesPerDay)
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm schedule-card">
+                        <div class="card-header d-flex align-items-center" style="background-color: var(--primary-color); color: white; border-bottom: none;">
+                            <h5 class="mb-0 text-uppercase me-2" style="font-weight: 600;">{{ $day }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                @foreach ($schedulesPerDay as $schedule)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ $schedule['time_start'] }} - {{ $schedule['time_end'] }}</strong>
+                                        </div>
+                                        <span class="text-muted">{{ $schedule['doctor_name'] }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            @if(empty($schedulesPerDay))
+                                <p class="text-muted text-center mt-3">No schedule available for this day.</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <div class="text-center mt-5">
+            @if(Auth::guard('patient')->check())
+            <a href="{{ route('reservation.index') }}" class="btn btn-primary btn-lg">Make an Appointment Now</a>
+            @else
+            <a href="{{ route('patient.login') }}" class="btn btn-primary btn-lg">Make an Appointment Now</a>
+            @endif
+        </div>
+    </div>
+</section>
 
     <!-- Contact Section -->
     <!-- <section id="contact" class="contact-section bg-light py-5">

@@ -16,6 +16,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    {{-- Dalam file layout utama Anda, misal: resources/views/layouts/main.blade.php --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> {{-- Select2 butuh jQuery --}}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
         :root {
             --sidebar-width-expanded: 260px;

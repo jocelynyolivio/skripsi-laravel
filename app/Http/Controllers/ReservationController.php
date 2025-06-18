@@ -16,6 +16,7 @@ class ReservationController extends Controller
 
     public function list()
     {
+        // dd('s');
         $reservations = Reservation::all(); // Ambil semua data reservasi
         $reservations = Reservation::with('patient')->get();
         return view('dashboard.reservations.index', [

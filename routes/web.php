@@ -40,6 +40,8 @@ use App\Http\Controllers\ScheduleOverrideController;
 use App\Http\Controllers\ScheduleTemplateController;
 use App\Http\Controllers\ProcedureMaterialController;
 use App\Http\Controllers\SalaryCalculationController;
+use App\Http\Controllers\PatientResetPasswordController;
+use App\Http\Controllers\PatientForgotPasswordController;
 use App\Http\Controllers\MedicalRecordAdjustmentController;
 /*
 |--------------------------------------------------------------------------
@@ -54,13 +56,43 @@ use App\Http\Controllers\MedicalRecordAdjustmentController;
 
 Route::get('/', function () {
     $contents = HomeContent::all();
+    $doctorSchedules = [
+        'SENIN' => [
+            ['time_start' => '08.00', 'time_end' => '14.00', 'doctor_name' => 'drg. Stefanus'],
+            ['time_start' => '14.00', 'time_end' => '20.00', 'doctor_name' => 'drg. Nico'],
+        ],
+        'SELASA' => [
+            ['time_start' => '08.00', 'time_end' => '14.00', 'doctor_name' => 'drg. Ayu'],
+            ['time_start' => '14.00', 'time_end' => '20.00', 'doctor_name' => 'drg. Inneke'],
+        ],
+        'RABU' => [
+            ['time_start' => '08.00', 'time_end' => '14.00', 'doctor_name' => 'drg. Stefanus'],
+            ['time_start' => '14.00', 'time_end' => '20.00', 'doctor_name' => 'drg. Nico'],
+        ],
+        'KAMIS' => [
+            ['time_start' => '08.00', 'time_end' => '14.00', 'doctor_name' => 'drg. Felicia'],
+            ['time_start' => '14.00', 'time_end' => '20.00', 'doctor_name' => 'drg. Stefanus'],
+        ],
+        'JUMAT' => [
+            ['time_start' => '08.00', 'time_end' => '14.00', 'doctor_name' => 'drg. Nico'],
+            ['time_start' => '14.00', 'time_end' => '20.00', 'doctor_name' => 'drg. Stefanus'],
+        ],
+        'SABTU' => [
+            ['time_start' => '08.00', 'time_end' => '13.00', 'doctor_name' => 'drg. Felicia'],
+            ['time_start' => '14.00', 'time_end' => '20.00', 'doctor_name' => 'drg. Ayu'],
+        ],
+        'MINGGU' => [
+            ['time_start' => '11.00', 'time_end' => '17.00', 'doctor_name' => 'drg. Ayu'],
+        ],
+    ];
     return view('home', [
         "title" => "SenyumQu",
         "active" => "home",
         "contents" => $contents,
+        'doctorSchedules' => $doctorSchedules, // Kirim data jadwal ke view
+
     ]);
 })->name('index');
-
 
 Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'authenticate']);

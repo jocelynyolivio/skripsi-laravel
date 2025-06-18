@@ -78,6 +78,9 @@
                     <small class="d-block mt-3">
                         Don't have an account? <a href="/patient/register">Register here.</a>
                     </small>
+                    <small class="d-block mt-2">
+                        <a href="{{ route('patient.password.request') }}">Forgot your password?</a>
+                    </small>
                 </div>
             </main>
         </div>

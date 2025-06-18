@@ -31,10 +31,10 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Siska', 'email' => 'siska@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
             ['name' => 'Marsha', 'email' => 'marsha@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
             ['name' => 'Shandra', 'email' => 'shandra@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
-            ['name' => 'Inneke', 'email' => 'inneke@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Felicia', 'email' => 'felicia@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Nico', 'email' => 'nico@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Stefanus', 'email' => 'stefanus@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'drg. Inneke', 'email' => 'inneke@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'drg. Felicia', 'email' => 'felicia@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'drg. Nico', 'email' => 'nico@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'drg. Stefanus', 'email' => 'stefanus@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
             ['name' => 'Anin', 'email' => 'anin@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
             ['name' => 'Winda', 'email' => 'winda@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
             ['name' => 'Cinta', 'email' => 'cinta@gmail.com', 'password' => Hash::make('password'), 'role_id' => 1],
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Dina', 'email' => 'dina@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
             ['name' => 'Radin', 'email' => 'radin@gmail.com', 'password' => Hash::make('password'), 'role_id' => 3],
             ['name' => 'Sergio', 'email' => 'sergio@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
-            ['name' => 'Ayu', 'email' => 'ayu@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
+            ['name' => 'drg. Ayu', 'email' => 'ayu@gmail.com', 'password' => Hash::make('password'), 'role_id' => 2],
 
         ];
         foreach ($users as $user) {
@@ -102,6 +102,9 @@ class DatabaseSeeder extends Seeder
         ]);
         Role::create([
             'role_name' => 'manager'
+        ]);
+        Role::create([
+            'role_name' => 'asisten dokter'
         ]);
 
         $patients = [

@@ -1,12 +1,14 @@
 @extends('dashboard.layouts.main')
+
 @section('breadcrumbs')
 @include('dashboard.layouts.breadcrumbs', [
-'customBreadcrumbs' => [
-['text' => 'Reservations', 'url' => route('dashboard.reservations.index')],
-['text' => 'Make Reservation']
-]
+    'customBreadcrumbs' => [
+        ['text' => 'Reservations', 'url' => route('dashboard.reservations.index')],
+        ['text' => 'Make Reservation']
+    ]
 ])
 @endsection
+
 @section('container')
 <div class="container mt-5">
     <div class="card shadow-sm">
@@ -22,21 +24,32 @@
             </div>
             @endif
 
-            <!-- Search Form -->
             <form id="filterForm" action="{{ route('dashboard.schedules.get-doctors-by-date') }}" method="GET">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="patient" class="form-label">Select Patient</label>
                         <select id="patient" name="patient" class="form-select" required>
-                            <option value="">-- Select a Patient --</option>
-                            
+                            <option value="">-- Search or Select a Patient --</option>
+                            {{-- Options akan dimuat via JavaScript atau Select2 AJAX --}}
                         </select>
+                    </div>
+
+                    {{-- Tambahkan div untuk detail pasien --}}
+                    <div class="col-md-6" id="patient-details" style="display: none;">
+                        <label class="form-label">Patient Details</label>
+                        <div class="card card-body bg-light">
+                            <p class="mb-1"><strong>Phone:</strong> <span id="patient-phone"></span></p>
+                            <p class="mb-0"><strong>Birth Date:</strong> <span id="patient-dob"></span></p>
+                        </div>
                     </div>
 
                     <div class="col-md-6">
                         <label for="date" class="form-label">Select Date</label>
                         <input type="date" id="date" name="date" class="form-control"
-                            value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
+                            value="{{ date('Y-m-d') }}"
+                            min="{{ $today }}"         {{-- Set tanggal minimum ke hari ini --}}
+                            max="{{ $oneMonthFromNow }}" {{-- Set tanggal maksimum ke satu bulan ke depan --}}
+                            required>
                     </div>
 
                     <div class="col-12">
@@ -47,17 +60,12 @@
                 </div>
             </form>
 
-            <!-- Search Results -->
             <div id="results" class="mt-4">
-                <!-- Results will appear here -->
             </div>
 
-            <!-- Selected Schedule -->
             <div id="resultsClicked" class="mt-4">
-                <!-- Selected schedule will appear here -->
             </div>
 
-            <!-- Reservation Form -->
             <form id="reservationForm" action="{{ route('dashboard.schedules.store-reservation') }}" method="POST" class="mt-4" style="display: none;">
                 @csrf
                 <input type="hidden" name="patient_id" id="patient_id">
@@ -77,98 +85,106 @@
 </div>
 
 <style>
-    .schedule-badge {
-        transition: all 0.2s ease;
-        margin-right: 5px;
-        margin-bottom: 5px;
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
-
-    .schedule-badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .doctor-row:hover {
-        background-color: #f8f9fa;
-    }
-
-    .selected-schedule {
-        border-left: 4px solid #0d6efd;
-        background-color: #f8f9fa;
-    }
+    /* ... (CSS Anda yang sudah ada, termasuk Select2) ... */
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
+    // ... (Kode JavaScript Select2 Anda yang sudah ada) ...
+
     const patientSelect = document.getElementById('patient');
+    const patientDetailsDiv = document.getElementById('patient-details');
+    const patientPhoneSpan = document.getElementById('patient-phone');
+    const patientDobSpan = document.getElementById('patient-dob');
     const reservationForm = document.getElementById('reservationForm');
     const resultsDiv = document.getElementById('results');
     const resultsClickedDiv = document.getElementById('resultsClicked');
     let selectedSchedule = null;
-    let selectedScheduleElement = null; // Untuk menyimpan elemen yang dipilih
+    let selectedScheduleElement = null;
 
-    // Fetch patients data
-    try {
-        const response = await fetch('/dashboard/schedules/get-patients');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const patients = await response.json();
+    // Inisialisasi Select2 untuk dropdown pasien (kode yang sudah ada)
+    $(patientSelect).select2({
+        placeholder: '-- Search or Select a Patient --',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('dashboard.schedules.get-patients') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { q: params.term };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(patient => {
+                        let fullName = [patient.fname, patient.mname, patient.lname].filter(name => name).join(' ');
+                        return {
+                            id: patient.id,
+                            text: fullName + (patient.home_mobile ? ` (${patient.home_mobile})` : ''),
+                            mobile: patient.home_mobile,
+                            dob: patient.date_of_birth
+                        };
+                    })
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1
+    });
 
-        patients.forEach(patient => {
-            const option = document.createElement('option');
-            option.value = patient.id;
-            // Gabungkan nama dengan aman, tangani jika ada bagian nama yang null/kosong
-            option.textContent = [patient.fname, patient.mname, patient.lname].filter(name => name).join(' ');
-            patientSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error fetching patients:', error);
-        // Berikan pesan error yang lebih informatif atau fallback UI jika perlu
-        const errorOption = document.createElement('option');
-        errorOption.value = "";
-        errorOption.textContent = "Error loading patients";
-        errorOption.disabled = true;
-        patientSelect.innerHTML = ''; // Kosongkan dulu jika ada opsi default
-        patientSelect.appendChild(errorOption);
-        // Mungkin nonaktifkan form atau beri tahu pengguna
-    }
+    $(patientSelect).on('select2:select', function (e) {
+        const selectedData = e.params.data;
+        if (selectedData) {
+            patientPhoneSpan.textContent = selectedData.mobile || 'N/A';
+            patientDobSpan.textContent = selectedData.dob || 'N/A';
+            patientDetailsDiv.style.display = 'block';
+        } else {
+            patientDetailsDiv.style.display = 'none';
+        }
+    });
 
-    // Handle form submission
+    $(patientSelect).on('select2:unselect', function (e) {
+        patientDetailsDiv.style.display = 'none';
+        patientPhoneSpan.textContent = '';
+        patientDobSpan.textContent = '';
+    });
+
+    // Handle form submission (kode yang sudah ada)
     document.getElementById('filterForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        // Reset tampilan schedule yang dipilih sebelumnya dan sembunyikan form reservasi
         resultsClickedDiv.innerHTML = '';
         reservationForm.style.display = 'none';
         selectedSchedule = null;
         if (selectedScheduleElement) {
-            // Pastikan selectedScheduleElement direset ke style default jika ada
-             selectedScheduleElement.classList.remove('btn-success', 'text-white');
-             selectedScheduleElement.classList.add('btn-outline-success');
-             selectedScheduleElement = null;
+            selectedScheduleElement.classList.remove('btn-success', 'text-white');
+            selectedScheduleElement.classList.add('btn-outline-success');
+            selectedScheduleElement = null;
         }
-
 
         const date = document.getElementById('date').value;
         const patientId = document.getElementById('patient').value;
 
         if (!patientId) {
-            Swal.fire({ // Menggunakan Swal untuk alert yang lebih baik
-                icon: 'warning',
-                title: 'Oops...',
-                text: 'Please select a patient first.',
-            });
+            Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Please select a patient first.' });
             return;
         }
         if (!date) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Oops...',
-                text: 'Please select a date first.',
-            });
+            Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Please select a date first.' });
             return;
         }
 
+        // Klien-side validation untuk tanggal
+        const selectedDateObj = new Date(date);
+        const minDateObj = new Date("{{ $today }}"); // Gunakan variabel dari Laravel
+        const maxDateObj = new Date("{{ $oneMonthFromNow }}"); // Gunakan variabel dari Laravel
+
+        if (selectedDateObj < minDateObj || selectedDateObj > maxDateObj) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Date',
+                text: `Please select a date between {{ \Carbon\Carbon::parse($today)->format('d M Y') }} and {{ \Carbon\Carbon::parse($oneMonthFromNow)->format('d M Y') }}.`
+            });
+            return;
+        }
 
         try {
             const response = await fetch(`/dashboard/schedules/get-doctors-by-date?date=${date}`);
@@ -211,8 +227,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                                         <td>
                                             <div class="d-flex flex-wrap">
                                             ${doctor.schedules.filter(schedule => schedule.is_available).map(schedule =>
-                                                // PERUBAHAN DI SINI: Gunakan btn-outline-success sebagai default
-                                                // dan ganti <span> menjadi <button> untuk semantik yang lebih baik
                                                 `<button type="button" class="btn btn-sm btn-outline-success schedule-badge"
                                                     data-time-start="${schedule.time_start}"
                                                     data-time-end="${schedule.time_end}"
@@ -242,26 +256,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-    // Handle schedule selection
+    // Handle schedule selection (kode yang sudah ada)
     resultsDiv.addEventListener('click', function(event) {
-        // Hanya target elemen dengan kelas 'schedule-badge'
         if (event.target.classList.contains('schedule-badge')) {
             const clickedBadge = event.target;
 
-            // Jika ada badge yang sudah dipilih sebelumnya, reset stylenya
             if (selectedScheduleElement && selectedScheduleElement !== clickedBadge) {
                 selectedScheduleElement.classList.remove('btn-success', 'text-white');
                 selectedScheduleElement.classList.add('btn-outline-success');
             }
 
-            // Toggle style untuk badge yang diklik
             if (clickedBadge.classList.contains('btn-outline-success')) {
-                // Jika belum dipilih, pilih
                 clickedBadge.classList.remove('btn-outline-success');
                 clickedBadge.classList.add('btn-success', 'text-white');
-                selectedScheduleElement = clickedBadge; // Simpan elemen yang dipilih
+                selectedScheduleElement = clickedBadge;
 
-                // Get selected schedule data
                 selectedSchedule = {
                     time_start: clickedBadge.dataset.timeStart,
                     time_end: clickedBadge.dataset.timeEnd,
@@ -271,14 +280,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                     date_formatted: document.querySelector('#results .card-header h5 strong') ? document.querySelector('#results .card-header h5 strong').textContent : document.getElementById('date').value
                 };
 
-                // Set hidden form values
                 document.getElementById('patient_id').value = document.getElementById('patient').value;
                 document.getElementById('doctor_id').value = selectedSchedule.doctor_id;
-                document.getElementById('reservation_date').value = selectedSchedule.date; // Kirim YYYY-MM-DD
+                document.getElementById('reservation_date').value = selectedSchedule.date;
                 document.getElementById('time_start').value = selectedSchedule.time_start;
                 document.getElementById('time_end').value = selectedSchedule.time_end;
 
-                // Show confirmation
                 resultsClickedDiv.innerHTML = `
                 <div class="card border-success mt-3">
                     <div class="card-header bg-success text-white">
@@ -302,13 +309,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 resultsClickedDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             } else {
-                // Jika sudah dipilih, batalkan pilihan (deselect)
                 clickedBadge.classList.remove('btn-success', 'text-white');
                 clickedBadge.classList.add('btn-outline-success');
-                selectedScheduleElement = null; // Tidak ada yang dipilih
+                selectedScheduleElement = null;
                 selectedSchedule = null;
-                resultsClickedDiv.innerHTML = ''; // Kosongkan konfirmasi
-                reservationForm.style.display = 'none'; // Sembunyikan form reservasi
+                resultsClickedDiv.innerHTML = '';
+                reservationForm.style.display = 'none';
             }
         }
     });

@@ -16,20 +16,47 @@ use Illuminate\Support\Facades\Mail;
 
 class ScheduleController extends Controller
 {
-    public function index()
+   public function index() // Ini adalah metode yang kemungkinan me-render halaman Make Reservations
     {
         $templates = ScheduleTemplate::where('is_active', true)->get();
         $overrides = ScheduleOverride::all();
-        $patients = Patient::all();
-
         $schedules = $this->generateSchedules($templates, $overrides);
 
-        return view('dashboard.schedules.index', [
-            'title' => 'Schedule List',
+        // --- TAMBAHKAN KODE INI ---
+        $today = Carbon::today()->toDateString(); // Tanggal hari ini (YYYY-MM-DD)
+        $oneMonthFromNow = Carbon::today()->addMonth()->toDateString(); // Tanggal satu bulan dari sekarang (YYYY-MM-DD)
+        // --- AKHIR TAMBAH KODE ---
+
+        return view('dashboard.schedules.index', [ // Sesuaikan nama view jika berbeda
+            'title' => 'Make Reservation',
             'schedules' => $schedules,
-            'patients' => $patients
+            'today' => $today, // Kirim tanggal hari ini ke view
+            'oneMonthFromNow' => $oneMonthFromNow // Kirim tanggal satu bulan ke depan ke view
         ]);
     }
+
+   public function getPatients(Request $request) // Pastikan hanya ada SATU deklarasi ini
+    {
+        $query = Patient::query();
+
+        if ($request->has('q') && $request->q != '') {
+            $searchTerm = $request->q;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('fname', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('mname', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('lname', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('home_mobile', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('patient_id', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        $patients = $query->select('id', 'fname', 'mname', 'lname', 'home_mobile', 'date_of_birth')
+                          ->limit(20)
+                          ->get();
+
+        return response()->json($patients);
+    }
+
 
     public function getDoctorsByDate(Request $request)
     {
@@ -189,12 +216,6 @@ class ScheduleController extends Controller
         }
 
         return true;
-    }
-
-    public function getPatients()
-    {
-        $patients = Patient::all(); // Pastikan model Patient sudah ada
-        return response()->json($patients);
     }
 
     // public function storeReservation(Request $request)

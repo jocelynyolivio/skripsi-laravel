@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\StockCard;
 use Illuminate\Support\Str;
 use App\Models\JournalEntry;
@@ -14,10 +15,25 @@ use Illuminate\Support\Facades\Validator;
 
 class JournalController extends Controller
 {
-    public function index()
+    public function index(Request $request) // Tambahkan Request $request
     {
-        // dd('jhai');
-        $journals = JournalEntry::with('details.account')->get();
+        // Ambil query dasar dengan eager loading relasi details.account
+        $query = JournalEntry::with('details.account');
+
+        // Filter berdasarkan tanggal jika parameter ada
+        if ($request->filled('start_date')) {
+            $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+            $query->where('entry_date', '>=', $startDate);
+        }
+
+        if ($request->filled('end_date')) {
+            $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
+            $query->where('entry_date', '<=', $endDate);
+        }
+
+        // Ambil data jurnal
+        $journals = $query->orderBy('entry_date', 'desc') // Urutkan berdasarkan tanggal terbaru
+                          ->get();
 
         return view('dashboard.journals.index', [
             'title' => 'Journal Entries',

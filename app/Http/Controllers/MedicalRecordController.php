@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\Patient;
 use App\Models\Procedure;
 use App\Models\StockCard;
@@ -16,15 +17,34 @@ use App\Models\DentalMaterial;
 class MedicalRecordController extends Controller
 {
 
-    public function list()
+    public function list(Request $request)
     {
-        $reservations = MedicalRecord::all(); // Ambil semua data reservasi
-        $reservations = MedicalRecord::with('patient')->get();
+        // dd('haa');
+        // Ambil query dasar dengan eager loading relasi patient dan doctor
+        $query = MedicalRecord::with(['patient', 'doctor']);
+
+        // Filter berdasarkan tanggal jika parameter ada
+        if ($request->filled('start_date')) {
+            $startDate = Carbon::parse($request->input('start_date'))->startOfDay();
+            $query->where('tanggal_reservasi', '>=', $startDate);
+        }
+
+        if ($request->filled('end_date')) {
+            $endDate = Carbon::parse($request->input('end_date'))->endOfDay();
+            $query->where('tanggal_reservasi', '<=', $endDate);
+        }
+
+        // Ambil data reservasi
+        $reservations = $query->orderBy('tanggal_reservasi', 'desc') // Urutkan berdasarkan tanggal terbaru
+            ->orderBy('jam_mulai', 'asc') // Lalu berdasarkan jam mulai
+            ->get();
+
         return view('dashboard.reservations.index', [
             'title' => 'Data Reservasi',
             'reservations' => $reservations
         ]);
     }
+
 
     public function selectIncomplete()
     {
@@ -561,6 +581,12 @@ class MedicalRecordController extends Controller
 
     public function edit($patientId, $recordId)
     {
+        $doctorId = MedicalRecord::find($recordId)->doctor_id ?? null;
+        // dd($doctorId);
+        if (auth()->user()->id !== $doctorId) {
+            abort(403, 'Unauthorized action.'); // Atau redirect dengan pesan error
+        }
+
         $medicalRecord = MedicalRecord::with(['procedures'])->findOrFail($recordId);
 
         // Ambil semua prosedur yang tersedia

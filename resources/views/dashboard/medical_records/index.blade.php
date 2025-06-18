@@ -121,9 +121,11 @@
 
                         @if(auth()->user()?->role?->role_name === 'dokter tetap' || auth()->user()?->role?->role_name === 'dokter luar')
                         @if($record->procedures->isEmpty())
+                        @if($record->doctor_id === auth()->user()->id)
                         <!-- Tampilkan tombol Edit hanya jika belum ada prosedur -->
                         <a href="{{ route('dashboard.medical_records.edit', ['patientId' => $patientId, 'recordId' => $record->id]) }}" class="btn btn-sm btn-warning d-flex align-items-center justify-content-center" style="width: 160px; height: 40px;"> <i class="fas fa-plus-circle me-1"></i> Add Record
                         </a>
+                        @endif
                         @endif
 
                         <!-- Button trigger modal -->

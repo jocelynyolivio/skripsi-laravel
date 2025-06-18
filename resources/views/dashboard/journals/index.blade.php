@@ -15,7 +15,7 @@
         @endif
     </div>
 
-       @if(session('success'))
+    @if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
@@ -26,6 +26,31 @@
         {{ session('error') }}
     </div>
     @endif
+
+    {{-- Filter Form --}}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Filter Journal Entries</h5>
+        </div>
+        <div class="card-body">
+            <form id="filterJournalsForm" action="{{ route('dashboard.journals.index') }}" method="GET">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100 me-2">Apply Filter</button>
+                        <a href="{{ route('dashboard.journals.index') }}" class="btn btn-secondary w-100">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <table id="journalTable" class="table table-striped table-bordered">
         <thead>
@@ -41,7 +66,7 @@
             <tr>
                 <td>{{ $journal->id }}</td>
                 <td>{{ $journal->description }}</td>
-                <td>{{ $journal->entry_date }}</td>
+                <td>{{ \Carbon\Carbon::parse($journal->entry_date)->format('d F Y') }}</td> {{-- Format tanggal --}}
                 <td>
                     <a href="{{ route('dashboard.journals.show', ['id' => $journal->id]) }}" class="btn btn-info">
                         Details </a>
@@ -60,6 +85,7 @@
             "ordering": true,
             "info": true,
             "responsive": true,
+            "order": [[2, 'desc']] // Mengurutkan berdasarkan kolom 'Entry Date' (indeks 2) secara descending
         });
     });
 </script>
