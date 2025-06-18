@@ -51,39 +51,6 @@ class DashboardController extends Controller
                 $today = now();
                 $bulanIni = $today->format('Y-m');
 
-                // $data['tipeProsedur'] = DB::table('medical_record_procedure as mrp')
-                //     ->join('medical_records as mr', 'mr.id', '=', 'mrp.medical_record_id')
-                //     ->join('procedures as p', 'p.id', '=', 'mrp.procedure_id')
-                //     ->join('procedure_types as pt', 'pt.id', '=', 'p.procedure_type_id')
-                //     ->whereRaw("DATE_FORMAT(mr.tanggal_reservasi, '%Y-%m') = ?", [$bulanIni])
-                //     ->select(
-                //         'pt.name as procedure_type',
-                //         DB::raw('COUNT(DISTINCT mr.patient_id) as total_patients'),
-                //         DB::raw('COUNT(mrp.id) as total_procedures'),
-                //         DB::raw('GROUP_CONCAT(DISTINCT mr.id ORDER BY mr.id ASC SEPARATOR ", ") as medical_record_refs')
-                //     )
-                //     ->groupBy('pt.id', 'pt.name')
-                //     ->get();
-
-                // $data['statistik'] = DB::table('transaction_items as ti')
-                //     ->join('transactions as t', 't.id', '=', 'ti.transaction_id')
-                //     ->join('medical_records as mr', 'mr.id', '=', 't.medical_record_id')
-                //     ->join('patients as p', 'p.id', '=', 'mr.patient_id')
-                //     ->join('procedures as proc', 'proc.id', '=', 'ti.procedure_id')
-                //     ->join('procedure_types as pt', 'pt.id', '=', 'proc.procedure_type_id')
-                //     ->whereRaw("DATE_FORMAT(mr.tanggal_reservasi, '%Y-%m') = ?", [$bulanIni])
-                //     ->select(
-                //         'pt.name as procedure_type',
-                //         DB::raw('COUNT(DISTINCT mr.patient_id) as total_patients'),
-                //         DB::raw("COUNT(DISTINCT CASE WHEN p.gender = 'male' THEN mr.patient_id END) as male_patients"),
-                //         DB::raw("COUNT(DISTINCT CASE WHEN p.gender = 'female' THEN mr.patient_id END) as female_patients"),
-                //         DB::raw('SUM(ti.final_price) as total_revenue'),
-                //         DB::raw("SUM(CASE WHEN p.gender = 'male' THEN ti.final_price ELSE 0 END) as male_revenue"),
-                //         DB::raw("SUM(CASE WHEN p.gender = 'female' THEN ti.final_price ELSE 0 END) as female_revenue")
-                //     )
-                //     ->groupBy('pt.id', 'pt.name')
-                //     ->get();
-
                 $subTotalPerTransaction = DB::table('transaction_items')
                     ->select('transaction_id', DB::raw('SUM(final_price) as total_per_transaction'))
                     ->groupBy('transaction_id');

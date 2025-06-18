@@ -22,8 +22,6 @@ class PricelistController extends Controller
 
     public function store(Request $request)
 {
-    // Validasi input tetap di luar, karena Laravel akan otomatis menangani
-    // redirect jika validasi gagal.
     $validatedData = $request->validate([
         'procedure_id' => 'required|exists:procedures,id',
         'price' => 'required|numeric',

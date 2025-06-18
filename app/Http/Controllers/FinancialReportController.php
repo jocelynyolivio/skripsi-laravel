@@ -8,9 +8,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\ChartOfAccount;   // <--- TAMBAHKAN ATAU PASTIKAN INI ADA
-use App\Models\JournalDetail;    // <--- TAMBAHKAN ATAU PASTIKAN INI ADA
-use App\Models\JournalEntry;     // <--- TAMBAHKAN ATAU PASTIKAN INI ADA
+use App\Models\ChartOfAccount;
+use App\Models\JournalDetail;
+use App\Models\JournalEntry;
 
 class FinancialReportController extends Controller
 {
@@ -30,13 +30,13 @@ class FinancialReportController extends Controller
                  SUM(journal_details.debit) as total_debit,
                  SUM(journal_details.credit) as total_credit'
             )
-            ->join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
-            ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
-            ->whereIn('chart_of_accounts.type', ['asset', 'contra_asset', 'liability', 'equity'])
-            ->whereDate('journal_entries.entry_date', '<=', $parsedDate->toDateString());
+                ->join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+                ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
+                ->whereIn('chart_of_accounts.type', ['asset', 'contra_asset', 'liability', 'equity'])
+                ->whereDate('journal_entries.entry_date', '<=', $parsedDate->toDateString());
 
             $coaSummary = $coaBalancesQuery->groupBy('chart_of_accounts.id', 'chart_of_accounts.name', 'chart_of_accounts.code', 'chart_of_accounts.type')
-                ->orderBy('chart_of_accounts.code') 
+                ->orderBy('chart_of_accounts.code')
                 ->get();
 
             // Laba/rugi ini akan mempengaruhi bagian Ekuitas jadi Laba Ditahan
@@ -48,19 +48,19 @@ class FinancialReportController extends Controller
                    SUM(CASE WHEN chart_of_accounts.type = \'revenue\' THEN journal_details.debit ELSE 0 END)) -
                   (SUM(CASE WHEN chart_of_accounts.type = \'contra_revenue\' THEN journal_details.debit ELSE 0 END) -
                    SUM(CASE WHEN chart_of_accounts.type = \'contra_revenue\' THEN journal_details.credit ELSE 0 END))) - ' .
-                // Beban Bersih = (Beban Kotor - Nilai Kontra Beban)
-                // Beban Kotor (saldo normal Debit): (SUM Debit tipe 'expense'/'cogs' - SUM Kredit tipe 'expense'/'cogs')
-                // Nilai Kontra Beban (saldo normal Kredit): (SUM Kredit tipe 'contra_expense' - SUM Debit tipe 'contra_expense')
-                '((SUM(CASE WHEN chart_of_accounts.type IN (\'expense\', \'cogs\') THEN journal_details.debit ELSE 0 END) -
+                    // Beban Bersih = (Beban Kotor - Nilai Kontra Beban)
+                    // Beban Kotor (saldo normal Debit): (SUM Debit tipe 'expense'/'cogs' - SUM Kredit tipe 'expense'/'cogs')
+                    // Nilai Kontra Beban (saldo normal Kredit): (SUM Kredit tipe 'contra_expense' - SUM Debit tipe 'contra_expense')
+                    '((SUM(CASE WHEN chart_of_accounts.type IN (\'expense\', \'cogs\') THEN journal_details.debit ELSE 0 END) -
                    SUM(CASE WHEN chart_of_accounts.type IN (\'expense\', \'cogs\') THEN journal_details.credit ELSE 0 END)) -
                   (SUM(CASE WHEN chart_of_accounts.type = \'contra_expense\' THEN journal_details.credit ELSE 0 END) -
                    SUM(CASE WHEN chart_of_accounts.type = \'contra_expense\' THEN journal_details.debit ELSE 0 END)))
                 as net_income'
             )
-            ->join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
-            ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
-            ->whereIn('chart_of_accounts.type', ['revenue', 'contra_revenue', 'expense', 'cogs', 'contra_expense'])
-            ->whereDate('journal_entries.entry_date', '<=', $parsedDate->toDateString());
+                ->join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+                ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id')
+                ->whereIn('chart_of_accounts.type', ['revenue', 'contra_revenue', 'expense', 'cogs', 'contra_expense'])
+                ->whereDate('journal_entries.entry_date', '<=', $parsedDate->toDateString());
 
             $profitOrLossResult = $cumulativeProfitOrLossQuery->first();
             $netIncomeForEquity = $profitOrLossResult ? $profitOrLossResult->net_income : 0;
@@ -134,7 +134,6 @@ class FinancialReportController extends Controller
                 'totalLiabilities',
                 'totalEquities'
             ));
-
         } catch (\Exception $e) {
             // \Log::error('Error generating balance sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Gagal memuat laporan neraca: ' . $e->getMessage());
@@ -160,7 +159,7 @@ class FinancialReportController extends Controller
             // Filter berdasarkan periode yang dipilih (bulanan atau tahunan)
             if ($period == 'monthly') {
                 $baseQuery->whereMonth('journal_entries.entry_date', $parsedDate->month)
-                          ->whereYear('journal_entries.entry_date', $parsedDate->year);
+                    ->whereYear('journal_entries.entry_date', $parsedDate->year);
             } elseif ($period == 'yearly') {
                 $baseQuery->whereYear('journal_entries.entry_date', $parsedDate->year);
             }
@@ -253,7 +252,7 @@ class FinancialReportController extends Controller
             return redirect()->back()->with('error', 'Gagal memuat laporan laba rugi: ' . $e->getMessage());
         }
     }
-public function cashFlow(Request $request)
+    public function cashFlow(Request $request)
     {
         $request->validate([
             'period' => 'sometimes|string|in:monthly,yearly',
@@ -279,7 +278,7 @@ public function cashFlow(Request $request)
 
             // --- Saldo Awal Kas dan Setara Kas ---
             // PERUBAHAN: Menggunakan relasi 'account' untuk mengakses ChartOfAccount dari JournalDetail
-            $beginningCashResult = \App\Models\JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
+            $beginningCashResult = JournalDetail::join('journal_entries', 'journal_details.journal_entry_id', '=', 'journal_entries.id')
                 ->join('chart_of_accounts', 'journal_details.coa_id', '=', 'chart_of_accounts.id') // Join tetap berdasarkan coa_id
                 ->where('chart_of_accounts.is_cash_equivalent', true)
                 ->where('journal_entries.entry_date', '<', $startDateOfPeriod->toDateString())
@@ -307,11 +306,11 @@ public function cashFlow(Request $request)
 
             foreach ($journalEntriesInPeriod as $entry) {
                 // PERUBAHAN: Menggunakan relasi 'account' untuk mengakses ChartOfAccount dari JournalDetail
-                $cashDetails = $entry->details->filter(function($detail) {
+                $cashDetails = $entry->details->filter(function ($detail) {
                     return $detail->account && $detail->account->is_cash_equivalent; // <--- DIUBAH
                 });
 
-                $nonCashDetails = $entry->details->filter(function($detail) {
+                $nonCashDetails = $entry->details->filter(function ($detail) {
                     return $detail->account && !$detail->account->is_cash_equivalent; // <--- DIUBAH
                 });
 
@@ -319,7 +318,7 @@ public function cashFlow(Request $request)
                     continue;
                 }
 
-                $netCashMovementInEntry = $cashDetails->sum(function($detail) {
+                $netCashMovementInEntry = $cashDetails->sum(function ($detail) {
                     return $detail->debit - $detail->credit;
                 });
 
@@ -332,7 +331,7 @@ public function cashFlow(Request $request)
                 $primaryNonCashDetail = $nonCashDetails->first();
                 // PERUBAHAN: Menggunakan relasi 'account'
                 if (!$primaryNonCashDetail || !$primaryNonCashDetail->account) { // <--- DIUBAH
-                     Log::warning("Cash flow: Entry ID {$entry->id} has cash movement but no clear primary non-cash CoA object.");
+                    Log::warning("Cash flow: Entry ID {$entry->id} has cash movement but no clear primary non-cash CoA object.");
                     continue;
                 }
                 $nonCashCoa = $primaryNonCashDetail->account; // <--- DIUBAH
@@ -383,9 +382,8 @@ public function cashFlow(Request $request)
                 'dateInput',
                 'parsedDate'
             ));
-
         } catch (\Exception $e) {
-            Log::error('Cash Flow Controller Error: ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine() ."\n" . $e->getTraceAsString());
+            Log::error('Cash Flow Controller Error: ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Gagal memuat laporan arus kas: Terjadi kesalahan sistem.');
         }
     }
@@ -436,11 +434,11 @@ public function cashFlow(Request $request)
             }
         } elseif ($activity === 'financing') {
             if ($isCashInflow) {
-                 if (in_array(strtolower($nonCashCoa->type), ['equity']) || (str_contains(strtolower($nonCashCoa->name), 'modal') || str_contains(strtolower($nonCashCoa->name), 'pinjaman diterima'))) {
+                if (in_array(strtolower($nonCashCoa->type), ['equity']) || (str_contains(strtolower($nonCashCoa->name), 'modal') || str_contains(strtolower($nonCashCoa->name), 'pinjaman diterima'))) {
                     $description = 'Penerimaan dari Pendanaan (' . $nonCashCoa->name . ')';
-                 } else {
+                } else {
                     $description = 'Penerimaan Pendanaan Lainnya (' . $nonCashCoa->name . ')';
-                 }
+                }
             } else {
                 if (in_array(strtolower($nonCashCoa->type), ['equity']) || (str_contains(strtolower($nonCashCoa->name), 'prive') || str_contains(strtolower($nonCashCoa->name), 'dividen') || str_contains(strtolower($nonCashCoa->name), 'pembayaran pinjaman'))) {
                     $description = 'Pembayaran untuk Pendanaan (' . $nonCashCoa->name . ')';
@@ -449,10 +447,10 @@ public function cashFlow(Request $request)
                 }
             }
         } else {
-             $description = 'Lain-lain (' . $nonCashCoa->name . ')';
-             // Jika activity 'none' dari CoA, kita mungkin ingin default ke 'operating' atau log sebagai unclassified.
-             // Atau bisa juga dikembalikan sebagai 'none' dan di-filter di loop utama.
-             // Untuk saat ini, jika $activity adalah 'none', biarkan, nanti akan di-skip oleh logika di loop utama.
+            $description = 'Lain-lain (' . $nonCashCoa->name . ')';
+            // Jika activity 'none' dari CoA, kita mungkin ingin default ke 'operating' atau log sebagai unclassified.
+            // Atau bisa juga dikembalikan sebagai 'none' dan di-filter di loop utama.
+            // Untuk saat ini, jika $activity adalah 'none', biarkan, nanti akan di-skip oleh logika di loop utama.
         }
         return ['activity' => $activity, 'description' => $description, 'coa_code_reference' => $coaCodeReference];
     }

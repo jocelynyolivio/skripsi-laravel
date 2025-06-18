@@ -210,6 +210,16 @@ Route::get('/dashboard/purchase_orders/select_request', [PurchaseOrderController
 Route::get('/dashboard/purchase_orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])->name('dashboard.purchase_orders.receive');
 Route::post('/dashboard/purchase_orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'storeReceived'])->name('dashboard.purchase_orders.storeReceived');
 
+Route::prefix('patient')->group(function () {
+    // Rute untuk meminta reset password (mengirim email)
+    Route::get('/forgot-password', [PatientForgotPasswordController::class, 'showLinkRequestForm'])->name('patient.password.request');
+    Route::post('/forgot-password', [PatientForgotPasswordController::class, 'sendResetLinkEmail'])->name('patient.password.email');
+
+    // Rute untuk menampilkan form reset password
+    Route::get('/reset-password/{token}', [PatientResetPasswordController::class, 'showResetForm'])->name('patient.password.reset');
+    Route::post('/reset-password', [PatientResetPasswordController::class, 'reset'])->name('patient.password.update');
+});
+
 // isi dashboarddddd
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::resource('purchase_orders', PurchaseOrderController::class);

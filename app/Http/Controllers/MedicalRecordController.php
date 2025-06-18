@@ -6,7 +6,6 @@ use Exception;
 use App\Models\Patient;
 use App\Models\Procedure;
 use App\Models\StockCard;
-use App\Models\Transaction;
 use App\Models\JournalEntry;
 use Illuminate\Http\Request;
 use App\Models\JournalDetail;

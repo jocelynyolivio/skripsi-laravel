@@ -29,13 +29,6 @@ class PurchaseController extends Controller
         return view('dashboard.purchases.index', compact('purchases', 'coa'));
     }
 
-    // public function create()
-    // {
-    //     $materials = DentalMaterial::all();
-    //     $suppliers = Supplier::all();
-    //     $cashAccounts = ChartOfAccount::all();
-    //     return view('dashboard.purchases.create', compact('suppliers', 'materials', 'cashAccounts'));
-    // }
     public function create(PurchaseOrder $purchaseOrder = null)
     {
         $data = [
@@ -397,12 +390,10 @@ class PurchaseController extends Controller
             'credit'           => $request->grand_total,
         ]);
         
-        // Hapus semua logika 'if discount' dan 'if ongkos_kirim' untuk jurnal.
 
         return $invoice;
     });
 
-    // ========================= AKHIR PERUBAHAN =========================
 }
 
 

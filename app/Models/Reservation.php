@@ -9,7 +9,6 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    // Perbaiki properti fillable agar sesuai dengan nama kolom di migrasi
     protected $fillable = ['patient_id', 'doctor_id', 'tanggal_reservasi', 'jam_mulai', 'jam_selesai', 'status_konfirmasi'];
 
     public function doctor()
